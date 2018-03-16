@@ -5,22 +5,20 @@ _**An old, bad and outdated C++ utility library**_
 ASL is a collection of general purpose classes and utilities intended to be easy to use and
 multiplatform. Builds in seconds and facilitates writing code that works on different operating systems and compilers.
 
-## Features ##
-
 - Multiplatform (**Windows**, **Linux**, **macOS**, **Android**), 32/64 bit
 - Works on older compilers (e.g. VisualStudio 2005, gcc 3.4) but can use some C++11 features if available (e.g. lambdas, range-based for, initializer lists)
 - Almost no dependencies (not even the standard C++ library, just the C part). Optionally the **mbedTLS**
 library for TLS sockets (e.g. HTTPS)
 
 
-## Functionalities ##
+## Functionalities
 
 __OS-related functionalities__:
 
 - Threads, mutexes and semaphores
-- Processes (run programs and read their output)
+- Processes (run programs and read their output or write input)
 - Binary and text files
-- Directory enumaration and file system operations (copy, move, delete)
+- Directory enumeration and file system operations (copy, move, delete)
 - Sockets TCP, UDP and Unix (where available), IPv4 and IPv6, with optional SSL/TLS
 - Runtime dynamically loadable libraries (DLLs or shared libraries)
 - Console: text and background color and cursor position
@@ -50,47 +48,49 @@ __Basic data types__:
 
 ## Features by example
 
-Here are some snippets that showcase some simple uses of ASL. There are also more complex ways of using the library with added functionalities.
+Here are some snippets that showcase some simple uses of ASL. There are also more complex ways
+of using the library with added functionalities. Namespace `asl` omitted for clarity.
 
 Get command line options (suppose we run `program.exe -iterations 10`):
 
-```
+```cpp
 CmdArgs args(argc, argv);
 int iterations = args["iterations"];
 ```
 
 Read a configuration INI file:
 
-```
+```cpp
 IniFile config("config.ini");
 float threshold = config("parameters/threshold");
 ```
 
 Do HTTP requests (you can post a body or send headers, too):
 
-```
+```cpp
 HttpResponse resp = Http::get("https://www.somewhere.com/page.xhtml");
 if(resp.code() != 200)
 	return -1;
 String type = resp.header("Content-Type");
+String text = resp.text();
 ```
 
 Decode XML:
 
-```
+```cpp
 Xml html = Xml::decode( resp.text() );
 String charset = html("head")("meta")["charset"];
 ```
 
 Read a file in one line:
 
-```
+```cpp
 String content = TextFile("somefile.json").text();
 ```
 
 Decode JSON (but you can directly load/save JSON from a file):
 
-```
+```cpp
 Var data = Json::decode(content);
 String name = data["name"];
 int number = data["age"];
@@ -98,23 +98,23 @@ int number = data["age"];
 
 Write JSON:
 
-```
+```cpp
 Var particle = Var("name", "proton")("mass", 1.67e-27)("position", array<Var>(x, y, z));
 String json = Json::encode(particle);
 ```
 
 Write to the console with colors:
 
-```
+```cpp
 Console console;
-console.color(BRED);    // bright red text
-console.bgcolor(CYAN);  // cyan background
+console.color(Console::BRED);    // bright red text
+console.bgcolor(Console::CYAN);  // cyan background
 printf("some highlighted text");
 ```
 
 Create threads (but you can also use lamdas):
 
-```
+```cpp
 class MyThread : public Thread
 {
 	void run() { do_stuff(); }
@@ -126,7 +126,7 @@ thread.start();
 
 Send data through a TCP socket:
 
-```
+```cpp
 Socket socket;                  // or TlsSocket for SSL/TLS
 socket.connect("host", 9000);
 socket << "hello\n";
@@ -134,7 +134,7 @@ socket << "hello\n";
 
 Or a message through a WebSocket:
 
-```
+```cpp
 WebSocket socket;
 socket.connect("host", 9000); // or "ws://host:9000"
 socket.send("hello");
@@ -142,19 +142,20 @@ socket.send("hello");
 
 Strings are 8 bit, by default assumed to be UTF8, and can be case converted even beyond ASCII:
 
-```
+```cpp
 String country = "Ελλάδα";
 String upper = country.toUpperCase(); // -> "ΕΛΛΆΔΑ"
 ```
 
 Strings have some additional handy methods:
 
-```
+```cpp
 if(filename.startsWith(prefix) || filename.contains("-"))
 ```
 
 A string can be split and joined back:
-```
+
+```cpp
 String names = "one,two,three";
 Array<String> numbers = names.split(",");
 String s123 = numbers.join(" "); // -> "one two three"
@@ -162,19 +163,20 @@ String s123 = numbers.join(" "); // -> "one two three"
 
 and can be automatically converted to UTF16:
 
-```
+```cpp
 String dirname = "newdir";
 CreateDirectoryW( dirname ); // autoconverted to UTF16
 ```
 
 But don't use the above Windows-only function when you can:
-```
+
+```cpp
 Directory::create("newdir");
 ```
 
 or enumerate the contents of a directory:
 
-```
+```cpp
 Directory dir("some/dir");
 Array<File> files = dir.files("*.txt");
 foreach(File& file, files)
@@ -188,24 +190,25 @@ foreach(File& file, files)
 
 Start a subprocess and read its output:
 
-```
+```cpp
 Process p = Process::execute("someprogram.exe");
 if(p.success())
 	output = p.output();
 ```
 
 Get the parent directory, file name and extension of a path:
-```
+
+```cpp
 Path path = "/some/dir/file.txt";
 path.directory() // -> "/some/dir/"
 path.name()      // -> "file.txt"
 path.nameNoExt() // -> "file"
 path.extension() // -> "txt"
-
 ```
 
 Time an operation with precision (around microseconds) and sleep for some time:
-```
+
+```cpp
 double t1 = now();
 sleep(0.5);               // 0.5 seconds
 double t2 = now();
@@ -227,7 +230,7 @@ To use the library in another project just find the ASL package and link against
 the imported targets, `asl` for the dynamic version or `asls` for the static version. The static library is recommended
 as you don't need to copy or distribute a DLL at runtime.
 
-```
+```cmake
 find_package( ASL REQUIRED )
 
 target_link_libraries( my_application asls ) # for the static version, or
@@ -241,7 +244,7 @@ find the library compatible with the current project among the versions compiled
 Remember that all header files have the `asl/` prefix directory and are named like the class they define
 (case-sensitively), and that all symbols are in the `asl` namespace. So, for example, to use the `Directory` class:
 
-```
+```cpp
 #include <asl/Directory.h>
 
 asl::Directory dir;
