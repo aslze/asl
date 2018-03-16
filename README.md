@@ -11,7 +11,7 @@ multiplatform. Builds in seconds and facilitates writing code that works on diff
 library for TLS sockets (e.g. HTTPS)
 
 
-## Functionalities
+## Features
 
 __OS-related functionalities__:
 
@@ -78,17 +78,19 @@ String text = resp.text();
 Decode XML:
 
 ```cpp
-Xml html = Xml::decode( resp.text() );
-String charset = html("head")("meta")["charset"];
+Xml html = Xml::decode( "<html><head><meta charset='utf8'/></head></html>" );
+String charset = html("head")("meta")["charset"];   // -> "utf8"
+String rootTag = html.tag();                        // -> "html"
 ```
 
-Read a file in one line:
+Read or write a file in one line (second line is sort-of `wget`):
 
 ```cpp
 String content = TextFile("somefile.json").text();
+File("image.png").put( Http::get("http://hello.com/image.png").body());
 ```
 
-Decode JSON (but you can directly load/save JSON from a file):
+Decode JSON (but you can also directly load/save JSON from a file):
 
 ```cpp
 Var data = Json::decode(content);
@@ -112,7 +114,7 @@ console.bgcolor(Console::CYAN);  // cyan background
 printf("some highlighted text");
 ```
 
-Create threads (but you can also use lamdas):
+Create threads (but you can also use lambdas):
 
 ```cpp
 class MyThread : public Thread
