@@ -1,0 +1,153 @@
+<head>
+<meta charset="utf-8">
+<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport'>
+</head>
+<body>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script>
+// 3.2.1
+// 1.12.4
+var port = window.location.port? window.location.port : (window.location.protocol=="http:")? 80 : 443;
+var httphost = window.location.protocol + "//" + window.location.hostname + ":" + port;
+var wshost = ((window.location.protocol=="http:")? "ws://" : "wss://") + window.location.hostname + ":" + port;
+
+function log(x)
+{
+	$("#log").text($("#log").text() + "\n" + x);
+}
+
+var ball = {x:0, y: 0, color: "black"};
+
+var havefocus = true;
+var useWS = false;
+var running = false;
+
+function paint()
+{
+	var can=$("#canvas");
+	var c=can[0].getContext("2d");
+	c.clearRect(0, 0, can.width(), can.height());
+	c.beginPath();
+	c.arc(ball.x, ball.y, 5, 0, 2 * Math.PI, false);
+	c.fillStyle = ball.color;
+	c.fill();
+}
+
+function moveBall(x, y, color)
+{
+	ball.x = x;
+	ball.y = y;
+	ball.color = color;
+}
+
+var timer1 = null, socket = null;
+
+function startWebSocket()
+{	
+	socket = new WebSocket(wshost + "/ws");
+	
+	socket.onopen = function (event) {
+		log("WS connected!");
+	};
+	
+	socket.onmessage = function (event) {
+		var msg = JSON.parse(event.data);
+		if (msg.op == "pos") {
+			moveBall(msg.x, msg.y, "red");
+			paint();
+		}
+	};
+	
+	socket.onclose = function ( event ) {
+		log("WS disconnected!");
+		socket = null;
+	};
+
+	if(!timer1)
+		timer1 = setInterval(function(){
+			if(running && useWS && !socket)
+				startWebSocket();
+		}, 5000);
+}
+
+function wssend(m)
+{
+	if(socket && socket.readyState == WebSocket.OPEN) {
+		socket.send((typeof m == "object")? JSON.stringify(m) : m);
+	}
+}
+
+$(function() {
+	$("#canvas").mouseup(function(e)
+	{
+		var msg = {r: e.pageX, v: e.pageY/20.0};
+		if(useWS)
+			wssend(msg);
+		else
+			$.ajax(httphost + "/conf", {
+				type: "PUT",
+				data: JSON.stringify(msg),
+				success: function(data){}
+			});
+	});
+
+	$("#run").click(function(e)
+	{
+		if(!running)
+		{
+			if(useWS && !running)
+				startWebSocket();
+			running = true;
+			$("#run").text("Stop");
+		}
+		else
+		{
+			if(useWS) {
+				socket.close();
+				socket = null;
+			}
+			running=false;
+			$("#run").text("Run");
+		}
+	});
+		
+	$("#toggle").click(function(e)
+	{
+		if(!useWS && "WebSocket" in window)
+		{
+			if(running)
+				startWebSocket();
+			useWS = true;
+			$("#toggle").text("HTTP");
+		}
+		else
+		{
+			socket.close();
+			socket = null;
+			useWS = false;
+			$("#toggle").text("WebSocket");
+		}
+	});
+	
+	setInterval(function(){
+		if(running && !useWS)
+			$.ajax(httphost + "/pos", {
+				type: "GET",
+				success: function(data){
+					moveBall(data.x, data.y, "green");
+					paint();
+				}
+			});
+		paint();
+	}, 50);
+});
+
+</script>
+
+<canvas id="canvas" width="500" height="400"></canvas>
+<br>
+<button id="run">Run</button>
+<button id="toggle">WebSocket</button>
+<pre id="log"></pre>
+
+</body>
