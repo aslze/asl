@@ -77,6 +77,28 @@ String type = resp.header("Content-Type");
 String text = resp.text();
 ```
 
+Or create HTTP services:
+
+```
+struct TimeServer : public HttpServer
+{
+	void serve(HttpRequest& req, HttpResponse& resp)
+	{
+		if(req.is("GET", "/time")
+		{
+			resp.put(Var("time", Date::now().toString()));
+		}
+		else
+		{
+			resp.put(Var("status", "error"));
+			resp.setCode(500);
+		}
+	}
+};
+TimeServer server;
+server.start();
+```
+
 Decode XML:
 
 ```cpp
@@ -217,6 +239,12 @@ double t1 = now();
 sleep(0.5);               // 0.5 seconds
 double t2 = now();
 double elapsed = t2 - t1; // should be around 0.5
+```
+
+Log a message to the console and to a file (or just one of those):
+
+```
+ASL_LOG_(WARNING, "Only %i bytes available", bytesAvailable);
 ```
 
 And much more.
