@@ -2,8 +2,7 @@
 
 _**An old, bad and outdated C++ utility library**_
 
-ASL is a collection of general purpose classes and utilities intended to be easy to use and
-multiplatform. Builds in seconds and facilitates writing code that works on different operating systems and compilers.
+ASL is a collection of multiplatform general purpose classes and utilities focused on simplicity and ease of use. Builds in seconds and facilitates writing code that works on different operating systems and compilers.
 
 - Multiplatform (**Windows**, **Linux**, **macOS**, **Android**), 32/64 bit
 - Works on older compilers (e.g. VisualStudio 2005, gcc 3.4) but can use some C++11 features if available (e.g. lambdas, range-based for, initializer lists)
@@ -96,6 +95,7 @@ struct TimeServer : public HttpServer
 	}
 };
 TimeServer server;
+server.bind(80);
 server.start();
 ```
 
