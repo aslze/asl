@@ -490,8 +490,9 @@ bool Socket_::connect(const InetAddress& addr)
 {
 	if (addr.length() == 0)
 		return false;
-	init(_family != addr.type());
+	bool force = _family != addr.type();
 	_family = addr.type();
+	init(force);
 	return ::connect(_handle, (sockaddr*)addr.ptr(), addr.length()) == 0;
 }
 
