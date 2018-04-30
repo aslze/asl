@@ -59,11 +59,17 @@ CmdArgs args(argc, argv);
 int iterations = args["iterations"];
 ```
 
-Read a configuration INI file:
+Read or write a configuration INI file ("config.ini" contains this):
+
+```
+[parameters]
+threshold=0.25
+```
 
 ```cpp
 IniFile config("config.ini");
 float threshold = config("parameters/threshold");
+config("parameters/threshold") = 0.5;
 ```
 
 Do HTTP requests (you can post a body or send headers, too):
@@ -107,11 +113,19 @@ String charset = html("head")("meta")["charset"];   // -> "utf8"
 String rootTag = html.tag();                        // -> "html"
 ```
 
-Read or write a file in one line (second line is sort-of `wget`):
+Read or write a file in one line:
 
 ```cpp
-String content = TextFile("somefile.json").text();
-File("image.png").put( Http::get("http://hello.com/image.png").body());
+String content = TextFile("somefile-uнicoδe.json").text();
+```
+
+The path given above can be Unicode UTF8, and the file content can be UTF8 with or wothout BOM,
+UTF16-BE or UTF16-LE. And it will be converted to UTF8.
+
+Emulate a simple `wget`:
+
+```cpp
+File("image.png").put( Http::get("http://hello.com/image.png").body() );
 ```
 
 Decode JSON (but you can also directly load/save JSON from a file):
@@ -194,7 +208,7 @@ String dirname = "newdir";
 CreateDirectoryW( dirname ); // autoconverted to UTF16
 ```
 
-But don't use the above Windows-only function when you can:
+But don't use the above Windows-only function when you can (in UTF8):
 
 ```cpp
 Directory::create("newdir");
