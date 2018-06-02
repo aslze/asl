@@ -44,7 +44,7 @@ and then run the program with either -get or -post arguments.
 This class is our HTTP server, implementing a simple REST-like service.
 
 GET /pos will return a new position as a JSON object {"x": xcoord, "y": ycoord}
-PUT /conf will set a new radius and position given in the request body {"r": radius, "v": speed}
+PUT /conf will set a new radius and speed given in the request body {"r": radius, "v": speed}
 */
 
 class Server : public HttpServer
