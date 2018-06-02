@@ -164,7 +164,8 @@ MyThread thread;
 thread.start();
 ```
 
-Send data through a TCP socket:
+Send data through a TCP socket (that will try different hosts
+if DNS "host" maps to several IPv4 or IPv6 addresses):
 
 ```cpp
 Socket socket;                  // or TlsSocket for SSL/TLS

@@ -9,7 +9,7 @@ __Operating system functionalities__:
 - Threads, mutexes and semaphores
 - Processes (run programs and read their output)
 - Binary and text files
-- Directory enumaration and file system operations (copy, move, delete)
+- Directory enumeration and file system operations (copy, move, delete)
 - Sockets TCP, UDP, Unix and SSL/TLS encrypted sockets, IPv4/IPv6
 - Runtime dynamically loadable libraries (DLLs/shared libraries)
 - Console attributes: text color and cursor position
