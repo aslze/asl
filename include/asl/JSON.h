@@ -39,7 +39,7 @@ The same `data` object can be built in one statement:
 ~~~ 
 Var data = Var("x", 1.5)
               ("y", Var::array({1, true}))
-			  ("z", 3.14);
+              ("z", 3.14);
 ~~~
 */
 struct ASL_API Json
