@@ -43,7 +43,7 @@ public:
 }
 #endif
 
-#ifdef ASL_HAVE_LAMBDA
+#if defined(ASL_HAVE_LAMBDA) && !(defined(_MSC_VER) && _MSC_VER <= 1600)
 #define ASL_EXP_THREADING
 #endif
 
