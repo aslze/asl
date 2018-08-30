@@ -103,6 +103,47 @@ if(particle.has("visible", Var::BOOL)) {...} // point is an OBJ and has a bool p
 if(indices.contains(3)) {...} // indices is an array and contains number 3
 ~~~
 
+When a Var contains an array or an object, its elements or properties can be iterated. Arrays can be iterated
+with `foreach` loops (or `for(item : array)` in C++11), or using array indexing and the `length()` method:
+
+~~~
+Var numbers = array<Var>(10.1, 25, -1, 3.4);
+
+foreach(Var& x, numbers)
+{
+    do_something_with(x);
+}
+
+for(int i=0; i < numbers.length(); i++)
+{
+    do_something_with(numbers[i]);
+}
+~~~
+
+And object properties (keys and values) can be iterated with a `foreach2` loop:
+
+~~~
+foreach2(String& key, Var& value, particle)   // the particle from above
+{
+    printf("%s : %s\n", *key, *value.toString());
+}
+~~~
+
+Any Var can be converted to a String representation for example for printing on a console or to a file. This is done
+with the `toString()` method. For instance, the following:
+
+~~~
+printf("%s\n", *particle.toString());
+~~~
+
+will print the string:
+
+~~~
+{color=[255,0,255],name=particle1,visible=Y,x=15,y=-1.25}
+~~~
+
+For a better representation that can be parsed back into a Var, you can use XDL (`Xdl::encode(var)`) or JSON (`Json::encode(var)`).
+
 */
 
 

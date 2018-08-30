@@ -77,14 +77,11 @@ Matrix4 Matrix4::scale(const Vec3& s)
 
 Matrix4 Matrix4::rotateX(float phi)
 {
-	float cosphi=cos(phi);
-	float sinphi=sin(phi);
-
 	return Matrix4(
-		1, 0,      0,       0,
-		0, cosphi, -sinphi, 0,
-		0, sinphi, cosphi,  0,
-		0, 0,      0,       1);
+		1, 0,        0,         0,
+		0, cos(phi), -sin(phi), 0,
+		0, sin(phi), cos(phi),  0,
+		0, 0,        0,         1);
 }
 
 Matrix4 Matrix4::rotateY(float phi)

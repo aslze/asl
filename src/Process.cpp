@@ -157,7 +157,7 @@ namespace asl {
 
 	void Process::makeDaemon()
 	{
-		// tiene esto sentido en Windows?
+		// does this make sense on Windows?
 	}
 
 	void Process::run(const String& command, const Array<String>& args)
@@ -170,7 +170,7 @@ namespace asl {
 		ZeroMemory(&startInfo, sizeof(STARTUPINFO));
 		startInfo.cb = sizeof(STARTUPINFO);
 		startInfo.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
-		startInfo.wShowWindow = SW_HIDE;
+		startInfo.wShowWindow = SW_SHOWNORMAL; // SW_HIDE;
 		startInfo.hStdInput = !_detached ? _pipe_in[0] : 0;
 		startInfo.hStdOutput = !_detached ? _pipe_out[1] : 0;
 		startInfo.hStdError = !_detached ? _pipe_err[1] : 0;

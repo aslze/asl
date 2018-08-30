@@ -153,7 +153,7 @@ contains two objects of different classes. If that fragment is stored in String
 
 
 ~~~
-Var garage = decodeXDL(garagex);
+Var garage = Xdl::decode(garagex);
 
 if(!garage.is("Garage"))
 	return;
@@ -179,14 +179,14 @@ We may construct a new Var or modify the one just parsed, and rewrite it as an X
 garage["vehicles"] << Var("_class", "Car")("brand", "Limo")("length", 8.34);
 garage["open"] = false;
 
-garagex = encodeXDL(garage, true);
+garagex = Xdl::encode(garage, true);
 ~~~~
 
 The `true` parameter makes the function write the code with new lines and indentations. By default
 the result is compact.
 
-The **JSON** functions `encodeJSON()`, `decodeJSON()`do the same using JSON syntax. Class names are represented 
-by a propery named `_class` in this case. All of JSON syntax is supported.
+The **JSON** functions `Json::encode()`, `Json::decode()`do the same using JSON syntax. Class names are represented 
+by a propery named `_` in this case (actually, the macro ASL_XDLCLASS). All of JSON syntax is supported.
 
 */
 
