@@ -16,6 +16,7 @@ Main definitions.
 #endif
 #define _CRT_SECURE_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <windows.h>
 #undef BIGENDIAN
 #undef LITTLEENDIAN

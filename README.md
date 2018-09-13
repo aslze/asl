@@ -226,7 +226,15 @@ foreach(File& file, files)
 	Long size = file.size();
 	Date date = file.lastModified();
 }
+```
 
+Copy, move or delete files:
+
+```cpp
+File("letter.doc").copy("/backup/");
+File("file.conf").move("file.ini");
+File("trash.doc").remove();
+Directory::remove("/trash/"); // must be empty
 ```
 
 Start a subprocess and read its output:
