@@ -103,9 +103,9 @@ String HttpMessage::text() const
 	return String((const char*)_body.ptr(), _body.length());
 }
 
-Var HttpMessage::data() const
+Var HttpMessage::json() const
 {
-	return decodeJSON(text());
+	return Json::decode(text());
 }
 
 void HttpMessage::put(const String& body)

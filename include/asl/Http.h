@@ -119,7 +119,12 @@ public:
 	/**
 	Returns the message body interpreted as JSON
 	*/
-	Var data() const;
+	Var json() const;
+
+	/**
+	\deprecated Use json()
+	*/
+	Var data() const { return json(); }
 
 	void write();
 	/**
