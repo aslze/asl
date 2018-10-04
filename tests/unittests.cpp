@@ -366,6 +366,8 @@ void testXDL()
 	ASL_ASSERT(!decodeXDL("1.25e+08").is(Var::NONE));
 	ASL_ASSERT(fabs( (double)decodeXDL("1.25e8") - 1.25e8) < 1e-6);
 	ASL_ASSERT(fabs( (double)decodeXDL("1.25e+8") - 1.25e8) < 1e-6);
+
+	ASL_ASSERT(Json::encode(nan()) == "null");
 }
 
 void testVar()

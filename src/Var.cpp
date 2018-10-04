@@ -128,6 +128,8 @@ Var::operator double() const
 		return atof((*s));
 	case SSTRING:
 		return atof(ss);
+	case NUL:
+		return nan();
 	default:
 		return 0.0;
 	}
@@ -145,6 +147,8 @@ Var::operator float() const
 		return (float)atof(*s);
 	case SSTRING:
 		return (float)atof(ss);
+	case NUL:
+		return nan();
 	default: break;
 	}
 	return 0.0; // NaN ?

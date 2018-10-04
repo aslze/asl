@@ -747,6 +747,14 @@ void XdlWriter::new_number(int x)
 void XdlWriter::new_number(double x)
 {
 	int n = out.length();
+	if (!isfinite(x))
+	{
+		if (x != x)
+			out += "null";
+		else
+			out += (x < 0)? "-1e400" : "1e400";
+		return;
+	}
 	if((float)x == x)
 	{
 		out.resize(n+15);
