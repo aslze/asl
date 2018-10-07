@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#if defined(_MSC_VER) && _MSC_VER < 1800
+#include <float.h>
+#endif
+
 namespace asl {
 
 #define INDENT_CHAR ' '
@@ -747,7 +751,11 @@ void XdlWriter::new_number(int x)
 void XdlWriter::new_number(double x)
 {
 	int n = out.length();
+#if defined(_MSC_VER) && _MSC_VER < 1800
+	if (!_finite(x))
+#else
 	if (!isfinite(x))
+#endif
 	{
 		if (x != x)
 			out += "null";
