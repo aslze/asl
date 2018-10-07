@@ -3,15 +3,26 @@
 
 namespace asl {
 
-inline QString _qt_(const asl::String& s)
+/**
+Converts a String to a Qt QString
+*/
+inline QString qt(const String& s)
 {
-	return QString::fromUtf8(s);
+	return QString::QTFROM(s);
 }
 
-inline asl::String _qt_(const QString& s)
+/**
+Converts a Qt QString to a String
+*/
+inline String qt(const QString& s)
 {
-	return s.toUtf8().data();
+	QByteArray a = s.QTTO();
+	return String(a.data(), a.size());
 }
+
+inline QString _qt_(const String& s) { return qt(s); }
+
+inline String _qt_(const QString& s) { return qt(s); }
 
 }
 

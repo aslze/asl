@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 
 	server.bindTLS(443);
 
-	if (config.has("key"))
+	if (config.has("cert") && config.has("key"))
 	{
 		server.useCert(TextFile(config["cert"]).text(), TextFile(config["key"]).text());
 	}
