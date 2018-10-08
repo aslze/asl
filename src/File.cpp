@@ -16,6 +16,7 @@ namespace asl {
 const char File::SEP='\\';
 #else
 #include <sys/stat.h>
+#include <utime.h>
 namespace asl {
 const char File::SEP='/';
 #endif
@@ -184,6 +185,31 @@ Date File::lastModified() const
 	if(!_info)
 		_info = Directory::getInfo(_path);
 	return _info.lastModified;
+}
+
+bool File::setLastModified(const Date& t)
+{
+#ifdef _WIN32
+	HANDLE hfile = CreateFileW(_path, FILE_WRITE_ATTRIBUTES, FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0);
+	if (!hfile)
+		return false;
+	LARGE_INTEGER ti;
+	ti.QuadPart = LONGLONG((t.time() + 11644473600.0) * 1e7);
+	FILETIME ft;
+	ft.dwHighDateTime = ti.HighPart;
+	ft.dwLowDateTime = ti.LowPart;
+	int ok = SetFileTime(hfile, 0, 0, &ft);
+	CloseHandle(hfile);
+	return ok != 0;
+#else
+	utimbuf times;
+	struct stat data;
+	if (stat(_path, &data) != 0)
+		return false;
+	times.actime = data.st_mtime;
+	times.modtime = (time_t)t.time();
+	return utime(_path, &times) == 0;
+#endif
 }
 
 Array<byte> File::content()

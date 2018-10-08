@@ -106,6 +106,10 @@ public:
 	Date lastModified() const;
 	/** Returns the file's creation date */
 	Date creationDate() const;
+	/**
+	Sets the file's last modification date
+	*/
+	bool setLastModified(const Date& t);
 	/** Returns the file size */
 	Long size() const;
 	/** Returns the file's name (without its directory) */
