@@ -72,7 +72,7 @@ Makes the current thread sleep for the given number of seconds
 */
 inline void sleep(int s)
 {
-	sleep((unsigned)s);
+	::sleep((unsigned)s);
 }
 
 /**
