@@ -11,7 +11,7 @@
 namespace asl {
 
 /**
-Vec3 represents a vector in 3D space.
+A Vec3 represents a vector in 3D space.
 
 This class allows operating with vectors as with primitive types via operators. It can be used
 together with class Matrix4 to transform vectors in space.
@@ -27,86 +27,88 @@ The angle between two vectors can be computed with:
 float angle = acos(a/!a * b/!b);
 ~~~
 */
-
-class Vec3
+template<class T>
+class Vec3_
 {
  public:
-	Vec3(float X, float Y, float Z): x(X), y(Y), z(Z) {}
-	Vec3(const Vec3& v): x(v.x), y(v.y), z(v.z) {}
-	Vec3(const float* v): x(v[0]), y(v[1]), z(v[2]) {}
-	Vec3() {}
+	Vec3_(T X, T Y, T Z): x(X), y(Y), z(Z) {}
+	Vec3_(const Vec3_& v): x(v.x), y(v.y), z(v.z) {}
+	template<class T2>
+	Vec3_(const Vec3_<T2>& v) : x((T)v.x), y((T)v.y), z((T)v.z) {}
+	Vec3_(const T* v): x(v[0]), y(v[1]), z(v[2]) {}
+	Vec3_() {}
 	operator const float*() const {return (float*)this;}
 	/** Returns the *x* and *y* components as a Vec2 */
-	Vec2 xy() const {return Vec2(x, y);}
+	Vec2_<T> xy() const {return Vec2_<T>(x, y);}
 	/** Returns the cartesian coordinates vector corresponding to this homogenous coordinates */
-	Vec2 h2c() const {float iz=1/z; return Vec2(iz*x, iz*y);}
-	static Vec3 fromCylindrical( float r, float a, float z) {return Vec3(r*cos(a), r*sin(a), z);}
-	static Vec3 fromSpherical( float r, float a, float b)
-	{float R=r*cos(b); return Vec3(R*cos(a), R*sin(b), r*sin(b));}
+	Vec2_<T> h2c() const {T iz=1/z; return Vec2_<T>(iz*x, iz*y);}
+	static Vec3_ fromCylindrical( T r, T a, T z) {return Vec3_(r*cos(a), r*sin(a), z);}
+	static Vec3_ fromSpherical( T r, T a, T b) {float R=r*cos(b); return Vec3_(R*cos(a), R*sin(b), r*sin(b));}
 
-	void set( float X,float Y,float Z) {x=X; y=Y; z=Z;}
-	void get( float& X,float& Y,float& Z) const {X=x; Y=y; Z=z;}
+	void set( T X, T Y, T Z) {x=X; y=Y; z=Z;}
+	void get( T& X, T& Y, T& Z) const {X=x; Y=y; Z=z;}
 
 	/** Returns a normalized version of this vector */
-	Vec3 normalized() const {
+	Vec3_ normalized() const {
 		return *this/length();
 	}
 	/** Returns the length of the vector */
-	float length() const {return sqrt(x*x+y*y+z*z);}
+	T length() const {return sqrt(x*x+y*y+z*z);}
 	/** Returns the length of the vector squared */
-	float length2() const {return x*x+y*y+z*z;}
+	T length2() const {return x*x+y*y+z*z;}
 	/** Returns the length of the vector */
-	float operator!() const {return length();}
-	Vec3 abs() const {return Vec3(fabs(x), fabs(y), fabs(z));}
+	T operator!() const {return length();}
+	Vec3_ abs() const {return Vec3_(fabs(x), fabs(y), fabs(z));}
 	/** Returns the angle between this vector and `b` */
-	float angle(const Vec3& b) const {return acosf(clamp((*this) * b / (!(*this)*!b), -1.0f, 1.0f) );}
+	T angle(const Vec3_& b) const {return acos(clamp((*this) * b / (!(*this)*!b), -1.0f, 1.0f) );}
 
-	void operator=(const Vec3& b) {x=b.x; y=b.y; z=b.z;}
+	void operator=(const Vec3_& b) {x=b.x; y=b.y; z=b.z;}
 	/** Returns this plus `b` */
-	Vec3 operator+(const Vec3& b) const {return Vec3(x+b.x, y+b.y, z+b.z);}
+	Vec3_ operator+(const Vec3_& b) const {return Vec3_(x+b.x, y+b.y, z+b.z);}
 	/** Returns this minus `b` */
-	Vec3 operator-(const Vec3& b) const {return Vec3(x-b.x, y-b.y, z-b.z);}
+	Vec3_ operator-(const Vec3_& b) const {return Vec3_(x-b.x, y-b.y, z-b.z);}
 	/** Returns the *cross product* of this vector and `b` */
-	Vec3 operator^(const Vec3& b) const {return Vec3(y*b.z-z*b.y,z*b.x-x*b.z,x*b.y-y*b.x);}
+	Vec3_ operator^(const Vec3_& b) const {return Vec3_(y*b.z-z*b.y,z*b.x-x*b.z,x*b.y-y*b.x);}
 	/** Returns the *dot product* of this vector and `b` */
-	float operator*(const Vec3& b) const {return x*b.x+y*b.y+z*b.z;}
+	T operator*(const Vec3_& b) const {return x*b.x+y*b.y+z*b.z;}
 	/** Returns this vector multiplied by scalar `r` */
-	Vec3 operator*(float r) const {return Vec3(x*r, y*r, z*r);}
+	Vec3_ operator*(T r) const {return Vec3_(x*r, y*r, z*r);}
 	/** Returns this vector multiplied by scalar `r` */
-	friend Vec3 operator*(float r, const Vec3& b) {return b*r;}
-	Vec3 operator/(float r) const {float t=1.0f/r; return Vec3(t*x, t*y, t*z);}
+	friend Vec3_ operator*(T r, const Vec3_& b) {return b*r;}
+	Vec3_ operator/(T r) const {T t=(T)1/r; return Vec3_(t*x, t*y, t*z);}
 	/** Returns a vector that is a component-wise product of this vector and `b` */
-	Vec3 operator%(const Vec3& b) const {return Vec3(x*b.x, y*b.y, z*b.z);}
+	Vec3_ operator%(const Vec3_& b) const {return Vec3_(x*b.x, y*b.y, z*b.z);}
 	/** Checks if this vector is equal to `b` */
-	bool operator==(const Vec3& b) const {return x==b.x && y==b.y && z==b.z;}
+	bool operator==(const Vec3_& b) const {return x==b.x && y==b.y && z==b.z;}
 	/** Checks if this vector is not equal to `b` */
-	bool operator!=(const Vec3& b) const {return x!=b.x || y!=b.y || z!=b.z;}
+	bool operator!=(const Vec3_& b) const {return x!=b.x || y!=b.y || z!=b.z;}
 	/** Adds vector `b` to this vector */
-	void operator+=(const Vec3& b) {x += b.x; y += b.y; z += b.z;}
+	void operator+=(const Vec3_& b) {x += b.x; y += b.y; z += b.z;}
 	/** Subtracts vector `b` from this vector */
-	void operator-=(const Vec3& b) {x -= b.x; y -= b.y; z -= b.z;}
+	void operator-=(const Vec3_& b) {x -= b.x; y -= b.y; z -= b.z;}
 	/** Multiplies this vector by scalar `r` */
-	void operator*=(float r) {x *= r; y *= r; z *= r;}
+	void operator*=(T r) {x *= r; y *= r; z *= r;}
 	/** Divides this vector by scalar `r` */
-	void operator/=(float r) {float t=1.0f/r; x *= t; y *= t; z *= t;}
+	void operator/=(T r) {float t=(T)1/r; x *= t; y *= t; z *= t;}
 	/** Returns this vector negated */
-	Vec3 operator-() const {return Vec3(-x,-y,-z);}
+	Vec3_ operator-() const {return Vec3_(-x,-y,-z);}
 
 	/** Returns true if this vector's length is less than a given threshold (almost zero) */
-	bool isNull( float tol=0.000001f) const {return length2() < tol;}
+	bool isNull( T tol=(T)0.000001) const {return length2() < tol;}
 
 	/** Returns true if this vector is nearly parallel to vector `v2` with a given tolerance */
-	bool isParallelToVector(const Vec3& v2, float tol=0.000001f)
+	bool isParallelToVector(const Vec3_& v2, T tol=(T)0.000001)
 	{
-		return fabsf( ((*this) * v2)/(length() * v2.length()) ) > (1.0f-tol);
+		return fabs( ((*this) * v2)/(length() * v2.length()) ) > ((T)1-tol);
 	}
 
 public:
 	/** The x, y, z components */
-	float x, y, z;
+	T x, y, z;
 };
 
-inline int compare(const Vec3& a, const Vec3& b)
+template <class T>
+inline int compare(const Vec3_<T>& a, const Vec3_<T>& b)
 {
 	if(a.x < b.x) return -1;
 	else if(a.x == b.x && a.y < b.y) return -1;
@@ -115,25 +117,32 @@ inline int compare(const Vec3& a, const Vec3& b)
 	else return 1;
 }
 
-inline Vec3 min(const Vec3& a, const Vec3& b)
+template <class T>
+inline Vec3_<T> min(const Vec3_<T>& a, const Vec3_<T>& b)
 {
-	return Vec3(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z) );
+	return Vec3_<T>(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z));
 }
 
-inline Vec3 max(const Vec3& a, const Vec3& b)
+template <class T>
+inline Vec3_<T> max(const Vec3_<T>& a, const Vec3_<T>& b)
 {
-	return Vec3(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z) );
+	return Vec3_<T>(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z));
 }
 
-inline const Vec3 min(const Vec3& a, const Vec3& b, const Vec3& c)
+template <class T>
+inline const Vec3_<T> min(const Vec3_<T>& a, const Vec3_<T>& b, const Vec3_<T>& c)
 {
 	return min(min(a,b), c);
 }
 
-inline Vec3 max(const Vec3& a, const Vec3& b, const Vec3& c)
+template <class T>
+inline Vec3_<T> max(const Vec3_<T>& a, const Vec3_<T>& b, const Vec3_<T>& c)
 {
 	return max(max(a,b), c);
 }
+
+typedef Vec3_<float> Vec3;
+typedef Vec3_<double> Vec3d;
 
 }
 

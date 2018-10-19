@@ -21,70 +21,71 @@ Vec3 v = a.h2c();
 ~~~
 
 */
-
-class Vec4
+template<class T>
+class Vec4_
 {
  public:
-	Vec4() {}
-	Vec4(float X, float Y, float Z, float W) : x(X), y(Y), z(Z), w(W) {}
-	Vec4(const Vec3& v, float W) : x(v.x), y(v.y), z(v.z), w(W) {}
-	Vec4(const Vec4& v): x(v.x), y(v.y), z(v.z), w(v.w) {}
-	Vec4(const float* v) : x(v[0]), y(v[1]), z(v[2]), w(v[3]) {}
-	operator const float*() const {return (float*)this;}
+	Vec4_() {}
+	Vec4_(T X, T Y, T Z, T W) : x(X), y(Y), z(Z), w(W) {}
+	Vec4_(const Vec3& v, T W) : x(v.x), y(v.y), z(v.z), w(W) {}
+	Vec4_(const Vec4_& v): x(v.x), y(v.y), z(v.z), w(v.w) {}
+	Vec4_(const T* v) : x(v[0]), y(v[1]), z(v[2]), w(v[3]) {}
+	operator const T*() const {return (T*)this;}
 	/** Returns the *x*, *y*, *z* components as a Vec3 */
-	Vec3 xyz() const {return Vec3(x, y, z);}
+	Vec3_<T> xyz() const {return Vec3_<T>(x, y, z);}
 	/** Returns the cartesian coordinates vector corresponding to this homogenous coordinates */
-	Vec3 h2c() const {float iw=1/w; return Vec3(iw*x, iw*y, iw*z);}
+	Vec3_<T> h2c() const {T iw=1/w; return Vec3_<T>(iw*x, iw*y, iw*z);}
 
 	/** Returns a normalized version of this vector */
-	Vec4 normalized() const {
+	Vec4_ normalized() const {
 		return *this/length();
 	}
 	/** Returns the length of the vector */
-	float length() const {return sqrt(x*x+y*y+z*z+w*w);}
+	T length() const {return sqrt(x*x+y*y+z*z+w*w);}
 	/** Returns the length of the vector squared */
-	float length2() const {return x*x+y*y+z*z+w*w;}
+	T length2() const {return x*x+y*y+z*z+w*w;}
 	/** Returns the length of the vector */
-	float operator!() const {return length();}
-	Vec4 abs() const {return Vec4(fabs(x), fabs(y), fabs(z), fabs(w));}
+	T operator!() const {return length();}
+	Vec4_ abs() const {return Vec4_(fabs(x), fabs(y), fabs(z), fabs(w));}
 
-	void operator=(const Vec4& b) {x = b.x; y = b.y; z = b.z; w = b.w;}
+	void operator=(const Vec4_& b) {x = b.x; y = b.y; z = b.z; w = b.w;}
 	/** Returns this plus `b` */
-	Vec4 operator+(const Vec4& b) const {return Vec4(x+b.x, y+b.y, z+b.z, w+b.w);}
+	Vec4_ operator+(const Vec4_& b) const {return Vec4_(x+b.x, y+b.y, z+b.z, w+b.w);}
 	/** Returns this minus `b` */
-	Vec4 operator-(const Vec4& b) const {return Vec4(x-b.x, y-b.y, z-b.z, w-b.w);}
+	Vec4_ operator-(const Vec4_& b) const {return Vec4_(x-b.x, y-b.y, z-b.z, w-b.w);}
 	/** Returns the *dot product* of this vector and `b` */
-	float operator*(const Vec4& b) const {return x*b.x+y*b.y+z*b.z+w*b.w;}
+	T operator*(const Vec4_& b) const {return x*b.x+y*b.y+z*b.z+w*b.w;}
 	/** Returns this vector multiplied by scalar `r` */
-	Vec4 operator*(float r) const {return Vec4(x*r, y*r, z*r, w*r);}
+	Vec4_ operator*(T r) const {return Vec4_(x*r, y*r, z*r, w*r);}
 	/** Returns this vector multiplied by scalar `r` */
-	friend Vec4 operator*(float r, const Vec4& b) {return b*r;}
-	Vec4 operator/(float r) const {float t=1.0f/r; return Vec4(t*x, t*y, t*z, t*w);}
+	friend Vec4_ operator*(T r, const Vec4_& b) {return b*r;}
+	Vec4_ operator/(T r) const {T t=1/r; return Vec4_(t*x, t*y, t*z, t*w);}
 	/** Returns a vector that is a component-wise product of this vector and `b` */
-	Vec4 operator%(const Vec4& b) const {return Vec4(x*b.x, y*b.y, z*b.z, w*b.w);}
+	Vec4_ operator%(const Vec4_& b) const {return Vec4_(x*b.x, y*b.y, z*b.z, w*b.w);}
 	/** Checks if this vector is equal to `b` */
-	bool operator==(const Vec4& b) const {return x==b.x && y==b.y && z==b.z && w==b.w;}
+	bool operator==(const Vec4_& b) const {return x==b.x && y==b.y && z==b.z && w==b.w;}
 	/** Checks if this vector is not equal to `b` */
-	bool operator!=(const Vec4& b) const {return x!=b.x || y!=b.y || z!=b.z || w!=b.w;}
+	bool operator!=(const Vec4_& b) const {return x!=b.x || y!=b.y || z!=b.z || w!=b.w;}
 	/** Adds vector `b` to this vector */
-	void operator+=(const Vec4& b) {x += b.x; y += b.y; z += b.z; w += b.w;}
+	void operator+=(const Vec4_& b) {x += b.x; y += b.y; z += b.z; w += b.w;}
 	/** Subtracts vector `b` from this vector */
-	void operator-=(const Vec4& b) {x -= b.x; y -= b.y; z -= b.z; w -= b.w;}
+	void operator-=(const Vec4_& b) {x -= b.x; y -= b.y; z -= b.z; w -= b.w;}
 	/** Multiplies this vector by scalar `r` */
-	void operator*=(float r) {x *= r; y *= r; z *= r; w *= r;}
+	void operator*=(T r) {x *= r; y *= r; z *= r; w *= r;}
 	/** Divides this vector by scalar `r` */
-	void operator/=(float r) {float t=1.0f/r; x *= t; y *= t; z *= t; w *= t;}
+	void operator/=(T r) {T t=1/r; x *= t; y *= t; z *= t; w *= t;}
 	/** Returns this vector negated */
-	Vec4 operator-() const {return Vec4(-x,-y,-z, -w);}
+	Vec4_ operator-() const {return Vec4_(-x,-y,-z, -w);}
 
 public:
 	/** The x, y, z, w components */
-	float x, y, z, w;
+	T x, y, z, w;
 };
 
 // CHECK
 
-inline int compare(const Vec4& a, const Vec4& b)
+template<class T>
+inline int compare(const Vec4_<T>& a, const Vec4_<T>& b)
 {
 	if(a.x < b.x) return -1;
 	else if(a.x == b.x && a.y < b.y) return -1;
@@ -93,6 +94,9 @@ inline int compare(const Vec4& a, const Vec4& b)
 	else if(a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w) return 0;
 	else return 1;
 }
+
+typedef Vec4_<float> Vec4;
+typedef Vec4_<double> Vec4d;
 
 }
 

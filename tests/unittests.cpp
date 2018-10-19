@@ -21,6 +21,8 @@ void testProcess();
 void testSHA1();
 void testSmartObject();
 void testDate();
+void testVec3();
+void testUuid();
 
 using namespace asl;
 
@@ -504,6 +506,8 @@ int main(int narg, char* argv[])
 	TEST(SHA1)
 	TEST(SmartObject)
 	TEST(Date)
+	TEST(Vec3)
+	TEST(Uuid)
 	else
 		return EXIT_FAILURE;
 	

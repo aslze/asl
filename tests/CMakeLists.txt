@@ -1,7 +1,7 @@
 
 SET(EXE_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-ADD_EXECUTABLE( unittests unittests.cpp unittests2.cpp unittests3.cpp)
+ADD_EXECUTABLE( unittests unittests.cpp unittests2.cpp unittests3.cpp unittests4.cpp)
 TARGET_LINK_LIBRARIES( unittests asls )
 
 MACRO(TEST name)
@@ -17,6 +17,8 @@ SET(TESTS
 	SmartObject
 	Date
 	AtomicCount
+	Vec3
+	Uuid
 )
 
 FOREACH(T ${TESTS})
