@@ -29,6 +29,7 @@ set( ASL_SRC
 	unicodedata.cpp
 	util.cpp
 	SHA1.cpp
+	Uuid.cpp
 	../include/asl/defs.h
 	../include/asl/String.h
 	../include/asl/Array.h
