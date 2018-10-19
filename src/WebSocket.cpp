@@ -25,7 +25,7 @@ WebSocketMsg::operator String() const
 
 WebSocketMsg::operator Var() const
 {
-	return decodeJSON(String(_data));
+	return Json::decode((const char*)_data.ptr());
 }
 
 const char* WebSocketMsg::operator*() const
@@ -138,6 +138,7 @@ WebSocket::WebSocket()
 	_closed = true;
 	_code = 1000;
 	_socket.setEndian(Socket::BIGENDIAN);
+	_random.init();
 }
 
 WebSocket::WebSocket(const Socket& s, bool isclient):
@@ -148,6 +149,7 @@ WebSocket::WebSocket(const Socket& s, bool isclient):
 	_code = 1000;
 	_socket.setEndian(Socket::BIGENDIAN);
 	_socket.setBlocking(true);
+	_random.init();
 }
 
 bool WebSocket::connect(const String& uri, int port)
@@ -179,7 +181,7 @@ bool WebSocket::connect(const String& uri, int port)
 
 	byte key[16];
 	for (int i = 0; i < 16; i++)
-		key[i] = (byte)random(256);
+		key[i] = (byte)_random(256);
 
 	String key64 = encodeBase64(key, 16);
 
@@ -343,7 +345,7 @@ WebSocketMsg WebSocket::receive()
 
 void WebSocket::send(const Var& v)
 {
-	send(encodeJSON(v));
+	send(Json::encode(v));
 }
 
 void WebSocket::send(const byte* p, int length, FrameType type)
@@ -365,7 +367,7 @@ void WebSocket::send(const byte* p, int length, FrameType type)
 
 	unsigned mask = 0;
 	if (_isClient) {
-		mask = (unsigned)random();
+		mask = _random.get();
 		buf << mask;
 	}
 	Array<byte> data(p, length);

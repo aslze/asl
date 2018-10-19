@@ -40,6 +40,10 @@ inline double now()
 #endif
 }
 
+// current time in us
+
+Long ASL_API inow();
+
 #ifdef _WIN32
 
 /*

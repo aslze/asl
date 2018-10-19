@@ -5,19 +5,23 @@ namespace asl {
 
 #if 0 // linear congruential
 
-static Long random_state = 1;
-int random()
+Random::Random()
 {
-	const int a = 1103515245;
-	const int c = 12345;
-	const Long m = 1 << 31;
-	random_state = (((Long)random_state * a + c) % m);
-	return random_state & 0x7fffffff;
+	_state[0] = 1;
 }
 
-void random_init(Long n)
+unsigned Random::get()
 {
-	random_state = (n>=0)? n : (Long)(1e9 * fract(1e-6 * now()));
+	const unsigned a = 1103515245;
+	const unsigned c = 12345;
+	const ULong m = 1 << 31;
+	_state[0] = (((ULong)_state[0] * a + c) % m);
+	return _state[0] & 0xffffffff;
+}
+
+void Random::init(Long n)
+{
+	_state[0] = (n>=0)? n : (Long)(1e9 * fract(1e-6 * now()));
 }
 
 #else // xoroshiro128+
@@ -27,26 +31,61 @@ inline ULong rotl(ULong x, int k)
 	return (x << k) | (x >> (64 - k));
 }
 
-static ULong random_state[2] = { 1234567890U, 2876543210U };
-
-int random()
+Random::Random(bool autoseed)
 {
-	const ULong s0 = random_state[0];
-	ULong s1 = random_state[1];
-	const ULong result = s0 + s1;
-	s1 ^= s0;
-	random_state[0] = rotl(s0, 55) ^ s1 ^ (s1 << 14); // a, b
-	random_state[1] = rotl(s1, 36); // c
-	return (result >> 32) & 0x7fffffff;
+	_state[0] = 1921312345;
+	_state[1] = 1312312876;
+	if (autoseed)
+		init();
 }
 
-void random_init(Long n)
+// maybe add a getLong() to get the full 64 bits, and use it to generate doubles... ?
+
+unsigned Random::get()
 {
-	random_state[0] = (n >= 0) ? n : (Long)(1e9 * fract(1e-6 * now()));
-	random_state[1] = (n >= 0) ? n : (Long)(2e9 * fract(1e-6 * now()));
+	const ULong s0 = _state[0];
+	ULong s1 = _state[1];
+	const ULong result = s0 + s1;
+	s1 ^= s0;
+	_state[0] = rotl(s0, 55) ^ s1 ^ (s1 << 14); // a, b
+	_state[1] = rotl(s1, 36); // c
+	return (result >> 32) & 0xffffffff;
+}
+
+void Random::init(ULong s1, ULong s2)
+{
+	_state[0] = s1;
+	_state[1] = s2;
+}
+
+void Random::init()
+{
+	Long n = inow();
+	_state[0] = (ULong)n;
+	int k = get();
+	_state[1] = (ULong) n + (ULong(k) << 30);
+	get();
 }
 
 #endif
+
+Random random(true);
+
+Long inow()
+{
+#ifdef _WIN32
+	FILETIME ft;
+	GetSystemTimeAsFileTime(&ft);
+	LARGE_INTEGER t;
+	t.HighPart = ft.dwHighDateTime;
+	t.LowPart = ft.dwLowDateTime;
+	return t.QuadPart / 10;
+#else
+	timeval t;
+	gettimeofday(&t, 0);
+	return t.tv_sec * (Long)1000000 + t.tv_usec;
+#endif
+}
 
 static const char base64_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 

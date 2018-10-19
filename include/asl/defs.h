@@ -16,7 +16,9 @@ Main definitions.
 #endif
 #define _CRT_SECURE_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <windows.h>
 #undef BIGENDIAN
 #undef LITTLEENDIAN
@@ -34,7 +36,7 @@ namespace asl {
 
 #include <string.h>
 #include <stdio.h>
-#include "time.h"
+#include <stdlib.h>
 
 #ifndef ASL_NOEXCEPT
 #include <new>
@@ -98,11 +100,9 @@ namespace asl {
 #define ASL_PATH_SEP '/'
 #endif
 
-#define ASL_ASSERT(x) if(!(x)) { printf("\n%s: %i\n\n* Failed: '%s'\n\n", __FILE__, __LINE__, #x); exit(EXIT_FAILURE); }
+#define ASL_ASSERT(x) if(!(x)) { printf("\n%s: %i\n\n* Failed: '%s'\n\n", __FILE__, __LINE__, #x); exit(1); }
 
 typedef unsigned char byte;
-
-#include "atomic.h"
 
 namespace asl {
 
@@ -126,10 +126,6 @@ Returns a NaN value
 */
 inline float nan()
 {
-	/*double x;
-	Long* bits = (Long*)&x;
-	*bits = 0x7ff0000080000001LL;
-	return x;*/
 	return float((1e100*1e100))*0.0f;
 }
 
@@ -158,39 +154,52 @@ inline T deg2rad(T x) {return (T)(x*0.017453292519943295);}
 template <class T>
 inline T rad2deg(T x) {return (T)(x*57.29577951308232);}
 
-/** Returns an integer pseudo-random number in the [0, 2^31) interval */
-ASL_API int random();
-
-/** Returns a floating point random number in the [0, m] interval */
-inline double random(double m)
-{
-	return random()*m*(1.0/((1U<<31)+1));
-}
-
-/** Returns a floating point random number in the [m, M] interval */
-inline double random(double m, double M)
-{
-	return m + random()*(M-m)*(1.0/((1U<<31)+1));
-}
-
-inline float random(float m) {return (float)random((double)m);}
-
-inline float random(float m, float M) {return (float)random((double)m, (double)M);}
-
-/** Returns an integer random number in the [0, M-1] interval */
-inline int random(int m) { return (int)random((double)m); }
-
-/** Returns an integer random number in the [m, M-1] interval */
-inline int random(int m, int M) { return (int)random((double)m, (double)M); }
-
-
-/** Initializes the seed for the random functions */
-ASL_API void random_init(Long n = -1);
-
-/**@}*/
 
 static const double PI = 3.14159265358979323;
 
+/**
+A random number generator
+*/
+class ASL_API Random
+{
+	ULong _state[2];
+public:
+	Random(bool autoseed = false);
+	/** Returns an integer pseudo-random number in the [0, 2^32-1] interval */
+	unsigned get();
+
+	/** Returns a floating point random number in the [0, m] interval */
+	double operator()(double m) { return get()*m*(1.0 / 4294967297.0); }
+
+	/** Returns a floating point random number in the [m, M] interval */
+	double operator()(double m, double M) { return m + get()*(M - m)*(1.0 / 4294967297.0); }
+
+	float operator()(float m) { return (float)(*this)((double)m); }
+
+	float operator()(float m, float M) { return (float)(*this)((double)m, (double)M); }
+
+	/** Returns an integer random number in the [0, M-1] interval */
+	int operator()(int m) { return (int)(*this)((double)m); }
+
+	/** Returns an integer random number in the [m, M-1] interval */
+	int operator()(int m, int M) { return (int)(*this)((double)m, (double)M); }
+
+	/** Returns a floating point random number with standard normal distribution */
+	double normal() { double u = (*this)(1e-30, 1.0), v = (*this)(1e-30, 1.0); return sqrt(-2 * log(u))*cos(2 * PI * v); }
+
+	/** Returns a floating point random number with normal distribution with given mean and variance */
+	double normal(double m, double s2) { return m + s2 * normal(); }
+
+	/** Initializes the seed for the random functions */
+	void init(ULong s1, ULong s2);
+
+	/** Initializes the seed for the random functions randomly (by default using the current time) */
+	void init();
+};
+
+extern ASL_API Random random; //!< A global random number generator
+
+/**@}*/
 
 ASL_API int myatoi(const char* s);
 
@@ -254,11 +263,10 @@ inline void swap(T& a, T& b)
 }
 
 }
-//inline void* operator new (unsigned, void* p) /*throw()*/ {return p;}
-//inline void operator delete(void* p) /*throw()*/ {::operator delete(p);}
+
 inline void* operator new (size_t, int* p) /*throw()*/ {return p;}
-//inline void* operator new (unsigned n) /*throw()*/ {return ::operator new(n);}
 inline void operator delete(void* p, int* r) {}
+
 namespace asl {
 
 // Placement constructors
@@ -277,13 +285,6 @@ inline void asl_destroy(T* p) {p->~T();}
 
 template <class T>
 inline void asl_destroy(T* p, int n) {T* q=p+n; while(p!=q) {p->~T(); p++;}}
-
-template <typename T>
-inline void asl_fix_moved_object(T* x) {}
-
-template <typename T>
-inline void asl_fix_moved_objects(T* x, int n) {}
-
 
 // Placement constructors for pointers
 #if !defined _MSC_VER || _MSC_VER > 11600
@@ -317,6 +318,12 @@ ASL_POD_CONSTRUCT(float)
 ASL_POD_CONSTRUCT(double)
 ASL_POD_CONSTRUCT(short)
 ASL_POD_CONSTRUCT(unsigned short)
+ASL_POD_CONSTRUCT(Long)
+ASL_POD_CONSTRUCT(ULong)
 
 }
+
+#include "time.h"
+#include "atomic.h"
+
 #endif

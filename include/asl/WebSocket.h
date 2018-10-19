@@ -110,6 +110,7 @@ protected:
 	bool _isClient;
 	bool _closed;
 	int _code;
+	Random _random;
 };
 
 /**
