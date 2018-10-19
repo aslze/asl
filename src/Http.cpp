@@ -100,12 +100,12 @@ HttpMessage::HttpMessage(Socket& s) : _socket(&s), _progress(NULL), _fileBody(fa
 
 String HttpMessage::text() const
 {
-	return String((const char*)_body.ptr(), _body.length());
+	return String(_body);
 }
 
 Var HttpMessage::json() const
 {
-	return Json::decode(text());
+	return Json::decode((const char*)_body.ptr());
 }
 
 void HttpMessage::put(const String& body)
@@ -122,7 +122,7 @@ void HttpMessage::put(const Array<byte>& data)
 
 void HttpMessage::put(const Var& body)
 {
-	put(encodeJSON(body));
+	put(Json::encode(body));
 	setHeader("Content-Type", "application/json");
 }
 

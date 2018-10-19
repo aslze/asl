@@ -17,6 +17,12 @@ Var decodeXDL(const String& xdl)
 	return parser.decode(xdl);
 }
 
+Var decodeJSON(const char* json)
+{
+	XdlParser parser;
+	return parser.decode(json);
+}
+
 String encodeXDL(const Var& data, bool pretty, bool json)
 {
 	XdlEncoder encoder;

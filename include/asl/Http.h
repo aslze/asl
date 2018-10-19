@@ -274,8 +274,8 @@ public:
 	*/
 	const Dic<>& query();
 	/**
-	Returns the value associated with the named key in the query. For example if the query was
-	`key1=value1&key2=value2`, then `request.query("key1")` would return "value1".
+	Returns the unescaped value associated with the named key in the query; For example if the query was
+	`key1=value1&key2=value2%26`, then `request.query("key2")` would return "value1&".
 	*/
 	const String& query(const String& key);
 	friend class HttpResponse;

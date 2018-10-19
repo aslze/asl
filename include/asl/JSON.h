@@ -16,6 +16,8 @@ Decodes the JSON-encoded string into a Var that will contain all the structure. 
 */
 Var ASL_API decodeJSON(const String& json);
 
+Var ASL_API decodeJSON(const char* json);
+
 /*
 Encodes the given Var into a JSON-format representation. It is similar to JavaScript's
 `JSON.stringify()`. If parameter `pretty` is true, an indented representation is produced.
@@ -57,6 +59,9 @@ struct ASL_API Json
 	`JSON.parse()`. If there are format parsing errors, the result will be a `Var::NONE` typed variable.
 	*/
 	static Var decode(const String& json) { return decodeJSON(json); }
+
+	static Var decode(const char* json) { return decodeJSON(json); }
+
 	/**
 	Encodes the given Var into a JSON-format representation. It is similar to JavaScript's
 	`JSON.stringify()`. If parameter `pretty` is true, an indented representation is produced.

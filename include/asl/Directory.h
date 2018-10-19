@@ -59,7 +59,7 @@ public:
 	String name() const;
 	/** Returns the full path of the directory */
 	String path() const {return _path;}
-	/** Returns the full path of the directory containing this directory */
+	/** Returns the parent directory containing this directory */
 	String directory() const;
 	/** Returns true if this directory exists (but false if it does not exist or refers to a file. */
 	bool exists() const
