@@ -158,7 +158,34 @@ inline T rad2deg(T x) {return (T)(x*57.29577951308232);}
 static const double PI = 3.14159265358979323;
 
 /**
-A random number generator
+A random number generator.
+
+Generates uniformly distributed pseudo-random numbers, except in the `normal()` functions.
+
+```
+Random random;
+int n = random(256);          // get an integer between 0 and 255
+double x = random(-1.5, 1.5); // get a number between -1.5 and +1.5
+double y = random.normal(10, 0.75); // get a number between -1.5 and +1.5
+```
+
+The generator initially has a constant seed, so it will always produce the same sequence. You
+can change the seed with the `init()` function, either with values or with no arguments to
+automatically seed it randomly:
+
+```
+random.init();
+```
+
+Or you can create the object with a true argument to auto seed it :
+
+```
+Random random(true);
+```
+
+For compatibility with older code, there is a global `asl::random` object already random initialized
+ready for use. But it is recommended to use new Random objects when separate sequences or multithreading
+are needed.
 */
 class ASL_API Random
 {
@@ -193,7 +220,7 @@ public:
 	/** Initializes the seed for the random functions */
 	void init(ULong s1, ULong s2);
 
-	/** Initializes the seed for the random functions randomly (by default using the current time) */
+	/** Initializes the seed for the random functions randomly */
 	void init();
 };
 
@@ -215,6 +242,12 @@ inline bool myisspace(char c)
 {
 	return c <= ' ' && (c == ' ' || c == '\n' || c == '\r' || c == '\t');
 }
+
+inline bool myisalnum(char c)
+{
+	return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9');
+}
+
 
 // Fatal errors (will become exceptions some day)
 
