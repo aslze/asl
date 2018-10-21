@@ -19,26 +19,7 @@ namespace asl {
 Returns the current time as a real number in seconds since a fixed epoch.
 It has a platform-dependent precision, usually around the microsecond.
 */
-inline double now()
-{
-#ifdef _WIN32
-	static double qpcPeriod=0;
-	if(qpcPeriod==0)
-	{
-		LARGE_INTEGER n;
-		QueryPerformanceFrequency(&n);
-		qpcPeriod = 1.0/n.QuadPart;
-	}
-	LARGE_INTEGER n;
-	QueryPerformanceCounter(&n);
-	return ((double)(n.QuadPart))*qpcPeriod;
-	// return 0.001*GetTickCount();
-#else
-	timeval t;
-	gettimeofday(&t, 0);
-	return t.tv_sec + 1e-6*t.tv_usec;
-#endif
-}
+double ASL_API now();
 
 // current time in us
 

@@ -468,6 +468,8 @@ void testBase64()
 	ASL_ASSERT(h == "05f07a45");
 	Array<byte> data2 = decodeHex(h);
 	ASL_ASSERT(data == data2);
+	String b64w = " MjAwMS\n1BIFN\n\twYWNlIE 9keXNzZXk = \n"; // with whitespace
+	ASL_ASSERT(String(decodeBase64(b64w)) == input);
 }
 
 

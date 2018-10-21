@@ -58,6 +58,8 @@ void Random::init(ULong s1, ULong s2)
 	_state[1] = s2;
 }
 
+// should use /dev/random or windows crypto to get better randomness
+
 void Random::init()
 {
 	Long n = inow();
@@ -70,6 +72,27 @@ void Random::init()
 #endif
 
 Random random(true);
+
+double now()
+{
+#ifdef _WIN32
+	static double qpcPeriod = 0;
+	if (qpcPeriod == 0)
+	{
+		LARGE_INTEGER n;
+		QueryPerformanceFrequency(&n);
+		qpcPeriod = 1.0 / n.QuadPart;
+	}
+	LARGE_INTEGER n;
+	QueryPerformanceCounter(&n);
+	return ((double)(n.QuadPart))*qpcPeriod;
+	// return 0.001*GetTickCount();
+#else
+	timeval t;
+	gettimeofday(&t, 0);
+	return t.tv_sec + 1e-6*t.tv_usec;
+#endif
+}
 
 Long inow()
 {
@@ -132,6 +155,8 @@ String encodeBase64(const byte* data, int n)
 	return output;
 }
 
+#ifdef ASL_B64_NOWS
+
 Array<byte> decodeBase64(const char* src0, int n)
 {
 	const byte* src = (const byte*)src0;
@@ -149,7 +174,6 @@ Array<byte> decodeBase64(const char* src0, int n)
 	result.resize(len2);
 
 	byte* dest = result.ptr();
-	//byte* end = dest + len2;
 	while (*src) {
 		byte a = base64_chars_inv[*src++];
 		byte b = base64_chars_inv[*src++];
@@ -163,6 +187,45 @@ Array<byte> decodeBase64(const char* src0, int n)
 	return result;
 }
 
+#else
+
+Array<byte> decodeBase64(const char* src0, int n)
+{
+	const byte* src = (const byte*)src0;
+	int len = n < 0 ? (int)strlen(src0) : n;
+	int len2 = len / 4 * 3;
+	Array<byte> result(len2);
+	if (len < 4) {
+		result.clear();
+		return result;
+	}
+	int e = 0;
+	const byte* p = &src[len - 1];
+	while (p > src && !(myisalnum(*p) || *p == '/' || *p == '+'))
+		if (*p-- == '=')
+			e++;
+
+	byte* dest = result.ptr();
+	byte k[4];
+	int i = 0;
+	while (*src) {
+		if (myisspace(*src)) { src++; continue; };
+		byte b = base64_chars_inv[*src++];
+		k[i++] = b;
+		if (i == 4)
+		{
+			unsigned u = (k[0] << 18) | (k[1] << 12) | (k[2] << 6) | k[3];
+			*dest++ = byte(u >> 16);
+			*dest++ = byte((u >> 8) & 0xff);
+			*dest++ = byte(u & 0xff);
+			i = 0;
+		}
+	}
+	result.resize(int(dest - result.ptr()) - e);
+	return result;
+}
+
+#endif
 
 String encodeHex(const byte* data, int n)
 {

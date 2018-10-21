@@ -20,7 +20,7 @@ class Array_;
 ASL_API Array<byte> decodeBase64(const char* src, int n = -1);
 
 /**
-Decodes a base64 encoded string into a byte array.
+Decodes a base64 encoded string into a byte array; the string can contain whitespace.
 */
 inline Array<byte> decodeBase64(const String& s)
 {

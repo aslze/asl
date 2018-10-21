@@ -17,9 +17,18 @@ inline int hash(int x)
 inline int hash(const String& s)
 {
 	int h = 0, n = s.length();
-	char* p = s;
+	const char* p = s;
 	for(int i=0; i<n; i++)
 		h = 33*h + p[i];
+	return h;
+}
+
+inline int hash(const Array<byte>& s)
+{
+	int h = 0, n = s.length();
+	const byte* p = s;
+	for (int i = 0; i<n; i++)
+		h = 33 * h + p[i];
 	return h;
 }
 
@@ -33,7 +42,7 @@ template<typename T>
 inline int hash(const T& x)
 {
 	int h = 0;
-	byte* p = (byte*)&x;
+	const byte* p = (const byte*)&x;
 	for(int i=0; i<sizeof(x); i++)
 		h = 33*h + p[i];
 	return h;
