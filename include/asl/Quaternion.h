@@ -11,6 +11,7 @@ namespace asl {
 
 /**
 A Quaternion representing an orientation or rotation in 3D space
+\ingroup Math3D
 */
 template<class T>
 class ASL_API Quaternion_

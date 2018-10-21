@@ -11,7 +11,8 @@
 namespace asl {
 
 /**
-A Vec3 represents a vector in 3D space.
+A Vec3_ represents a vector in 3D space. It is a template `Vec3_<T>` and has two predefined 
+specializations `Vec3` (float) and `Vec3d` (double)
 
 This class allows operating with vectors as with primitive types via operators. It can be used
 together with class Matrix4 to transform vectors in space.
@@ -26,6 +27,7 @@ The angle between two vectors can be computed with:
 ~~~
 float angle = acos(a/!a * b/!b);
 ~~~
+\ingroup Math3D
 */
 template<class T>
 class Vec3_

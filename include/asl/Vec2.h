@@ -24,6 +24,7 @@ The angle between two vectors can be computed with:
 ~~~
 T angle = acos(a/!a * b/!b);
 ~~~
+\ingroup Math3D
 */
 template<class T>
 class Vec2_

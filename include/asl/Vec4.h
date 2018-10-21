@@ -19,7 +19,7 @@ It can be used together with class Matrix4 to transform vectors in projective sp
 Vec4 a (10, 10, 0.1, 1.0);
 Vec3 v = a.h2c();
 ~~~
-
+\ingroup Math3D
 */
 template<class T>
 class Vec4_

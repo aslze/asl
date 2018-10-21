@@ -17,6 +17,7 @@ Matrix3 translation = Matrix3::translate(10, 4);
 Matrix3 rotation = Matrix3::rotate(PI/3) * Matrix3::scale(0.5);
 Vec2 v = translation * rotation * Vec2(x, y);
 ~~~
+\ingroup Math3D
 */
 template<class T>
 class ASL_API Matrix3_

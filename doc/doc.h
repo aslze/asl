@@ -429,3 +429,27 @@ Turn a file into a base64 representation:
 TextFile("image.jpg.b64").put( encodeBase64(File("image.jpg").content()) );
 ~~~
 */
+
+/**
+\defgroup Math3D 3D Math
+
+Types useful in 2D/3D geometric computations and graphics.
+
+These classes are templates that can be used with elements of any numeric type.
+
+~~~
+Vec3_<int> ivec(1, 2, 3);
+Matrix4_<float> m;
+~~~
+
+They all have two predefined specializations, for `float` and `double` elements. The
+type for doubles has a `d` suffix.
+
+~~~
+Vec3 v;   // Vec3_<float>
+Matrix4;  // Matrix4_<float>
+Vec3d v;  // Vec3_<double>
+Matrix3d; // Matrix3_<double>
+~~~
+
+*/
