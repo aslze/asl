@@ -161,7 +161,7 @@ double myatof(const char* s)
 		if(c=='E' || c=='e') break;
 		y = 10.0*y + (c-'0');
 	}
-	if(exp != 1)
+	if(exp != 0)
 		y *= pow(10.0, exp);
 	return y * m;
 }
@@ -772,7 +772,7 @@ void XdlWriter::new_number(double x)
 	if((float)x == x)
 	{
 		out.resize(n+15);
-		out.fix(n+sprintf(&out[n], "%.7g", x));
+		out.fix(n+sprintf(&out[n], "%.8g", x));
 	}
 	else
 	{
