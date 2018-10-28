@@ -260,6 +260,10 @@ public:
 	Enumerator all() {return Enumerator(*this);}
 	Enumerator all() const { return Enumerator(*(Map*)this); }
 
+	// for internal use
+	Array<KeyVal>& kv() { return a; }
+	const Array<KeyVal>& kv() const { return a; }
+
 	/**
 	Joins the contents of a Dic<> into a string, using `s1` as element
 	separator (often a comma) and `s2` as key-value separator (usually an '=').
@@ -390,6 +394,23 @@ inline Dic<String> split(const String& s, const String& sep1, const String& sep2
 	}
 	return dic;
 }
+
+#ifdef ASL_HAVE_RANGEFOR
+
+template<class K, class T>
+typename Array< typename Map<K, T>::KeyVal >::Enumerator begin(const Map<K, T>& a)
+{
+	return a.kv().all();
+}
+
+template<class K, class T>
+typename Array< typename Map<K, T>::KeyVal >::Enumerator end(const Map<K, T>& a)
+{
+	return a.kv().all();
+}
+
+#endif
+
 
 /**@}*/
 
