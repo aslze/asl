@@ -43,6 +43,15 @@ String encodeUrl(const String& q0)
 	return q;
 }
 
+Dic<> decodeUrlParams(const String& querystring)
+{
+	Dic<> query;
+	Dic<> q = split(querystring.replace('+', ' '), '&', '=');
+	foreach2(String& k, const String& v, q)
+		query[decodeUrl(k)] = decodeUrl(v);
+	return query;
+}
+
 Url parseUrl(const String& url)
 {
 	Url u;
@@ -105,7 +114,9 @@ String HttpMessage::text() const
 
 Var HttpMessage::json() const
 {
-	return Json::decode((const char*)_body.ptr());
+	String str = (const char*)_body.ptr();
+	Var data = Json::decode(str);
+	return data.ok() ? data : Var(decodeUrlParams(str));
 }
 
 void HttpMessage::put(const String& body)
