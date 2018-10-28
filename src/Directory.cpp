@@ -87,7 +87,7 @@ const Array<File>& Directory::items(const String& which, Directory::ItemType t)
 {
 	_files.clear();
 	WIN32_FIND_DATA data;
-	String basedir = nat(_path) + File::SEP;
+	String basedir = nat(_path) + '/';
 	HANDLE hdir = FindFirstFile(basedir + which, &data);
 	if(hdir == INVALID_HANDLE_VALUE)
 		return _files;
