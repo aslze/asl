@@ -119,6 +119,10 @@ public:
 	{
 		return a.length();
 	}
+	
+	//operator bool() const { return a.length() != 0; }
+	bool operator!() const { return a.length() == 0; }
+
 	/** Removes all elements */
 	void clear()
 	{

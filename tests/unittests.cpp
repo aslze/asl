@@ -205,6 +205,10 @@ void testArray()
 
 	ASL_ASSERT(a[0] == -5 && a[1] == 0 && a[2] == 3 && a[3] == 10);
 
+	ASL_ASSERT(a);
+	a.clear();
+	ASL_ASSERT(!a);
+
 	Array<String> names;
 	names << "Alvaro" << "Segura";
 
@@ -241,6 +245,15 @@ void testArray()
 		s += i * x;
 	}
 	ASL_ASSERT(s == -1 * 2 + 2 * 3);
+
+#ifdef ASL_HAVE_RANGEFOR
+	s = 0;
+	for (auto& x : b)
+	{
+		s += x;
+	}
+	ASL_ASSERT(s == 26);
+#endif
 }
 
 

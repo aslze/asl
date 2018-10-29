@@ -154,6 +154,7 @@ inline T deg2rad(T x) {return (T)(x*0.017453292519943295);}
 template <class T>
 inline T rad2deg(T x) {return (T)(x*57.29577951308232);}
 
+/**@}*/
 
 static const double PI = 3.14159265358979323;
 
@@ -205,11 +206,11 @@ public:
 
 	float operator()(float m, float M) { return (float)(*this)((double)m, (double)M); }
 
-	/** Returns an integer random number in the [0, M-1] interval */
-	int operator()(int m) { return (int)(*this)((double)m); }
+	/** Returns an integer random number in the [0, M] interval */
+	int operator()(int m) { return (int)(*this)((double)m+1); }
 
-	/** Returns an integer random number in the [m, M-1] interval */
-	int operator()(int m, int M) { return (int)(*this)((double)m, (double)M); }
+	/** Returns an integer random number in the [m, M] interval */
+	int operator()(int m, int M) { return (int)(*this)((double)m, (double)M+1); }
 
 	/** Returns a floating point random number with standard normal distribution */
 	double normal() { double u = (*this)(1e-30, 1.0), v = (*this)(1e-30, 1.0); return sqrt(-2 * log(u))*cos(2 * PI * v); }
@@ -225,8 +226,6 @@ public:
 };
 
 extern ASL_API Random random; //!< A global random number generator
-
-/**@}*/
 
 ASL_API int myatoi(const char* s);
 
