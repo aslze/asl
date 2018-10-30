@@ -50,6 +50,24 @@ foreach2(auto& name, auto& value, headers);
 	request << name << ": " << value << "\r\n";
 }
 ~~~
+
+In C++11 you can use range-based for loops:
+
+~~~
+for(auto& e : headers);
+{
+	request << e.key << ": " << e.value << "\r\n";
+}
+~~~
+
+And in C++17:
+
+~~~
+for(auto& [name, value] : headers);
+{
+	request << name << ": " << value << "\r\n";
+}
+~~~
 */
 
 template <class K=String, class T=String>

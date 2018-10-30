@@ -103,10 +103,12 @@ if(particle.has("visible", Var::BOOL)) {...} // point is an OBJ and has a bool p
 if(indices.contains(3)) {...} // indices is an array and contains number 3
 ~~~
 
-**Iteration**
+__Iteration__
 
-When a Var contains an array or an object, its elements or properties can be iterated. Arrays can be iterated
-with `foreach` loops (or `for(item : array)` in C++11), or using array indexing and the `length()` method:
+When a Var contains an array or an object, its elements or properties can be iterated.
+
+__Arrays__ can be iterated with `foreach` loops (or `for(item : array)` in C++11), or using array
+indexing and the `length()` method:
 
 ~~~
 Var numbers = array<Var>(10.1, 25, -1, 3.4);
@@ -127,8 +129,8 @@ for(int i=0; i < numbers.length(); i++)
 }
 ~~~
 
-And object properties (keys and values) can be iterated with a `foreach2` loop, or with range-based for in C++11/17 (but
-here don't forget to add `.object()`):
+__Object__ properties (keys and values) can be iterated with a `foreach2` loop, or with range-based for in C++11/17 (but
+in this case don't forget to add `.object()`):
 
 ~~~
 foreach2(String& key, Var& value, particle)   // the particle from above

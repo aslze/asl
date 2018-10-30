@@ -85,6 +85,16 @@ foreach2(String& name, float value, constants)
     cout << "Contstant " << *name << " has value: " << value << endl;
 }
 ~~~
+
+Or with range-based for, in C++11:
+
+~~~
+for(auto& e : constants)
+{
+	cout << "Contstant " << *e.key << " has value: " << e.value << endl;
+}
+~~~
+
 \ingroup Containers
 */
 template<class K, class T>
@@ -378,7 +388,7 @@ public:
 		typename Array<KeyVal*>::Enumerator e;
 		KeyVal* p;
 		Enumerator() {}
-		Enumerator(const HashMap& _d): e(_d.a)
+		Enumerator(const HashMap& m): e(m.a)
 		{
 			for(int i=0; i<ASL_HMAP_SKIP; ++i)
 				++e;
@@ -405,10 +415,34 @@ public:
 		T* operator->() {return &(p->value);}
 		const K& operator~() {return p->key;}
 		operator bool() const {return p!=0 || e;}
+		bool operator!=(const Enumerator& e) const { return (bool)*this; }
 		Enumerator all() {return *this;}
 	};
 	Enumerator all() {return Enumerator(*this);}
+
+	struct FEnumerator : public Enumerator
+	{
+		FEnumerator() {}
+		FEnumerator(const HashMap& m) : Enumerator(m) {}
+		typename Enumerator::KeyVal& operator*() { return *this->p; }
+	};
+
+	FEnumerator _all() const { return FEnumerator(*this); }
 };
+
+
+template<class K, class T>
+typename HashMap<K, T>::FEnumerator begin(const HashMap<K, T>& a)
+{
+	return a._all();
+}
+
+template<class K, class T>
+typename HashMap<K, T>::FEnumerator end(const HashMap<K, T>& a)
+{
+	return a._all();
+}
+
 
 template <class T>
 class HashDic : public HashMap<String, T>
