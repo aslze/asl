@@ -99,6 +99,10 @@ if( ANDROID )
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fno-exceptions ") # -fno-rtti
 endif()
 
+if(ASL_IPV6)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASL_IPV6")
+endif()
+
 set(TARGETS "")
 
 if(ASL_BUILD_STATIC)

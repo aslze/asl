@@ -145,6 +145,8 @@ public:
 	const T* ptr() const {return &_a[0];}
 	T* ptr() {return &_a[0];}
 	//operator bool() const { return d().n != 0; }
+	operator const void*() const { return d().n == 0 ? 0 : this; }
+	//explicit operator bool() const { return d().n != 0; }
 	bool operator!() const { return d().n == 0; }
 	/** Tests for equality of all elements of both arrays*/
 	bool operator==(const Array& b) const

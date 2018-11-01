@@ -29,7 +29,7 @@
 #define NET_ERROR(o) asl::asl_die("Network error: " o, __LINE__)
 #endif
 
-#ifndef __ANDROID__
+#ifdef ASL_IPV6
 #define AF_TYPE AF_UNSPEC
 #else
 //#define OLD_RESOLVE
@@ -243,7 +243,7 @@ Array<InetAddress> InetAddress::lookup(const String& host)
 	struct addrinfo hints;
 	struct addrinfo* info;
 	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_family = AF_TYPE;
+	hints.ai_family = host.contains(':') ? AF_INET6 : AF_TYPE;
 	hints.ai_socktype = 0;
 	hints.ai_flags = 0;
 	hints.ai_protocol = 0;
@@ -284,7 +284,7 @@ bool InetAddress::set(const String& host, int port)
 	{
 		addrinfo hints, *info;
 		memset(&hints, 0, sizeof(addrinfo));
-		hints.ai_family = AF_TYPE;
+		hints.ai_family = host.contains(':') ? AF_INET6 : AF_TYPE;
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_flags = 0;
 		hints.ai_protocol = 0;

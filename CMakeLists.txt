@@ -19,7 +19,7 @@ option( ASL_USE_LOCAL8BIT "Treat char strings as local 8 bit instead of UTF8 whe
 
 if(NOT MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-	if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "4.4")
+	if((CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "4.4") OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 	endif()
 else()
@@ -50,6 +50,7 @@ endif()
 
 option(ASL_BUILD_STATIC "Build static library" ON)
 option(ASL_BUILD_SHARED "Build shared library" ${ASL_BUILD_SHARED})
+option(ASL_IPV6 "Expect also IPv6 when looking up DNS names" OFF)
 
 add_subdirectory( src )
 

@@ -92,6 +92,7 @@ public:
 		return *this;
 	}
 	void use(FILE* f) {_file=f;}
+	FILE* stdio() { return _file; }
 	/**
 	Returns true if this object refers to an *open* file
 	*/

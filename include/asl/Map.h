@@ -138,7 +138,8 @@ public:
 		return a.length();
 	}
 	
-	//operator bool() const { return a.length() != 0; }
+	operator const void*() const { return a.length() == 0 ? 0 : this; }
+	//explicit operator bool() const { return a.length() != 0; }
 	bool operator!() const { return a.length() == 0; }
 
 	/** Removes all elements */

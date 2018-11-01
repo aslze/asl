@@ -74,7 +74,7 @@ public:
 	*/
 	bool hasExtension(const String& exts) const;
 	/**
-	Returns the directory containing this path (wthout a trailing '/')
+	Returns the directory containing this path (without a trailing '/')
 	*/
 	Path directory() const;
 	/**
