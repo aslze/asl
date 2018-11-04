@@ -352,13 +352,13 @@ String::String(unsigned x)
 String::String(float x)
 {
 	alloc(15);
-	_len = sprintf(str(), "%.7g", x);
+	_len = sprintf(str(), "%.8g", x);
 }
 
 String::String(double x)
 {
 	char s[32];
-	_len = sprintf(s, "%.15g", x);
+	_len = sprintf(s, "%.16g", x);
 	alloc(_len);
 	strcpy(str(), s);
 }

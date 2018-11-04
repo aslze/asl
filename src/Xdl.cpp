@@ -96,36 +96,6 @@ Long myatol(const char* s)
 	return y*sgn;
 }
 
-inline double pow10(int x)
-{
-	static double z[] = { 
-		0.000000000000000001,
-		0.00000000000000001,
-		0.0000000000000001,
-		0.000000000000001,
-		0.00000000000001,
-		0.0000000000001,
-		0.000000000001,
-		0.00000000001,
-		0.0000000001,
-		0.000000001,
-		0.00000001,
-		0.0000001,
-		0.000001,
-		0.00001,
-		0.0001,
-		0.001,
-		0.01,
-		0.1,
-		1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 10000000.0, 100000000.0, 1000000000.0, 10000000000.0, 100000000000.0,
-		1000000000000.0, 10000000000000.0, 100000000000000.0, 1000000000000000.0
-	};
-	if (x > -19 && x < 16)
-		return z[x + 18];
-	else
-		return pow(10.0, x);
-}
-
 double myatof(const char* s)
 {
 	double y = 0;
@@ -155,7 +125,7 @@ double myatof(const char* s)
 		if(c=='E' || c=='e') break;
 		y = 10.0*y + (c-'0');
 	}
-	if(exp != 1)
+	if(exp != 0)
 		y *= pow(10.0, exp);
 	return y * m;
 }
@@ -167,13 +137,11 @@ double myatof(const char* s)
 	double y = 0;
 	double m = 1;
 	int exp = 0;
-	int e = 0;
 	if (s[0] == '-') { m = -1; s++; }
 	const char* p = strchr(s, '.');
 	if (p) {
 		p++;
 		while (*p != '\0' && *p != 'e' && *p != 'E') {
-			//m *= 0.1;
 			exp--;
 			p++;
 		}
@@ -194,7 +162,7 @@ double myatof(const char* s)
 		if (c == 'E' || c == 'e') break;
 		y1 = 10*y1 + (c - '0');
 	}
-	y = double(y1) * pow10(exp);
+	y = double(y1) * pow(10.0, exp);
 	return y * m;
 }
 */
@@ -766,12 +734,12 @@ void XdlWriter::new_number(double x)
 	if((float)x == x)
 	{
 		out.resize(n+15);
-		out.fix(n+sprintf(&out[n], "%.7g", x));
+		out.fix(n+sprintf(&out[n], "%.9g", x));
 	}
 	else
 	{
 		out.resize(n+26);
-		out.fix(n+sprintf(&out[n], "%.15g", x));
+		out.fix(n+sprintf(&out[n], "%.16g", x));
 	}
 
 	// Fix decimal comma of some locales
