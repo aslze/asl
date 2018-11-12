@@ -103,6 +103,7 @@ if(particle.has("visible", Var::BOOL)) {...} // point is an OBJ and has a bool p
 if(indices.contains(3)) {...} // indices is an array and contains number 3
 ~~~
 
+
 __Iteration__
 
 When a Var contains an array or an object, its elements or properties can be iterated.
@@ -135,7 +136,7 @@ in this case don't forget to add `.object()`):
 ~~~
 foreach2(String& key, Var& value, particle)   // the particle from above
 {
-    printf("%s : %s\n", *key, *value.toString());
+	printf("%s : %s\n", *key, *value.toString());
 }
 
 for(auto& e : particle.object())   // C++11
@@ -170,7 +171,7 @@ For a better representation that can be parsed back into a Var, you can use XDL 
 class ASL_API Var
 {
   public:
-	enum Type {NONE, NUL, NUMBER, BOOL, INT, SSTRING, STRING=8, ARRAY, DIC, OBJ=10};
+	enum Type {NONE, NUL, NUMBER, BOOL, INT, SSTRING, FLOAT, STRING=8, ARRAY, DIC, OBJ=10};
 	bool isPod() const {return (_type & 8)==0;}
 	Var(): _type(NONE) {}
 	Var(Type t);
@@ -239,7 +240,7 @@ class ASL_API Var
 	Var(const HDic<Var>& v) {_type=DIC; NEW_DICC(o, v);}
 	Var(double x); // : _type(NUMBER), d(x){}
 	Var(int x): _type(INT), i(x){}
-	Var(float x): _type(NUMBER) {d=x;}
+	Var(float x): _type(FLOAT) {d=x;}
 	Var(unsigned x);
 	Var(long x) : _type(INT), i((int)x){}
 	Var(unsigned long x) : _type(INT), i((int)x){}
@@ -429,7 +430,7 @@ class ASL_API Var
 	/** Checks if this var's type is `t`. */
 	bool is(Type t) const
 	{
-		return _type == t || (t==NUMBER && _type == INT) ||
+		return _type == t || (t==NUMBER && (_type == INT || _type == FLOAT)) ||
 			(t==STRING && _type == SSTRING) || (t==SSTRING && _type == STRING);
 	}
 	/** Checks if this var is an object of class `clas`. */

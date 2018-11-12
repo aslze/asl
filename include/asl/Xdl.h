@@ -84,6 +84,7 @@ public:
 	Var decode(const char* s);
 	virtual void new_number(int x) {put(x);}
 	virtual void new_number(double x) {put(x);}
+	virtual void new_number(float x) { put(x); }
 	virtual void new_string(const char* x) {put(x);}
 	virtual void new_string(const String& x) {put(x);}
 	virtual void new_bool(bool b) {put(b);}
@@ -108,6 +109,7 @@ public:
 	virtual void reset();
 	virtual void new_number(int x);
 	virtual void new_number(double x);
+	virtual void new_number(float x);
 	virtual void new_string(const char* x);
 	virtual void new_string(const String& x) {new_string(*x);}
 	virtual void new_bool(bool b);

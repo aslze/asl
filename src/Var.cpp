@@ -121,6 +121,7 @@ Var::operator double() const
 {
 	switch(_type) {
 	case NUMBER:
+	case FLOAT:
 		return d;
 	case INT:
 		return i;
@@ -140,6 +141,7 @@ Var::operator float() const
 {
 	switch(_type) {
 	case NUMBER:
+	case FLOAT:
 		return (float)d;
 	case INT:
 		return (float)i;
@@ -160,6 +162,7 @@ Var::operator int() const
 	case INT:
 		return i;
 	case NUMBER:
+	case FLOAT:
 		return (int)d;
 	case STRING:
 		return atoi(*s);
@@ -176,6 +179,7 @@ Var::operator unsigned() const
 	case INT:
 		return (unsigned)i;
 	case NUMBER:
+	case FLOAT:
 		return (unsigned)d;
 	case STRING:
 		return (unsigned)atoi(*s);
@@ -192,6 +196,7 @@ Var::operator Long() const
 	case INT:
 		return i;
 	case NUMBER:
+	case FLOAT:
 		return (Long)d;
 	case STRING:
 		return (Long)atoi(*s);
@@ -219,6 +224,7 @@ Var::operator bool() const
 	case INT:
 		return i != 0;
 	case NUMBER:
+	case FLOAT:
 		return d != 0;
 	case ARRAY:
 	case DIC:
@@ -264,17 +270,13 @@ String Var::toString() const
 	case INT:
 		r.fix(sprintf(r, "%i", i));
 		break;
+	case FLOAT:
+		r.resize(16);
+		r.fix(sprintf(r, "%.9g", d));
+		break;
 	case NUMBER:
-		if((float)d == d)
-		{
-			r.resize(15);
-			r.fix(sprintf(r, "%.7g", d));
-		}
-		else
-		{
-			r.resize(26);
-			r.fix(sprintf(r, "%.16g", d));
-		}
+		r.resize(29);
+		r.fix(sprintf(r, "%.17g", d));
 		break;
 	case BOOL:
 		r=b?"true":"false";
@@ -385,7 +387,7 @@ void Var::operator=(float x)
 	if(_type == NONE){}
 	else
 		free();
-	_type=NUMBER;
+	_type=FLOAT;
 	d=x;
 }
 
@@ -394,8 +396,14 @@ void Var::operator=(unsigned x)
 	if(_type == NONE){}
 	else
 		free();
-	_type=INT;
-	i=(int)x;
+	if (x & 0x80000000) {
+		_type = NUMBER;
+		d = (double)x;
+	}
+	else {
+		_type = INT;
+		i = (int)x;
+	}
 }
 
 void Var::operator=(bool x)

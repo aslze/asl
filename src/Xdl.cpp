@@ -7,6 +7,16 @@
 #include <float.h>
 #endif
 
+#ifdef ASL_FAST_JSON
+#define ASL_ATOF myatof
+#define FLOAT_F "%.8g"
+#define DOUBLE_F "%.16g"
+#else
+#define ASL_ATOF atof
+#define FLOAT_F "%.9g"
+#define DOUBLE_F "%.17g"
+#endif
+
 namespace asl {
 
 #define INDENT_CHAR ' '
@@ -67,178 +77,6 @@ inline void XdlParser::value_end()
 	else
 		state=WAIT_VALUE;
 	buffer="";
-}
-
-int myatoi(const char* s)
-{
-	int y = 0, sgn = 1;
-	if(s[0] == '-') {sgn = -1; s++;}
-	else if(s[0] == '+') s++;
-	int c;
-	while(c = *s++, c >= '0' && c <= '9')
-		y=10 * y + (c - '0');
-	return y*sgn;
-}
-
-int myatoiz(const char* s)
-{
-	int y = 0, sgn = 1;
-	if (s[0] == '-') { sgn = -1; s++; }
-	else if (s[0] == '+') s++;
-	int c;
-	while ((c = *s++))
-		y = 10 * y + (c - '0');
-	return y*sgn;
-}
-
-Long myatol(const char* s)
-{
-	Long y = 0, sgn = 1;
-	if (s[0] == '-') { sgn = -1; s++; }
-	else if (s[0] == '+') s++;
-	int c;
-	while (c = *s++, c >= '0' && c <= '9')
-		y = 10 * y + (c - '0');
-	return y*sgn;
-}
-
-inline double pow10(int x)
-{
-	static const double z[] = { 
-		0.0000000001, 0.000000001, 0.00000001, 0.0000001, 0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1,
-		1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 10000000.0, 100000000.0, 1000000000.0, 10000000000.0
-	};
-	if (x > -11 && x < 11)
-		return z[x + 10];
-	else
-		return pow(10.0, x);
-}
-
-double myatof(const char* s)
-{
-	double y = 0;
-	double m = 1;
-	int exp = 0;
-	if (s[0] == '-') { m = -1; s++; }
-	const char* p = strchr(s, '.');
-	if(p) {
-		p++;
-		while (*p != '\0' && *p!='e' && *p!='E') {
-			exp--;
-			p++;
-		}
-		p--;
-	}
-	if (!p) p = s;
-	while(*p++)
-		if(*p == 'e' || *p == 'E'){
-			if(*(p+1) == '+')
-				p++;
-			exp += myatoiz(p+1);
-			break;
-		}
-	while(int c=*s++)
-	{
-		if(c=='.') continue;
-		if(c=='E' || c=='e') break;
-		y = 10.0*y + (c-'0');
-	}
-	if(exp != 0)
-		y *= pow(10.0, exp);
-	return y * m;
-}
-
-
-/*
-double myatof(const char* s)
-{
-	double y = 0;
-	double m = 1;
-	int exp = 0;
-	int e = 0;
-	if (s[0] == '-') { m = -1; s++; }
-	const char* p = strchr(s, '.');
-	if (p) {
-		p++;
-		while (*p != '\0' && *p != 'e' && *p != 'E') {
-			//m *= 0.1;
-			exp--;
-			p++;
-		}
-		p--;
-	}
-	if(!p) p = s;
-	while (*p++)
-		if (*p == 'e' || *p == 'E'){
-		if (*(p + 1) == '+')
-			p++;
-		exp += myatoi(p + 1);
-		break;
-		}
-	long long y1 = 0;
-	while (int c = *s++)
-	{
-		if (c == '.') continue;
-		if (c == 'E' || c == 'e') break;
-		y1 = 10*y1 + (c - '0');
-	}
-	y = double(y1) * pow10(exp);
-	return y * m;
-}
-*/
-
-int myitoa(int x, char* s)
-{
-	char ss[16];
-	int i=0, j=0;
-	if(x==0)
-	{
-		s[0]='0';
-		s[1]='\0';
-		return 1;
-	}
-	if (x < 0)
-	{
-		if (x == (-2147483647 - 1)) {
-			strcpy(s, "-2147483648");
-			return 11;
-		}
-		s[j++] = '-';
-		x = -x;
-	}
-	while(x!=0) {
-		ss[i++] = (x % 10) + '0';
-		x = x/10;
-	}
-	while(i>=0)
-		s[j++] = ss[--i];
-	s[j-1] = '\0';
-	return j-1;
-}
-
-int myltoa(Long x, char* s)
-{
-	char ss[32];
-	int i = 0, j = 0;
-	if (x == 0)
-	{
-		s[0] = '0';
-		s[1] = '\0';
-		return 1;
-	}
-	if (x<0)
-	{
-		s[j++] = '-';
-		x = -x;
-	}
-	while (x != 0) {
-		ss[i++] = (x % 10) + '0';
-		x = x / 10;
-	}
-	while (i >= 0)
-		s[j++] = ss[--i];
-	s[j - 1] = '\0';
-	return j - 1;
 }
 
 void XdlParser::parse(const char* s)
@@ -335,7 +173,7 @@ void XdlParser::parse(const char* s)
 			}
 			else if(buffer != '-')
 			{
-				new_number(myatof(buffer));
+				new_number(ASL_ATOF(buffer));
 				value_end();
 				s--;
 			}
@@ -363,7 +201,7 @@ void XdlParser::parse(const char* s)
 
 		case PROPERTY:
 			//if(!isalnum(c) && c!='_')
-			if (c == '=' || isspace(c))
+			if (c == '=' || myisspace(c))
 			{
 				new_property(buffer);
 				s--;
@@ -627,6 +465,9 @@ void XdlEncoder::_encode(const Var& v)
 {
 	switch(v._type)
 	{
+	case Var::FLOAT:
+		new_number((float)v.d);
+		break;
 	case Var::NUMBER:
 		new_number(v.d);
 		break;
@@ -751,18 +592,11 @@ void XdlWriter::new_number(double x)
 			out += (x < 0)? "-1e400" : "1e400";
 		return;
 	}
-	if((float)x == x)
-	{
-		out.resize(n+16);
-		out.fix(n+sprintf(&out[n], "%.9g", x));
-	}
-	else
-	{
-		out.resize(n+26);
-		out.fix(n+sprintf(&out[n], "%.16g", x));
-	}
+	out.resize(n+26);
+	out.fix(n + sprintf(&out[n], DOUBLE_F, x));
 
 	// Fix decimal comma of some locales
+#ifndef ASL_NO_FIX_DOT
 	char* p = &out[n];
 	while (*p)
 	{
@@ -772,6 +606,39 @@ void XdlWriter::new_number(double x)
 		}
 		p++;
 	}
+#endif
+}
+
+void XdlWriter::new_number(float x)
+{
+	int n = out.length();
+#if defined(_MSC_VER) && _MSC_VER < 1800
+	if (!_finite(x))
+#else
+	if (!isfinite(x))
+#endif
+	{
+		if (x != x)
+			out += "null";
+		else
+			out += (x < 0) ? "-1e400" : "1e400";
+		return;
+	}
+	out.resize(n + 16);
+	out.fix(n + sprintf(&out[n], FLOAT_F, x));
+
+	// Fix decimal comma of some locales
+#ifndef ASL_NO_FIX_DOT
+	char* p = &out[n];
+	while (*p)
+	{
+		if (*p == ',') {
+			*p = '.';
+			break;
+		}
+		p++;
+	}
+#endif
 }
 
 void XdlWriter::new_string(const char* x)
@@ -819,7 +686,7 @@ void XdlWriter::begin_object(const char* _class)
 		out += _class;
 	out += '{';
 	if(json && _class[0] != '\0') {
-		out += "\"_class\":\"";
+		out += "\"" ASL_XDLCLASS "\":\"";
 		out += _class;
 		out +="\"";
 	}
