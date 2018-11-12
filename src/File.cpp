@@ -1,6 +1,6 @@
 #undef __STRICT_ANSI__
 #include <asl/File.h>
-#include <asl/Directory.h>
+//#include <asl/Directory.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -8,6 +8,13 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <io.h>
+#if !defined(ASL_ANSI)
+#define UNICODE
+#undef WIN32_FIND_DATA
+#undef FindFirstFile
+#define WIN32_FIND_DATA WIN32_FIND_DATAW
+#define FindFirstFile FindFirstFileW
+#endif
 #define fdopen _fdopen
 #define dup _dup
 
@@ -16,6 +23,9 @@ namespace asl {
 const char File::SEP='\\';
 #else
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <errno.h>
 #include <utime.h>
 namespace asl {
 const char File::SEP='/';
@@ -29,6 +39,73 @@ const char File::SEP='/';
 #define STR_PREFIX(x) x
 #define fopenX fopen
 #define CHART char
+#endif
+
+#ifdef _WIN32
+
+inline double ft2t(const FILETIME& ft)
+{
+	LARGE_INTEGER t;
+	t.HighPart = ft.dwHighDateTime;
+	t.LowPart = ft.dwLowDateTime;
+	return t.QuadPart*100e-9 - 11644473600.0;
+}
+
+#define nat(x) x
+
+static FileInfo infoFor(const WIN32_FIND_DATA& data)
+{
+	FileInfo info;
+	info.lastModified = ft2t(data.ftLastWriteTime);
+	info.creationDate = ft2t(data.ftCreationTime);
+	info.size = data.nFileSizeLow + ((Long)data.nFileSizeHigh << 32);
+	info.flags = data.dwFileAttributes;
+	return info;
+}
+
+static FileInfo getFileInfo(const String& path)
+{
+	WIN32_FIND_DATA data;
+	HANDLE hdir = FindFirstFile(nat(path), &data);
+	if (hdir == INVALID_HANDLE_VALUE)
+	{
+		FileInfo info;
+		memset(&info, 0, sizeof(FileInfo));
+		return info;
+	}
+	FindClose(hdir);
+	return infoFor(data);
+}
+
+#else
+
+inline double ft2t(const time_t& ft)
+{
+	return ft;
+}
+
+static FileInfo infoFor(const struct stat& data)
+{
+	FileInfo info;
+	info.lastModified = ft2t(data.st_mtime);
+	info.creationDate = ft2t(data.st_ctime);
+	info.size = data.st_size;
+	info.flags = data.st_mode;
+	return info;
+}
+
+FileInfo getFileInfo(const String& path)
+{
+	struct stat data;
+	if (stat(path, &data))
+	{
+		FileInfo info;
+		memset(&info, 0, sizeof(FileInfo));
+		return info;
+	}
+	return infoFor(data);
+}
+
 #endif
 
 bool File::open(const String& name, File::OpenMode mode)
@@ -64,14 +141,6 @@ bool File::openfd(int fd)
 	_file = fdopen(fd2, "wb");
 	return _file != 0;
 }
-
-bool TextFile::openfd(int fd)
-{
-	int fd2 = dup(fd);
-	_file = fdopen(fd2, "wt");
-	return _file != 0;
-}
-
 
 void File::close()
 {
@@ -116,7 +185,7 @@ bool File::isDirectory() const
 		return File(_path.substring(0, _path.length() - 1)).isDirectory();
 
 	if(!_info)
-		_info = Directory::getInfo(_path);
+		_info = getFileInfo(_path);
 #ifdef _WIN32
 	return (_info.flags & FILE_ATTRIBUTE_DIRECTORY) != 0;
 #else
@@ -169,21 +238,21 @@ String File::directory() const
 Long File::size() const
 {
 	if(!_info)
-		_info = Directory::getInfo(_path);
+		_info = getFileInfo(_path);
 	return _info.size;
 }
 
 Date File::creationDate() const
 {
 	if(!_info)
-		_info = Directory::getInfo(_path);
+		_info = getFileInfo(_path);
 	return _info.creationDate;
 }
 
 Date File::lastModified() const
 {
 	if(!_info)
-		_info = Directory::getInfo(_path);
+		_info = getFileInfo(_path);
 	return _info.lastModified;
 }
 
@@ -288,316 +357,6 @@ File File::temp(const String& ext)
 	file._path = nam;
 	return file;
 #endif
-}
-
-bool File::copy(const String& to)
-{
-	return Directory::copy(_path, to);
-}
-
-
-bool File::move(const String& to)
-{
-	return Directory::move(_path, to);
-}
-
-bool File::remove()
-{
-	return Directory::remove(_path);
-}
-
-// class TextFile
-
-bool TextFile::printf(const char* fmt, ...)
-{
-	if(!_file && !open(_path, APPEND))
-		return false;
-	va_list arg;
-	va_start(arg,fmt);
-	int ret = vfprintf(_file, (char*)fmt, arg);
-	va_end(arg);
-	return ret >= 0;
-}
-
-int TextFile::scanf(const String& fmt, void* p1, void* p2, void* p3, void* p4)
-{
-	if(!_file && !open(_path, READ))
-		return 0;
-	return fscanf(_file, fmt, p1, p2, p3, p4);
-}
-
-String TextFile::readLine()
-{
-	String s;
-	readLine(s);
-	return s;
-	/*
-	String s(1000, 0);
-	s[0] = '\0';
-	if(!_file && !open(_path, READ))
-		return s;
-	if(!fgets(s, 1000, _file))
-		return s;
-	int n = (int)strlen(*s)-1;
-	s[n]='\0';
-	if (s[n - 1] == '\r') {
-		n--;
-		s[n] = '\0';
-	}
-	s.fix(n);
-	return s;*/
-}
-
-String TextFile::readLine(char newline)
-{
-	String s(1000, 0);
-	s[0] = '\0';
-	if(!_file && !open(_path, READ))
-		return s;
-	while (1)
-	{
-		char c = read<char>();
-		if (end() || c == newline)
-			break;
-		s << c;
-	}
-	return s;
-}
-
-bool TextFile::readLine(String& s)
-{
-	int chunk = 255;
-	int m = 0, n = 0;
-	s[0] = '\0';
-	if(!_file && !open(_path, READ))
-		return false;
-	do {
-		s.resize(m + chunk);
-		char* r = fgets(&s[m], chunk, _file);
-		if (!r)
-		{
-			s[m] = '\0';
-			s.fix(m);
-			return false;
-		}
-		n = (int)strlen(*s + m) + m;
-		if (s[n-1] == '\n') {
-			n--;
-			s[n] = '\0';
-			if (s[n-1] == '\r') {
-				n--;
-				s[n] = '\0';
-			}
-			break;
-		}
-		m = n;
-	} while (1);
-	s.fix(n);
-	return true;
-}
-
-Array<String> TextFile::lines()
-{
-	Array<String> lines;
-	if(!_file && !open(_path, READ))
-		return lines;
-	while (!end()) {
-		lines << String();
-		readLine(lines.last());
-	}
-	return lines;
-}
-
-String TextFile::text()
-{
-	int n = (int)(size() & 0x7fffffff); // truncate
-	String text;
-	if(!open(_path)) {
-		return text;
-	}
-	byte head[8];
-	if (n >= 2) // Read BOM
-	{
-		read(head, 2);
-		if (head[0] == 0xff && head[1] == 0xfe) // UTF16LE
-		{
-			Array<wchar_t> a;
-			wchar_t c = 0, c0 = 0;
-			byte b[2];
-			while (1)
-			{
-				if (read(b, 2) < 2)
-					break;
-				c = b[0] | (((wchar_t)b[1]) << 8);
-				if (c == '\n' && c0 == '\r')
-					a.resize(a.length() - 1);
-				a << c;
-				c0 = c;
-			}
-			a << 0;
-			text = a.ptr();
-			return text;
-		}
-		else if (head[0] == 0xfe && head[1] == 0xff) // UTF16BE
-		{
-			Array<wchar_t> a;
-			wchar_t c = 0, c0 = 0;
-			byte b[2];
-			while (1)
-			{
-				if (read(b, 2) < 2)
-					break;
-				c = b[1] | (((wchar_t)b[0]) << 8);
-				if (c == '\n' && c0 == '\r')
-					a.resize(a.length() - 1);
-				a << c;
-				c0 = c;
-			}
-			a << 0;
-			text = a.ptr();
-			return text;
-		}
-		else if (head[0] == 0xef && head[1] == 0xbb && n>=3 && read<byte>() == 0xbf) // UTF8
-		{
-		}
-		else
-		{
-			seek(0);
-		}
-	}
-	text.resize(n, false, false);
-	n = read(&text[0], n);
-	text[n]='\0';
-	text.fix(n);
-	return text;
-}
-
-bool TextFile::append(const String& text)
-{
-	if(!open(_path, APPEND))
-		return false;
-	return fprintf(_file, "%s", *text) >= 0;
-}
-
-bool TextFile::put(const String& text)
-{
-	if(!_file && !open(_path, WRITE))
-		return false;
-	return fprintf(_file, "%s", *text) >= 0;
-}
-
-TextFile& TextFile::operator>>(char &x)
-{
-	if(!_file && !open(_path, READ))
-		return *this;
-	x=getc(_file);
-	return *this;
-}
-
-TextFile& TextFile::operator>>(byte &x)
-{
-	if(!_file && !open(_path, READ))
-		return *this;
-	x=getc(_file);
-	return *this;
-}
-
-TextFile& TextFile::operator>>(int &x)
-{
-	if (!_file && !open(_path, READ))
-		return *this;
-	int n = fscanf(_file, "%i", &x); if (n < 1) {}
-	return *this;
-}
-
-TextFile& TextFile::operator>>(unsigned &x)
-{
-	if(!_file && !open(_path, READ))
-		return *this;
-	int n = fscanf(_file, "%ui", &x); if (n < 1) {}
-	return *this;
-}
-
-TextFile& TextFile::operator>>(float &x)
-{
-	if(!_file && !open(_path, READ))
-		return *this;
-	int n = fscanf(_file, "%f", &x); if (n < 1) {}
-	return *this;
-}
-
-TextFile& TextFile::operator>>(double &x)
-{
-	if(!_file && !open(_path, READ))
-		return *this;
-	int n = fscanf(_file, "%lf", &x); if (n < 1) {}
-	return *this;
-}
-
-TextFile& TextFile::operator>>(String &x)
-{
-	if(!_file && !open(_path, READ))
-		return *this;
-	char s[256];
-	int n = fscanf(_file, "%255s", s); if (n < 1) {}
-	x = &s[0];
-	return *this;
-}
-
-TextFile& TextFile::operator<<(char x)
-{
-	if(!_file && !open(_path, APPEND))
-		return *this;
-	putc(x, _file);
-	return *this;
-}
-
-TextFile& TextFile::operator<<(byte x)
-{
-	if(!_file && !open(_path, APPEND))
-		return *this;
-	putc(x, _file);
-	return *this;
-}
-
-TextFile& TextFile::operator<<(int x)
-{
-	if(!_file && !open(_path, APPEND))
-		return *this;
-	fprintf(_file, "%i", x);
-	return *this;
-}
-
-TextFile& TextFile::operator<<(unsigned x)
-{
-	if(!_file && !open(_path, APPEND))
-		return *this;
-	fprintf(_file, "%ui", x);
-	return *this;
-}
-
-TextFile& TextFile::operator<<(float x)
-{
-	if(!_file && !open(_path, APPEND))
-		return *this;
-	fprintf(_file, "%.8g", x);
-	return *this;
-}
-
-TextFile& TextFile::operator<<(double x)
-{
-	if(!_file && !open(_path, APPEND))
-		return *this;
-	fprintf(_file, "%.16lg", x);
-	return *this;
-}
-
-TextFile& TextFile::operator<<(const String& x)
-{
-	if(!_file && !open(_path, APPEND))
-		return *this;
-	fprintf(_file, "%s", (const char*)x);
-	return *this;
 }
 
 }

@@ -281,7 +281,7 @@ namespace asl {
 }
 
 #else
-#include <asl/File.h>
+//#include <asl/File.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -289,7 +289,7 @@ namespace asl {
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
 #include <limits.h>
-//#include <stdlib.h>
+#include <stdio.h>
 //#include <dlfcn.h>
 #include <stdint.h>
 #endif
@@ -352,7 +352,6 @@ String Process::myPath()
 	char* resolved = realpath(path, buffer2);
 	return buffer2;
 #else
-	//String link(15, "/proc/%i/exe", (int)getpid());
 	String link = "/proc/self/exe";
 	char buffer[1024];
 	int n = readlink(link, buffer, 1023);
@@ -367,20 +366,27 @@ String Process::myPath()
 
 String Process::loadedLibPath(const String& lib)
 {
-	TextFile mapfile(String(15, "/proc/%i/maps", (int)getpid()), File::READ);
+	//TextFile mapfile("/proc/self/maps", File::READ);
+	FILE* mapfile = fopen("/proc/self/maps", "rt");
 	if(!mapfile)
 		return "";
 	
 	String name1 = '/' + lib + ".so";
 	String name2 = "/lib" + lib + ".so";
+	String line(1000, 1000);
 
-	while(!mapfile.end())
+	while(!feof(mapfile))
 	{
-		String line = mapfile.readLine();
+		//String line = mapfile.readLine();
+		fgets(SafeString(line), 1000, mapfile);
 		Array<String> parts = line.split();
 		if(parts.last().contains(name1) || parts.last().contains(name2))
+		{
+			fclose(mapfile);
 			return parts.last();
+		}
 	}
+	fclose(mapfile);
 	return "";
 }
 void Process::makeDaemon()

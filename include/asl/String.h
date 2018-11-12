@@ -268,7 +268,7 @@ public:
 	/** Converts this string to a 32-bit floating-point number */
 	operator float() const {return (float)myatof(str());}
 	/** Converts this string to a 64-bit floating-point number */
-	operator double() const {return myatof(str());}
+	operator double() const {return atof(str());}
 	/** Converts this string to a 64-bit integer number */
 	operator Long() const {return toLong();}
 	/** Returns true if this string is not empty */
@@ -292,7 +292,8 @@ public:
 		for functions requiring C-style strings) */
 	const char* operator*() const {return str();}
 	int toInt() const {return atoi(str());}
-	double toFloat() const {return atof(str());}
+	double toDouble() const { return atof(str()); }
+	float toFloat() const {return (float)atof(str());}
 	/**
 	Returns true if this string represents a non-false value (none of: "0", "N", "false", "no")
 	*/

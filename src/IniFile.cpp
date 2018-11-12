@@ -1,5 +1,5 @@
 #include <asl/IniFile.h>
-#include <asl/File.h>
+#include <asl/TextFile.h>
 
 namespace asl {
 

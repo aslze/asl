@@ -15,6 +15,7 @@ set( ASL_SRC
 	Xml.cpp
 	IniFile.cpp
 	File.cpp
+	TextFile.cpp
 	Directory.cpp
 	Path.cpp
 	Date.cpp
@@ -48,6 +49,7 @@ set( ASL_SRC
 	../include/asl/IniFile.h
 	../include/asl/Date.h
 	../include/asl/File.h
+	../include/asl/TextFile.h
 	../include/asl/Directory.h
 	../include/asl/Path.h
 	../include/asl/Library.h

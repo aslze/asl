@@ -628,4 +628,161 @@ Array<String> String::split() const
 	return a;
 }
 
+int myatoi(const char* s)
+{
+	int y = 0, sgn = 1;
+	if (s[0] == '-') { sgn = -1; s++; }
+	else if (s[0] == '+') s++;
+	int c;
+	while (c = *s++, c >= '0' && c <= '9')
+		y = 10 * y + (c - '0');
+	return y*sgn;
+}
+
+int myatoiz(const char* s)
+{
+	int y = 0, sgn = 1;
+	if (s[0] == '-') { sgn = -1; s++; }
+	else if (s[0] == '+') s++;
+	int c;
+	while ((c = *s++))
+		y = 10 * y + (c - '0');
+	return y*sgn;
+}
+
+Long myatol(const char* s)
+{
+	Long y = 0, sgn = 1;
+	if (s[0] == '-') { sgn = -1; s++; }
+	else if (s[0] == '+') s++;
+	int c;
+	while (c = *s++, c >= '0' && c <= '9')
+		y = 10 * y + (c - '0');
+	return y*sgn;
+}
+
+/*
+double myatof(const char* s)
+{
+double y = 0;
+double m = 1;
+int exp = 0;
+if (s[0] == '-') { m = -1; s++; }
+const char* p = strchr(s, '.');
+if(p) {
+p++;
+while (*p != '\0' && *p!='e' && *p!='E') {
+exp--;
+p++;
+}
+p--;
+}
+if (!p) p = s;
+while(*p++)
+if(*p == 'e' || *p == 'E'){
+if(*(p+1) == '+')
+p++;
+exp += myatoiz(p+1);
+break;
+}
+while(int c=*s++)
+{
+if(c=='.') continue;
+if(c=='E' || c=='e') break;
+y = 10.0*y + (c-'0');
+}
+if(exp != 0)
+y *= pow(10.0, exp);
+return y * m;
+}
+*/
+
+double myatof(const char* s)
+{
+	double y = 0;
+	double m = 1;
+	int exp = 0;
+	if (s[0] == '-') { m = -1; s++; }
+	const char* p = strchr(s, '.');
+	if (p) {
+		p++;
+		while (*p != '\0' && *p != 'e' && *p != 'E') {
+			exp--;
+			p++;
+		}
+		p--;
+	}
+	if (!p) p = s;
+	while (*p++)
+		if (*p == 'e' || *p == 'E'){
+			if (*(p + 1) == '+')
+				p++;
+			exp += myatoiz(p + 1);
+			break;
+		}
+	long long y1 = 0;
+	while (int c = *s++)
+	{
+		if (c == '.') continue;
+		if (c == 'E' || c == 'e') break;
+		y1 = 10 * y1 + (c - '0');
+	}
+	y = double(y1) * pow(10.0, exp);
+	return y * m;
+}
+
+int myitoa(int x, char* s)
+{
+	char ss[16];
+	int i = 0, j = 0;
+	if (x == 0)
+	{
+		s[0] = '0';
+		s[1] = '\0';
+		return 1;
+	}
+	if (x < 0)
+	{
+		if (x == (-2147483647 - 1)) {
+			strcpy(s, "-2147483648");
+			return 11;
+		}
+		s[j++] = '-';
+		x = -x;
+	}
+	while (x != 0) {
+		ss[i++] = (x % 10) + '0';
+		x = x / 10;
+	}
+	while (i >= 0)
+		s[j++] = ss[--i];
+	s[j - 1] = '\0';
+	return j - 1;
+}
+
+int myltoa(Long x, char* s)
+{
+	char ss[32];
+	int i = 0, j = 0;
+	if (x == 0)
+	{
+		s[0] = '0';
+		s[1] = '\0';
+		return 1;
+	}
+	if (x<0)
+	{
+		s[j++] = '-';
+		x = -x;
+	}
+	while (x != 0) {
+		ss[i++] = (x % 10) + '0';
+		x = x / 10;
+	}
+	while (i >= 0)
+		s[j++] = ss[--i];
+	s[j - 1] = '\0';
+	return j - 1;
+}
+
 }

@@ -229,6 +229,8 @@ extern ASL_API Random random; //!< A global random number generator
 
 ASL_API int myatoi(const char* s);
 
+ASL_API int myatoiz(const char* s);
+
 ASL_API Long myatol(const char* s);
 
 ASL_API int myltoa(Long x, char* s);

@@ -1,7 +1,7 @@
 #include <asl/Log.h>
 #include <asl/Console.h>
 #include <asl/Date.h>
-#include <asl/File.h>
+#include <asl/TextFile.h>
 #include <asl/Path.h>
 #include <asl/Directory.h>
 #include <asl/Thread.h>

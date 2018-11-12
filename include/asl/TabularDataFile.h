@@ -4,7 +4,7 @@
 #ifndef ASL_TABDATAFILE_H
 #define ASL_TABDATAFILE_H
 
-#include <asl/File.h>
+#include <asl/TextFile.h>
 #include <asl/Array.h>
 #include <asl/String.h>
 #include <asl/Var.h>

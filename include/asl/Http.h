@@ -165,6 +165,9 @@ protected:
 };
 
 
+enum HttpMethod { HTTP_UNKNOWN, HTTP_GET, HTTP_POST, HTTP_PUT, HTTP_PATCH, HTTP_DELETE, HTTP_OPTIONS };
+
+
 /**
 An HTTP request that servers can read from.
 
@@ -218,6 +221,9 @@ public:
 	{
 		return _method;
 	}
+
+	HttpMethod methodId() const;
+	
 	void setMethod(const String& m)
 	{
 		_method = m;

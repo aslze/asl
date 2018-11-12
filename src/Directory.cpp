@@ -38,6 +38,21 @@ String Directory::createTemp()
 	return dir;
 }
 
+bool File::copy(const String& to)
+{
+	return Directory::copy(_path, to);
+}
+
+bool File::move(const String& to)
+{
+	return Directory::move(_path, to);
+}
+
+bool File::remove()
+{
+	return Directory::remove(_path);
+}
+
 }
 
 #ifdef _WIN32
