@@ -181,7 +181,7 @@ bool WebSocket::connect(const String& uri, int port)
 
 	byte key[16];
 	for (int i = 0; i < 16; i++)
-		key[i] = (byte)_random(256);
+		key[i] = (byte)_random(255);
 
 	String key64 = encodeBase64(key, 16);
 

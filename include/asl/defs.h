@@ -192,7 +192,7 @@ class ASL_API Random
 {
 	ULong _state[2];
 public:
-	Random(bool autoseed = false);
+	Random(bool autoseed = false, bool fast = true);
 	/** Returns an integer pseudo-random number in the [0, 2^32-1] interval */
 	unsigned get();
 
@@ -221,8 +221,11 @@ public:
 	/** Initializes the seed for the random functions */
 	void init(ULong s1, ULong s2);
 
-	/** Initializes the seed for the random functions randomly */
-	void init();
+	/** Initializes the seed for the random functions randomly (set fast=false for a high quality random seed) */
+	void init(bool fast = true);
+
+	/** Fills a buffer with OS-provided random bytes or pseudo-random if that fails */
+	static void getBytes(void* buffer, int n);
 };
 
 extern ASL_API Random random; //!< A global random number generator

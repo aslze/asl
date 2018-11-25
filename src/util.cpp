@@ -1,7 +1,39 @@
 #include <asl/util.h>
 #include <asl/String.h>
+#include <stdio.h>
+
+#ifdef _WIN32
+#include <Wincrypt.h>
+#endif
 
 namespace asl {
+
+void Random::getBytes(void* buffer, int n)
+{
+#ifdef _WIN32
+	HCRYPTPROV cp;
+	if (CryptAcquireContextW(&cp, NULL, NULL, PROV_RSA_FULL, 0))
+	{
+		if (CryptGenRandom(cp, n, (BYTE*)buffer))
+		{
+			CryptReleaseContext(cp, 0);
+			return;
+		}
+	}
+#else
+	FILE* f = fopen("/dev/urandom", "rb");
+	if (f)
+	{
+		fread(buffer, 1, n, f);
+		fclose(f);
+		return;
+	}
+#endif
+	Random random;
+	random.init((ULong)inow(), (ULong)inow());
+	for(int i=0; i<n; i++)
+		((byte*)buffer)[i] = (byte)random(255);
+}
 
 #if 0 // linear congruential
 
@@ -31,12 +63,12 @@ inline ULong rotl(ULong x, int k)
 	return (x << k) | (x >> (64 - k));
 }
 
-Random::Random(bool autoseed)
+Random::Random(bool autoseed, bool fast)
 {
 	_state[0] = 1921312345;
 	_state[1] = 1312312876;
 	if (autoseed)
-		init();
+		init(fast);
 }
 
 // maybe add a getLong() to get the full 64 bits, and use it to generate doubles... ?
@@ -58,15 +90,18 @@ void Random::init(ULong s1, ULong s2)
 	_state[1] = s2;
 }
 
-// should use /dev/random or windows crypto to get better randomness
-
-void Random::init()
+void Random::init(bool fast)
 {
-	Long n = inow();
-	_state[0] = (ULong)n;
-	int k = get();
-	_state[1] = (ULong) n + (ULong(k) << 30);
-	get();
+	if (fast)
+	{
+		Long n = inow();
+		_state[0] = (ULong)n;
+		int k = get();
+		_state[1] = (ULong)n + (ULong(k) << 30);
+		get();
+	}
+	else
+		getBytes(_state, sizeof(_state));
 }
 
 #endif

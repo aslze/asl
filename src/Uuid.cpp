@@ -22,7 +22,7 @@ String Uuid::operator*() const
 
 UuidGenerator::UuidGenerator()
 {
-	_random.init();
+	_random.init(false);
 }
 
 Uuid UuidGenerator::generate()
