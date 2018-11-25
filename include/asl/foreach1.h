@@ -116,7 +116,7 @@ void shuffle(E& a)
 {
 	int n = a.length();
 	while (n) {
-		int i = random(1.0) * n--;
+		int i = int(random(1.0) * n--);
 		swap(a[n], a[i]);
 	}
 }

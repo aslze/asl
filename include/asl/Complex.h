@@ -24,7 +24,7 @@ public:
 	/** Returns exp(i * x) where x is a real number*/
 	friend Complex exp_i(T t) {return Complex(cos(t), sin(t));}
 	/** Returns *this * exp(i * x) where x is a real number */
-	Complex exp_i(T t) const { float c = cos(t), s = sin(t); return Complex(r*c - i*s, i*c + r*s); }
+	Complex exp_i(T t) const { T c = cos(t), s = sin(t); return Complex(r*c - i*s, i*c + r*s); }
 	/** Returns exp(z) where z is a complex number */
 	friend Complex exp(const Complex& z) {return exp(z.r)*Complex(cos(z.i), sin(z.i));}
 	/** Returns the argument (angle) of this number if polar form */

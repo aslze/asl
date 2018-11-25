@@ -137,7 +137,7 @@ public:
 	/**
 	Returns a 2D translation matrix for vector t
 	*/
-	static Matrix3_ translate(const Vec2& t)
+	static Matrix3_ translate(const Vec2_<T>& t)
 	{
 		return Matrix3_(1, 0, t.x,
 		                0, 1, t.y);
