@@ -39,7 +39,7 @@ class Vec2_
 	void get(T& X, T& Y) const { X=x; Y=y; }
 	/** Returns a vector constructed from polar coordinates */
 	static Vec2_ polar(T r, T a) {return Vec2_(r*cos(a), r*sin(a));}
-	/** Returns this vector rotated 90º counterclockwise. */
+	/** Returns this vector rotated 90 degrees counterclockwise. */
 	Vec2_ perpend() const {return Vec2_(-y, x);}
 	/** Returns this vector rotated an angle `a`. */
 	Vec2_ rotate(T a) const {T s=sin(a), c=cos(a); return Vec2_(c*x-s*y, s*x+c*y);}

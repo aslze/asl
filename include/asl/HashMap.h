@@ -286,7 +286,7 @@ public:
 	*/
 	const T& operator[](const K& key) const
 	{
-		((HashMap*)this)->rehash();
+		const_cast<HashMap*>(this)->rehash();
 		int bin = binOf(key);
 		KeyVal* p = a[bin], *q = p;
 		while(p)
@@ -302,7 +302,7 @@ public:
 			a[bin] = p;
 		else
 			q->next = p;
-		++((HashMap*)this)->_n();
+		++const_cast<HashMap*>(this)->_n();
 		return p->value;
 	}
 
@@ -387,7 +387,7 @@ public:
 		typedef typename HashMap<K,T>::KeyVal KeyVal;
 		typename Array<KeyVal*>::Enumerator e;
 		KeyVal* p;
-		Enumerator() {}
+		///Enumerator() {}
 		Enumerator(const HashMap& m): e(m.a)
 		{
 			for(int i=0; i<ASL_HMAP_SKIP; ++i)

@@ -266,7 +266,7 @@ public:
 		for(int i=i0; i<i1; i++)
 		{
 			Thread t;
-			Context s = { &f, i, &t, 0};
+			Context s = { &f, &t, 0, i};
 			contexts << s;
 			t.run((Function)Thread::beginf1<F>, (void*)&contexts.last());
 			threads << t;

@@ -263,8 +263,8 @@ bool Directory::create(const String& name)
 String Directory::current()
 {
 	String dir;
-	char* d = getcwd(SafeString(dir, 512), 512);
-	return dir;
+	char* d = getcwd(SafeString(dir, PATH_MAX), PATH_MAX);
+	return d? dir : "";
 }
 
 bool Directory::change(const String& dir)

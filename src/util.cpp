@@ -24,9 +24,11 @@ void Random::getBytes(void* buffer, int n)
 	FILE* f = fopen("/dev/urandom", "rb");
 	if (f)
 	{
-		fread(buffer, 1, n, f);
+		if(fread(buffer, 1, n, f) == n) {
+			fclose(f);
+			return;
+		}
 		fclose(f);
-		return;
 	}
 #endif
 	Random random;

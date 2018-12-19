@@ -358,7 +358,7 @@ String Process::myPath()
 	if (n != -1) 
 	{
 		buffer[n] = '\0';
-		return buffer;
+		return String(buffer);
 	}
 	return "";
 #endif
@@ -378,7 +378,8 @@ String Process::loadedLibPath(const String& lib)
 	while(!feof(mapfile))
 	{
 		//String line = mapfile.readLine();
-		fgets(SafeString(line), 1000, mapfile);
+		char* s = fgets(SafeString(line), 1000, mapfile);
+		if(!s) break;
 		Array<String> parts = line.split();
 		if(parts.last().contains(name1) || parts.last().contains(name2))
 		{
@@ -389,6 +390,7 @@ String Process::loadedLibPath(const String& lib)
 	fclose(mapfile);
 	return "";
 }
+
 void Process::makeDaemon()
 {
 	int _pid = fork();

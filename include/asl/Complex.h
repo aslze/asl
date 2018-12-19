@@ -26,7 +26,7 @@ public:
 	/** Returns *this * exp(i * x) where x is a real number */
 	Complex exp_i(T t) const { T c = cos(t), s = sin(t); return Complex(r*c - i*s, i*c + r*s); }
 	/** Returns exp(z) where z is a complex number */
-	friend Complex exp(const Complex& z) {return exp(z.r)*Complex(cos(z.i), sin(z.i));}
+	friend Complex exp(const Complex& z) {return ::exp(z.r)*Complex(cos(z.i), sin(z.i));}
 	/** Returns the argument (angle) of this number if polar form */
 	T angle() const {return atan2(i, r);}
 	/** Returns the magnitude this number */
@@ -46,13 +46,13 @@ public:
 	Complex operator*(T x) const {return Complex(r*x, i*x);}
 	friend Complex operator*(T x, const Complex& z) {return Complex(z.r*x, z.i*x);}
 	Complex operator/(T x) const {T q=1./x; return Complex(r*q, i*q);}
-	Complex operator/(const Complex& z) const {Complex q=~(z/z.mod2()); return (*this)*q;}
+	Complex operator/(const Complex& z) const { Complex q = ~(z / z.magnitude2()); return (*this)*q; }
 	bool operator==(const Complex& z) const {return r==z.r && i==z.i;}
 	bool operator!=(const Complex& z) const {return r!=z.r || i!=z.i;}
 	void operator+=(const Complex& z) {r += z.r; i += z.i;}
 	void operator-=(const Complex& z) {r -= z.r; i -= z.i;}
 	void operator*=(T x) {r *= x; i *= x;}
-	void operator/=(T r) {r /= x; i /= x;}
+	void operator/=(T x) {r /= x; i /= x;}
 	Complex operator-() const {return Complex(-r, -i);}
 public:
 	T r, i;

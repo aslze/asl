@@ -277,7 +277,7 @@ String Date::toString(Date::Format fmt, bool utc) const
 		time_t now = (time_t)_t; //::time(0);
 		struct tm tm = *gmtime(&now);
 		strftime(buf, sizeof buf, "%a, %d %b %Y %H:%M:%S GMT", &tm);
-		return buf;
+		return String(buf);
 		}
 	}
 

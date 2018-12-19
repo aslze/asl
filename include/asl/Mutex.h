@@ -374,8 +374,8 @@ public:
 	{
 		double t = now()+timeout;
 		struct timespec to;
-		to.tv_sec = (unsigned)floor(t);
-		to.tv_nsec = (unsigned)((t-floor(t))*1e9);
+		to.tv_sec = (time_t)floor(t);
+		to.tv_nsec = (long)((t-floor(t))*1e9);
 		int r = pthread_cond_timedwait(&_cond, &_mut->_mutex, &to);
 		return r == ETIMEDOUT;
 	}

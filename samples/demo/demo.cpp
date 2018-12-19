@@ -1,5 +1,5 @@
 #include <asl/Array.h>
-#include <asl/File.h>
+#include <asl/TextFile.h>
 #include <asl/Directory.h>
 #include <asl/Console.h>
 #include <asl/Log.h>
