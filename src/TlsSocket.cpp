@@ -245,18 +245,24 @@ bool TlsSocket_::connect(const InetAddress& addr)
 {
 	int ret = mbedtls_net_connect(&_core->net, addr.host(), String(addr.port()), MBEDTLS_NET_PROTO_TCP);
 	if (ret)
+	{
+		(*this) = TlsSocket_();
 		return false;
-
+	}
 	ret = mbedtls_ssl_config_defaults(&_core->conf, MBEDTLS_SSL_IS_CLIENT, MBEDTLS_SSL_TRANSPORT_STREAM, MBEDTLS_SSL_PRESET_DEFAULT);
 	mbedtls_ssl_conf_authmode(&_core->conf, MBEDTLS_SSL_VERIFY_NONE);
 	ret = mbedtls_ssl_setup(&_core->ssl, &_core->conf);
-	if (ret)
+	if (ret) {
+		(*this) = TlsSocket_();
 		return false;
+	}
+	ret = mbedtls_ssl_set_hostname(&_core->ssl, _hostname);
 
 	while ((ret = mbedtls_ssl_handshake(&_core->ssl)) != 0)
 	{
-		if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE)
+		if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE && ret != -0x7000)
 		{
+			(*this) = TlsSocket_();
 			return false;
 		}
 	}

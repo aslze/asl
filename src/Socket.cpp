@@ -478,6 +478,7 @@ Socket_* Socket_::accept()
 bool Socket::connect(const String& host, int port)
 {
 	Array<InetAddress> addrs = InetAddress::lookup(host);
+	_()->_hostname = host;
 	for (int i = 0; i < addrs.length(); i++)
 	{
 		if (connect(addrs[i].setPort(port)))

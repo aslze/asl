@@ -107,6 +107,7 @@ ASL_SMART_CLASS(Socket, SmartObject)
 	enum Endian { NATIVEENDIAN, BIGENDIAN, LITTLEENDIAN };
 	Endian _endian;
 	InetAddress::Type _family;
+	String _hostname;
 	bool _error;
 	bool _blocking;
 	virtual bool setOption(int level, int opt, const void* p, int n);
