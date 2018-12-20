@@ -180,31 +180,36 @@ header automatically set.
 class ASL_API HttpRequest : public HttpMessage
 {
 public:
-	HttpRequest() { _recursion = 0; }
+	HttpRequest() { init(); }
 	/**
 	Constructs an HttpRequest with the given method
 	*/
-	HttpRequest(const String& method, const String& url) : _method(method), _url(url) { _recursion = 0; }
+	HttpRequest(const String& method, const String& url) : _method(method), _url(url) { init(); }
 	/**
 	Constructs an HttpRequest with the given method and headers
 	*/
-	HttpRequest(const String& method, const String& url, const Dic<>& headers) : HttpMessage(headers), _method(method), _url(url) { _recursion = 0; }
+	HttpRequest(const String& method, const String& url, const Dic<>& headers) : HttpMessage(headers), _method(method), _url(url) { init(); }
 	/**
 	Constructs an HttpRequest with the given method and body
 	*/
 	template<class T>
-	HttpRequest(const String& method, const String& url, const T& data) : _method(method), _url(url) { put(data); _recursion = 0; }
+	HttpRequest(const String& method, const String& url, const T& data) : _method(method), _url(url) { put(data); init(); }
 	/**
 	Constructs an HttpRequest with the given method, headers and body
 	*/
 	template<class T>
-	HttpRequest(const String& method, const String& url, const T& data, const Dic<>& headers) : HttpMessage(headers), _method(method), _url(url) { put(data); _recursion = 0; }
+	HttpRequest(const String& method, const String& url, const T& data, const Dic<>& headers) : HttpMessage(headers), _method(method), _url(url) { put(data); init(); }
 	HttpRequest(Socket& s) : HttpMessage(s)
 	{
-		_recursion = 0;
+		init();
 		read();
 	}
 	~HttpRequest();
+	void init()
+	{
+		_recursion = 0;
+		_followRedirects = true;
+	}
 	void read();
 	const String& resource() const
 	{
@@ -291,9 +296,9 @@ public:
 
 	int recursion() const { return _recursion; }
 
-	void setFollowRedirects(bool enable) { _follow_redirects = enable; }
+	void setFollowRedirects(bool enable) { _followRedirects = enable; }
 
-	bool followRedirects() const { return _follow_redirects; }
+	bool followRedirects() const { return _followRedirects; }
 
 protected:
 	String _method;
@@ -307,7 +312,7 @@ protected:
 	Dic<> _query;
 	String _argument;
 	int _recursion;
-	bool _follow_redirects = true;
+	bool _followRedirects;
 };
 
 /**
