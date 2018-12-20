@@ -291,6 +291,10 @@ public:
 
 	int recursion() const { return _recursion; }
 
+	void setFollowRedirects(bool enable) { _follow_redirects = enable; }
+
+	bool followRedirects() const { return _follow_redirects; }
+
 protected:
 	String _method;
 	String _url;
@@ -303,6 +307,7 @@ protected:
 	Dic<> _query;
 	String _argument;
 	int _recursion;
+	bool _follow_redirects = true;
 };
 
 /**

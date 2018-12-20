@@ -317,19 +317,22 @@ HttpResponse Http::request(HttpRequest& request)
 
 	int code = response.code();
 
-	if (code == 301 || code == 302 || code == 307 || code == 308) // 303 ?
+	if (request.followRedirects())
 	{
-		socket.close();
-		String url = response.header("Location");
-		HttpRequest req(request.method(), url, request.headers());
-		int n = request.recursion() + 1;
-		if (n < 4) {
-			req.setRecursion(n);
-			return Http::request(req);
-		}
-		else {
-			response.setCode(421);
-			return response;
+		if (code == 301 || code == 302 || code == 307 || code == 308) // 303 ?
+		{
+			socket.close();
+			String url = response.header("Location");
+			HttpRequest req(request.method(), url, request.headers());
+			int n = request.recursion() + 1;
+			if (n < 4) {
+				req.setRecursion(n);
+				return Http::request(req);
+			}
+			else {
+				response.setCode(421);
+				return response;
+			}
 		}
 	}
 
