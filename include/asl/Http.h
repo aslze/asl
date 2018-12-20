@@ -291,7 +291,7 @@ public:
 
 	int recursion() const { return _recursion; }
 
-	void setFollowRedirects(bool enable) { _follow_redirects = enable;  }
+	void setFollowRedirects(bool enable) { _follow_redirects = enable; }
 
 	bool followRedirects() const { return _follow_redirects; }
 
