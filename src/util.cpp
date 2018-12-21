@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #ifdef _WIN32
-#include <Wincrypt.h>
+#include <wincrypt.h>
 #endif
 
 namespace asl {

@@ -10,7 +10,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#include <WinSock2.h>
+#include <winsock2.h>
 #else
 #include <stdlib.h>
 #include <unistd.h>

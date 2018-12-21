@@ -7,7 +7,7 @@
 #include <sys/uio.h>
 #else
 #include <windows.h>
-#include <WinSock2.h>
+#include <winsock2.h>
 #include <ws2tcpip.h>
 #endif
 

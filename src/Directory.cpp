@@ -1,6 +1,9 @@
 #include <asl/Directory.h>
 #include <asl/Path.h>
 #include <stdio.h>
+#ifdef __APPLE__
+#include <sys/syslimits.h>
+#endif
 
 namespace asl {
 
@@ -188,10 +191,6 @@ bool Directory::remove(const String& path)
 #include <unistd.h>
 #include <dirent.h>
 #include <errno.h>
-
-#ifndef PATH_MAX
-#define PATH_MAX 512
-#endif
 
 namespace asl {
 
