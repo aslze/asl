@@ -189,6 +189,10 @@ bool Directory::remove(const String& path)
 #include <dirent.h>
 #include <errno.h>
 
+#ifndef PATH_MAX
+#define PATH_MAX 512
+#endif
+
 namespace asl {
 
 inline double ft2t(const time_t& ft)
