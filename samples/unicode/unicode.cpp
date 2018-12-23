@@ -97,7 +97,7 @@ double processFile(const String& fname)
 int main(int argc, char* argv[])
 {
 	CmdArgs args(argc, argv);
-	String file = (args.length()==0)? "UnicodeData.txt" : args[0];
+	String file = (args.length()==0)? String("UnicodeData.txt") : args[0];
 	String url = "http://www.unicode.org/Public/9.0.0/ucd/UnicodeData.txt";
 	
 	if (args.length() > 0 && args[0].startsWith("http:"))

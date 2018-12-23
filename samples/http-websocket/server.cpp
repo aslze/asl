@@ -1,5 +1,5 @@
 #include <asl/HttpServer.h>
-#include <asl/File.h>
+#include <asl/TextFile.h>
 #include <asl/IniFile.h>
 #include <asl/Directory.h>
 #include <asl/CmdArgs.h>

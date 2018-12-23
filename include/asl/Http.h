@@ -296,6 +296,9 @@ public:
 
 	int recursion() const { return _recursion; }
 
+	/**
+	Enables or disables automatic HTTP redirection
+	*/
 	void setFollowRedirects(bool enable) { _followRedirects = enable; }
 
 	bool followRedirects() const { return _followRedirects; }
