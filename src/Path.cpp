@@ -27,7 +27,7 @@ String Path::extension() const
 	n = (m > n) ? m : n;
 #endif
 	int dot = _path.lastIndexOf('.');
-	return (dot >= 0 && dot > n) ? _path.substring(dot + 1) : "";
+	return (dot >= 0 && dot > n) ? _path.substring(dot + 1) : String();
 }
 
 bool Path::hasExtension(const String& extensions) const
@@ -47,7 +47,7 @@ Path Path::directory() const
 	int m = _path.lastIndexOf('/');
 	n = (m > n)? m : n;
 #endif
-	return (n>=0)? _path.substring(0, n) : ".";
+	return (n>=0)? _path.substring(0, n) : String(".");
 }
 
 Path& Path::removeDDots()

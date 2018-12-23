@@ -212,7 +212,7 @@ String File::extension() const
 	n = (m > n) ? m : n;
 #endif
 	int dot = _path.lastIndexOf('.');
-	return (dot >= 0 && dot > n) ? _path.substring(dot + 1) : "";
+	return (dot >= 0 && dot > n) ? _path.substring(dot + 1) : String();
 }
 
 bool File::hasExtension(const String& extensions) const
@@ -232,7 +232,7 @@ String File::directory() const
 	int m = _path.lastIndexOf('/');
 	n = (m > n)? m : n;
 #endif
-	return (n>=0)? _path.substring(0, n) : ".";
+	return (n>=0)? _path.substring(0, n) : String(".");
 }
 
 Long File::size() const

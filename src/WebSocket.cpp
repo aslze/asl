@@ -82,7 +82,7 @@ void WebSocketServer::serve(Socket client)
 			capitalize = !isalnum(name[i]);
 		}
 
-		String value = (i < line.length() - 1) ? line.substring(i + 2) : "";
+		String value = (i < line.length() - 1) ? line.substring(i + 2) : String();
 		headers[cname] = value;
 	}
 
@@ -223,7 +223,7 @@ bool WebSocket::connect(const String& uri, int port)
 			return false;
 		}
 		String name = line.substring(0, i);
-		String value = (i < line.length() - 1) ? line.substring(i + 2) : "";
+		String value = (i < line.length() - 1) ? line.substring(i + 2) : String();
 		headers[name] = value;
 	}
 

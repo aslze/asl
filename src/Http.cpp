@@ -157,7 +157,7 @@ void HttpMessage::setHeader(const String& header, const String& value)
 
 String HttpMessage::header(const String& name) const
 {
-	return _headers.has(name) ? _headers[name] : "";
+	return _headers.has(name) ? _headers[name] : String();
 }
 
 bool HttpMessage::hasHeader(const String& name) const
@@ -183,7 +183,7 @@ void HttpMessage::readHeaders()
 			return;
 		}
 		headerName = line.substring(0, i);
-		headerValue = (i < line.length() - 1) ? line.substring(i + 2) : "";
+		headerValue = (i < line.length() - 1) ? line.substring(i + 2) : String();
 		setHeader(headerName, headerValue);
 	}
 }

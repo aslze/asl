@@ -3,6 +3,7 @@
 #ifdef _WIN32
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #define _WIN32_WINNT 0x0501
+struct IUnknown; // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here" when using /permissive-
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
