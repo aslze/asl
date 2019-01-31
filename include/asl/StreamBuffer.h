@@ -11,6 +11,101 @@
 
 namespace asl {
 
+
+template <class T>
+struct AsBytes
+{
+	union { T x; byte b[sizeof(T)]; };
+	AsBytes() {}
+	AsBytes(const T& a) : x(a) {}
+	byte& operator[](int i) { return b[i]; }
+};
+
+template <class T, class T2>
+struct AsOther
+{
+	union { T x; T2 y; };
+	AsOther() {}
+	AsOther(const T& a) : x(a) {}
+};
+
+/**
+This class allows reading a memory buffer as a binary stream. It can read bytes, integers of different sizes and floating
+point numbers in big-endian or little-endian byte order.
+*/
+
+class ASL_API StreamBufferReader
+{
+public:
+	enum Endian { BIGENDIAN, LITTLEENDIAN };
+	StreamBufferReader(const Array<byte>& data, Endian e = LITTLEENDIAN) : _ptr(data.ptr()), _end(data.ptr() + data.length()), _endian(e) {}
+	StreamBufferReader(const byte* data, int n, Endian e = LITTLEENDIAN) : _ptr(data), _end(data + n), _endian(e) {}
+	void setEndian(Endian e) { _endian = e; }
+	operator bool() const { return _ptr < _end; }
+
+	const byte* ptr() const { return _ptr; }
+
+	void skip(int n) { _ptr += n; }
+
+	template <class T>
+	StreamBufferReader& read2(T& x)
+	{
+		AsOther<T, unsigned short> a;
+		if (_endian == BIGENDIAN)
+			a.y = ((unsigned short)_ptr[0] << 8) | ((unsigned short)_ptr[1]);
+		else
+			a.y = ((unsigned short)_ptr[1] << 8) | ((unsigned short)_ptr[0]);
+		x = a.x;
+		_ptr += 2;
+		return *this;
+	}
+	
+	template <class T>
+	StreamBufferReader& read4(T& x)
+	{
+		AsOther<T, unsigned> a;
+		if (_endian == BIGENDIAN)
+			a.y = ((unsigned)_ptr[0] << 24) | ((unsigned)_ptr[1] << 16) | ((unsigned)_ptr[2] << 8) | ((unsigned)_ptr[3]);
+		else
+			a.y = ((unsigned)_ptr[3] << 24) | ((unsigned)_ptr[2] << 16) | ((unsigned)_ptr[1] << 8) | ((unsigned)_ptr[0]);
+		x = a.x;
+		_ptr += 4;
+		return *this;
+	}
+	
+	template <class T>
+	StreamBufferReader& read8(T& x)
+	{
+		AsOther<T, ULong> a;
+		if (_endian == BIGENDIAN)
+			a.y = ((ULong)_ptr[0] << 56) | ((ULong)_ptr[1] << 48) | ((ULong)_ptr[2] << 40) | ((ULong)_ptr[3] << 32)
+			    | ((ULong)_ptr[4] << 24) | ((ULong)_ptr[5] << 16) | ((ULong)_ptr[6] << 8) | ((ULong)_ptr[7]);
+		else
+			a.y = ((ULong)_ptr[7] << 56) | ((ULong)_ptr[6] << 48) | ((ULong)_ptr[5] << 40) | ((ULong)_ptr[4] << 32)
+			    | ((ULong)_ptr[3] << 24) | ((ULong)_ptr[2] << 16) | ((ULong)_ptr[1] << 8) | ((ULong)_ptr[3]);
+		x = a.x;
+		_ptr += 8;
+		return *this;
+	}
+	
+	StreamBufferReader& operator>>(char& x) { x = *(const char*)_ptr; _ptr++; return *this; }
+	StreamBufferReader& operator>>(byte& x) { x = *_ptr++; return *this; }
+	StreamBufferReader& operator>>(short& x) { return read2(x); }
+	StreamBufferReader& operator>>(unsigned short& x) { return read2(x); }
+	StreamBufferReader& operator>>(int& x) { return read4(x); }
+	StreamBufferReader& operator>>(unsigned& x) { return read4(x); }
+	StreamBufferReader& operator>>(float& x) { return read4(x); }
+	StreamBufferReader& operator>>(Long& x) { return read8(x); }
+	StreamBufferReader& operator>>(ULong& x) { return read8(x); }
+	StreamBufferReader& operator>>(double& x) { return read8(x); }
+
+protected:
+	const byte* _ptr;
+	const byte* _end;
+	Endian _endian;
+};
+
+
 /**
 This class is a buffer that can be written to as a binary stream. The buffer is initially
 empty and grows as you append variables. You can change endianness at any moment.
@@ -25,8 +120,6 @@ File("data").put(buffer);
 
 socket << *buffer;
 ~~~
-
-* **THIS CLASS IS STILL ALPHA**
 */
 
 class StreamBuffer : public Array<byte>

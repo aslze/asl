@@ -23,6 +23,7 @@ void testSmartObject();
 void testDate();
 void testVec3();
 void testUuid();
+void testStreamBuffer();
 
 using namespace asl;
 
@@ -523,6 +524,7 @@ int main(int narg, char* argv[])
 	TEST(Date)
 	TEST(Vec3)
 	TEST(Uuid)
+	TEST(StreamBuffer)
 	else
 		return EXIT_FAILURE;
 	

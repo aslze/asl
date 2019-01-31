@@ -19,6 +19,7 @@ SET(TESTS
 	AtomicCount
 	Vec3
 	Uuid
+	StreamBuffer
 )
 
 FOREACH(T ${TESTS})
