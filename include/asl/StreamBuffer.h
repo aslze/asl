@@ -99,6 +99,12 @@ public:
 	StreamBufferReader& operator>>(ULong& x) { return read8(x); }
 	StreamBufferReader& operator>>(double& x) { return read8(x); }
 
+	/**
+	Read one value from the buffer: `float x = buffer.read<float>()`
+	*/
+	template <class T>
+	T read() { T x; *this >> x; return x; }
+
 protected:
 	const byte* _ptr;
 	const byte* _end;
