@@ -11,7 +11,7 @@
 namespace asl {
 
 template<class T> class ASL_API Matrix4_;
-template<class T> class ASL_API Quaternion_;
+template<class T> class Quaternion_;
 
 /**
 A Matrix4 is a 4x4 matrix useful for representing affine transformations in 3D space.
