@@ -1,6 +1,7 @@
 #ifndef _ASL_TIME_H_
 #define _ASL_TIME_H_
 
+#include "defs.h"
 #ifdef _WIN32
 #include <windows.h>
 #else
