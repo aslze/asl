@@ -24,6 +24,8 @@ public:
 	Quaternion_(const Vec3_<T>& v, T t) { T m = v.length(); T k = (m != 0) ? sin((T)0.5 * t) / m : 0; w = cos((T)0.5 * t); x = k * v.x; y = k * v.y; z = k * v.z; };
 	/** Creates a quaternion by its 4 elements */
 	Quaternion_(T _r, T _x, T _y, T _z) { w=_r; x=_x; y=_y; z=_z; }
+	template<class T2>
+	Quaternion_(const Quaternion_<T2>& q) { w = q._r; x = q._x; y = q._y; z = q._z; }
 	/** Returns the angle rotated by this quaternion */
 	T angle() const { return 2 * acos(w); }
 	/** Returns the normalized axis of rotation of this quaternion */
