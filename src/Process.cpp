@@ -166,9 +166,9 @@ namespace asl {
 			return;
 
 		_hasExited=false;
-		STARTUPINFO startInfo;
-		ZeroMemory(&startInfo, sizeof(STARTUPINFO));
-		startInfo.cb = sizeof(STARTUPINFO);
+		STARTUPINFOW startInfo;
+		ZeroMemory(&startInfo, sizeof(startInfo));
+		startInfo.cb = sizeof(startInfo);
 		startInfo.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
 		startInfo.wShowWindow = SW_SHOWNORMAL; // SW_HIDE;
 		startInfo.hStdInput = !_detached ? _pipe_in[0] : 0;
@@ -181,7 +181,7 @@ namespace asl {
 			commandline << " \"" << arg.replace('\"', "\\\"") << "\"";
 
 		PROCESS_INFORMATION procInfo;
-		_ok = CreateProcess(NULL,
+		_ok = CreateProcessW(NULL,
 			commandline,            // application name
 			NULL,                   // process security attributes
 			NULL,                   // primary thread security attributes

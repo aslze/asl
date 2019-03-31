@@ -550,7 +550,7 @@ int ASL_API utf16toUtf8(const wchar_t* p, char* u, int);
 int ASL_API utf8toUtf16(const char* u, wchar_t* p, int);
 int ASL_API utf32toUtf8(const int* p, char* u, int);
 int ASL_API utf8toUtf32(const char* u, int* p, int);
-
+String ASL_API localToString(const String& a);
 }
 
 #ifdef QSTRING_H

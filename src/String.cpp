@@ -45,12 +45,24 @@ void printf_(const char* fmt, ...)
 
 int utf16toLocal8(const wchar_t* p, char* u, int nmax)
 {
+#ifdef _WIN32
+	char def = '_';
+	BOOL used = false;
+	return WideCharToMultiByte(CP_ACP, 0, p, -1, u, nmax, &def, &used) - 1;
+#else
 	return (int)wcstombs(u, p, nmax);
+#endif
 }
 
 int local8toUtf16(const char* u, wchar_t* p, int nmax)
 {
+#ifdef _WIN32
+	char def = '_';
+	BOOL used = false;
+	return MultiByteToWideChar(CP_ACP, 0, u, -1, p, nmax) - 1;
+#else
 	return (int)mbstowcs(p, u, nmax);
+#endif
 }
 
 int local8toUtf32(const char* u, int* p, int nmax)
@@ -177,6 +189,13 @@ int utf8toUtf16(const char* u, wchar_t* p, int)
 	}
 	*p=L'\0';
 	return 0;
+}
+
+String localToString(const String& a)
+{
+	Array<wchar_t> ws(a.length() + 1);
+	local8toUtf16(a, ws.ptr(), a.length() + 1);
+	return String(ws.ptr());
 }
 
 int String::Enumerator::operator*()

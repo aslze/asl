@@ -1,5 +1,6 @@
 #include <asl/CmdArgs.h>
 #include <asl/File.h>
+#include <asl/TextFile.h>
 #ifdef _WIN32
 #include <shellapi.h>
 #endif
@@ -18,14 +19,22 @@ CmdArgs::CmdArgs(const String& spec)
 #ifdef _WIN32
 	int nArgs;
 	LPWSTR* arglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
+
+	/*TextFile log("i:/log.txt", TextFile::APPEND);
+	log << *(String)GetCommandLineW() << " " << (int)wcslen(GetCommandLineW()) << "\n";
+	log.printf("args: %i\n", nArgs);*/
 	if( NULL == arglist )
 		return;
 	Array<String> a;
-	for(int i=0; i<nArgs; i++)
+	for (int i = 0; i < nArgs; i++)
+	{
 		a << arglist[i];
+		//log << (int)arglist[i][12] << "\n";
+		//log << *(String)arglist[i] << "\n";
+	}
 
 	LocalFree(arglist);
-	*this = CmdArgs(nArgs, (Array<char*>)a);
+	*this = CmdArgs(-nArgs, (Array<char*>)a);
 #else
 	File file("/proc/self/cmdline", File::READ);
 	if(!file)
@@ -55,9 +64,10 @@ CmdArgs::CmdArgs(const String& spec)
 
 CmdArgs::CmdArgs(int argc, char* argv[], const String& spec)
 {
-	for(int i=0; i< argc; i++)
+	int n = abs(argc);
+	for(int i=0; i < n; i++)
 	{
-		_args << argv[i];
+		_args << ((argc < 0) ? String(argv[i]) : localToString(argv[i]));
 	}
 	Array<String> flags;
 	Array<String> options;
