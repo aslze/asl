@@ -114,7 +114,7 @@ String HttpMessage::text() const
 
 Var HttpMessage::json() const
 {
-	String str = (const char*)_body.ptr();
+	String str = _body;
 	Var data = Json::decode(str);
 	return data.ok() ? data : Var(decodeUrlParams(str));
 }
