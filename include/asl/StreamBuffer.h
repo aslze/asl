@@ -88,6 +88,7 @@ public:
 		return *this;
 	}
 	
+	StreamBufferReader& operator>>(signed char& x) { x = *(const char*)_ptr; _ptr++; return *this; }
 	StreamBufferReader& operator>>(char& x) { x = *(const char*)_ptr; _ptr++; return *this; }
 	StreamBufferReader& operator>>(byte& x) { x = *_ptr++; return *this; }
 	StreamBufferReader& operator>>(short& x) { return read2(x); }
@@ -166,6 +167,13 @@ public:
 
 	template<class T>
 	StreamBuffer& operator<<(const char& x)
+	{
+		(*this) << (byte&)x;
+		return *this;
+	}
+
+	template<class T>
+	StreamBuffer& operator<<(const signed char& x)
 	{
 		(*this) << (byte&)x;
 		return *this;

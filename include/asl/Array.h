@@ -75,6 +75,7 @@ protected:
 	Array(T* p);
 	operator void*() {}
 	Array(const String& s);
+	Array& operator=(int b) {}
 public:
 	Array() {alloc(0);}
 	Array(int m) {alloc(m);}
