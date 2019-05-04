@@ -31,20 +31,42 @@ struct AsOther
 
 /**
 This class allows reading a memory buffer as a binary stream. It can read bytes, integers of different sizes and floating
-point numbers in big-endian or little-endian byte order.
+point numbers in big-endian or little-endian byte order. You have to make sure you don't read past the bounds of the buffer.
+
+~~~
+Array<byte> data = File("data.bin").content();
+StreamBufferReader buffer (data, StreamBufferReader::BIGENDIAN);
+int n = buffer.read<int>();
+double x, y, z;
+buffer >> x >> y >> z;
+~~~
+
+\ingroup Binary
 */
 
 class ASL_API StreamBufferReader
 {
 public:
 	enum Endian { BIGENDIAN, LITTLEENDIAN };
+	/**
+	Constructs a buffer reader from a byte array
+	*/
 	StreamBufferReader(const Array<byte>& data, Endian e = LITTLEENDIAN) : _ptr(data.ptr()), _end(data.ptr() + data.length()), _endian(e) {}
+	/**
+	Constructs a buffer reader from a raw byte array
+	*/
 	StreamBufferReader(const byte* data, int n, Endian e = LITTLEENDIAN) : _ptr(data), _end(data + n), _endian(e) {}
+	/**
+	Sets the endianness for reading (can be changed on the fly)
+	*/
 	void setEndian(Endian e) { _endian = e; }
 	operator bool() const { return _ptr < _end; }
 
 	const byte* ptr() const { return _ptr; }
 
+	/**
+	Skips a number of bytes
+	*/
 	void skip(int n) { _ptr += n; }
 
 	template <class T>
@@ -89,15 +111,45 @@ public:
 	}
 	
 	StreamBufferReader& operator>>(signed char& x) { x = *(const char*)_ptr; _ptr++; return *this; }
+	/**
+	Read one value from the buffer
+	*/
 	StreamBufferReader& operator>>(char& x) { x = *(const char*)_ptr; _ptr++; return *this; }
+	/**
+	Read one value from the buffer
+	*/
 	StreamBufferReader& operator>>(byte& x) { x = *_ptr++; return *this; }
+	/**
+	Read one value from the buffer
+	*/
 	StreamBufferReader& operator>>(short& x) { return read2(x); }
+	/**
+	Read one value from the buffer
+	*/
 	StreamBufferReader& operator>>(unsigned short& x) { return read2(x); }
+	/**
+	Read one value from the buffer
+	*/
 	StreamBufferReader& operator>>(int& x) { return read4(x); }
+	/**
+	Read one value from the buffer
+	*/
 	StreamBufferReader& operator>>(unsigned& x) { return read4(x); }
+	/**
+	Read one value from the buffer
+	*/
 	StreamBufferReader& operator>>(float& x) { return read4(x); }
+	/**
+	Read one value from the buffer
+	*/
 	StreamBufferReader& operator>>(Long& x) { return read8(x); }
+	/**
+	Read one value from the buffer
+	*/
 	StreamBufferReader& operator>>(ULong& x) { return read8(x); }
+	/**
+	Read one value from the buffer
+	*/
 	StreamBufferReader& operator>>(double& x) { return read8(x); }
 
 	/**
@@ -127,6 +179,8 @@ File("data").put(buffer);
 
 socket << *buffer;
 ~~~
+
+\ingroup Binary
 */
 
 class StreamBuffer : public Array<byte>

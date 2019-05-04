@@ -1,3 +1,5 @@
+namespace asl {
+
 /**
 \mainpage ASL - All-purpose Simple Library
 
@@ -268,8 +270,8 @@ while(socket.waitInput())
 /**
 \defgroup Containers Containers
 
-There are several container classes that can hold elements of any type (`Array`, 
-`Map`, `Dic`, `Stack`, `HashMap`). These classes are reference-counted, so they 
+There are several container classes that can hold elements of any type (Array, 
+Map, Dic, Stack, HashMap). These classes are reference-counted, so they 
 are copied by reference. If a separate copy is required, use the `clone()` method:
 
 ~~~
@@ -285,8 +287,8 @@ when to stop iterating.
 
 All containers have an `all()` enumerator that represents all its elements. All enumerators must implement
 operator `*` to dereference the currently pointed element, and may implement operator `~` to get their associated
-*key*, if any. For example, in an `Array`, they key is the integer index associated to each element. And in a
-`Dic`, the key is the element's name, a string.
+*key*, if any. For example, in an Array, they key is the integer index associated to each element. And in a
+Dic, the key is the element's name, a string.
 
 This way, enumerating is done like this: (the keyword `auto` is useful if your compiler supports it)
 
@@ -297,7 +299,7 @@ for(Array<T>::Enumerator e = container.all(); e; ++e)
 }
 ~~~
 
-That way, if container was a `Dic`, it would be printing the names and values of all elements.
+That way, if container was a Dic, it would be printing the names and values of all elements.
 
 But there is a shorthand notation for iterating, inspired by other languages, `foreach` and `foreach2` loops. The
 first iterates on the values of elements. And the second on both the keys and values of elements.
@@ -337,10 +339,10 @@ Several classes implement *reference counting* so that objects are copied by ref
 destroyed and freed when it no longer has references. For a separate copy of the object, there is a `clone()`
 method.
 
-All containers such as `Array`, `Map`, `Dic`, `Stack`, `HashMap`, are shared this way. `String` is currently not shared but
+All containers such as Array, Map, Dic, Stack, HashMap, are shared this way. String is currently not shared but
 might be in the future.
 
-Other shared classes also support inheritance and polymorphism: `Xml`, `XmlText`, `Socket`, `TlsSocket`.
+Other shared classes also support inheritance and polymorphism: Xml, XmlText, Socket, TlsSocket.
 
 It works like this. Suppose we have a shared class `Shape` and derived classes `Circle` and `Square`.
 
@@ -453,3 +455,49 @@ Matrix3d; // Matrix3_<double>
 ~~~
 
 */
+
+/**
+\defgroup Binary Binary data
+
+Reading and writing binary data as a stream (in big or little endian order).
+
+Currently files can be read or written as binary streams with the File class, but only in the CPU native endianness.
+
+~~~
+File file("data.bin", File::WRITE);
+
+file << 3 << 0.5; // writes a 32-bit int and an 64-bit double (12 bytes total).
+~~~
+
+Using class TextFile instead woud write those variables as text (as "30.5" because we did not add whitespace separation).
+
+TCP sockets (class Socket) can also be read or written as binary streams, even with specific endianness:
+
+~~~
+Socket socket;
+socket.connect("someserver", 9000);
+socket.setEndian(Socket::BIGENDIAN);
+socket << 3 << 0.5;
+int32_t x, y;
+socket >> x >> y;
+~~~
+
+That will call an actual socket read or write operation for each variable. Alternatively we can use binary buffers and
+read or write to them as streams with classes StreamBuffer and StreamBufferReader.
+
+~~~
+StreamBuffer buffer(StreamBuffer::BIGENDIAN);
+buffer << 3 << 0.5;                                // fill binary buffer
+socket << *buffer;                                 // send it all at once
+~~~
+
+~~~
+Array<byte> data(12);
+socket.read(data.ptr(), 12);                       // read 12 bytes into a buffer
+StreamBufferReader reader(StreamBuffer::BIGENDIAN);
+int32_t x, y;
+reader >> x >> y;                                  // read 2 int32 variables from the buffer
+~~~
+*/
+
+}
