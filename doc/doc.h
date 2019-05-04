@@ -1,7 +1,7 @@
 namespace asl {
 
 /**
-\mainpage ASL - All-purpose Simple Library
+\mainpage ASL - All-purpose Simple %Library
 
 ASL is a collection of general purpose classes and utilities intended to be easy to use. It is mostly compatible
 with **Windows**, **Linux**, **macOS** and **Android**, 32 and 64 bits.
@@ -11,10 +11,10 @@ __Operating system functionalities__:
 - Threads, mutexes and semaphores
 - Processes (run programs and read their output)
 - Binary and text files
-- Directory enumeration and file system operations (copy, move, delete)
+- %Directory enumeration and file system operations (copy, move, delete)
 - Sockets TCP, UDP, Unix and SSL/TLS encrypted sockets, IPv4/IPv6
 - Runtime dynamically loadable libraries (DLLs/shared libraries)
-- Console attributes: text color and cursor position
+- %Console attributes: text color and cursor position
 - Serial ports
 - Shared memory
 
@@ -22,10 +22,10 @@ __Utilities__:
 
 - JSON, XML and XDL parsing/encoding
 - HTTP/HTTPS server and client
-- WebSocket server and client
+- %WebSocket server and client
 - Configuration INI files reading/writing
 - CSV file reading/writing, ARFF write
-- Log messages to console and/or files (with limited growth)
+- %Log messages to console and/or files (with limited growth)
 - Command line arguments and options parsing
 - Singletons and Factories
 - Base64, hex encoding/decoding
@@ -65,7 +65,7 @@ There is no need to provide the library directory or set *include_directories*. 
 find the library compatible with the current project among the versions compiled.
 
 Remember that all header files have the `asl/` prefix directory and are named like the class they define
-(case-sensitively), and that all symbols are in the `asl` namespace. So, for example, to use the `Directory` class:
+(case-sensitively), and that all symbols are in the `asl` namespace. So, for example, to use the Directory class:
 
 ~~~
 #include <asl/Directory.h>
