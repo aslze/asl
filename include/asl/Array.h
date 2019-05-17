@@ -77,9 +77,22 @@ protected:
 	Array(const String& s);
 	Array& operator=(int b) {}
 public:
+	/**
+	Creates an empty array
+	*/
 	Array() {alloc(0);}
-	Array(int m) {alloc(m);}
-	Array(const T* p, int m) {alloc(m); for(int i=0; i<m; i++) _a[i]=p[i];}
+	/**
+	Creates an array of n elements
+	*/
+	Array(int n) {alloc(n);}
+	/**
+	Creates an array of n elements and copies them from the pointer p
+	*/
+	Array(const T* p, int n) {alloc(n); for(int i=0; i<n; i++) _a[i]=p[i];}
+	/**
+	Creates an array of n elements and gives them the value x
+	*/
+	Array(int n, const T& x) { alloc(n); for (int i = 0; i<n; i++) _a[i] = x; }
 	template<class K>
 	Array(const Array<K>& b)
 	{
