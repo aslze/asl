@@ -91,7 +91,7 @@ class Vec3_
 	/** Multiplies this vector by scalar `r` */
 	void operator*=(T r) {x *= r; y *= r; z *= r;}
 	/** Divides this vector by scalar `r` */
-	void operator/=(T r) {float t=(T)1/r; x *= t; y *= t; z *= t;}
+	void operator/=(T r) {T t=(T)1/r; x *= t; y *= t; z *= t;}
 	/** Returns this vector negated */
 	Vec3_ operator-() const {return Vec3_(-x,-y,-z);}
 
