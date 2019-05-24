@@ -4,12 +4,13 @@
 #include <asl/Date.h>
 #include <asl/util.h>
 #include <stdio.h>
+#include "testing.h"
 
 using namespace asl;
 
 #define APPROX(x, y) (fabs(x - y) < 0.001)
 
-void testProcess()
+ASL_TEST(Process)
 {
 	{
 		Process proc = Process::execute(Process::myPath(), "-subproc", 1);
@@ -36,7 +37,7 @@ void testProcess()
 	}
 }
 
-void testSHA1()
+ASL_TEST(SHA1)
 {
 	SHA1::Hash h1 = SHA1::hash("abc");
 	ASL_ASSERT(encodeHex(h1, 20) == "a9993e364706816aba3e25717850c26c9cd0d89d");
@@ -108,7 +109,7 @@ ASL_SMART_INNER_IMPL(Rect)
 
 Rect::Rect(float w, float h) : ASL_SMART_INIT(w, h) {}
 
-void testSmartObject()
+ASL_TEST(SmartObject)
 {
 	{
 		float r = 2.0f;
@@ -151,7 +152,7 @@ void testSmartObject()
 	ASL_ASSERT(Shape::count() == 0);
 }
 
-void testDate()
+ASL_TEST(Date)
 {
 	for (double t = -2214380800.0; t < 3102441200.0; t += Date::DAY/2)
 	{

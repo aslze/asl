@@ -9,26 +9,13 @@
 #include <asl/TextFile.h>
 #include <asl/util.h>
 #include <stdio.h>
+#include "testing.h"
 
-void testFactory();
-void testHashMap();
-void testMap();
-void testStaticSpace();
-void testPath();
-void testAtomicCount();
-void testXML();
-void testProcess();
-void testSHA1();
-void testSmartObject();
-void testDate();
-void testVec3();
-void testUuid();
-void testStreamBuffer();
+ASL_ENABLE_TESTING();
 
 using namespace asl;
 
-
-void testFile()
+ASL_TEST(File)
 {
 	File file("c:/dir1/dir.2/file.ext");
 	ASL_ASSERT(file.directory() == "c:/dir1/dir.2");
@@ -48,7 +35,7 @@ void testFile()
 	ASL_ASSERT(lines[1] == line2);
 }
 
-void testIniFile()
+ASL_TEST(IniFile)
 {
 	{
 		IniFile file("config.ini");
@@ -76,7 +63,7 @@ void testIniFile()
 	}
 }
 
-void testTabularDataFile()
+ASL_TEST(TabularDataFile)
 {
 	int N = 100;
 	
@@ -140,7 +127,7 @@ void testTabularDataFile()
 	}
 }
 
-void testCmdArgs()
+ASL_TEST(CmdArgs)
 {
 	Array<const char*> argv;
 	argv << "convert" << "-format" << "jpeg" << "-fast" << "-q" << "85" <<
@@ -186,7 +173,7 @@ String join(const Array<String>& a)
 	return a.join("-");
 }
 
-void testArray()
+ASL_TEST(Array)
 {
 	Array<int> a;
 	a << 3 << -5 << 10 << 0;
@@ -258,7 +245,7 @@ void testArray()
 }
 
 
-void testString()
+ASL_TEST(String)
 {
 	String xxx = String::repeat('x', 1000);
 	ASL_ASSERT(xxx.length() == 1000);
@@ -353,7 +340,7 @@ void testString()
 	ASL_ASSERT(!String("false").isTrue());
 }
 
-void testXDL()
+ASL_TEST(XDL)
 {
 	String a = "A/*...*/{x=3.5, //...\ny=\"s\", z=[Y, N]}";
 	Var b = decodeXDL(a);
@@ -386,7 +373,7 @@ void testXDL()
 	ASL_ASSERT(Json::encode(nan()) == "null");
 }
 
-void testVar()
+ASL_TEST(Var)
 {
 	Var b = Var("x", 3);
 	ASL_ASSERT(b.type() == Var::DIC && b.length()==1 && b["x"]==3);
@@ -464,10 +451,20 @@ void testVar()
 	Var a3 = Var::array({1, "a"});
 	ASL_ASSERT(a3.is(Var::ARRAY) && a3.length() == 2 && a3[0] == 1 && a3[1] == "a");
 #endif
+
+#ifdef ASL_HAVE_RANGEFOR
+	Var list = array<Var>(1, 2, 3);
+	int sum = 0;
+	for (auto e : list)
+	{
+		sum += (int)e;
+	}
+	ASL_ASSERT(sum == 6);
+#endif
 }
 
 
-void testBase64()
+ASL_TEST(Base64)
 {
 	String input = "2001-A Space Odyssey";
 	String b64 = encodeBase64(input);
@@ -486,9 +483,6 @@ void testBase64()
 	ASL_ASSERT(String(decodeBase64(b64w)) == input);
 }
 
-
-#define TEST( T ) else if(!strcmp(argv[1], #T)) test##T();
-
 int main(int narg, char* argv[])
 {
 	{
@@ -498,35 +492,17 @@ int main(int narg, char* argv[])
 			return args.all().length();
 		}
 	}
+	
 	if (narg < 2) {
 		printf("No arguments\n");
 		return EXIT_SUCCESS;
 	}
-	TEST(Var)
-	TEST(XDL)
-	TEST(XML)
-	TEST(Array)
-	TEST(CmdArgs)
-	TEST(String)
-	TEST(TabularDataFile)
-	TEST(IniFile)
-	TEST(Map)
-	TEST(HashMap)
-	TEST(Factory)
-	TEST(StaticSpace)
-	TEST(File)
-	TEST(Path)
-	TEST(Base64)
-	TEST(AtomicCount)
-	TEST(Process)
-	TEST(SHA1)
-	TEST(SmartObject)
-	TEST(Date)
-	TEST(Vec3)
-	TEST(Uuid)
-	TEST(StreamBuffer)
-	else
+
+	if(!asl::runTest(argv[1]))
+	{
+		printf("Unknown test\n");
 		return EXIT_FAILURE;
+	}
 	
 	return EXIT_SUCCESS;
 }

@@ -6,8 +6,8 @@
 #include <asl/Thread.h>
 #include <asl/Path.h>
 #include <asl/Xml.h>
-
 #include <stdio.h>
+#include "testing.h"
 
 using namespace asl;
 
@@ -28,7 +28,7 @@ bool isancestor(const Xml& ancestor, const Xml& e)
 	return false;
 }
 
-void testXML()
+ASL_TEST(XML)
 {
 	String xml1 = "<?xml encoding='utf8' ?>\n<a x='1'><b y=\"2&amp;3\"><br /><c>x<!--comment--> &gt; &#x30; &#95;y</c><d g='3'></d></b></a>";
 	Xml dom = Xml::decode(xml1);
@@ -161,7 +161,7 @@ public:
 ASL_FACTORY_REGISTER(Animal, Dog)
 
 
-void testFactory()
+ASL_TEST(Factory)
 {
 	Array<String> catalog = Factory<Animal>::catalog();
 	ASL_ASSERT(catalog.length() == 2);
@@ -173,7 +173,7 @@ void testFactory()
 	ASL_ASSERT( animal->speak() == "Miau!" );
 }
 
-void testPath()
+ASL_TEST(Path)
 {
 	Path path("c:\\a/b.h");
 	ASL_ASSERT(path);
@@ -195,7 +195,7 @@ void testPath()
 
 }
 
-void testHashMap()
+ASL_TEST(HashMap)
 {
 	HashDic<int> dic;
 	for(int i=0; i<10; i++)
@@ -218,7 +218,7 @@ String join(const Dic<int>& a)
 	return a.join(",", ":");
 }
 
-void testMap()
+ASL_TEST(Map)
 {
 	Map<int, String> numbers;
 	numbers[12] = "twelve";
@@ -248,9 +248,33 @@ void testMap()
 	ASL_ASSERT(snumbers == snumbers2);
 	snumbers2.remove("12");
 	ASL_ASSERT(snumbers != snumbers2);
+
+#ifdef ASL_HAVE_RANGEFOR
+	int sum = 0;
+	String all;
+	for (auto e : numbers)
+	{
+		sum += e.key;
+		all += e.value;
+	}
+	ASL_ASSERT(sum == 110);
+	ASL_ASSERT(all == "minus twotwelveone hundred");
+
+#ifdef ASL_HAVE_RANGEFOR_CXX17
+	sum = 0;
+	all = "";
+	for (auto& [k, v] : numbers)
+	{
+		sum += k;
+		all += v;
+	}
+	ASL_ASSERT(sum == 110);
+	ASL_ASSERT(all == "minus twotwelveone hundred");
+#endif
+#endif
 }
 
-void testStaticSpace()
+ASL_TEST(StaticSpace)
 {
 	StaticSpace<String> ss;
 	ss.construct();
@@ -277,7 +301,7 @@ public:
 
 AtomicCount AThread::n = 0;
 
-void testAtomicCount()
+ASL_TEST(AtomicCount)
 {
 	double t1 = now();
 	ThreadGroup<AThread> threads;
