@@ -323,8 +323,8 @@ String& String::resize(int n, bool keep, bool newlen)
 	}
 	int size2 = n+1;
 	int size3 = (_size < (1 << 30)) ? 2 * _size : 2147483647;
-	size2 = (size2 > _size) ? max(size3, size2) : _size;
-	if (size2 == _size)
+	size2 = (size2 > _size)? max(size3, size2) : _size;
+	if(size2 == _size)
 	{}
 	else // grow
 	if(_size < 1024)

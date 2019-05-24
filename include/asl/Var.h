@@ -170,6 +170,9 @@ For a better representation that can be parsed back into a Var, you can use XDL 
 
 class ASL_API Var
 {
+	// avoid these operators
+	void operator+(const Var& v) {}
+	void operator-(const Var& v) {}
   public:
 	enum Type {NONE, NUL, NUMBER, BOOL, INT, SSTRING, FLOAT, STRING=8, ARRAY, DIC, OBJ=10};
 	bool isPod() const {return (_type & 8)==0;}

@@ -119,6 +119,7 @@ protected:
 	void free();
 	void init(int n) {alloc(n); _len=n;}
 	char* str() const {return (_size==0)? (char*)_space : (char*)_str;}
+	String(void*) {} // avoid accidental construction from arbitrary pointers
 public:
 	/** Constructs an empty string */
 	String(): _size(0),_len(0)
@@ -352,6 +353,10 @@ public:
 	bool operator!=(const char* s) const {return strcmp(str(),s)!=0;}
 	bool operator!=(char c) const {return _len!=1 || str()[0]!=c;}
 	bool operator<(const String& s) const {return strcmp(str(), s.str())<0;}
+	/**
+	Returns this string or s if this string is empty
+	*/
+	const String& operator|(const String& s) const { return (_len == 0) ? s : *this; }
 	/** Returns a reference to the `i`-th character in this string (byte-based) */
 	char& operator[](int i) {return str()[i];}
 	/** Returns a reference to the `i`-th character in this string (byte-based) */
