@@ -83,7 +83,6 @@ namespace asl {
 #define ASL_HAVE_RANGEFOR
 #endif
 
-
 #if !defined(_WIN32) || defined(ASL_STATIC)
  #define ASL_API
 #elif defined(asl_EXPORTS)
@@ -159,6 +158,17 @@ inline T rad2deg(T x) {return (T)(x*57.29577951308232);}
 static const double PI = 3.14159265358979323;
 
 /**
+Endianness types for binary parsing/writing
+*/
+enum Endian { ENDIAN_BIG, ENDIAN_LITTLE, ENDIAN_NATIVE };
+
+#ifndef ASL_BIGENDIAN
+#define ASL_OTHER_ENDIAN ENDIAN_BIG
+#else
+#define ASL_OTHER_ENDIAN ENDIAN_LITTLE
+#endif
+
+/**
 A random number generator.
 
 Generates uniformly distributed pseudo-random numbers, except in the `normal()` functions.
@@ -167,7 +177,7 @@ Generates uniformly distributed pseudo-random numbers, except in the `normal()` 
 Random random;
 int n = random(256);          // get an integer between 0 and 255
 double x = random(-1.5, 1.5); // get a number between -1.5 and +1.5
-double y = random.normal(10, 0.75); // get a number between -1.5 and +1.5
+double y = random.normal(10, 0.75); // get a number from a normal distribution
 ```
 
 The generator initially has a constant seed, so it will always produce the same sequence. You

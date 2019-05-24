@@ -51,6 +51,7 @@ protected:
 	FILE* _file;
 	String _path;
 	mutable FileInfo _info;
+	Endian _endian;
 public:
 	enum OpenMode{READ, WRITE, APPEND, RW, TEXT=8};
 	enum SeekMode{START, HERE, END};
@@ -59,12 +60,12 @@ public:
 	/**
 	Constructs a File object with no associated file.
 	*/
-	File() {_file=0;}
-	File(const String& name, const FileInfo& inf) : _path(name) {_file=0; _info=inf;}
+	File() { _file = 0; _endian = ENDIAN_NATIVE; }
+	File(const String& name, const FileInfo& inf) : _path(name) { _file = 0; _info = inf; _endian = ENDIAN_NATIVE; }
 	/**
 	Constructs a File object with the given path name but does not open it
 	*/
-	File(const String& name) : _path(name) {_file=0;}
+	File(const String& name) : _path(name) { _file = 0; _endian = ENDIAN_NATIVE; }
 	/**
 	Constructs a File object with the given path name and opens it with the given access mode.
 	\param name File name optionally including path
@@ -73,11 +74,13 @@ public:
 	File(const String& name, OpenMode mode) : _path(name)
 	{
 		open(name, mode);
+		_endian = ENDIAN_NATIVE;
 	}
 	File(const File& f) : _path(f._path)
 	{
 		_file = 0;
 		_info = f._info;
+		_endian = ENDIAN_NATIVE;
 	}
 	~File()
 	{
@@ -91,7 +94,11 @@ public:
 		_info = f._info;
 		return *this;
 	}
+
+	void setEndian(Endian e) { _endian = e; }
+
 	void use(FILE* f) {_file=f;}
+
 	FILE* stdio() { return _file; }
 	/**
 	Returns true if this object refers to an *open* file
@@ -186,26 +193,56 @@ public:
 	int write(const void* p, int n);
 
 	/**
-	Writes variable x in its binary form to this file
+	Writes variable x to the file respecting endianness in binary form
 	*/
 	template<class T>
 	File& operator<<(const T& x)
 	{
-		write(&x, sizeof(x));
+		T y = (_endian == ASL_OTHER_ENDIAN) ? bytesSwapped(x) : x;
+		write(&y, sizeof(x));
 		return *this;
 	}
 
-	File& operator<<(const String& x);
-
-	File& operator<<(const Array<char>& x)
+	/**
+	Reads variable x from the file respecting endianness in binary form
+	*/
+	template<class T>
+	File& operator>>(T& x)
 	{
-		write(x.ptr(), x.length());
+		read(&x, sizeof(x));
+		if (_endian == ASL_OTHER_ENDIAN)
+			swapBytes(x);
+		return *this;
+	}
+
+	File& operator>>(char& x)
+	{
+		read(&x, sizeof(x));
+		return *this;
+	}
+
+	File& operator>>(byte& x)
+	{
+		read(&x, sizeof(x));
+		return *this;
+	}
+
+	template<class T>
+	File& operator<<(const Array<T>& x)
+	{
+		if (_endian == ASL_OTHER_ENDIAN)
+		{
+			foreach(const T& y, x)
+				*this << y;
+		}
+		else
+			write(&x[0], x.length());
 		return *this;
 	}
 
 	File& operator<<(const Array<byte>& x)
 	{
-		write(x.ptr(), x.length());
+		write(&x[0], x.length());
 		return *this;
 	}
 
@@ -215,10 +252,19 @@ public:
 		return *this;
 	}
 
-	template<class T>
-	File& operator>>(T& x)
+	File& operator<<(const String& x)
 	{
-		read(&x, sizeof(x));
+		write(*x, x.length());
+		return *this;
+	}
+
+	File& operator>>(String& x) // do what? read size then data? read until 0?
+	{
+		int n;
+		*this >> n;
+		x.resize(n);
+		x[n] = '\0';
+		read(&x[0], n);
 		return *this;
 	}
 

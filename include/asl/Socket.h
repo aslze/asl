@@ -10,12 +10,6 @@
 
 namespace asl {
 
-#ifndef ASL_BIGENDIAN
-#define ASL_OTHERENDIAN BIGENDIAN
-#else
-#define ASL_OTHERENDIAN LITTLEENDIAN
-#endif
-
 struct SocketException : public Exception
 {
 };
@@ -104,7 +98,6 @@ ASL_SMART_CLASS(Socket, SmartObject)
 	friend class Sockets;
 	int _handle;
 	enum { TCP, PACKET, LOCAL } _type;
-	enum Endian { NATIVEENDIAN, BIGENDIAN, LITTLEENDIAN };
 	Endian _endian;
 	InetAddress::Type _family;
 	String _hostname;
@@ -148,7 +141,6 @@ class ASL_API Socket : public SmartObject
 {
 public:
 	enum { TCP, PACKET, LOCAL };
-	enum Endian { NATIVEENDIAN, BIGENDIAN, LITTLEENDIAN };
 
 	ASL_SMART_DEF(Socket, SmartObject);
 	Socket(int fd) : ASL_SMART_INIT(fd) {}
@@ -169,7 +161,7 @@ public:
 	{
 		return _()->setOption(level, opt, &val, sizeof(T));
 	}
-	void setEndian(Endian e) { _()->_endian = (Socket_::Endian)e; }
+	void setEndian(Endian e) { _()->_endian = e; }
 
 	Endian endian() const { return (Endian)_()->_endian; }
 
@@ -257,7 +249,7 @@ public:
 	template<class T>
 	Socket& operator<<(const T& x)
 	{
-		T y = (endian() == ASL_OTHERENDIAN) ? bytesSwapped(x) : x;
+		T y = (endian() == ASL_OTHER_ENDIAN) ? bytesSwapped(x) : x;
 		write(&y, sizeof(x));
 		return *this;
 	}
@@ -269,7 +261,7 @@ public:
 	Socket& operator>>(T& x)
 	{
 		read(&x, sizeof(x));
-		if (endian() == ASL_OTHERENDIAN)
+		if (endian() == ASL_OTHER_ENDIAN)
 			swapBytes(x);
 		return *this;
 	}
@@ -289,7 +281,7 @@ public:
 	template<class T>
 	Socket& operator<<(const Array<T>& x)
 	{
-		if (endian() == ASL_OTHERENDIAN)
+		if (endian() == ASL_OTHER_ENDIAN)
 		{
 			foreach(const T& y, x)
 				*this << y;

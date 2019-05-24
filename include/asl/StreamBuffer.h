@@ -3,14 +3,7 @@
 
 #include "Array.h"
 
-#ifndef ASL_BIGENDIAN
-#define ASL_OTHERENDIAN BIGENDIAN
-#else
-#define ASL_OTHERENDIAN LITTLEENDIAN
-#endif
-
 namespace asl {
-
 
 template <class T>
 struct AsBytes
@@ -35,7 +28,7 @@ point numbers in big-endian or little-endian byte order. You have to make sure y
 
 ~~~
 Array<byte> data = File("data.bin").content();
-StreamBufferReader buffer (data, StreamBufferReader::BIGENDIAN);
+StreamBufferReader buffer (data, ENDIAN_BIG);
 int n = buffer.read<int>();
 double x, y, z;
 buffer >> x >> y >> z;
@@ -47,15 +40,14 @@ buffer >> x >> y >> z;
 class ASL_API StreamBufferReader
 {
 public:
-	enum Endian { BIGENDIAN, LITTLEENDIAN };
 	/**
 	Constructs a buffer reader from a byte array
 	*/
-	StreamBufferReader(const Array<byte>& data, Endian e = LITTLEENDIAN) : _ptr(data.ptr()), _end(data.ptr() + data.length()), _endian(e) {}
+	StreamBufferReader(const Array<byte>& data, Endian e = ENDIAN_LITTLE) : _ptr(data.ptr()), _end(data.ptr() + data.length()), _endian(e) {}
 	/**
 	Constructs a buffer reader from a raw byte array
 	*/
-	StreamBufferReader(const byte* data, int n, Endian e = LITTLEENDIAN) : _ptr(data), _end(data + n), _endian(e) {}
+	StreamBufferReader(const byte* data, int n, Endian e = ENDIAN_LITTLE) : _ptr(data), _end(data + n), _endian(e) {}
 	/**
 	Sets the endianness for reading (can be changed on the fly)
 	*/
@@ -73,7 +65,7 @@ public:
 	StreamBufferReader& read2(T& x)
 	{
 		AsOther<T, unsigned short> a;
-		if (_endian == BIGENDIAN)
+		if (_endian == ENDIAN_BIG)
 			a.y = ((unsigned short)_ptr[0] << 8) | ((unsigned short)_ptr[1]);
 		else
 			a.y = ((unsigned short)_ptr[1] << 8) | ((unsigned short)_ptr[0]);
@@ -86,7 +78,7 @@ public:
 	StreamBufferReader& read4(T& x)
 	{
 		AsOther<T, unsigned> a;
-		if (_endian == BIGENDIAN)
+		if (_endian == ENDIAN_BIG)
 			a.y = ((unsigned)_ptr[0] << 24) | ((unsigned)_ptr[1] << 16) | ((unsigned)_ptr[2] << 8) | ((unsigned)_ptr[3]);
 		else
 			a.y = ((unsigned)_ptr[3] << 24) | ((unsigned)_ptr[2] << 16) | ((unsigned)_ptr[1] << 8) | ((unsigned)_ptr[0]);
@@ -99,7 +91,7 @@ public:
 	StreamBufferReader& read8(T& x)
 	{
 		AsOther<T, ULong> a;
-		if (_endian == BIGENDIAN)
+		if (_endian == ENDIAN_BIG)
 			a.y = ((ULong)_ptr[0] << 56) | ((ULong)_ptr[1] << 48) | ((ULong)_ptr[2] << 40) | ((ULong)_ptr[3] << 32)
 			    | ((ULong)_ptr[4] << 24) | ((ULong)_ptr[5] << 16) | ((ULong)_ptr[6] << 8) | ((ULong)_ptr[7]);
 		else
@@ -172,7 +164,7 @@ empty and grows as you append variables. You can change endianness at any moment
 You can then get the content as an Array<byte> and for example write it to a file or send it
 through a socket.
 ~~~
-StreamBuffer buffer(StreamBuffer::BIGENDIAN);
+StreamBuffer buffer(ENDIAN_BIG);
 buffer << 1 << "abc" << 1.5 << short(33);
 
 File("data").put(buffer);
@@ -186,9 +178,7 @@ socket << *buffer;
 class StreamBuffer : public Array<byte>
 {
 public:
-	enum Endian { NATIVEENDIAN, BIGENDIAN, LITTLEENDIAN };
-
-	StreamBuffer(Endian e = NATIVEENDIAN) : _endian(e) {}
+	StreamBuffer(Endian e = ENDIAN_LITTLE) : _endian(e) {}
 
 	Array<byte>& operator*() { return (Array<byte>&)*this; }
 	const Array<byte>& operator*() const { return (const Array<byte>&)*this; }
@@ -207,7 +197,7 @@ public:
 	template<class T>
 	StreamBuffer& operator<<(const T& x)
 	{
-		T y = (_endian == ASL_OTHERENDIAN) ? bytesSwapped(x) : x;
+		T y = (_endian == ASL_OTHER_ENDIAN) ? bytesSwapped(x) : x;
 		write(&y, sizeof(x));
 		return *this;
 	}
@@ -236,7 +226,7 @@ public:
 	template<class T>
 	StreamBuffer& operator<<(const Array<T>& x)
 	{
-		if (_endian == ASL_OTHERENDIAN)
+		if (_endian == ASL_OTHER_ENDIAN)
 		{
 			foreach(const T& y, x)
 				*this << y;

@@ -137,7 +137,7 @@ WebSocket::WebSocket()
 	_isClient = true;
 	_closed = true;
 	_code = 1000;
-	_socket.setEndian(Socket::BIGENDIAN);
+	_socket.setEndian(ENDIAN_BIG);
 	_random.init();
 }
 
@@ -147,7 +147,7 @@ WebSocket::WebSocket(const Socket& s, bool isclient):
 {
 	_closed = false;
 	_code = 1000;
-	_socket.setEndian(Socket::BIGENDIAN);
+	_socket.setEndian(ENDIAN_BIG);
 	_socket.setBlocking(true);
 	_random.init();
 }
@@ -164,7 +164,7 @@ bool WebSocket::connect(const String& uri, int port)
 #ifdef ASL_TLS
 		_socket.close();
 		_socket = TlsSocket();
-		_socket.setEndian(Socket::BIGENDIAN);
+		_socket.setEndian(ENDIAN_BIG);
 		_socket.setBlocking(true);
 		if (url.port == 0) url.port = 443;
 #else
@@ -355,7 +355,7 @@ void WebSocket::send(const byte* p, int length, FrameType type)
 	byte opcode = (type == FRAME_TEXT) ? 1 : (type == FRAME_BINARY) ? 2 : (type == FRAME_PONG) ? 10 : (type == FRAME_PING) ? 9 : 8;
 	byte b0 = 0x80 | opcode;
 	byte masked = _isClient ? 0x80 : 0;
-	StreamBuffer buf(StreamBuffer::BIGENDIAN);
+	StreamBuffer buf(ENDIAN_BIG);
 	buf << b0;
 	Long len = length;
 	if (len < 126)

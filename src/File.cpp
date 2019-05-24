@@ -314,12 +314,6 @@ int File::write(const void* p, int n)
 	return (int)fwrite(p, 1, n, _file);
 }
 
-File& File::operator<<(const String& x)
-{
-	write(*x, x.length());
-	return *this;
-}
-
 File File::temp(const String& ext)
 {
 	File file;

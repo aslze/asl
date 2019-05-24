@@ -391,7 +391,7 @@ Socket_::Socket_()
 	_error = false;
 	_type = TCP;
 	_blocking = true;
-	_endian = NATIVEENDIAN;
+	_endian = ENDIAN_NATIVE;
 }
 
 Socket_::Socket_(bool)
@@ -401,7 +401,7 @@ Socket_::Socket_(bool)
 	_error = false;
 	_type = TCP;
 	_blocking = false;
-	_endian = NATIVEENDIAN;
+	_endian = ENDIAN_NATIVE;
 }
 
 Socket_::Socket_(int fd)
@@ -411,7 +411,7 @@ Socket_::Socket_(int fd)
 	_error = false;
 	_type = TCP;
 	_blocking = true;
-	_endian = NATIVEENDIAN;
+	_endian = ENDIAN_NATIVE;
 }
 
 Socket_::~Socket_()
