@@ -83,7 +83,7 @@ and provide the *mbedTLS* install directory and library location.
 /**
 \defgroup XDL XML, XDL, and JSON
 
-These functions allow parsing and writing data in XMl, XDL and JSON formats.
+These functions allow parsing and writing data in XML, XDL and JSON formats.
 
 Data can be decoded and encoded from/to a text **string** with:
 
@@ -125,8 +125,8 @@ The main differences with VRML syntax are that field name and value are
 separated with a '=', that boolean values are `Y` nd `N` and that array or 
 property elements in the same line are separated with a ','. The main 
 differences with JSON are that property names are not quoted, that objects can 
-have a *class* name prepended, as in VRML, that elements can be separated with a 
-*newline* instead of a comma, and that there can be C/C++ style comments. 
+have a _class_ name prepended, as in VRML, that elements can be separated with a 
+_newline_ instead of a comma, and that there can be C/C++ style comments. 
 Whitespace and newlines can be removed to produce more compact representations.
 
 Consider this XDL code:
@@ -281,13 +281,13 @@ Array<int> c = a.clone();       // c is a separate copy of a
 ~~~
 
 In order to support iterating the elements contained, they implement an 
-*Enumerator*. These are similar to *iterators* but don't have to come in pairs 
+_Enumerator_. These are similar to *iterators* but don't have to come in pairs 
 (*begin* and *end*). Just one Enumerator knows how to go to the next element and 
 when to stop iterating.
 
 All containers have an `all()` enumerator that represents all its elements. All enumerators must implement
 operator `*` to dereference the currently pointed element, and may implement operator `~` to get their associated
-*key*, if any. For example, in an Array, they key is the integer index associated to each element. And in a
+_key_, if any. For example, in an Array, they key is the integer index associated to each element. And in a
 Dic, the key is the element's name, a string.
 
 This way, enumerating is done like this: (the keyword `auto` is useful if your compiler supports it)
@@ -461,22 +461,23 @@ Matrix3d; // Matrix3_<double>
 
 Reading and writing binary data as a stream (in big or little endian order).
 
-Currently files can be read or written as binary streams with the File class, but only in the CPU native endianness.
+Files can be read or written as binary streams with the File class in specific endianness (byte order).
 
 ~~~
 File file("data.bin", File::WRITE);
+file.setEndian(ENDIAN_LITTLE);
 
-file << 3 << 0.5; // writes a 32-bit int and an 64-bit double (12 bytes total).
+file << 3 << 0.5; // writes a 32-bit int and an 64-bit double (12 bytes total) in little endian byte order.
 ~~~
 
 Using class TextFile instead woud write those variables as text (as "30.5" because we did not add whitespace separation).
 
-TCP sockets (class Socket) can also be read or written as binary streams, even with specific endianness:
+TCP sockets (class Socket) can also be read or written as binary streams:
 
 ~~~
 Socket socket;
 socket.connect("someserver", 9000);
-socket.setEndian(Socket::BIGENDIAN);
+socket.setEndian(ENDIAN_BIG);
 socket << 3 << 0.5;
 int32_t x, y;
 socket >> x >> y;
@@ -486,7 +487,7 @@ That will call an actual socket read or write operation for each variable. Alter
 read or write to them as streams with classes StreamBuffer and StreamBufferReader.
 
 ~~~
-StreamBuffer buffer(StreamBuffer::BIGENDIAN);
+StreamBuffer buffer(ENDIAN_BIG);
 buffer << 3 << 0.5;                                // fill binary buffer
 socket << *buffer;                                 // send it all at once
 ~~~
@@ -494,7 +495,7 @@ socket << *buffer;                                 // send it all at once
 ~~~
 Array<byte> data(12);
 socket.read(data.ptr(), 12);                       // read 12 bytes into a buffer
-StreamBufferReader reader(StreamBuffer::BIGENDIAN);
+StreamBufferReader reader(ENDIAN_BIG);
 int32_t x, y;
 reader >> x >> y;                                  // read 2 int32 variables from the buffer
 ~~~
