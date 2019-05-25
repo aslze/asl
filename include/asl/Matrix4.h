@@ -28,7 +28,9 @@ class ASL_API Matrix4_
 	T a[4][4]; // row-major
  public:
 	Matrix4_() {}
-	/** Returns the element at row `i`, column `j`. */
+	/**
+	Returns the element at row `i`, column `j`.
+	*/
 	T& operator()(int i,int j) {return a[i][j];}
 	T operator()(int i,int j) const {return a[i][j];}
 	T& at(int i,int j) {return a[i][j];}
@@ -72,7 +74,9 @@ class ASL_API Matrix4_
 		a[2][0]=m[2]; a[2][1]=m[6]; a[2][2]=m[10]; a[2][3]=m[14];
 		a[3][0]=m[3]; a[3][1]=m[7]; a[3][2]=m[11]; a[3][3]=m[15];
 	}
-	/** Returns this matrix transposed */
+	/**
+	Returns this matrix transposed
+	*/
 	Matrix4_ t() const {
 		return Matrix4_(
 		a[0][0], a[1][0], a[2][0], a[3][0],
@@ -80,16 +84,26 @@ class ASL_API Matrix4_
 		a[0][2], a[1][2], a[2][2], a[3][2],
 		a[0][3], a[1][3], a[2][3], a[3][3]);
 	}
-	/** Returns this matrix plus `B` */
+	/**
+	Returns this matrix plus `B`
+	*/
 	Matrix4_ operator+(const Matrix4_& B) const;
-	/** Returns this matrix multiplied by `B` */
+	/**
+	Returns this matrix multiplied by `B`
+	*/
 	Matrix4_ operator*(const Matrix4_& B) const;
-	/** Returns this matrix multipled by scalar `t` */
+	/**
+	Returns this matrix multipled by scalar `t`
+	*/
 	Matrix4_ operator*(T t) const;
 	friend Matrix4_ operator*(T t, const Matrix4_& m) {return m * t;}
-	/** Multiplies this matrix by scalar `t` */
+	/**
+	Multiplies this matrix by scalar `t`
+	*/
 	Matrix4_& operator*=(T t);
-	/** Returns vector `p` left-multiplied by this matrix. */
+	/**
+	Returns vector `p` left-multiplied by this matrix.
+	*/
 	Vec4_<T> operator*(const Vec4_<T>& p) const
 	{
 		return Vec4_<T>(
@@ -98,7 +112,9 @@ class ASL_API Matrix4_
 			a[2][0] * p.x + a[2][1] * p.y + a[2][2] * p.z + a[2][3] * p.w,
 			a[3][0] * p.x + a[3][1] * p.y + a[3][2] * p.z + a[3][3] * p.w);
 	}
-	/** Returns vector `p` left-multiplied by this matrix. */
+	/**
+	Returns vector `p` left-multiplied by this matrix.
+	*/
 	Vec3_<T> operator*(const Vec3_<T>& p) const
 	{
 		return Vec3_<T>(
@@ -106,64 +122,80 @@ class ASL_API Matrix4_
 			a[1][0] * p.x + a[1][1] * p.y + a[1][2] * p.z + a[1][3],
 			a[2][0] * p.x + a[2][1] * p.y + a[2][2] * p.z + a[2][3]);
 	}
-	/** Returns vector `p` left-multiplied by this matrix without applying the translation part. */
+	/**
+	Returns vector `p` left-multiplied by this matrix without applying the translation part.
+	*/
 	Vec3_<T> operator%(const Vec3_<T>& p) const;
-	/** Returns a translation matrix for the given vector. */
+	/**
+	Returns a translation matrix for the given vector.
+	*/
 	static Matrix4_ translate(const Vec3_<T>&);
-	/** Returns a translation matrix for the given coordinates. */
+	/**
+	Returns a translation matrix for the given coordinates.
+	*/
 	static Matrix4_ translate(T x, T y, T z) {return translate(Vec3_<T>(x,y,z));}
-	/** Returns a scale matrix. */
+	/**
+	Returns a scale matrix.
+	*/
 	static Matrix4_ scale(const Vec3_<T>&);
-	/** Returns a scale matrix. */
+	/**
+	Returns a scale matrix.
+	*/
 	static Matrix4_ scale(T s) {return scale(Vec3_<T>(s, s, s));}
-	/** Returns a rotation matrix around the *x* axis. */
+	/**
+	Returns a rotation matrix around the *x* axis.
+	*/
 	static Matrix4_ rotateX(T);
-	/** Returns a rotation matrix around the *y* axis. */
+	/**
+	Returns a rotation matrix around the *y* axis.
+	*/
 	static Matrix4_ rotateY(T);
-	/** Returns a rotation matrix around the *z* axis. */
+	/**
+	Returns a rotation matrix around the *z* axis.
+	*/
 	static Matrix4_ rotateZ(T);
-	/** Returns a rotation matrix of an angle around a given axis. */
+	/**
+	Returns a rotation matrix of an angle around a given axis.
+	*/
 	static Matrix4_ rotate(const Vec3_<T>& axis, T angle);
+	/**
+	Returns a rotation matrix from a rotation vector (aligned with the axis and with the rotation angle as magnitude)
+	*/
+	static Matrix4_ rotate(const Vec3_<T>& axisAngle) { return rotate(axisAngle, axisAngle.length()); }
+
 	static Matrix4_ rotateAxis(const Vec3_<T>& axis, T angle) { return rotate(axis, angle); } // [deprecated]
+	
 	static Matrix4_ reflection(const Vec3_<T>& p, const Vec3_<T>& n);
-	/** Multipies this matrix by `B` */
+	/**
+	Multipies this matrix by `B`
+	*/
 	Matrix4_& operator*=(const Matrix4_& B);
-	/** Returns the inverse of this matrix */
+	/**
+	Returns the inverse of this matrix
+	*/
 	Matrix4_ inverse() const;
-	/** Returns an identity matrix */
+	/**
+	Returns an identity matrix
+	*/
 	static Matrix4_ identity();
-	/** Returns the *rotation* part of this matrix as a Quaternion */
+	/**
+	Returns the *rotation* part of this matrix as a Quaternion
+	*/
 	Quaternion_<T> rotation() const;
-	/** Returns the *translation* part of this matrix (the last column) as a Vec3 */
+	/**
+	Returns the *translation* part of this matrix (the last column) as a Vec3
+	*/
 	Vec3_<T> translation() const {return Vec3_<T>(a[0][3], a[1][3], a[2][3]);}
-	//Matrix4_(const Matrix4_& m) {memcpy(this,&m, sizeof(Matrix4_));}
-	//void operator=(const Matrix4_& m) {memcpy(this,&m, sizeof(Matrix4_));}
-	/** Sets the *translation* part of this matrix (the last column) */
+	/**
+	Sets the *translation* part of this matrix (the last column)
+	*/
 	Matrix4_& setTranslation(const Vec3_<T>& t) { a[0][3] = t.x; a[1][3] = t.y; a[2][3] = t.z; return *this; }
-	/** Returns the *determinant* part of this matrix. */
+	/**
+	Returns the *determinant* of this matrix.
+	*/
 	T det() const;
 };
 
-/*
-template<class T>
-inline Vec3_<T> Matrix4_<T>::operator*(const Vec3_<T>& p) const
-{
-	return Vec3_<T>(
-		a[0][0] * p.x + a[0][1] * p.y + a[0][2] * p.z + a[0][3],
-		a[1][0] * p.x + a[1][1] * p.y + a[1][2] * p.z + a[1][3],
-		a[2][0] * p.x + a[2][1] * p.y + a[2][2] * p.z + a[2][3]);
-}
-
-template<class T>
-inline Vec4_<T> Matrix4_<T>::operator*(const Vec4_<T>& p) const
-{
-	return Vec4_<T>(
-		a[0][0] * p.x+a[0][1] * p.y + a[0][2] * p.z+a[0][3] * p.w,
-		a[1][0] * p.x+a[1][1] * p.y + a[1][2] * p.z+a[1][3] * p.w,
-		a[2][0] * p.x+a[2][1] * p.y + a[2][2] * p.z+a[2][3] * p.w,
-		a[3][0] * p.x+a[3][1] * p.y + a[3][2] * p.z+a[3][3] * p.w );
-}
-*/
 typedef Matrix4_<float> Matrix4;
 typedef Matrix4_<double> Matrix4d;
 

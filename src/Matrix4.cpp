@@ -116,7 +116,7 @@ Matrix4_<T> Matrix4_<T>::rotateZ(T phi)
 template<class T>
 Matrix4_<T> Matrix4_<T>::rotate(const Vec3_<T>& axis, T angle)
 {
-	return Quaternion_<T>(axis, angle).matrix();
+	return Quaternion_<T>::fromAxisAngle(axis, angle).matrix();
 }
 
 template<class T>
