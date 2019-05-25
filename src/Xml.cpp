@@ -15,8 +15,14 @@ bool Xml::write(const String& file, const Xml& e)
 	return TextFile(file).put(encodeXML(e, true));
 }
 
-Xml::Xml(const String& t, const String& val) : NodeBase(new _Xml(t))
+Xml::Xml(const String& tag, const String& val) : NodeBase(new _Xml(tag))
 {
+	_()->children << XmlText(val);
+}
+
+Xml::Xml(const String& tag, const Map<>& attrs, const String& val) : NodeBase(new _Xml(tag))
+{
+	_()->attribs = attrs;
 	_()->children << XmlText(val);
 }
 

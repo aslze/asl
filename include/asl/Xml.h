@@ -278,6 +278,12 @@ public:
 	Constructs an element with the given tag and value (text subelement).
 	*/
 	Xml(const String& tag, const String& val);
+
+	/**
+	Constructs an element with the given tag, attributes and value (text subelement).
+	*/
+	Xml(const String& tag, const Map<>& attrs, const String& val);
+
 	/**
 	Returns a separate copy of this element with its children, and no parent
 	*/
@@ -479,7 +485,7 @@ public:
 	}
 
 	/**
-	Appends a text element as a child.
+	Appends a text element as a child, or appends to the text if the last child is already a text element
 	*/
 	Xml& operator<<(const String& text);
 
