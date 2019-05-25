@@ -22,6 +22,20 @@ ASL_TEST(File)
 	ASL_ASSERT(file.name() == "file.ext");
 	ASL_ASSERT(file.extension() == "ext");
 	ASL_ASSERT(file.hasExtension("txt|EXT"));
+
+	File bfile("file.bin", File::WRITE);
+	bfile << int(-3) << 3.5f;
+	bfile.setEndian(ENDIAN_BIG);
+	bfile << 0x10203040;
+	bfile.close();
+
+	bfile.open(File::READ);
+	bfile.setEndian(ENDIAN_LITTLE);
+	int n;
+	float x;
+	bfile >> n >> x;
+	ASL_ASSERT(n == -3 && x == 3.5f);
+	ASL_ASSERT(bfile.read<unsigned>() == 0x40302010);
 	
 	TextFile tfile("lines.txt", File::WRITE);
 	String line1 = "123";

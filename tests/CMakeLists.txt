@@ -1,27 +1,40 @@
 
-SET(EXE_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set(EXE_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-ADD_EXECUTABLE( unittests unittests.cpp unittests2.cpp unittests3.cpp unittests4.cpp)
-TARGET_LINK_LIBRARIES( unittests asls )
+add_executable( unittests unittests.cpp unittests2.cpp unittests3.cpp unittests4.cpp)
+target_link_libraries( unittests asls )
 
-MACRO(TEST name)
-	ADD_TEST( ${name}-test ${EXE_PATH}/unittests ${name})
-ENDMACRO()
+macro(TEST name)
+	add_test( ${name} ${EXE_PATH}/unittests ${name})
+endmacro()
 
-SET(TESTS
-	Array String Var XDL CmdArgs TabularDataFile IniFile
-	Factory HashMap Map File StaticSpace Path
-	Base64 XML
+set(TESTS
+	Array
+	String
+	Var
+	XDL
+	CmdArgs
+	TabularDataFile
+	IniFile
+	Factory
+	HashMap
+	Map
+	File
+	StaticSpace
+	Path
+	Base64
+	XML
 	Process
 	SHA1
 	SmartObject
 	Date
 	AtomicCount
 	Vec3
+	Matrix4
 	Uuid
 	StreamBuffer
 )
 
-FOREACH(T ${TESTS})
+foreach(T ${TESTS})
 	TEST(${T})
-ENDFOREACH()
+endforeach()

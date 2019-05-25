@@ -1,11 +1,16 @@
 #include <asl/Vec3.h>
 #include <asl/Matrix4.h>
+#include <asl/Quaternion.h>
 #include <asl/Uuid.h>
 #include <asl/StreamBuffer.h>
 #include <stdio.h>
 #include "testing.h"
 
 using namespace asl;
+
+#define EPS 1e-5
+#define EPSf 1e-5f
+
 
 ASL_TEST(Vec3)
 {
@@ -14,7 +19,16 @@ ASL_TEST(Vec3)
 
 	Vec3d a2 = a, b2 = b;
 	Vec3 a3 = a2;
-	ASL_ASSERT(a2 + b2 == Vec3d(2, 2.5, 3));
+	ASL_ASSERT(!((a2 + b2) - Vec3d(2, 2.5, 3)) < EPS);
+}
+
+ASL_TEST(Matrix4)
+{
+	Matrix4 m1 = Matrix4::rotateAxis(Vec3(1, 0, 0), (float)PI / 2);
+	Matrix4 m2 = Matrix4::rotateX((float)PI / 2);
+	Vec3 a(0, 1, 0);
+	ASL_ASSERT(!(m1 * a - Vec3(0, 0, 1)) < EPSf);
+	ASL_ASSERT(!(m2 * a - Vec3(0, 0, 1)) < EPSf);
 }
 
 

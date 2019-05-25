@@ -63,7 +63,7 @@ ASL_TEST(XML)
 		)
 		<< (Xml("body")
 			<< Xml("h1", "Hello")
-			<< Xml("p", "world")
+			<< Xml("p", Dic<>("class", "main"), "world")
 		);
 
 	ASL_ASSERT(html.tag() == "html");
@@ -77,6 +77,8 @@ ASL_TEST(XML)
 
 	Xml head = html("head");
 	ASL_ASSERT(head("meta")["lang"] == "es" && head("meta")["charset"] == "utf8");
+
+	ASL_ASSERT(html("body")("p")["class"] == "main");
 
 	html("body")("p") << "!";
 	ASL_ASSERT(html("body").child(1).text() == "world!");
