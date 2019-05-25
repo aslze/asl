@@ -143,17 +143,27 @@ public:
 		void operator=(const Enumerator& e) {for(int k=0; k<length(); k++) a[i+k] = e[k];}
 	};
 	int r() {return d().rc;}
-	/** Returns the number of elements in the array */
+	/**
+	Returns the number of elements in the array
+	*/
 	int length() const {return d().n;}
-	/** Resizes the array to a capacity of m elements. Up to m existing elements are preserved */
+	/**
+	Resizes the array to a capacity of m elements. Up to m existing elements are preserved
+	*/
 	void resize(int m);
-	/** Reserves space for m elements without changing actual length */
+	/**
+	Reserves space for m elements without changing actual length
+	*/
 	void reserve(int m) { int n = length(); resize(m); resize(n); }
-	/** Removes all elements in the array */
+	/**
+	Removes all elements in the array
+	*/
 	void clear() { resize(0); }
 	/* Frees all elements (with delete) and clears the array. Elements must be pointers */
 	void destroy() {for(int i=0; i<length(); i++) delete _a[i]; clear();}
-	/** Returns a pointer to the base of the array */
+	/**
+	Returns a pointer to the base of the array
+	*/
 	operator const T*() const {return &_a[0];}
 	operator T*() {return &_a[0];}
 	const T* ptr() const {return &_a[0];}
@@ -162,7 +172,9 @@ public:
 	operator const void*() const { return d().n == 0 ? 0 : this; }
 	//explicit operator bool() const { return d().n != 0; }
 	bool operator!() const { return d().n == 0; }
-	/** Tests for equality of all elements of both arrays*/
+	/**
+	Tests for equality of all elements of both arrays
+	*/
 	bool operator==(const Array& b) const
 	{
 		if(length() != b.length())
@@ -173,14 +185,18 @@ public:
 		return true;
 	}
 	bool operator!=(const Array&b) const { return !(*this == b); }
-	/** Returns the element at index i */
+	/**
+	Returns the element at index i
+	*/
 	const T& operator[](int i) const {
 #ifdef ASL_DEBUG_ARRAY
 		if(i>=length()) {_a[i]=_a[0];return *(const T*)0;}
 #endif
 		return _a[i];
 	}
-	/** Returns the element at index i */
+	/**
+	Returns the element at index i
+	*/
 	T& operator[](int i) {
 #ifdef ASL_DEBUG_ARRAY
 		if(i>=length()) {_a[i]=_a[0]; return *(T*)0;}
@@ -188,25 +204,35 @@ public:
 		return _a[i];
 	}
 
-	/** Returns a reference to the last element */
+	/**
+	Returns a reference to the last element
+	*/
 	const T& last() const {
 		return _a[length()-1];
 	}
 	
-	/** Returns a reference to the last element */
+	/**
+	Returns a reference to the last element
+	*/
 	T& last() {
 		return _a[length()-1];
 	}
-	/** Returns the index of the first element with value x. The search starts at position j.
-	The value -1 is returned if no such element is found*/
+	/**
+	Returns the index of the first element with value x. The search starts at position j.
+	The value -1 is returned if no such element is found
+	*/
 	int indexOf(const T& x, int j=0) const
 	{
 		for(int i=j; i<length(); i++) {if(_a[i]==x) return i;}
 		return -1;
 	}
-	/** Returns true if the array contains an element equal to x */
+	/**
+	Returns true if the array contains an element equal to x
+	*/
 	bool contains(const T& x) const {return indexOf(x) >= 0;}
-	/** Makes this array independent of others */
+	/**
+	Makes this array independent of others
+	*/
 	Array& dup()
 	{
 		if(d().rc==1) return *this;
@@ -216,13 +242,17 @@ public:
 		(*this)=b;
 		return *this;
 	}
-	/** Returns an independent copy of this array */
+	/**
+	Returns an independent copy of this array
+	*/
 	Array clone() const
 	{
 		Array b(*this);
 		return b.dup();
 	}
-	/** Copies another array's contents into this array */
+	/**
+	Copies another array's contents into this array
+	*/
 	void copy(const Array& b)
 	{
 		int n = b.length();
@@ -230,7 +260,9 @@ public:
 		for (int i = 0; i<n; i++)
 			_a[i] = b._a[i];
 	}
-	/** Assigns array b into this array by reference. */
+	/**
+	Assigns array b into this array by reference.
+	*/
 	Array& operator=(const Array& b)
 	{
 		if(this==&b) return *this;
@@ -239,15 +271,21 @@ public:
 		++d().rc;
 		return *this;
 	}
-	/** Adds element x at the end of the array */
+	/**
+	Adds element x at the end of the array
+	*/
 	Array& operator<<(const T& x)
 	{
 		insert(-1, x);
 		return *this;
 	}
-	/** The same as `<<`, useful to create pseudo-array-literals  */
+	/**
+	The same as `<<`, useful to create pseudo-array-literals
+	*/
 	Array& operator,(const T& x) { return (*this) << x; }
-	/** Removes the element at position i. */
+	/**
+	Removes the element at position i.
+	*/
 	void remove(int i)
 	{
 		asl_destroy(_a+i);
@@ -256,7 +294,9 @@ public:
 		resize(d().n);
 		return;
 	}
-	/** Removes n elements starting at position i. */
+	/**
+	Removes n elements starting at position i.
+	*/
 	void remove(int i, int n)
 	{
 		asl_destroy(_a+i, n);
@@ -265,7 +305,9 @@ public:
 		resize(d().n);
 		return;
 	}
-	/* Removes n elements starting at position i. */
+	/*
+	Removes n elements starting at position i.
+	*/
 	void remove(Enumerator& i, int n=1)
 	{
 		asl_destroy(_a+i.i, n);
@@ -276,8 +318,9 @@ public:
 		resize(d().n);
 		return;
 	}
-	/** Removes the first element with value x starting at index i0.
-		Returns true if an elemento was found and removed.
+	/**
+	Removes the first element with value x starting at index i0.
+	Returns true if an elemento was found and removed.
 	*/
 	bool removeOne(const T& x, int i0=0)
 	{
@@ -288,9 +331,13 @@ public:
 		}
 		return false;
 	}
-	/** Inserts x at position k */
+	/**
+	Inserts x at position k
+	*/
 	void insert(int k, const T& x);
-	/** Returns the elements of the array in reversed order */
+	/**
+	Returns the elements of the array in reversed order
+	*/
 	Array reversed() const
 	{
 		Array b(length());
@@ -298,8 +345,10 @@ public:
 			b[i] = _a[length()-i-1];
 		return b;
 	}
-	/** Returns a section of the array, from element i1 up to but not including element i2.
-	If i2 is omitted the subarray will take elements up te the last*/
+	/**
+	Returns a section of the array, from element i1 up to but not including element i2.
+	If i2 is omitted the subarray will take elements up te the last
+	*/
 	Array slice(int i1, int i2=0) const
 	{
 		if(i2==0)
@@ -309,12 +358,16 @@ public:
 			b[i-i1] = _a[i];
 		return b;
 	}
-	/** Same as slice() \deprecated */
+	/**
+	Same as slice() \deprecated
+	*/
 	Array sslice(int i1, int i2 = 0) const
 	{
 		return slice(i1, i2);
 	}
-	/** Adds all elements from array b at the end of the array */
+	/**
+	Adds all elements from array b at the end of the array
+	*/
 	Array& append(const Array& b)
 	{
 		int n=length();
@@ -323,7 +376,9 @@ public:
 			_a[n+i] = b[i];
 		return *this;
 	}
-	/** Adds n elements from array pointed by p at the end of this array */
+	/**
+	Adds n elements from array pointed by p at the end of this array
+	*/
 	Array& append(const T* p, int n)
 	{
 		int m=length();
@@ -365,13 +420,17 @@ public:
 		return concat(b);
 	}
 
-	/** Sorts the array using the elements' < operator "in place" */
+	/**
+	Sorts the array using the elements' < operator "in place"
+	*/
 	Array& sort()
 	{
 		quicksort(_a, length());
 		return *this;
 	}
-	/** Sorts the array using the elements' < operator "in place" */
+	/**
+	Sorts the array using the elements' < operator "in place"
+	*/
 	template<class Less>
 	Array& sort(Less f)
 	{

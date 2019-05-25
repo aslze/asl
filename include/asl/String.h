@@ -36,7 +36,8 @@ class QString;
 
 namespace asl {
 
-/** A substitute of `printf` that works on MingW with UTF8 text
+/**
+A substitute of `printf` that works on MingW with UTF8 text
 */
 void ASL_API printf_(const char* fmt, ...);
 
@@ -121,7 +122,9 @@ protected:
 	char* str() const {return (_size==0)? (char*)_space : (char*)_str;}
 	String(void*) {} // avoid accidental construction from arbitrary pointers
 public:
-	/** Constructs an empty string */
+	/**
+	Constructs an empty string
+	*/
 	String(): _size(0),_len(0)
 	{
 		*_space='\0';
@@ -136,26 +139,34 @@ public:
 		_len=n;
 		str()[_len] = '\0';
 	}
-	/** Constructs a string from a C string (pointer to null-terminated string) */
+	/**
+	Constructs a string from a C string (pointer to null-terminated string)
+	*/
 	String(char* txt)
 	{
 		init((int)strlen(txt));
 		memcpy(str(), txt, _len+1);
 	}
-	/** Constructs a string from a C string (pointer to null-terminated string) */
+	/**
+	Constructs a string from a C string (pointer to null-terminated string)
+	*/
 	String(const char* txt)
 	{
 		init((int)strlen(txt));
 		memcpy(str(), txt, _len+1);
 	}
-	/** Constructs a string from the first `n` characters of a character buffer pointed by `txt` */
+	/**
+	Constructs a string from the first `n` characters of a character buffer pointed by `txt`
+	*/
 	String(const char* txt, int n)
 	{
 		init(n);
 		memcpy(str(), txt, n);
 		str()[n] = '\0';
 	}
-	/** Constructs a string from a byte array` */
+	/**
+	Constructs a string from a byte array`
+	*/
 	String(const Array<char>& txt)
 	{
 		int n = txt.length();
@@ -177,22 +188,28 @@ public:
 		init(s._len);
 		memcpy(str(), s.str(), _len + 1);
 	}
-	/** Constructs a string from a character */
+	/**
+	Constructs a string from a character
+	*/
 	String(char c)
 	{
 		init(1);
 		str()[0] = c;
 		str()[1] = '\0';
 	}
-	/** Constructs a string consisting of character `c` repeated `n` times.
-	@deprecated Use `repeat()` instead. */
+	/**
+	Constructs a string consisting of character `c` repeated `n` times.
+	@deprecated Use `repeat()` instead.
+	*/
 	String(char c, int n)
 	{
 		init(n);
 		memset(str(), c, n);
 		str()[n] = '\0';
 	}
-	/** Constructs a string consisting of character `c` repeated `n` times */
+	/**
+	Constructs a string consisting of character `c` repeated `n` times
+	*/
 	inline static String repeat(char c, int n)
 	{
 		String s(n, n);
@@ -200,7 +217,9 @@ public:
 		s.str()[n] = '\0';
 		return s;
 	}
-	/** Constructs a string from another string object */
+	/**
+	Constructs a string from another string object
+	*/
 	String(const String& s)
 	{
 		init(s._len);
@@ -215,7 +234,9 @@ public:
 		swap(*this, s);
 	}
 #endif
-	/** Constructs a string from an Unicode UCS2 C string */
+	/**
+	Constructs a string from an Unicode UTF16 string
+	*/
 	String(const wchar_t* s);
 	~String()
 	{
@@ -232,17 +253,29 @@ public:
 	any case, the function will automatically allocate _space as needed.
 	*/
 	String(int n, const char* fmt, ...);
-	/** Constructs a string from a 64bit long integer number */
+	/**
+	Constructs a string from a 64bit long integer number
+	*/
 	String(Long x);
-	/** Constructs a string from an integer number */
+	/**
+	Constructs a string from an integer number
+	*/
 	String(int x);
-	/** Constructs a string from an unsigned integer number */
+	/**
+	Constructs a string from an unsigned integer number
+	*/
 	String(unsigned x);
-	/** Constructs a string from a float floating-point number */
+	/**
+	Constructs a string from a float floating-point number
+	*/
 	String(float x);
-	/** Constructs a string from a double floating-point number */
+	/**
+	Constructs a string from a double floating-point number
+	*/
 	String(double x);
-	/** Constructs a string from a boolean value */
+	/**
+	Constructs a string from a boolean value
+	*/
 	String(bool x);
 #if defined(QSTRING_H) && defined(ASL_STATIC)
 	String(const QString& s)
@@ -261,36 +294,57 @@ public:
 		return QString::QTFROM(str());
 	}
 #endif
-	/** Converts this string to an integer number */
+	/**
+	Converts this string to an integer number
+	*/
 	operator int() const {return myatoi(str());}
 	//operator int() {return atoi(str());}
-	/** Converts this string to an unsigned integer number */
+	/**
+	Converts this string to an unsigned integer number
+	*/
 	operator unsigned() const {return atoi(str());}
-	/** Converts this string to a 32-bit floating-point number */
+	/**
+	Converts this string to a 32-bit floating-point number
+	*/
 	operator float() const {return (float)myatof(str());}
-	/** Converts this string to a 64-bit floating-point number */
+	/**
+	Converts this string to a 64-bit floating-point number
+	*/
 	operator double() const {return atof(str());}
-	/** Converts this string to a 64-bit integer number */
+	/**
+	Converts this string to a 64-bit integer number
+	*/
 	operator Long() const {return toLong();}
-	/** Returns true if this string is not empty */
+	/**
+	Returns true if this string is not empty
+	*/
 	operator bool() const {return _len > 0;}
-	//operator bool() {return _len > 0;}
-	/** Returns true if this string is empty */
+	/**
+	Returns true if this string is empty
+	*/
 	bool operator!() const {return _len == 0;}
-	/** Returns a const pointer to the beginning of the character data (suitable for functions
-		requiring C-style strings) */
+	/**
+	Returns a const pointer to the beginning of the character data (suitable for functions
+	requiring C-style strings)
+	*/
 	operator const char*() const {return str();}
-	/** Returns a pointer to the beginning of the character data (suitable for functions
-		requiring C-style strings) */
+	/**
+	Returns a pointer to the beginning of the character data (suitable for functions
+	requiring C-style strings)
+	*/
 	operator char*() const {return str();}
-	/** Returns a const pointer to a Unicode UCS2 representation of this string by expanding from the internal
-		byte representation (suitable for functions requiring C-style wide strings (LPWSTR)) */
+	/**
+	Returns a const pointer to a Unicode UCS2 representation of this string by expanding from the internal
+	byte representation (suitable for functions requiring C-style wide strings (LPWSTR))
+	*/
 	operator const wchar_t*() const;
-	//operator const wchar_t*() const {return (const wchar_t*)*(String*)this;}
+
 	operator wchar_t*() const {return (wchar_t*)(const wchar_t*)*this;}
 	
-	/** Returns a const pointer to the beginning of the character data (suitable for functions
-		for functions requiring C-style strings) */
+	/**
+	Returns a const pointer to the beginning of the character data (suitable for functions
+	for functions requiring C-style strings)
+	*/
 	const char* operator*() const {return str();}
 	int toInt() const {return atoi(str());}
 	double toDouble() const { return atof(str()); }
@@ -300,19 +354,27 @@ public:
 	*/
 	bool isTrue() const;
 	Long toLong() const;
-	/** Converts this string to an unsigned integer number */
+	/**
+	Converts this string to an unsigned integer number by interpreting it as an hexadecimal number
+	*/
 	unsigned hexToInt() const {return (unsigned int)strtoul(str(), NULL, 16);}
-	/** Resizes this string to a length of `n`, keeping or not its original contents  */
+	/**
+	Resizes this string to a length of `n`, keeping or not its original contents
+	*/
 	String& resize(int n, bool keep=true, bool newlen=true);
-	/** Restores the internal state of a String that has been modified externally and changed its length */
+	/**
+	Restores the internal state of a String that has been modified externally and changed its length
+	*/
 	String& fix();
 	String& fixW();
-	/** Restores the internal state of a String that has been modified externally and changed its length to a known value */
+	/**
+	Restores the internal state of a String that has been modified externally and changed its length to a known value
+	*/
 	String& fix(int n) { _len = n; return *this; }
-	/** Returns a list of full Unicode characters (code points) in this string */
-	Array<int> chars();
-	/** Returns a list of full Unicode characters (code points) in this string */
-	Array<int> chars() const {return ((String)*this).chars();}
+	/**
+	Returns a list of Unicode characters (code points) in this string
+	*/
+	Array<int> chars() const;
 
 	String concat(const char* b, int n) const;
 	void append(const char* b, int n);
@@ -357,63 +419,107 @@ public:
 	Returns this string or s if this string is empty
 	*/
 	const String& operator|(const String& s) const { return (_len == 0) ? s : *this; }
-	/** Returns a reference to the `i`-th character in this string (byte-based) */
+	/**
+	Returns a reference to the `i`-th character in this string (byte-based)
+	*/
 	char& operator[](int i) {return str()[i];}
-	/** Returns a reference to the `i`-th character in this string (byte-based) */
+	/**
+	Returns a reference to the `i`-th character in this string (byte-based)
+	*/
 	const char& operator[](int i) const {return str()[i];}
 	int compare(const String& s) const {return strcmp(str(), s.str());}
 	int compare(const char* s) const {return strcmp(str(), s);}
 	bool equalsNocase(const String& s) const {return toUpperCase() == s.toUpperCase();}
-	/** Returns the first index where character `c` appears in this string, optionally starting search at position
-		`i0`, or -1 if it is not found. */
+	/**
+	Returns the first index where character `c` appears in this string, optionally starting search at position
+	`i0`, or -1 if it is not found.
+	*/
 	int indexOf(char c, int i0=0) const;
-	/** Returns the first index where substring `s` appears in this string, optionally starting search at position
-		`i0`, or -1 if it is not found. */
+	/**
+	Returns the first index where substring `s` appears in this string, optionally starting search at position
+	`i0`, or -1 if it is not found.
+	*/
 	int indexOf(const char* s, int i0=0) const;
-	/** Returns the first index where substring `s` appears in this string, optionally starting search at position
-		`i0`, or -1 if it is not found. */
+	/**
+	Returns the first index where substring `s` appears in this string, optionally starting search at position
+	`i0`, or -1 if it is not found.
+	*/
 	int indexOf(const String& s, int i0=0) const {return indexOf((const char*)s, i0);}
-	/** Returns the last index where character `c` appears in this string, or -1 if it is not found. */
+	/**
+	Returns the last index where character `c` appears in this string, or -1 if it is not found.
+	*/
 	int lastIndexOf(char c) const {char* p=strrchr(str(), c); return p?int(p-str()):-1;}
-	/** Returns the last index where string `s` appears in this string, or -1 if it is not found. */
+	/**
+	Returns the last index where string `s` appears in this string, or -1 if it is not found.
+	*/
 	int lastIndexOf(const char* s) const;
-	/** Returns the length of this string in bytes */
+	/**
+	Returns the length of this string in bytes
+	*/
 	int length() const {return _len;}
-	/** Returns the number of full characters in the string (may be different from `length()` ) */
+	/**
+	Returns the number of full characters in the string (may be different from `length()` )
+	*/
 	int count() const {const wchar_t* w(*(String*)this); return (int)wcslen(w);} // to improve
-	/** Return the substring starting at position `i` and up to but not including position `j` */
+	/**
+	Return the substring starting at position `i` and up to but not including position `j`
+	*/
 	String substring(int i, int j) const;
-	/** Return the substring starting at position `i` and up to the end */
+	/**
+	Return the substring starting at position `i` and up to the end
+	*/
 	String substring(int i) const {return substring(i, _len);}
-	/** Return the substring starting at position `i` with at most `n` chars, if `i` is negative it counts from the end */
+	/**
+	Return the substring starting at position `i` with at most `n` chars, if `i` is negative it counts from the end
+	*/
 	String substr(int i, int n) const;
 	String substr(int i) const { return substr(i, _len); }
-	/* Return the substring starting at position `i` and up to but not including position `j` */
-	//String operator()(int i, int j) const { return substring(i, j); } // deprecated
-	/** Return a string that is like this but without space at the beginning or end */
+	/**
+	Return a string that is like this but without space at the beginning or end
+	*/
 	String trimmed() const;
-	/** Removes space at the beginning and end of the string */
+	/**
+	Removes space at the beginning and end of the string
+	*/
 	String& trim();
-	/** Tests if this string starts with the given substring */
+	/**
+	Tests if this string starts with the given substring
+	*/
 	bool startsWith(const String& s) const { return strncmp(str(), s, s.length()) == 0; }
 	bool startsWith(const char* s) const { return strncmp(str(), s, strlen(s)) == 0; }
-	/** Tests if this string ends with the given substring */
+	/**
+	Tests if this string ends with the given substring
+	*/
 	bool endsWith(const String& s) const { return strncmp(str() + _len - s.length(), s, s.length()) == 0; }
 	bool endsWith(const char* s) const { return strncmp(str() + _len - strlen(s), s, strlen(s)) == 0; }
-	/** Tests if this string starts with the given character */
+	/**
+	Tests if this string starts with the given character
+	*/
 	bool startsWith(char c) const { return str()[0] == c; }
-	/** Tests if this string ends with the given character */
+	/**
+	Tests if this string ends with the given character
+	*/
 	bool endsWith(char c) const { return str()[_len-1] == c; }
-	/** Tests if this string contains the given substring */
+	/**
+	Tests if this string contains the given substring
+	*/
 	bool contains(const char* s) const {return indexOf(s)>=0;}
 	bool contains(const String& s) const {return indexOf(s)>=0;}
-	/** Tests if this string contains the given character */
+	/**
+	Tests if this string contains the given character
+	*/
 	bool contains(char s) const {return indexOf(s)>=0;}
-	/** Returns a lowercase version of this string */
+	/**
+	Returns a lowercase version of this string
+	*/
 	String toLowerCase() const;
-	/** Returns an uppercase version of this string */
+	/**
+	Returns an uppercase version of this string
+	*/
 	String toUpperCase() const;
-	/** Returns a list of strings obtained by cutting this string by occurences of the separator `sep` */
+	/**
+	Returns a list of strings obtained by cutting this string by occurences of the separator `sep`
+	*/
 	Array<String> split(const String& sep) const
 	{
 		Array<String> a;
@@ -421,7 +527,9 @@ public:
 		return a;
 	}
 	void split(const String& sep, Array<String>& out) const;
-	/** Returns a list of strings obtained by cutting this string by whitespace */
+	/**
+	Returns a list of strings obtained by cutting this string by whitespace
+	*/
 	Array<String> split() const;
 	template <class T>
 	Array<T> split_() const
@@ -444,9 +552,13 @@ public:
 		}
 		return a;
 	}
-	/** Returns a string like this one but in which occurences of substring `a` are replaced by `b` */
+	/**
+	Returns a string like this one but in which occurences of substring `a` are replaced by `b`
+	*/
 	String replace(const String& a, const String& b) const;
-	/** Replaces all occurences of character `a` with `b` *in place* */
+	/**
+	Replaces all occurences of character `a` with `b` *in place*
+	*/
 	String& replaceme(char a, char b);
 
 	struct ASL_API Enumerator

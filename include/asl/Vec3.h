@@ -33,12 +33,12 @@ template<class T>
 class Vec3_
 {
  public:
-	Vec3_(T X, T Y, T Z): x(X), y(Y), z(Z) {}
+	Vec3_() {}
+	Vec3_(T x, T y, T z) : x(x), y(y), z(z) {}
 	Vec3_(const Vec3_& v): x(v.x), y(v.y), z(v.z) {}
 	template<class T2>
 	Vec3_(const Vec3_<T2>& v) : x((T)v.x), y((T)v.y), z((T)v.z) {}
 	Vec3_(const T* v): x(v[0]), y(v[1]), z(v[2]) {}
-	Vec3_() {}
 	operator const float*() const {return (float*)this;}
 	/** Returns the *x* and *y* components as a Vec2 */
 	Vec2_<T> xy() const {return Vec2_<T>(x, y);}
@@ -48,7 +48,6 @@ class Vec3_
 	static Vec3_ fromSpherical( T r, T a, T b) {float R=r*cos(b); return Vec3_(R*cos(a), R*sin(b), r*sin(b));}
 
 	void set( T X, T Y, T Z) {x=X; y=Y; z=Z;}
-	void get( T& X, T& Y, T& Z) const {X=x; Y=y; Z=z;}
 
 	/** Returns a normalized version of this vector */
 	Vec3_ normalized() const {

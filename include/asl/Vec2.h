@@ -30,13 +30,10 @@ template<class T>
 class Vec2_
 {
  public:
-	/** Constructs a vector with the given (x, y) coordinates */
-	Vec2_(T X, T Y) {x=X; y=Y;}
-	Vec2_(const Vec2_& v) {x=v.x; y=v.y;}
 	Vec2_() {}
-	/** Sets the x, y components of this vector */
-	void set(T X, T Y) { x=X; y=Y; }
-	void get(T& X, T& Y) const { X=x; Y=y; }
+	/** Constructs a vector with the given (x, y) coordinates */
+	Vec2_(T x, T y): x(x), y(y) {}
+	Vec2_(const Vec2_& v): x(v.x), y(v.y) {}
 	/** Returns a vector constructed from polar coordinates */
 	static Vec2_ polar(T r, T a) {return Vec2_(r*cos(a), r*sin(a));}
 	/** Returns this vector rotated 90 degrees counterclockwise. */

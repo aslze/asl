@@ -110,19 +110,29 @@ public:
 	bool operator==(const File& f) const { return _path == f._path; }
 	bool operator<(const File& f) const { return _path < f._path; }
 	bool operator!() const {return _file==0;}
-	/** Returns the file's last modification date */
+	/**
+	Returns the file's last modification date
+	*/
 	Date lastModified() const;
-	/** Returns the file's creation date */
+	/**
+	Returns the file's creation date
+	*/
 	Date creationDate() const;
 	/**
 	Sets the file's last modification date
 	*/
 	bool setLastModified(const Date& t);
-	/** Returns the file size */
+	/**
+	Returns the file size
+	*/
 	Long size() const;
-	/** Returns the file's name (without its directory) */
+	/**
+	Returns the file's name (without its directory)
+	*/
 	String name() const;
-	/** Returns the file's extension (what follows the last dot) */
+	/**
+	Returns the file's extension (what follows the last dot)
+	*/
 	String extension() const;
 
 	/**
@@ -134,42 +144,70 @@ public:
 	Returns true if this file's extension is any of those given (separated by '|'), case-insensitively.
 	*/
 	bool hasExtension(const String& exts) const;
-	/** Returns the full path of the file */
+	/**
+	Returns the full path of the file
+	*/
 	const String& path() const {return _path;}
-	/** Returns the directory containing the file */
+	/**
+	Returns the directory containing the file
+	*/
 	String directory() const;
-	/** Returns true if the file is a directory */
+	/**
+	Returns true if the file is a directory
+	*/
 	bool isDirectory() const;
-	/**	Returns true if the file exists */
+	/**
+	Returns true if the file exists
+	*/
 	bool exists() const {return creationDate().time() != 0;}
 
-	/** Copies this file to a new directory or name */
+	/**
+	Copies this file to a new directory or name
+	*/
 	bool copy(const String& to);
-	/** Moves or renames this file to `to` which can be a full name or a destination directory */
+	/**
+	Moves or renames this file to `to` which can be a full name or a destination directory
+	*/
 	bool move(const String& to);
-	/** Deletes the file */
+	/**
+	Deletes the file
+	*/
 	bool remove();
 
-	/** Returns the first n bytes in the file */
+	/**
+	Returns the first n bytes in the file
+	*/
 	Array<byte> firstBytes(int n);
-	/** Returns the binary content of the file as an array of bytes */
+	/**
+	Returns the binary content of the file as an array of bytes
+	*/
 	Array<byte> content();
-	/** Writes the binary content of the file from an array of bytes. Returns false on failure */
+	/**
+	Writes the binary content of the file from an array of bytes. Returns false on failure
+	*/
 	bool put(const Array<byte>& data);
 
-	/** Opens the file with the specified access mode */
+	/**
+	Opens the file with the specified access mode
+	*/
 	bool open(const String& name, OpenMode mode=READ);
-	/** Opens the file with the specified access mode */
+	/**
+	Opens the file with the specified access mode
+	*/
 	bool open(OpenMode mode=READ)
 	{
 		return open(_path, mode);
 	}
 	bool openfd(int fd);
-	/** Closes the file */
+	/**
+	Closes the file
+	*/
 	void close();
 	void setBuffering(char mode, int s=0); // nlf
 
-	/** Returns the current position in the file */
+	/**
+	Returns the current position in the file
+	*/
 	Long position();
 	/**
 	Moves the file pointer to the given position
@@ -187,9 +225,13 @@ public:
 	void flush() {fflush(_file);}
 	bool error() {return ferror(_file)!=0;}
 
-	/** Reads n bytes from the file into the buffer pointed to by p */
+	/**
+	Reads n bytes from the file into the buffer pointed to by p
+	*/
 	int read(void* p, int n);
-	/** Writes n bytes from the buffer pointed to by p into the file */
+	/**
+	Writes n bytes from the buffer pointed to by p into the file
+	*/
 	int write(const void* p, int n);
 
 	/**

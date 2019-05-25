@@ -401,7 +401,7 @@ bool String::isTrue() const
 	return length() > 0 && *this != "0" && c != 'N' && c != 'n' && c != 'f' && c != 'F';
 }
 
-Array<int> String::chars()
+Array<int> String::chars() const
 {
 	Array<int> c(length());
 	int n = utf8toUtf32(str(), c, 1);
