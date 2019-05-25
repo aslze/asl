@@ -113,7 +113,7 @@ if(ASL_BUILD_STATIC)
 	set_target_properties( asls PROPERTIES INTERFACE_COMPILE_DEFINITIONS "${ASLS_DEFS}" )
 	target_include_directories(asls PUBLIC $<BUILD_INTERFACE:${asl_SOURCE_DIR}/../include> $<INSTALL_INTERFACE:$<TARGET_FILE_DIR:asls>/../include> )
 	if( WIN32 )
-		target_link_libraries(asls ws2_32)
+		target_link_libraries(asls ws2_32 shell32 advapi32)
 	elseif( ANDROID )
 		target_link_libraries(asls dl log c m)
 		link_directories( "${ANDROID_SYSROOT}/usr/lib" )
@@ -142,7 +142,7 @@ if(ASL_BUILD_SHARED)
 	set_target_properties( asl PROPERTIES INTERFACE_COMPILE_DEFINITIONS "${ASL_DEFS}" )
 
 	if( WIN32 )
-		target_link_libraries(asl LINK_PRIVATE ws2_32) # PRIVATE
+		target_link_libraries(asl LINK_PRIVATE ws2_32 shell32 advapi32) # PRIVATE
 	elseif( ANDROID )
 		target_link_libraries(asl dl log c m)
 		link_directories( "${ANDROID_SYSROOT}/usr/lib" )
