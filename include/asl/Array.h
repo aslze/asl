@@ -711,5 +711,23 @@ Array<T> array(const T& a0, const T& a1, const T& a2, const T& a3, const T& a4, 
 	return _a;
 }
 
+template<class T>
+static asl::Array<T> deg2rad(const asl::Array<T>& a)
+{
+	asl::Array<T> b(a.length());
+	for (int i = 0; i < a.length(); i++)
+		b[i] = asl::deg2rad(a[i]);
+	return b;
+}
+
+template<class T>
+static asl::Array<T> rad2deg(const asl::Array<T>& a)
+{
+	asl::Array<T> b(a.length());
+	for (int i = 0; i < a.length(); i++)
+		b[i] = asl::rad2deg(a[i]);
+	return b;
+}
+
 }
 #endif
