@@ -10,6 +10,8 @@ using namespace asl;
 
 #define APPROX(x, y) (fabs(x - y) < 0.001)
 
+#ifndef __ANDROID__
+
 ASL_TEST(Process)
 {
 	{
@@ -36,6 +38,8 @@ ASL_TEST(Process)
 		ASL_ASSERT(lines[0] == "subprocess -subproc,5,a \"b");
 	}
 }
+
+#endif
 
 ASL_TEST(SHA1)
 {

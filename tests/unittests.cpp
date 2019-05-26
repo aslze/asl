@@ -15,6 +15,8 @@ ASL_ENABLE_TESTING();
 
 using namespace asl;
 
+#ifndef __ANDROID__
+
 ASL_TEST(File)
 {
 	File file("c:/dir1/dir.2/file.ext");
@@ -181,6 +183,8 @@ ASL_TEST(CmdArgs)
 	ASL_ASSERT( args2[0] == "image1.bmp" );
 	ASL_ASSERT( args2.length() == 1 );
 }
+
+#endif
 
 String join(const Array<String>& a)
 {
@@ -497,6 +501,8 @@ ASL_TEST(Base64)
 	ASL_ASSERT(String(decodeBase64(b64w)) == input);
 }
 
+#ifndef __ANDROID__
+
 int main(int narg, char* argv[])
 {
 	{
@@ -520,3 +526,4 @@ int main(int narg, char* argv[])
 	
 	return EXIT_SUCCESS;
 }
+#endif
