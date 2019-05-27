@@ -52,9 +52,14 @@ public:
 	Sets the endianness for reading (can be changed on the fly)
 	*/
 	void setEndian(Endian e) { _endian = e; }
+
 	operator bool() const { return _ptr < _end; }
 
 	const byte* ptr() const { return _ptr; }
+
+	const byte* end() const { return _end; }
+
+	int length() const { return (int)(_end - _ptr); }
 
 	/**
 	Skips a number of bytes
@@ -149,6 +154,11 @@ public:
 	*/
 	template <class T>
 	T read() { T x; *this >> x; return x; }
+
+	/**
+	Reads n bytes into an Array (or all remaining bytes by default)
+	*/
+	Array<byte> read(int n = -1) { if (n < 0) n = length();  Array<byte> a(n); memcpy(a.ptr(), _ptr, n); _ptr += n; return a; }
 
 	// [deprecated] symbols for compatibility with old code:
 	static const Endian BIGENDIAN = ENDIAN_BIG;
