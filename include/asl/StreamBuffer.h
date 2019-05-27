@@ -150,6 +150,10 @@ public:
 	template <class T>
 	T read() { T x; *this >> x; return x; }
 
+	// [deprecated] symbols for compatibility with old code:
+	static const Endian BIGENDIAN = ENDIAN_BIG;
+	static const Endian LITTLEENDIAN = ENDIAN_LITTLE;
+
 protected:
 	const byte* _ptr;
 	const byte* _end;
@@ -253,6 +257,11 @@ public:
 		write(*x, x.length());
 		return *this;
 	}
+
+	// [deprecated] symbols for compatibility with old code:
+	static const Endian BIGENDIAN = ENDIAN_BIG;
+	static const Endian LITTLEENDIAN = ENDIAN_LITTLE;
+
 protected:
 	Endian _endian;
 };

@@ -321,6 +321,10 @@ public:
 
 	template <class T>
 	T read() { T x; *this >> x; return x; }
+
+	// [deprecated] symbols for compatibility with old code:
+	static const Endian BIGENDIAN = ENDIAN_BIG;
+	static const Endian LITTLEENDIAN = ENDIAN_LITTLE;
 };
 
 ASL_SMART_CLASS(PacketSocket, Socket)
