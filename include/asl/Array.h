@@ -260,6 +260,20 @@ public:
 		for (int i = 0; i<n; i++)
 			_a[i] = b._a[i];
 	}
+
+#ifdef ASL_HAVE_INITLIST
+
+	Array& operator=(std::initializer_list<T> b)
+	{
+		int n = (int)b.size();
+		const T* p = b.begin();
+		resize(n);
+		for (int i = 0; i<n; i++)
+			_a[i] = p[i];
+		return *this;
+	}
+
+#endif
 	/**
 	Assigns array b into this array by reference.
 	*/

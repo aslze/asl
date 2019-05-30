@@ -227,6 +227,12 @@ ASL_TEST(Array)
 
 	// This fails in gcc 4.4.4 !!
 	ASL_ASSERT(join({ "a", "b" }) == "a-b");
+
+	c = { 3, 4, 5 };
+
+	ASL_ASSERT(c.length() == 3);
+	ASL_ASSERT(c[0] == 3 && c[1] == 4 && c[2] == 5);
+
 #endif
 
 	Array<int> b = array(5, 3, -1, 2, 10, 7);
