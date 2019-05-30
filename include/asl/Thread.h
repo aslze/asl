@@ -82,7 +82,7 @@ specific Thread subclass. These threads can get input data or keep state using v
 by the lambda.
 
 ~~~
-Thread thread([=]() {
+Thread thread([&]() {
 	... // what the thread does
 });
 ...
@@ -106,11 +106,13 @@ class Thread
 	typedef pthread_t Handle;
 #endif
 	Handle _thread;
+	volatile bool _threadFinished;
 private:
+	template<class F>
 	struct Context {
-		void* f;
+		F f;
 		Thread* t;
-		Handle h;
+		volatile bool ready;
 		int i;
 	};
 
@@ -145,33 +147,42 @@ private:
 	{
 		Thread* t = (Thread*)p;
 		t->run();
+		t->_threadFinished = true;
 		return 0;
 	}
 #ifdef ASL_EXP_THREADING
 	template<class Func>
-	static void ASL_THREADFUNC_API beginf(void* f)
+	static void ASL_THREADFUNC_API beginf(void* p)
 	{
-		(*((Func*)f))();
+		Context<Func> s = *(Context<Func>*)p;
+		((Context<Func>*)p)->ready = true;
+		s.f();
+		s.t->_threadFinished = true;
 	}
 	template<class Func>
 	static void ASL_THREADFUNC_API beginf1(void* p)
 	{
 		if(!p) return;
-		Context* s = (Context*)p;
-		(*((Func*)s->f))(s->i);
+		Context<Func> s = *(Context<Func>*)p;
+		((Context<Func>*)p)->ready = true;
+		s.f(s.i);
+		s.t->_threadFinished = true;
 	}
 #endif
 public:
 	Thread()
 	{
 		_thread = 0;
+		_threadFinished = false;
 	}
 	Thread(const Thread& t) : _thread(t._thread)
 	{
+		_threadFinished = false;
 		const_cast<Thread&>(t)._thread = 0;
 	}
 	void operator=(const Thread& t)
 	{
+		_threadFinished = t._threadFinished;
 		_thread = t._thread;
 		const_cast<Thread&>(t)._thread = 0;
 	}
@@ -214,6 +225,10 @@ public:
 #endif
 	}
 	/**
+	Returns true if this thread has finished
+	*/
+	bool finished() const { return _threadFinished; }
+	/**
 	Returns the number of logical processors or cores
 	*/
 	static int numProcessors()
@@ -233,14 +248,16 @@ public:
 	template<class F>
 	Thread(const F& f)
 	{
-		*this = start(f);
+		_threadFinished = false;
+		*this = start(f, this);
 	}
 	template<class Func>
-	static Thread start(const Func& f)
+	static Thread start(const Func& f, Thread* t)
 	{
-		Thread t;
-		t.run((Function)Thread::beginf<Func>, (void*)&f);
-		return t;
+		Context<Func> s = { f, t, false, 0 };
+		t->run((Function)Thread::beginf<Func>, (void*)&s);
+		while (!s.ready) {}
+		return *t;
 	}
 	/**
 	Emulates an OpenMP *parallel for* by running function `f` several times in parallel. Function `f` must
@@ -255,20 +272,20 @@ public:
 	~~~
 	
 	but with all iterations run in parallel threads.
-	Needs lambda support.
 	*/
 	template<class F>
 	static void parallel_for(int i0, int i1, const F& f, bool wait=true)
 	{
 		Array<Thread> threads;
-		Array<Context> contexts(i1-i0);
+		Array<Context<F>> contexts(i1 - i0);
 		contexts.clear();
 		for(int i=i0; i<i1; i++)
 		{
 			Thread t;
-			Context s = { &f, &t, 0, i};
+			Context<F> s = { f, &t, false, i };
 			contexts << s;
 			t.run((Function)Thread::beginf1<F>, (void*)&contexts.last());
+			while (!contexts.last().ready) {}
 			threads << t;
 		}
 		if(wait)
