@@ -612,7 +612,7 @@ int Socket_::write(const void* data, int n)
 Array<byte> Socket_::read(int n)
 {
 	Array<byte> a((n < 0)? available() : n);
-	read(&a[0], a.length());
+	a.resize(read(&a[0], a.length()));
 	return a;
 }
 
