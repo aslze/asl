@@ -142,7 +142,7 @@ Consider the following XML fragment.
 	</head>
 	<body>
 		<h1>Hello</h1>
-		<p>world</p>
+		<p class="main">world</p>
 	</body>
 </html>
 ~~~
@@ -165,7 +165,7 @@ Xml html = Xml("html")
 	)
 	<< (Xml("body")
 		<< Xml("h1", "Hello")
-		<< Xml("p", "world")
+		<< Xml("p", Map<>("class", "main"), "world")
 	);
 ~~~
 

@@ -59,7 +59,7 @@ public:
 	*/
 	Vec3_<T> axis() const { return Vec3_<T>(x, y, z).normalized(); }
 	/**
-	Returns the axis-angle representation of the rotation equivalent to this quaternion (i.e. A vector aligned with the
+	Returns the axis-angle representation of the rotation equivalent to this quaternion (a vector aligned with the
 	rotation axis and with length equal to the rotation angle)
 	*/
 	Vec3_<T> axisAngle() const { Vec3_<T> v(x, y, z); T k = v.length(); return (k == 0) ? Vec3_<T>(0, 0, 0) : v * (angle() / k); }
