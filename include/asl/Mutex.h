@@ -411,6 +411,179 @@ public:
 	}
 };
 
+
+/**
+Atomic version of another type.
+
+~~~
+Atomic<double> value = 0;
+value += 1.5;
+~~~
+
+Variable `value` can be read or written from different threads without interfering.
+
+These types have a mutex, accessible for locking.
+
+~~~
+Atomic<Array<int>> list;
+
+Lock _(list.mutex());
+*list << item;
+return list->length();
+~~~
+*/
+
+template<class T>
+class Atomic
+{
+public:
+	Atomic() {}
+
+	Atomic(const Atomic& x)
+	{
+		_x = x;
+	}
+
+	Atomic(const T& x)
+	{
+		_x = x;
+	}
+
+	Atomic& operator=(const T& x)
+	{
+		Lock _(_mutex);
+		_x = x;
+		return *this;
+	}
+
+	T& operator*()
+	{
+		return (T&)_x;
+	}
+
+	Mutex& mutex()
+	{
+		return _mutex;
+	}
+
+	operator T() const
+	{
+		Lock _(_mutex);
+		return _x;
+	}
+
+	const T* operator->() const
+	{
+		Lock _(_mutex);
+		return (const T*)&_x;
+	}
+
+	T* operator->()
+	{
+		Lock _(_mutex);
+		return (T*)&_x;
+	}
+
+	bool operator==(const T& x)
+	{
+		Lock _(_mutex);
+		return _x == x;
+	}
+
+	bool operator != (const T& x)
+	{
+		Lock _(_mutex);
+		return _x != x;
+	}
+
+	bool operator < (const T& x)
+	{
+		Lock _(_mutex);
+		return _x < x;
+	}
+
+	bool operator <= (const T& x)
+	{
+		Lock _(_mutex);
+		return _x <= x;
+	}
+
+	bool operator >(const T& x)
+	{
+		Lock _(_mutex);
+		return _x > x;
+	}
+
+	bool operator >= (const T& x)
+	{
+		Lock _(_mutex);
+		return _x >= x;
+	}
+
+	T operator++()
+	{
+		Lock _(_mutex);
+		++_x;
+		return _x;
+	}
+
+	T operator++(int)
+	{
+		Lock _(_mutex);
+		T x = _x;
+		++_x;
+		return x;
+	}
+
+	T operator--()
+	{
+		Lock _(_mutex);
+		--_x;
+		return _x;
+	}
+
+	T operator--(int)
+	{
+		Lock _(_mutex);
+		T x = _x;
+		--_x;
+		return x;
+	}
+
+	Atomic& operator+=(const T& x)
+	{
+		Lock _(_mutex);
+		_x += x;
+		return *this;
+	}
+
+	Atomic& operator-=(const T& x)
+	{
+		Lock _(_mutex);
+		_x -= x;
+		return *this;
+	}
+
+	Atomic& operator*=(const T& x)
+	{
+		Lock _(_mutex);
+		_x *= x;
+		return *this;
+	}
+
+	Atomic& operator/=(const T& x)
+	{
+		Lock _(_mutex);
+		_x /= x;
+		return *this;
+	}
+
+private:
+	volatile T _x;
+	mutable Mutex _mutex;
+};
+
+
 }
 
 #endif
