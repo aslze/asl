@@ -258,6 +258,10 @@ public:
 	*/
 	String(Long x);
 	/**
+	Constructs a string from a 64bit unsigned long integer number
+	*/
+	String(ULong x);
+	/**
 	Constructs a string from an integer number
 	*/
 	String(int x);

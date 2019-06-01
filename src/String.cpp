@@ -353,8 +353,14 @@ String& String::resize(int n, bool keep, bool newlen)
 
 String::String(Long x)
 {
-	alloc(x < 1000000000000000ll ? ASL_STR_SPACE-1 : 21);
+	alloc((x < 1000000000000000ll && x > -100000000000000ll) ? ASL_STR_SPACE-1 : 21);
 	_len = myltoa(x, str());
+}
+
+String::String(ULong x)
+{
+	alloc(x < 1000000000000000ll ? ASL_STR_SPACE - 1 : 21);
+	_len = sprintf(str(), "%llu", x);
 }
 
 String::String(int x)
