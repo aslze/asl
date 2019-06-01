@@ -493,6 +493,15 @@ public:
 		return *this;
 	}
 
+	/**
+	Removes the last item in the array
+	*/
+	void removeLast()
+	{
+		if (length() > 0)
+			remove(length() - 1);
+	}
+
 	Enumerator all() {return Enumerator(*this);}
 	Enumerator all() const {return Enumerator(*this);}
 	Enumerator slice_(int i, int j=0) {if(j==0) j=length();return Enumerator(*this, i, j);}
