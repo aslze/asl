@@ -422,15 +422,19 @@ value += 1.5;
 
 Variable `value` can be read or written from different threads without interfering.
 
-These types have a mutex, accessible for locking.
+Basic operators of the underlying type are exposed (+=, -=, *=, /=, ==, ...). For other operations you can cast to
+the underlying type or use operator `~`. Or you can use operator `*` to get a reference to the internal variable
+(with no synchronization). In that case you can use the objet's mutex to protect access:
 
 ~~~
-Atomic<Array<int>> list;
-
-Lock _(list.mutex());
-*list << item;
-return list->length();
+int appendAtomic(Atomic<Array<int>>& list, double number)
+{
+	Lock _(list);
+	*list << number;
+	return list->length();
+}
 ~~~
+\ingroup Threading
 */
 
 template<class T>
@@ -456,22 +460,52 @@ public:
 		return *this;
 	}
 
+	/**
+	Returns a reference to the internal value (not synchronized)
+	*/
 	T& operator*()
 	{
 		return (T&)_x;
 	}
 
+	const T& operator*() const
+	{
+		return (const T&)_x;
+	}
+
+	/**
+	Returns the internal mutex for synchronization
+	*/
 	Mutex& mutex()
 	{
 		return _mutex;
 	}
 
-	operator T() const
+	operator Mutex&() const
+	{
+		return _mutex;
+	}
+
+	/**
+	Returns the value of this variable as a copy
+	*/
+	T operator~() const
 	{
 		Lock _(_mutex);
 		return _x;
 	}
 
+	/**
+	Returns the value of this variable as a copy
+	*/
+	operator T() const
+	{
+		return ~(*this);
+	}
+
+	/**
+	Allows calling member functions of the internal object
+	*/
 	const T* operator->() const
 	{
 		Lock _(_mutex);
@@ -484,40 +518,58 @@ public:
 		return (T*)&_x;
 	}
 
-	bool operator==(const T& x)
+	bool operator!()
+	{
+		Lock _(_mutex);
+		return !_x;
+	}
+
+	operator bool() const
+	{
+		Lock _(_mutex);
+		return (bool)_x;
+	}
+
+	bool operator==(const T& x) const
 	{
 		Lock _(_mutex);
 		return _x == x;
 	}
 
-	bool operator != (const T& x)
+	bool operator != (const T& x) const
 	{
 		Lock _(_mutex);
 		return _x != x;
 	}
 
-	bool operator < (const T& x)
+	bool operator < (const T& x) const
 	{
 		Lock _(_mutex);
 		return _x < x;
 	}
 
-	bool operator <= (const T& x)
+	bool operator <= (const T& x) const
 	{
 		Lock _(_mutex);
 		return _x <= x;
 	}
 
-	bool operator >(const T& x)
+	bool operator >(const T& x) const
 	{
 		Lock _(_mutex);
 		return _x > x;
 	}
 
-	bool operator >= (const T& x)
+	bool operator >= (const T& x) const
 	{
 		Lock _(_mutex);
 		return _x >= x;
+	}
+
+	T operator-() const
+	{
+		Lock _(_mutex);
+		return -_x;
 	}
 
 	T operator++()
@@ -579,7 +631,7 @@ public:
 	}
 
 private:
-	volatile T _x;
+	T _x;
 	mutable Mutex _mutex;
 };
 
