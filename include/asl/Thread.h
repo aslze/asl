@@ -113,7 +113,7 @@ private:
 		F f;
 		Thread* t;
 		volatile bool ready;
-		int i;
+		int i0, i1, s;
 	};
 
 	void run(Function f, void* arg)
@@ -160,12 +160,15 @@ private:
 		s.t->_threadFinished = true;
 	}
 	template<class Func>
-	static void ASL_THREADFUNC_API beginf1(void* p)
+	static void ASL_THREADFUNC_API beginfN(void* p)
 	{
-		if(!p) return;
+		if (!p) return;
 		Context<Func> s = *(Context<Func>*)p;
 		((Context<Func>*)p)->ready = true;
-		s.f(s.i);
+		for (int i = s.i0; i < s.i1; i += s.s)
+		{
+			s.f(i);
+		}
 		s.t->_threadFinished = true;
 	}
 #endif
@@ -254,7 +257,7 @@ public:
 	template<class Func>
 	static Thread start(const Func& f, Thread* t)
 	{
-		Context<Func> s = { f, t, false, 0 };
+		Context<Func> s = { f, t, false, 0, 0, 0 };
 		t->run((Function)Thread::beginf<Func>, (void*)&s);
 		while (!s.ready) {}
 		return *t;
@@ -262,35 +265,40 @@ public:
 	/**
 	Emulates an OpenMP *parallel for* by running function `f` several times in parallel. Function `f` must
 	receive an integer argument which will get the values from `i0` up to but not including `i1`.
-	If the argument `wait` is true, the call is blocking and will wait for all executions to end.
-	
-	This is equivalent to running:
+		
+	~~~
+	Thread::parallel_for(i0, i1, [&](int i) {
+		f(i);
+	});
+	~~~
+
+	Is equivalent to running:
 
 	~~~
-	for(int i=i0; i<i1; i++)
+	for(int i=i0; i<i1; i++) {
 		f(i);
+	}
 	~~~
 	
-	but with all iterations run in parallel threads.
+	but with iterations run in `nth` parallel threads.
 	*/
 	template<class F>
-	static void parallel_for(int i0, int i1, const F& f, bool wait=true)
+	static void parallel_for(int i0, int i1, const F& f, int nth = 8)
 	{
-		Array<Thread> threads;
-		Array<Context<F>> contexts(i1 - i0);
-		contexts.clear();
-		for(int i=i0; i<i1; i++)
+		Array<Thread*> threads;
+		int n = min(nth, i1 - i0);
+		for (int i = 0; i<n; i++)
 		{
-			Thread t;
-			Context<F> s = { f, &t, false, i };
-			contexts << s;
-			t.run((Function)Thread::beginf1<F>, (void*)&contexts.last());
-			while (!contexts.last().ready) {}
-			threads << t;
+			threads << new Thread;
+			Context<F> s = { f, threads.last(), false, i0 + i, i1, n };
+			threads.last()->run((Function)Thread::beginfN<F>, (void*)&s);
+			while (!s.ready) {}
 		}
-		if(wait)
-			foreach(Thread& t, threads)
-				t.join();
+		foreach(Thread* t, threads)
+		{
+			t->join();
+			delete t;
+		}
 	}
 	/**
 	Runs the two functions/lambdas in parallel and returns when both are finished.
@@ -330,7 +338,6 @@ public:
 	}
 #endif
 };
-
 
 /**
 A ThreadGroup is a set of threads that start at the same time and can be waited for termination.
