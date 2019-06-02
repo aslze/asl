@@ -6,11 +6,10 @@
 
 #include <asl/Vec3.h>
 #include <asl/Vec4.h>
-//#include <asl/Matrix3.h>
 
 namespace asl {
 
-template<class T> class ASL_API Matrix4_;
+template<class T> class Matrix4_;
 template<class T> class Quaternion_;
 
 /**
@@ -23,7 +22,7 @@ Vec3 v = a.inverse().t() * Vec3(1, 0, 0);
 \ingroup Math3D
 */
 template<class T>
-class ASL_API Matrix4_
+class Matrix4_
 {
 	T a[4][4]; // row-major
  public:
@@ -164,8 +163,6 @@ class ASL_API Matrix4_
 	static Matrix4_ rotate(const Vec3_<T>& axisAngle) { return rotate(axisAngle, axisAngle.length()); }
 
 	static Matrix4_ rotateAxis(const Vec3_<T>& axis, T angle) { return rotate(axis, angle); } // [deprecated]
-	
-	static Matrix4_ reflection(const Vec3_<T>& p, const Vec3_<T>& n);
 	/**
 	Multipies this matrix by `B`
 	*/
@@ -199,6 +196,198 @@ class ASL_API Matrix4_
 typedef Matrix4_<float> Matrix4;
 typedef Matrix4_<double> Matrix4d;
 
+}
+
+#include <asl/Quaternion.h>
+
+namespace asl {
+
+template<class T>
+Matrix4_<T> Matrix4_<T>::operator+(const Matrix4_<T>& B) const
+{
+	Matrix4_<T> C;
+	for(int i=0; i<4; i++)
+		for(int j=0; j<4; j++)
+			C(i,j) = a[i][j] + B(i,j);
+	return C;
+}
+
+template<class T>
+Matrix4_<T> Matrix4_<T>::operator*(const Matrix4_<T>& B) const
+{
+	Matrix4_<T> C;
+	for(int i=0; i<4; i++)
+		for(int j=0; j<4; j++)
+			C(i,j) = a[i][0]*B(0,j)+ a[i][1]*B(1,j) + a[i][2]*B(2,j) + a[i][3]*B(3,j);
+	return C;
+}
+
+template<class T>
+Matrix4_<T> Matrix4_<T>::operator*(T t) const
+{
+	Matrix4_<T> C;
+	for(int i=0; i<4; i++)
+		for(int j=0; j<4; j++)
+			C(i,j) = t * a[i][j];
+	return C;
+}
+
+template<class T>
+Matrix4_<T>& Matrix4_<T>::operator*=(T t)
+{
+	for (int i = 0; i<4; i++)
+		for (int j = 0; j<4; j++)
+			a[i][j] *= t;
+	return *this;
+}
+
+template<class T>
+Matrix4_<T>& Matrix4_<T>::operator*=(const Matrix4_<T>& B)
+{
+	Matrix4_<T> C;
+	for(int i=0; i<4; i++)
+		for(int j=0; j<4; j++)
+			C(i,j) = a[i][0]*B(0,j)+ a[i][1]*B(1,j) + a[i][2]*B(2,j) + a[i][3]*B(3,j);
+	*this=C;
+	return *this;
+}
+
+template<class T>
+Matrix4_<T> Matrix4_<T>::identity()
+{
+	return Matrix4_<T>(
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1);
+}
+
+template<class T>
+Matrix4_<T> Matrix4_<T>::translate(const Vec3_<T>& t)
+{
+	return Matrix4_<T>(
+		1, 0, 0, t.x,
+		0, 1, 0, t.y,
+		0, 0, 1, t.z,
+		0, 0, 0, 1);
+}
+
+template<class T>
+Matrix4_<T> Matrix4_<T>::scale(const Vec3_<T>& s)
+{
+	return Matrix4_<T>(
+		s.x, 0,   0,   0,
+		0,   s.y, 0,   0,
+		0,   0,   s.z, 0,
+		0,   0,   0,   1);
+}
+
+template<class T>
+Matrix4_<T> Matrix4_<T>::rotateX(T phi)
+{
+	return Matrix4_<T>(
+		1, 0,        0,         0,
+		0, cos(phi), -sin(phi), 0,
+		0, sin(phi), cos(phi),  0,
+		0, 0,        0,         1);
+}
+
+template<class T>
+Matrix4_<T> Matrix4_<T>::rotateY(T phi)
+{
+	return Matrix4_<T>(
+		cos(phi),  0, sin(phi), 0,
+		0,         1, 0,        0,
+		-sin(phi), 0, cos(phi), 0,
+		0,         0, 0,        1);
+}
+
+template<class T>
+Matrix4_<T> Matrix4_<T>::rotateZ(T phi)
+{
+	return Matrix4_<T>(
+		cos(phi), -sin(phi), 0, 0,
+		sin(phi), cos(phi),  0, 0,
+		0,        0,         1, 0,
+		0,        0,         0, 1);
+}
+
+template<class T>
+Matrix4_<T> Matrix4_<T>::rotate(const Vec3_<T>& axis, T angle)
+{
+	return Quaternion_<T>::fromAxisAngle(axis, angle).matrix();
+}
+
+template<class T>
+Vec3_<T> Matrix4_<T>::operator%(const Vec3_<T>& p) const
+{
+	return Vec3_<T>(
+		a[0][0]*p.x+a[0][1]*p.y+a[0][2]*p.z,
+		a[1][0]*p.x+a[1][1]*p.y+a[1][2]*p.z,
+		a[2][0]*p.x+a[2][1]*p.y+a[2][2]*p.z );
+}
+
+template<class T>
+Matrix4_<T> Matrix4_<T>::inverse() const
+{
+	T det = a[0][0]*a[1][1]*a[2][2]-a[0][0]*a[2][1]*a[1][2]-a[1][0]*a[0][1]*a[2][2]+
+		a[1][0]*a[2][1]*a[0][2]+a[2][0]*a[0][1]*a[1][2]-a[2][0]*a[1][1]*a[0][2];
+
+	T x = -a[0][1]*a[1][2]*a[2][3]+a[0][1]*a[1][3]*a[2][2]+a[1][1]*a[0][2]*a[2][3]-
+		a[1][1]*a[0][3]*a[2][2]-a[2][1]*a[0][2]*a[1][3]+a[2][1]*a[0][3]*a[1][2];
+	T y = a[0][0]*a[1][2]*a[2][3]-a[0][0]*a[1][3]*a[2][2]-a[1][0]*a[0][2]*a[2][3]+
+		a[1][0]*a[0][3]*a[2][2]+a[2][0]*a[0][2]*a[1][3]-a[2][0]*a[0][3]*a[1][2];
+	T z = -a[0][0]*a[1][1]*a[2][3]+a[0][0]*a[1][3]*a[2][1]+a[1][0]*a[0][1]*a[2][3]-
+		a[1][0]*a[0][3]*a[2][1]-a[2][0]*a[0][1]*a[1][3]+a[2][0]*a[0][3]*a[1][1];
+
+	Matrix4_<T> m(
+		-(-a[1][1] * a[2][2] + a[2][1] * a[1][2]), -a[0][1] * a[2][2] + a[2][1] * a[0][2], a[0][1] * a[1][2] - a[1][1] * a[0][2], x,
+		-a[1][0] * a[2][2] + a[2][0] * a[1][2], -(-a[0][0] * a[2][2] + a[2][0] * a[0][2]), -(a[0][0] * a[1][2] - a[1][0] * a[0][2]), y,
+		-(-a[1][0] * a[2][1] + a[2][0] * a[1][1]), -a[0][0] * a[2][1] + a[2][0] * a[0][1], a[0][0] * a[1][1] - a[1][0] * a[0][1], z);
+	m *= 1/det;
+	m(3, 3) = 1;
+	return m;
+}
+
+template<class T>
+Quaternion_<T> Matrix4_<T>::rotation() const
+{
+    T t = at(0,0) + at(1,1) + at(2,2), s, r;
+    if(t >= 0)
+	{
+		r = sqrt(1 + t);
+		s = (T)0.5 / r;
+		return Quaternion_<T>((T)0.5 * r, (at(2, 1) - at(1, 2)) * s, (at(0, 2) - at(2, 0)) * s, (at(1, 0) - at(0, 1)) * s);
+	}
+    else if (at(1, 1) > at(0, 0) && at(1, 1) >= at(2, 2))
+	{
+		r = sqrt(1 + at(1, 1) - at(2, 2) - at(0, 0));
+		s = (T)0.5 / r;
+		return Quaternion_<T>((at(0, 2) - at(2, 0)) * s, (at(0, 1) + at(1, 0)) * s, (T)0.5 * r, (at(1, 2) + at(2, 1)) * s);
+	}
+	else if (at(2, 2) > at(0, 0) /*&& at(2, 2) > at(1, 1)*/)
+	{
+		r = sqrt(1 + at(2, 2) - at(0, 0) - at(1, 1));
+		s = (T)0.5 / r;
+		return Quaternion_<T>((at(1, 0) - at(0, 1)) * s, (at(2, 0) + at(0, 2)) * s, (at(1, 2) + at(2, 1)) * s, (T)0.5 * r);
+	}
+	else
+	{
+		r = sqrt(1 + at(0, 0) - at(1, 1) - at(2, 2));
+		s = (T)0.5 / r;
+		return Quaternion_<T>((at(2, 1) - at(1, 2)) * s, (T)0.5 * r, (at(0, 1) + at(1, 0)) * s, (at(2, 0) + at(0, 2)) * s);
+	}
+}
+
+template<class T>
+T Matrix4_<T>::det() const 
+{
+	return a[0][0]*a[1][1]*a[2][2]-a[0][0]*a[2][1]*a[1][2]-a[1][0]*a[0][1]*a[2][2]+
+		a[1][0]*a[2][1]*a[0][2]+a[2][0]*a[0][1]*a[1][2]-a[2][0]*a[1][1]*a[0][2];
+}
+
+template class Matrix4_<float>;
+template class Matrix4_<double>;
 }
 
 #endif

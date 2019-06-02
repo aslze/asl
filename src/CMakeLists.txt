@@ -20,7 +20,7 @@ set( ASL_SRC
 	Path.cpp
 	Date.cpp
 	Process.cpp
-	Matrix4.cpp
+	#Matrix4.cpp
 	Console.cpp
 	Log.cpp
 	TabularDataFile.cpp

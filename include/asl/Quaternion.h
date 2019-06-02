@@ -1,11 +1,12 @@
 // Copyright(c) 1999-2018 ASL author
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
+#include <asl/Matrix4.h>
+
 #ifndef ASL_QUATERNION_H
 #define ASL_QUATERNION_H
 
 #include <asl/Vec3.h>
-#include <asl/Matrix4.h>
 
 namespace asl {
 
