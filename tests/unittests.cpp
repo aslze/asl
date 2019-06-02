@@ -529,6 +529,8 @@ int main(int narg, char* argv[])
 		printf("Unknown test\n");
 		return EXIT_FAILURE;
 	}
+	if (testFailed)
+		return EXIT_FAILURE;
 	
 	return EXIT_SUCCESS;
 }

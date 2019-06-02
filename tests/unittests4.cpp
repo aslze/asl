@@ -8,29 +8,50 @@
 
 using namespace asl;
 
-#define EPS 1e-5
+#define EPS 1e-6
 #define EPSf 1e-5f
 
 
 ASL_TEST(Vec3)
 {
 	Vec3 a(1, 2.5f, 3), b(1, 0, 0);
-	ASL_APPROX(a*b, 1);
+	ASL_APPROX(a*b, 1.0f, EPS);
 
 	Vec3d a2 = a, b2 = b;
 	Vec3 a3 = a2;
-	ASL_ASSERT(!((a2 + b2) - Vec3d(2, 2.5, 3)) < EPS);
+	ASL_APPROX(a2 + b2, Vec3d(2, 2.5, 3), EPS);
 }
 
 ASL_TEST(Matrix4)
 {
-	Matrix4 m1 = Matrix4::rotateAxis(Vec3(1, 0, 0), (float)PI / 2);
-	Matrix4 m2 = Matrix4::rotateX((float)PI / 2);
-	Vec3 a(0, 1, 0);
-	ASL_ASSERT(!(m1 * a - Vec3(0, 0, 1)) < EPSf);
-	ASL_ASSERT(!(m2 * a - Vec3(0, 0, 1)) < EPSf);
-}
+	Matrix4d m1 = Matrix4d::rotate(Vec3d(1, 0, 0), PI / 2);
+	Matrix4d m2 = Matrix4d::rotateX(PI / 2);
+	Vec3d a(0, 1, 0);
+	ASL_APPROX(m1 * a, Vec3d(0, 0, 1), EPS);
+	ASL_APPROX(m2 * a, Vec3d(0, 0, 1), EPS);
 
+	Quaterniond q1 = Quaterniond::fromAxisAngle(Vec3d(1, 0.5f, -1.25f), 0.25f);
+	Matrix4d mrot = Matrix4d::rotate(Vec3d(1, 0.5f, -1.25f), 0.25f);
+	Quaterniond q2 = mrot.rotation();
+
+	ASL_APPROX(q1, q2, EPS);
+	ASL_APPROX(q1.matrix(), mrot, EPS);
+	ASL_APPROX(q1.matrix(), q2.matrix(), EPS);
+
+	for (double x = -1; x <= 1; x+=0.25)
+		for (double y = -1; y <= 1; y += 0.25)
+			for (double z = -1; z <= 1; z += 0.25)
+				for (double a = -2*PI; a <= 2*PI; a += PI / 8)
+				{
+					if (x == 0 && y == 0 && z == 0)
+						continue;
+					Quaterniond q1 = Quaterniond::fromAxisAngle(Vec3d(x, y, z), a);
+					Matrix4d m = q1.matrix();
+					Quaterniond q2 = m.rotation();
+					ASL_APPROX(q1, q2, EPS);
+					ASL_APPROX(q1.matrix(), q2.matrix(), EPS);
+				}
+}
 
 ASL_TEST(Uuid)
 {

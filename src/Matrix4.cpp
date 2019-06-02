@@ -166,51 +166,30 @@ template<class T>
 Quaternion_<T> Matrix4_<T>::rotation() const
 {
     T t = at(0,0) + at(1,1) + at(2,2), s, r;
-    Quaternion_<T> q;
     if(t >= 0)
 	{
 		r = sqrt(1 + t);
 		s = (T)0.5 / r;
-		q.w = (T)0.5 * r;
-		q.x = (at(2,1) - at(1,2)) * s;
-		q.y = (at(0,2) - at(2,0)) * s;
-		q.z = (at(1,0) - at(0,1)) * s;
+		return Quaternion_<T>((T)0.5 * r, (at(2, 1) - at(1, 2)) * s, (at(0, 2) - at(2, 0)) * s, (at(1, 0) - at(0, 1)) * s);
 	}
-    else
+    else if (at(1, 1) > at(0, 0) && at(1, 1) >= at(2, 2))
 	{
-		int i = 0; 
-		if (at(1,1) > at(0,0))
-			i = 1; 
-		if (at(2,2) > at(i,i))
-			i = 2; 
-		switch (i)
-		{
-		case 0:
-			r = sqrt(1 + at(0,0) - at(1,1) - at(2,2));
-			s = (T)0.5 / r;
-			q.x = (T)0.5 * r;
-			q.y = (at(0,1) + at(1,0)) * s; 
-			q.z = (at(2,0) + at(0,2)) * s;
-			q.w = (at(2,1) - at(1,2)) * s;
-			break;
-		case 1:
-			r = sqrt(1 + at(1,1) - at(2,2) - at(0,0));
-			s = (T)0.5 / r;
-			q.y = (T)0.5 * r;
-			q.z = (at(1,2) + at(2,1)) * s;
-			q.x = (at(0,1) + at(1,0)) * s;
-			q.w = (at(0,2) - at(2,0)) * s;
-			break;
-		case 2:
-			r = sqrt(1 + at(2,2) - at(0,0) - at(1,1));
-			s = (T)0.5 / r;
-			q.z = (T)0.5 * r;
-			q.x = (at(2,0) + at(0,2)) * s;
-			q.y = (at(1,2) + at(2,1)) * s;
-			q.w = (at(1,0) - at(0,1)) * s;
-		}
+		r = sqrt(1 + at(1, 1) - at(2, 2) - at(0, 0));
+		s = (T)0.5 / r;
+		return Quaternion_<T>((at(0, 2) - at(2, 0)) * s, (at(0, 1) + at(1, 0)) * s, (T)0.5 * r, (at(1, 2) + at(2, 1)) * s);
 	}
-	return q;
+	else if (at(2, 2) > at(0, 0) /*&& at(2, 2) > at(1, 1)*/)
+	{
+		r = sqrt(1 + at(2, 2) - at(0, 0) - at(1, 1));
+		s = (T)0.5 / r;
+		return Quaternion_<T>((at(1, 0) - at(0, 1)) * s, (at(2, 0) + at(0, 2)) * s, (at(1, 2) + at(2, 1)) * s, (T)0.5 * r);
+	}
+	else
+	{
+		r = sqrt(1 + at(0, 0) - at(1, 1) - at(2, 2));
+		s = (T)0.5 / r;
+		return Quaternion_<T>((at(2, 1) - at(1, 2)) * s, (T)0.5 * r, (at(0, 1) + at(1, 0)) * s, (at(2, 0) + at(0, 2)) * s);
+	}
 }
 
 template<class T>
