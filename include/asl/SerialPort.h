@@ -15,14 +15,14 @@
 namespace asl {
 
 /**
-SerialPort represents a serial port to communicate with. Still quite simple but working.
+SerialPort represents a serial port to communicate with.
 
 ~~~
 SerialPort port;
-if(!port.open("COM1"))     // or "/dev/ttyS0" on Linux
+if(!port.open("COM1"))     // or "/dev/ttyS0" o "/dev/ttyUSB0" ...  on Linux
 	return;
 port.config(9600, "8N1");  // 9600 bps, 8 bits, no parity, 1 stop bit
-port.setTimeout(200);
+port.setTimeout(0.2);
 port << "COMMAND\n";
 String answer = port.readLine();
 ~~~
@@ -30,6 +30,7 @@ String answer = port.readLine();
 
 class ASL_API SerialPort
 {
+	bool _error;
 	HANDLE _handle;
 public:
 	SerialPort();
@@ -39,16 +40,20 @@ public:
 	/** Closes the port */
 	void close();
 	/**
-	Sets the read timeout in ms
+	Returns true if there were communication errors (possibly the device was disconnected)
 	*/
-	void setTimeout(int ms);
+	bool error() { return _error; }
+	/**
+	Sets the read timeout in seconds
+	*/
+	void setTimeout(double s);
 	/**
 	Configures the port with a bitrate and a string encoded as "BPS":
 	B=data bits, P=parity (N/E/O), S=stop bits, plus an optional X for Xon/Xoff flow control */
 	void config(int bps, const char* mode="8N1");
-	/** waits until there is data to read for a maximum time of `timeout` (Currently not working on Windows) */
-	bool waitInput(int timeout = 0);
-	bool canRead(int timeout = 0) { return waitInput(timeout); }
+	/** waits until there is data to read for a maximum time of `timeout` seconds */
+	bool waitInput(double timeout = 0);
+	bool canRead(double timeout = 0) { return waitInput(timeout); }
 	/** Returns the number of bytes available for reading */
 	int available();
 	/** Writes n bytes of buffer p to the port */

@@ -6,6 +6,7 @@ namespace asl {
 SerialPort::SerialPort()
 {
 	_handle = 0;
+	_error = false;
 }
 
 SerialPort::~SerialPort()
@@ -45,8 +46,9 @@ void SerialPort::config(int bps, const char* mode)
 {
 	if(strlen(mode) < 3)
 	{
-		config(bps, "8N1");
-		return;
+		mode = "8N1";
+		//config(bps, "8N1");
+		//return;
 	}
 	DCB serialConfig;
 	serialConfig.DCBlength = sizeof(DCB);
@@ -91,18 +93,29 @@ void SerialPort::config(int bps, const char* mode)
 	SetupComm(_handle, 4096, 1024);
 }
 
-void SerialPort::setTimeout(int ms)
+void SerialPort::setTimeout(double s)
 {
 	COMMTIMEOUTS timeouts;
 	GetCommTimeouts(_handle,&timeouts);
-	timeouts.ReadTotalTimeoutConstant   = ms;
+	timeouts.ReadTotalTimeoutConstant   = DWORD(s * 1000);
 	timeouts.ReadIntervalTimeout        = 10;
 	timeouts.ReadTotalTimeoutMultiplier = 0;
 	SetCommTimeouts(_handle, &timeouts);
 }
 
-bool SerialPort::waitInput(int timeout)
+bool SerialPort::waitInput(double timeout)
 {
+	int i = 0, n = 0, m = int(timeout*1000);
+	while ((n = available()) == 0 && i++ < m)
+	{
+		sleep(0.001);
+	}
+
+	if (n < 0)
+		_error = true;
+
+	return (n != 0);
+	/*
 	if(!SetCommMask(_handle, EV_RXCHAR | EV_BREAK | EV_ERR))
 		return false;
 	DWORD eventMask;
@@ -114,10 +127,8 @@ bool SerialPort::waitInput(int timeout)
 	timeouts.ReadTotalTimeoutMultiplier = 1;
 	SetCommTimeouts(_handle, &timeouts);
 
-	if(WaitCommEvent(_handle, &eventMask, NULL))
-		return true;
-	else
-		return false;
+	return WaitCommEvent(_handle, &eventMask, NULL) != 0;
+	*/
 }
 
 int SerialPort::available()
@@ -126,7 +137,7 @@ int SerialPort::available()
 	if(ClearCommError(_handle, NULL, &stat))
 		return stat.cbInQue;
 	else
-		return 0;
+		return -1;
 }
 
 int SerialPort::write(const void* p, int n)
@@ -169,7 +180,7 @@ bool SerialPort::open(const String& port)
 {
 	_handle = ::open(port, O_RDWR, S_IRUSR | S_IWUSR);
 
-	if(_handle == 0)
+	if(_handle <= 0)
 		return false;
 
 	return true;
@@ -257,17 +268,67 @@ void SerialPort::config(int bps, const char* mode)
 
 int SerialPort::write(const void* p, int n)
 {
-	return ::write(_handle, p, n);
+	int b = ::write(_handle, p, n);
+	if(b <= 0)
+		_error = true;
+	return b;
 }
 
 int SerialPort::read(void *p, int n)
 {
-	return ::read(_handle, p, n);
+	int b = ::read(_handle, p, n);
+	if(b <= 0)
+		_error = true;
+	return b;
+}
+
+int SerialPort::available()
+{
+	if (_error || _handle < 0)
+		return -1;
+	long n;
+	if (ioctl(_handle, FIONREAD, &n) == 0)
+	{
+		if(n<0)
+			printf("ioctl n < 0\n");
+		return (int)n;
+	}
+	else {
+		_error = true;
+		printf("ioctl != 0\n");
+		return -1;
+	}
+}
+
+bool SerialPort::waitInput(double timeout)
+{
+	if (_handle < 0)
+		return false;
+	int a = available();
+	if (a > 0)
+		return true;
+	if (a < 0)
+	{
+		_error = true;
+		return true;
+	}
+	fd_set rset;
+	struct timeval to;
+	to.tv_sec = (int)floor(timeout);
+	to.tv_usec = (int)((timeout-floor(timeout))*1e6);
+	FD_ZERO(&rset);
+	FD_SET(_handle, &rset);
+	if(select(_handle+1, &rset, 0, 0, &to) >= 0)
+		return FD_ISSET(_handle, &rset) != 0;
+	_error = true;
+	return true;
 }
 
 void SerialPort::close()
 {
 	::close(_handle);
+	_handle = -1;
+	_error = false;
 }
 
 #endif
