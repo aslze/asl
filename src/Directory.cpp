@@ -18,6 +18,23 @@ String Directory::directory() const
 	return Path(_path).directory().string();
 }
 
+bool Directory::create(const String& name)
+{
+	if (!name)
+		return false;
+	if (createOne(name))
+		return true;
+	Path path = Path(name).absolute();
+	String parent = path.directory();
+	if (Directory(parent).directory())
+	if (parent && !Directory(parent).exists())
+	{
+		create(parent);
+	}
+	
+	return createOne(name);
+}
+
 String Directory::createTemp()
 {
 	String dir;
@@ -40,6 +57,29 @@ String Directory::createTemp()
 	create(dir);
 	return dir;
 }
+
+bool Directory::removeRecursive(const String& path)
+{
+	if (!path)
+		return false;
+	bool ok = true;
+	String abs = Path(path).absolute().string().toLowerCase().replace('\\', '/');
+	if (abs.endsWith('/'))
+		abs.resize(abs.length() - 1);
+	if (abs.length() == 2 && abs[1] == ':')
+		return false;
+	if (((abs.length() > 3 && abs.substr(3) == "windows") || abs.substr(3) == "Program Files") || abs == "")
+		return false;
+	Directory dir(path);
+	foreach(File& file, dir.files())
+		ok = ok && file.remove();
+ 	foreach(File& d, dir.subdirs())
+		ok = ok && removeRecursive(d.path());
+	
+	ok = ok && remove(path);
+	return ok;
+}
+
 
 bool File::copy(const String& to)
 {
@@ -138,9 +178,10 @@ FileInfo Directory::getInfo(const String& path)
 	return infoFor(data);
 }
 
-bool Directory::create(const String& name)
+bool Directory::createOne(const String& name)
 {
-	return CreateDirectory(name, 0) != 0;
+	bool ok = CreateDirectory(name, 0) != 0;
+	return ok || (GetLastError() == ERROR_ALREADY_EXISTS); // if it exists we don't consider that an error
 }
 
 String Directory::current()
@@ -258,9 +299,10 @@ FileInfo Directory::getInfo(const String& path)
 	return infoFor(data);
 }
 
-bool Directory::create(const String& name)
+bool Directory::createOne(const String& name)
 {
-	return mkdir(name, 0777) == 0;
+	int a = mkdir(name, 0777);
+	return a == 0 || a == EEXIST;
 }
 
 String Directory::current()

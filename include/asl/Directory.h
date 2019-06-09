@@ -49,44 +49,82 @@ protected:
 
 public:
 	Directory() {}
-	/** Constructs a directory from a relative or absolute path */
+	/**
+	Constructs a directory from a relative or absolute path
+	*/
 	Directory(const String& name) : _path(name) {}
 	Directory(const File& file) : _path(file.path()) {}
 	Directory(const Path& file) : _path(file.string()) {}
 	Directory(const char* file) : _path(file) {}
 
-	/** Returns the name of the directory */
+	/**
+	Returns the name of the directory
+	*/
 	String name() const;
-	/** Returns the full path of the directory */
+	/**
+	Returns the full path of the directory
+	*/
 	String path() const {return _path;}
-	/** Returns the parent directory containing this directory */
+	/**
+	Returns the parent directory containing this directory
+	*/
 	String directory() const;
-	/** Returns true if this directory exists (but false if it does not exist or refers to a file. */
+	/**
+	Returns true if this directory exists (but false if it does not exist or refers to a file.
+	*/
 	bool exists() const
 	{
 		return File(_path).isDirectory();
 	}
-	/** Returns the contents of a directory */
+	/**
+	Returns the contents of a directory
+	*/
 	const Array<File>& items(const String& which="*", ItemType t=ALL);
-	/** Returns the files in a directory */
+	/**
+	Returns the files in a directory
+	*/
 	const Array<File>& files(const String& which="*") {return items(which, FILE);}
-	/** Returns the subdirectories of a directory */
+	/**
+	Returns the subdirectories of a directory
+	*/
 	const Array<File>& subdirs(const String& which="*") {return items(which, DIRE);}
 	static FileInfo getInfo(const String& path);
-	/** Returns the current working directory */
+	/**
+	Returns the current working directory
+	*/
 	static String current();
-	/** Sets the current working directory */
+	/**
+	Sets the current working directory
+	*/
 	static bool change(const String& dir);
-	/** Creates a new directory, returns false on failure */
+	/**
+	Creates a new directory (and its ancestors if they don't exist), returns false on failure
+	*/
 	static bool create(const String& name);
-	/** Creates a new temporary directory with an arbitrary name and returns its path */
+	/**
+	Creates a new directory, returns false on failure (e.g. if its parent does not exist)
+	*/
+	static bool createOne(const String& name);
+	/**
+	Creates a new temporary directory with an arbitrary name and returns its path
+	*/
 	static String createTemp();
-	/** Copies file `from` to `to` which can be a full name or a destination directory */
+	/**
+	Copies file `from` to `to` which can be a full name or a destination directory
+	*/
 	static bool copy(const String& from, const String& to);
-	/** Moves or renames file `from` to `to` which can be a full name or a destination directory */
+	/**
+	Moves or renames file `from` to `to` which can be a full name or a destination directory
+	*/
 	static bool move(const String& from, const String& to);
-	/** Deletes file or directory `path` (if it is a directory it must be empty) */
+	/**
+	Deletes file or directory `path` (if it is a directory it must be empty)
+	*/
 	static bool remove(const String& path);
+	/**
+	Removes the given directory with all its content recursively and returns true on success (USE WITH CARE!)
+	*/
+	static bool removeRecursive(const String& path);
 };
 
 }

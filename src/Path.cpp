@@ -47,6 +47,8 @@ Path Path::directory() const
 	int m = _path.lastIndexOf('/');
 	n = (m > n)? m : n;
 #endif
+	if (n < 0 && _path.contains(':')) // drive
+		return "";
 	return (n>=0)? _path.substring(0, n) : String(".");
 }
 
