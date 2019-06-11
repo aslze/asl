@@ -17,8 +17,7 @@ namespace asl {
  */
 
 /**
-Returns the current time as a real number in seconds since a fixed epoch.
-It has a platform-dependent precision, usually around the microsecond.
+Returns the current time as a real number in seconds since a fixed epoch (precision is platform-dependent, often around a microsecond).
 */
 double ASL_API now();
 
@@ -45,7 +44,7 @@ inline void usleep(int us)
 }
 
 /**
-Makes the current thread sleep for the given number of seconds
+Makes the current thread sleep for the given time in seconds (can be fractional)
 */
 inline void sleep(double s)
 {
@@ -62,7 +61,7 @@ inline void sleep(int s)
 }
 
 /**
-Makes the current thread sleep for the given number of seconds 
+Makes the current thread sleep for the given time in seconds (can be fractional)
 */
 inline void sleep(double s)
 {

@@ -117,7 +117,7 @@ Xdl::write("file.xdl", data );
 Xml::write("file.xml", xml );
 ~~~
 
-XDL, *eXtensible Data Language*, is a format for describing structured data 
+__XDL__, *eXtensible Data Language*, is a format for describing structured data 
 as text. It has some similarities with the *VRML* syntax and with the *JSON* 
 semantics.
 
@@ -163,7 +163,7 @@ if(!garage.is("Garage"))
 int capacity = garage["capacity"];
 bool open = garage["open"];
 
-float height = (garge.has("dimensions", Var::ARRAY) && garage["dimensions"].length() == 3) ?
+float height = (garage.has("dimensions", Var::ARRAY) && garage["dimensions"].length() == 3) ?
 	garage["dimensions"][2] : 0;
 
 foreach(Var& vehicle, garage["vehicles"])
@@ -178,7 +178,7 @@ foreach(Var& vehicle, garage["vehicles"])
 We may construct a new Var or modify the one just parsed, and rewrite it as an XDL string.
 
 ~~~~
-garage["vehicles"] << Var("_class", "Car")("brand", "Limo")("length", 8.34);
+garage["vehicles"] << Var(ASL_XDLCLASS, "Car")("brand", "Limo")("length", 8.34);
 garage["open"] = false;
 
 garagex = Xdl::encode(garage, true);
@@ -255,8 +255,10 @@ socket.connect(host, 80);
 socket << String(0, "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n", *path, *host);
 String response;
 char buffer[1001];
-while(socket.waitInput())
+while(true)
 {
+	if(!socket.waitInput())
+		continue;
 	if(socket.disconnected())
 		break;
 	int n = socket.read(buffer, min(socket.available(), 1000));

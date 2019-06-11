@@ -29,17 +29,17 @@ String ASL_API encodeJSON(const Var& data, bool pretty = false);
 Functions to encode/decode data as JSON. These functions use class Var to represent JSON values.
 
 ~~~
-Var data = Json::decode("{\"x\":1.5, \"y\":[1,true]}");  // decode JSON from a string
-data["z"] = 3.14;                                        // add a property
-String json = Json::encode(data);                        // encode to string
+Var data = Json::decode("{\"x\":\"abc\", \"y\":[1,true]}"); // decode JSON from a string
+data["z"] = 3.14;                                           // add a property
+String json = Json::encode(data);                           // encode to string
 
-Json::write("data.json", data);                          // write to file
+Json::write("data.json", data);                             // write to file
 ~~~
 
 The same `data` object can be built in one statement:
 
 ~~~ 
-Var data = Var("x", 1.5)
+Var data = Var("x", "abc")
               ("y", Var::array({1, true}))
               ("z", 3.14);
 ~~~

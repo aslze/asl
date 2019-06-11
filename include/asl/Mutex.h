@@ -413,7 +413,7 @@ public:
 
 
 /**
-Atomic version of another type.
+%Atomic version of another type.
 
 ~~~
 Atomic<double> value = 0;

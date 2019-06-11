@@ -52,8 +52,8 @@ public:
 	B=data bits, P=parity (N/E/O), S=stop bits, plus an optional X for Xon/Xoff flow control */
 	void config(int bps, const char* mode="8N1");
 	/** waits until there is data to read for a maximum time of `timeout` seconds */
-	bool waitInput(double timeout = 0);
-	bool canRead(double timeout = 0) { return waitInput(timeout); }
+	bool waitInput(double timeout = 60);
+	bool canRead(double timeout = 60) { return waitInput(timeout); }
 	/** Returns the number of bytes available for reading */
 	int available();
 	/** Writes n bytes of buffer p to the port */

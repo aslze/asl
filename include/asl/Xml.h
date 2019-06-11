@@ -147,7 +147,7 @@ Consider the following XML fragment.
 </html>
 ~~~
 
-This can be parsed with the Xml::decode() function:
+This can be parsed from a string or read from a file:
 
 ~~~{.cpp}
 Xml html = Xml::decode(xml);    // from a string
@@ -175,13 +175,17 @@ And the original XML formatted document can be written with the Xml::encode() fu
 String xml = Xml::encode(html);
 ~~~
 
-The charset attribute in the `<meta>` element can be read with:
+The content can be accessed easily with as **shorthand syntax** using operators `()` for tags and `[]` for attributes.
+For example, the charset attribute in the `<meta>` element can be read with:
 
 ~~~
 String charset = html("head")("meta")["charset"];  // -> "utf8"
 ~~~
 
-And the content of the `<h1>` element:
+That is, `element("tag")` returns the first child of `element` that has the given tag (`element("tag", 3)` would return
+the 3rd child with that tag). And `element["attr"]` returns the value of the attribute `attr`.
+
+The text content of the `<h1>` element would be retrieved like this:
 
 ~~~
 String text = html("body")("h1").text();  // -> "Hello"
@@ -204,10 +208,10 @@ foreach(auto& e, body.children())
 }
 ~~~
 
-Or only the children with a given tag:
+Or only the children with a given tag (you can also use C++11 range-based for):
 
 ~~~
-foreach(auto& meta, html("head").children("meta"))
+for(auto& meta : html("head").children("meta"))
 {
 	if(meta.has("charset"))
 		setCharset(meta["charset"]);
