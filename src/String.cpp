@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <asl/String.h>
 #include <asl/Array.h>
+#include <asl/Map.h>
 
 #ifdef _WIN32
 #define vsnprintf _vsnprintf
@@ -652,6 +653,19 @@ Array<String> String::split() const
 		}
 	}
 	return a;
+}
+
+Dic<String> String::split(const String& sep1, const String& sep2) const
+{
+	Dic<String> dic;
+	Array<String> pairs = split(sep1);
+	for (int i = 0; i < pairs.length(); i++)
+	{
+		int j = pairs[i].indexOf(sep2);
+		if (j > 0)
+			dic[pairs[i].substring(0, j)] = pairs[i].substring(j + sep2.length());
+	}
+	return dic;
 }
 
 int myatoi(const char* s)

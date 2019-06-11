@@ -38,6 +38,11 @@ ASL_TEST(XML)
 	ASL_ASSERT(dom("b")["y"] == "2&3");
 	ASL_ASSERT(dom.child(0).child(2).has("g"));
 
+	ASL_ASSERT(dom("b"));
+	ASL_ASSERT(dom("b")("c"));
+	ASL_ASSERT(!dom("B"));
+	ASL_ASSERT(!dom("b")("C"));
+
 	Array<Xml> elems = dom.find(hasTag("br"));
 
 	ASL_ASSERT(elems.length() == 1 && elems[0].tag() == "br" && elems[0].numChildren() == 0);

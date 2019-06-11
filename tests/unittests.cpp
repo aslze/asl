@@ -352,6 +352,9 @@ ASL_TEST(String)
 	ASL_ASSERT(String(" \rmy  taylor\n\tis rich\r\n").split().join('_') == "my_taylor_is_rich");
 	ASL_ASSERT(String("my  taylor is rich").split().join('_') == "my_taylor_is_rich");
 
+	Dic<> dic = String("x=1,y=2").split(',', '=');
+	ASL_ASSERT(dic["x"] == "1" && dic["y"] == "2");
+
 	String empty = "";
 	ASL_ASSERT(!empty);
 	ASL_ASSERT(String("c"));

@@ -35,6 +35,8 @@ class QString;
 #endif
 
 namespace asl {
+	
+template<class T> class Dic;
 
 /**
 A substitute of `printf` that works on MingW with UTF8 text
@@ -557,6 +559,12 @@ public:
 		return a;
 	}
 	/**
+	Parses a string and creates a `Dic` using `sep1` as pair separator (e.g. ','), and `sep2` as key/value separator (e.g. '=').
+	It is the opposite of `join()`.
+	*/
+	Dic<String> split(const String& sep1, const String& sep2) const;
+
+	/**
 	Returns a string like this one but in which occurences of substring `a` are replaced by `b`
 	*/
 	String replace(const String& a, const String& b) const;
@@ -614,14 +622,6 @@ Array<T>::Array(const String& s)
 	alloc(0);
 	*this = s.split();
 }
-/*
-template<class T>
-Array<T>::operator String() const
-{
-	String s = '[';
-	s << join(',') << ']';
-	return s;
-}*/
 
 template<class T>
 String Array<T>::join(const String& sep) const
