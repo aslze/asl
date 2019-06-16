@@ -19,8 +19,27 @@ String SerialPort::readLine()
 {
 	char c;
 	String s;
-	while(read(&c, 1) > 0 && c != '\r' && c != '\n' && s.length() < 1024)
-		s += c;
+	int matched = 0;
+
+	while (read(&c, 1) > 0)
+	{
+		if (!_nl)
+		{
+			if (c != '\r' && c != '\n')
+				s += c;
+			else
+				break;
+		}
+		else
+		{
+			if (matched == 0 && c != _nl[0])
+				s += c;
+			else if (c == _nl[matched])
+				matched++;
+			if (matched == _nl.length() || s.length() > 1024)
+				break;
+		}
+	}
 	return s;
 }
 
@@ -42,13 +61,12 @@ bool SerialPort::open(const String& port)
 	return true;
 }
 
-void SerialPort::config(int bps, const char* mode)
+void SerialPort::config(int bps, const String& mode)
 {
-	if(strlen(mode) < 3)
+	if(mode.length() < 3)
 	{
-		mode = "8N1";
-		//config(bps, "8N1");
-		//return;
+		config(bps, "8N1");
+		return;
 	}
 	DCB serialConfig;
 	serialConfig.DCBlength = sizeof(DCB);
@@ -97,8 +115,8 @@ void SerialPort::setTimeout(double s)
 {
 	COMMTIMEOUTS timeouts;
 	GetCommTimeouts(_handle,&timeouts);
-	timeouts.ReadTotalTimeoutConstant   = DWORD(s * 1000);
-	timeouts.ReadIntervalTimeout        = 10;
+	timeouts.ReadTotalTimeoutConstant = DWORD(s * 1000);
+	timeouts.ReadIntervalTimeout = 10;
 	timeouts.ReadTotalTimeoutMultiplier = 0;
 	SetCommTimeouts(_handle, &timeouts);
 }
@@ -115,20 +133,22 @@ bool SerialPort::waitInput(double timeout)
 		_error = true;
 
 	return (n != 0);
-	/*
+/*
 	if(!SetCommMask(_handle, EV_RXCHAR | EV_BREAK | EV_ERR))
 		return false;
 	DWORD eventMask;
 
 	COMMTIMEOUTS timeouts;
 	GetCommTimeouts(_handle, &timeouts);
-	timeouts.ReadTotalTimeoutConstant   = timeout;
+	COMMTIMEOUTS timeouts0 = timeouts;
+	timeouts.ReadTotalTimeoutConstant   = DWORD(timeout * 1000);
 	timeouts.ReadIntervalTimeout        = 100;
 	timeouts.ReadTotalTimeoutMultiplier = 1;
 	SetCommTimeouts(_handle, &timeouts);
-
-	return WaitCommEvent(_handle, &eventMask, NULL) != 0;
-	*/
+	BOOL ret = WaitCommEvent(_handle, &eventMask, NULL);
+	SetCommTimeouts(_handle, &timeouts0);
+	return ret != 0 && (eventMask & EV_RXCHAR) != 0;
+*/
 }
 
 int SerialPort::available()
@@ -186,8 +206,14 @@ bool SerialPort::open(const String& port)
 	return true;
 }
 
-void SerialPort::config(int bps, const char* mode)
+void SerialPort::config(int bps, const String& mode)
 {
+	if(mode.length() < 3)
+	{
+		config(bps, "8N1");
+		return;
+	}
+
 	int bps0[20]={0, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400,
 		460800, 500000, 576000, 921600, 1000000};
 	int bps1[20]={B0, B300, B600, B1200, B2400, B4800, B9600, B19200, B38400, B57600, B115200,
@@ -264,6 +290,10 @@ void SerialPort::config(int bps, const char* mode)
 		tty.c_cflag |= PARODD;
 
 	tcsetattr(_handle, TCSANOW, &tty);
+}
+
+void SerialPort::setTimeout(double s)
+{
 }
 
 int SerialPort::write(const void* p, int n)

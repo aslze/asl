@@ -19,12 +19,21 @@ SerialPort represents a serial port to communicate with.
 
 ~~~
 SerialPort port;
-if(!port.open("COM1"))     // or "/dev/ttyS0" o "/dev/ttyUSB0" ...  on Linux
+if(!port.open("COM1"))     // or "/dev/ttyS0", "/dev/ttyUSB0" ...  on Linux
 	return;
 port.config(9600, "8N1");  // 9600 bps, 8 bits, no parity, 1 stop bit
 port.setTimeout(0.2);
 port << "COMMAND\n";
 String answer = port.readLine();
+while(1)
+{
+	if(port.waitInput())
+	{
+		if(port.error()) // the device disconnected
+			break;
+		String info = port.readLine();
+	}
+}
 ~~~
 */
 
@@ -32,12 +41,23 @@ class ASL_API SerialPort
 {
 	bool _error;
 	HANDLE _handle;
+	String _nl;
 public:
 	SerialPort();
 	~SerialPort();
-	/** Opens the port by name (Win32: `"COM%i"`, Linux: `"/dev/..."`) */
+	/**
+	Opens the port by name (Windows: `"COM..."`, Linux: `"/dev/..."`)
+	*/
 	bool open(const String& port);
-	/** Closes the port */
+
+	/**
+	Sets the newline to expect by readLine(), normally one of "\n", "\r" or "\r\n".
+	*/
+	void setNewline(const String& nl) { _nl = nl; }
+
+	/**
+	Closes the port
+	*/
 	void close();
 	/**
 	Returns true if there were communication errors (possibly the device was disconnected)
@@ -49,24 +69,36 @@ public:
 	void setTimeout(double s);
 	/**
 	Configures the port with a bitrate and a string encoded as "BPS":
-	B=data bits, P=parity (N/E/O), S=stop bits, plus an optional X for Xon/Xoff flow control */
-	void config(int bps, const char* mode="8N1");
-	/** waits until there is data to read for a maximum time of `timeout` seconds */
+	B=data bits, P=parity (N/E/O), S=stop bits, plus an optional X for Xon/Xoff flow control
+	*/
+	void config(int bps, const String& mode="8N1");
+	/**
+	Waits until there is data to read for a maximum time of `timeout` seconds (or the device disconnected)
+	*/
 	bool waitInput(double timeout = 60);
-	bool canRead(double timeout = 60) { return waitInput(timeout); }
-	/** Returns the number of bytes available for reading */
+	/**
+	Returns the number of bytes available for reading
+	*/
 	int available();
-	/** Writes n bytes of buffer p to the port */
+	/**
+	Writes n bytes of buffer p to the port
+	*/
 	int write(const void* p, int n);
-	/** Reads n bytes from the port into buffer p */
+	/**
+	Reads n bytes from the port into buffer p
+	*/
 	int read(void* p, int n);
-	/** Writes the given string to the port */
+	/**
+	Writes the given string to the port
+	*/
 	int write(const String& s)
 	{
 		return write(*s, s.length());
 	}
-	/** Reads a text line from the port (up to a \\r or \\n character) and returns it not
-	including the newline */
+	/**
+	Reads a text line from the port (up to a \\r or \\n character) and returns it not
+	including the newline
+	*/
 	String readLine();
 
 	SerialPort& operator<<(const String& x);
