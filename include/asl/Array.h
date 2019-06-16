@@ -150,7 +150,7 @@ public:
 	/**
 	Resizes the array to a capacity of m elements. Up to m existing elements are preserved
 	*/
-	void resize(int m);
+	Array& resize(int m);
 	/**
 	Reserves space for m elements without changing actual length
 	*/
@@ -300,29 +300,29 @@ public:
 	/**
 	Removes the element at position i.
 	*/
-	void remove(int i)
+	Array& remove(int i)
 	{
 		asl_destroy(_a+i);
 		memmove(_a+i, _a+i+1, (d().n-i-1)*sizeof(T));
 		d().n --;
 		resize(d().n);
-		return;
+		return *this;
 	}
 	/**
 	Removes n elements starting at position i.
 	*/
-	void remove(int i, int n)
+	Array& remove(int i, int n)
 	{
 		asl_destroy(_a+i, n);
 		memmove(_a+i, _a+i+n, (d().n-i-n)*sizeof(T));
 		d().n -= n;
 		resize(d().n);
-		return;
+		return *this;
 	}
 	/*
 	Removes n elements starting at position i.
 	*/
-	void remove(Enumerator& i, int n=1)
+	Array& remove(Enumerator& i, int n = 1)
 	{
 		asl_destroy(_a+i.i, n);
 		memmove(_a+i.i, _a+i.i+n, (d().n-i.i-n)*sizeof(T));
@@ -330,11 +330,11 @@ public:
 		--i.i;
 		--i.j;
 		resize(d().n);
-		return;
+		return *this;
 	}
 	/**
 	Removes the first element with value x starting at index i0.
-	Returns true if an elemento was found and removed.
+	Returns true if an element was found and removed.
 	*/
 	bool removeOne(const T& x, int i0=0)
 	{
@@ -348,7 +348,7 @@ public:
 	/**
 	Inserts x at position k
 	*/
-	void insert(int k, const T& x);
+	Array& insert(int k, const T& x);
 	/**
 	Returns the elements of the array in reversed order
 	*/
@@ -496,10 +496,11 @@ public:
 	/**
 	Removes the last item in the array
 	*/
-	void removeLast()
+	Array& removeLast()
 	{
 		if (length() > 0)
 			remove(length() - 1);
+		return *this;
 	}
 
 	Enumerator all() {return Enumerator(*this);}
@@ -525,7 +526,7 @@ public:
 };
 
 template <class T>
-void Array<T>::resize(int m)
+Array<T>& Array<T>::resize(int m)
 {
 	//if(length()==m)
 	//	return;
@@ -564,10 +565,11 @@ void Array<T>::resize(int m)
 		d().s = s1;
 	}
 	d().n = m;
+	return *this;
 }
 
 template <class T>
-void Array<T>::insert(int k, const T& x)
+Array<T>& Array<T>::insert(int k, const T& x)
 {
 	Data* h = &d();
 	int n = h->n;
@@ -608,6 +610,7 @@ void Array<T>::insert(int k, const T& x)
 	}
 	asl_construct_copy(_a+k, x);
 	h->n = n+1;
+	return *this;
 }
 
 template<class T>
