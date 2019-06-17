@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2018 ASL author
+// Copyright(c) 1999-2019 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_ARRAYX_H

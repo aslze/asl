@@ -1,3 +1,6 @@
+// Copyright(c) 1999-2019 aslze
+// Licensed under the MIT License (http://opensource.org/licenses/MIT)
+
 #ifndef ASL_TESTING_H
 #define ASL_TESTING_H
 
