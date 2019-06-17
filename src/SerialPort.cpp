@@ -53,7 +53,7 @@ SerialPort& SerialPort::operator<<(const String& x)
 
 bool SerialPort::open(const String& port)
 {
-	_handle = CreateFile("\\\\.\\" + port, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
+	_handle = CreateFile("\\\\.\\" + port, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
 
 	if(_handle == INVALID_HANDLE_VALUE)
 		return false;
@@ -123,32 +123,27 @@ void SerialPort::setTimeout(double s)
 
 bool SerialPort::waitInput(double timeout)
 {
-	int i = 0, n = 0, m = int(timeout*1000);
-	while ((n = available()) == 0 && i++ < m)
+	bool incoming = true;
+	DWORD mask;
+	SetCommMask(_handle, EV_RXCHAR);
+	OVERLAPPED overlapped;
+	memset(&overlapped, 0, sizeof(OVERLAPPED));
+	overlapped.hEvent = CreateEvent(NULL, TRUE, TRUE, 0);
+	if (!WaitCommEvent(_handle, &mask, &overlapped))
 	{
-		sleep(0.001);
+		if (GetLastError() == ERROR_IO_PENDING)
+		{
+			if (WaitForSingleObject(overlapped.hEvent, (DWORD)(timeout * 1000)) != WAIT_OBJECT_0)
+			{
+				incoming = false;
+			}
+		}
 	}
+	CloseHandle(overlapped.hEvent);
 
-	if (n < 0)
-		_error = true;
-
-	return (n != 0);
-/*
-	if(!SetCommMask(_handle, EV_RXCHAR | EV_BREAK | EV_ERR))
+	if ((mask & EV_RXCHAR) != EV_RXCHAR)
 		return false;
-	DWORD eventMask;
-
-	COMMTIMEOUTS timeouts;
-	GetCommTimeouts(_handle, &timeouts);
-	COMMTIMEOUTS timeouts0 = timeouts;
-	timeouts.ReadTotalTimeoutConstant   = DWORD(timeout * 1000);
-	timeouts.ReadIntervalTimeout        = 100;
-	timeouts.ReadTotalTimeoutMultiplier = 1;
-	SetCommTimeouts(_handle, &timeouts);
-	BOOL ret = WaitCommEvent(_handle, &eventMask, NULL);
-	SetCommTimeouts(_handle, &timeouts0);
-	return ret != 0 && (eventMask & EV_RXCHAR) != 0;
-*/
+	return incoming && available() > 0;
 }
 
 int SerialPort::available()
@@ -162,16 +157,22 @@ int SerialPort::available()
 
 int SerialPort::write(const void* p, int n)
 {
-	DWORD written;
-	WriteFile(_handle, p, n, &written, 0);
-	return written;
+	DWORD bytes;
+	OVERLAPPED overlapped;
+	memset(&overlapped, 0, sizeof(OVERLAPPED));
+	WriteFile(_handle, p, n, NULL, &overlapped);
+	GetOverlappedResult(_handle, &overlapped, &bytes, TRUE);
+	return bytes;
 }
 
 int SerialPort::read(void *p, int n)
 {
-	DWORD received;
-	ReadFile(_handle, p, n, &received, 0);
-	return received;
+	DWORD bytes;
+	OVERLAPPED overlapped;
+	memset(&overlapped, 0, sizeof(OVERLAPPED));
+	ReadFile(_handle, p, n, NULL, &overlapped);
+	GetOverlappedResult(_handle, &overlapped, &bytes, TRUE);
+	return bytes;
 }
 
 void SerialPort::close()
