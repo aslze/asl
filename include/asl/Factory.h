@@ -26,12 +26,12 @@ Animal* animal = Factory<Animal>::create("Dog");
 \ingroup Factory
 */
 
-template<class T, class K=void*>
-class Factory : public Singleton< Factory<T,K> >
+template<class T>
+class Factory : public Singleton< Factory<T> >
 {
 	Dic<T*(*)()> _constructors;
-	Dic<T*(*)(K)> _constructors2; // constructors with an argument [deprecated]
-	typedef Singleton< Factory<T,K> > S;
+	Dic<> _classInfo;
+	typedef Singleton< Factory<T> > S;
 public:
 	Factory(){}
 
@@ -42,35 +42,24 @@ public:
 			return 0;
 		return S::instance()->_constructors[name]();
 	}
-	static T* create(const String& name, const K& k)
-	{
-		if(!S::instance()->_constructors2.has(name))
-			return 0;
-		return S::instance()->_constructors2[name](k);
-	}
 	/**
 	Registers a class given a function that constructs and returns a new object.
 	*/
 	static int add(const String& className, T*(*f)())
 	{
-		//printf("Registering %s on %p\n", *name, Factory::instance());
 		S::instance()->_constructors[className] = f;
 		return 0;
-	}	
-	static int add(const String& name, T*(*f)(K))
-	{
-		S::instance()->_constructors2[name] = f;
-		return 0;
 	}
+
 	static void add(void* other)
 	{
-		Dic<T*(*)()> ctors1 = S::instance()->_constructors;
 		Dic<T*(*)()> ctors2 = ((Factory*)(((void*(*)())other)()))->_constructors;
 		foreach2(String& k, T*(*f)(), ctors2)
 		{
-			ctors1[k] = f;
+			S::instance()->_constructors[k] = f;
 		}
 	}
+
 	/**
 	Returns a list of the class names already registered
 	*/
@@ -80,11 +69,26 @@ public:
 	}
 
 	/**
-	returns true if the given class name is registered
+	Returns true if the given class name is registered
 	*/
 	static bool has(const String& clas)
 	{
 		return S::instance()->_constructors.has(clas);
+	}
+	/**
+	Associates an information string with a registered class
+	*/
+	static int setClassInfo(const String& clas, const Dic<>& info)
+	{
+		S::instance()->_classInfo[clas] = info.join(',', '=');
+		return 0;
+	}
+	/**
+	Returns the information associated with a class
+	*/
+	static const Dic<> classInfo(const String& clas)
+	{
+		return S::instance()->_classInfo[clas].split(',', '=');
 	}
 };
 
@@ -107,6 +111,10 @@ Registers class `Class` in the factory for class `Base` for instantiation by the
 #define ASL_FACTORY_REGISTER_AS(Base, Class, Name) \
 	Base* create##Class() {return new Class();} \
 	static int Class##_1 = asl::Factory<Base>::add(#Name, create##Class);
+
+
+#define ASL_FACTORY_SET_INFO(Base, Class, Info) \
+	static int Base##_Class##_i = Factory<Base>::setClassInfo(#Class, (Info));
 
 /**
 Exports all registered classes derived from `Base` for instantiation from a dynamic library
