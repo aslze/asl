@@ -45,11 +45,13 @@ set(TARGETS "")
 
 
 if(CMAKE_SOURCE_DIR STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} AND NOT ANDROID)
-	set(ASL_BUILD_SHARED ON)
+	set(ASL_BUILD_SHARED_HINT ON)
+else()
+	set(ASL_BUILD_SHARED_HINT OFF)
 endif()
 
 option(ASL_BUILD_STATIC "Build static library" ON)
-option(ASL_BUILD_SHARED "Build shared library" ${ASL_BUILD_SHARED})
+option(ASL_BUILD_SHARED "Build shared library" ${ASL_BUILD_SHARED_HINT})
 option(ASL_IPV6 "Expect also IPv6 when looking up DNS names" OFF)
 
 add_subdirectory( src )
@@ -72,8 +74,8 @@ set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OLD_CMAKE_LIBRARY} CACHE PATH "Output dire
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OLD_CMAKE_RUNTIME} CACHE PATH "Output directory for executables." FORCE ) 
 
 file( WRITE "${PROJECT_BINARY_DIR}/ASLConfigVersion.cmake"
-	"if(NOT \${CMAKE_GENERATOR} STREQUAL \"${CMAKE_GENERATOR}\")\n"
-	"message( \"Skipping incompatible ASL build\" )\n"
+	"if(NOT CMAKE_GENERATOR STREQUAL \"${CMAKE_GENERATOR}\" OR (DEFINED CMAKE_GENERATOR_PLATFORM AND NOT CMAKE_GENERATOR_PLATFORM STREQUAL \"${CMAKE_GENERATOR_PLATFORM}\"))\n"
+	"message(\"Skipping incompatible ASL build\")\n"
 	"set(PACKAGE_VERSION_UNSUITABLE TRUE)\nendif()\n" )
 
 export( TARGETS ${TARGETS} FILE ASLConfig.cmake )
@@ -82,7 +84,7 @@ if(CMAKE_SOURCE_DIR STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 	export( PACKAGE ASL )
 	find_package(Doxygen)
 	if(DOXYGEN_FOUND AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/doc)
-		set(ASL_DOC_DIR "${PROJECT_BINARY_DIR}/doc" CACHE DIR  "Directory for documentation")
+		set(ASL_DOC_DIR "${PROJECT_BINARY_DIR}/doc" CACHE PATH "Directory for documentation")
 		configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxy.ini ${PROJECT_BINARY_DIR}/doxy2.ini)
 		add_custom_target(DOC
 			${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/doxy2.ini
