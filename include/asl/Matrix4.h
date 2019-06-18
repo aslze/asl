@@ -136,25 +136,25 @@ class Matrix4_
 	/**
 	Returns a scale matrix.
 	*/
-	static Matrix4_ scale(const Vec3_<T>&);
+	static Matrix4_ scale(const Vec3_<T>& s);
 	/**
-	Returns a scale matrix.
+	Returns a uniform scale matrix.
 	*/
 	static Matrix4_ scale(T s) {return scale(Vec3_<T>(s, s, s));}
 	/**
-	Returns a rotation matrix around the *x* axis.
+	Returns a rotation matrix of the given angle in radians around the *x* axis.
 	*/
-	static Matrix4_ rotateX(T);
+	static Matrix4_ rotateX(T angle);
 	/**
-	Returns a rotation matrix around the *y* axis.
+	Returns a rotation matrix of the given angle in radians around the *y* axis.
 	*/
-	static Matrix4_ rotateY(T);
+	static Matrix4_ rotateY(T angle);
 	/**
-	Returns a rotation matrix around the *z* axis.
+	Returns a rotation matrix of the given angle in radians around the *z* axis.
 	*/
-	static Matrix4_ rotateZ(T);
+	static Matrix4_ rotateZ(T angle);
 	/**
-	Returns a rotation matrix of an angle around a given axis.
+	Returns a rotation matrix of an angle in radians around a given axis.
 	*/
 	static Matrix4_ rotate(const Vec3_<T>& axis, T angle);
 	/**

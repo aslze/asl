@@ -21,7 +21,8 @@ class HelloServer : public SocketServer
 public:
 	void serve(Socket client)
 	{
-		client << "Hello\n";
+		String name = client.readLine();
+		client << "Hello " + name + "\n";
 	}
 };
 
