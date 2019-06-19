@@ -148,7 +148,7 @@ public:
 	*/
 	int length() const {return d().n;}
 	/**
-	Resizes the array to a capacity of m elements. Up to m existing elements are preserved
+	Resizes the array to a capacity of m elements; up to m existing elements are preserved
 	*/
 	Array& resize(int m);
 	/**
@@ -159,7 +159,7 @@ public:
 	Removes all elements in the array
 	*/
 	void clear() { resize(0); }
-	/* Frees all elements (with delete) and clears the array. Elements must be pointers */
+	/* Frees all elements (with delete) and clears the array; elements must be pointers */
 	void destroy() {for(int i=0; i<length(); i++) delete _a[i]; clear();}
 	/**
 	Returns a pointer to the base of the array
@@ -218,7 +218,7 @@ public:
 		return _a[length()-1];
 	}
 	/**
-	Returns the index of the first element with value x. The search starts at position j.
+	Returns the index of the first element with value x; The search starts at position j;
 	The value -1 is returned if no such element is found
 	*/
 	int indexOf(const T& x, int j=0) const
@@ -333,7 +333,7 @@ public:
 		return *this;
 	}
 	/**
-	Removes the first element with value x starting at index i0.
+	Removes the first element with value x starting at index i0;
 	Returns true if an element was found and removed.
 	*/
 	bool removeOne(const T& x, int i0=0)
@@ -360,7 +360,7 @@ public:
 		return b;
 	}
 	/**
-	Returns a section of the array, from element i1 up to but not including element i2.
+	Returns a section of the array, from element i1 up to but not including element i2;
 	If i2 is omitted the subarray will take elements up te the last
 	*/
 	Array slice(int i1, int i2=0) const
@@ -464,7 +464,7 @@ public:
 	///operator String() const;
 	/**
 	Returns a string representation of the array, formed by joining its
-	elements with the given separator string sep. The elements need to be
+	elements with the given separator string sep; The elements need to be
 	convertible to String
 	*/
 	String join(const String& sep) const;

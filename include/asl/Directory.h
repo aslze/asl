@@ -70,7 +70,7 @@ public:
 	*/
 	String directory() const;
 	/**
-	Returns true if this directory exists (but false if it does not exist or refers to a file.
+	Returns true if this directory exists, or false if it does not exist or refers to a file
 	*/
 	bool exists() const
 	{
@@ -102,7 +102,7 @@ public:
 	*/
 	static bool create(const String& name);
 	/**
-	Creates a new directory, returns false on failure (e.g. if its parent does not exist)
+	Creates a new directory, returns false on failure (e.g if its parent does not exist)
 	*/
 	static bool createOne(const String& name);
 	/**
