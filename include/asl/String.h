@@ -578,6 +578,7 @@ public:
 		const char* u;
 		int i, n;
 		Enumerator(const String& s): u(s), i(0), n(1) {}
+		bool operator!=(const Enumerator& e) const { return (bool)*this; }
 		void operator++() {u += n;}
 		int operator*();
 		int operator~() {return i;}
@@ -617,7 +618,6 @@ inline String operator+(const String& a, const T& b)
 
 template<class T>
 Array<T>::Array(const String& s)
-
 {
 	alloc(0);
 	*this = s.split();
@@ -632,6 +632,21 @@ String Array<T>::join(const String& sep) const
 	for(int i=1; i<n; i++) {s+=sep; String v=_a[i]; s+=(v);}
 	return s;
 }
+
+#ifdef ASL_HAVE_RANGEFOR
+
+inline String::Enumerator begin(const String& s)
+{
+	return s.all();
+}
+
+inline String::Enumerator end(const String& s)
+{
+	return s.all();
+}
+
+#endif
+
 
 /**
 This is a helper class to use a String as an output parameter of a C function using a pointer to a buffer.

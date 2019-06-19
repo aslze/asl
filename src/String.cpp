@@ -211,11 +211,18 @@ int String::Enumerator::operator*()
 		n = 2;
 		return ((c & 0x1f) << 6) | (c2 & 0x3f);
 	}
-	else /*if ((c & 0xf0) == 0xe0)*/ {
+	else if ((c & 0xf0) == 0xe0) {
 		char c2 = u[1];
 		char c3 = u[2];
 		n = 3;
 		return ((c & 0x0f) << 12) | ((c2 & 0x3f) << 6) | (c3 & 0x3f);
+	}
+	else {
+		n = 4;
+		char c2 = u[1];
+		char c3 = u[2];
+		char c4 = u[3];
+		return ((c & 0x07) << 18) | ((c2 & 0x3f) << 12) | ((c3 & 0x3f) << 6) | (c4 & 0x3f);
 	}
 	return 0;
 }
