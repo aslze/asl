@@ -250,8 +250,8 @@ public:
 	*/
 	int cap() const { return (_size == 0) ? ASL_STR_SPACE : _size; }
 	/**
-	Constructs a string by formatting values using `sprintf`-style specification `fmt`.
-	The first argument can give an initial buffer _size, but will be automatically calculated if it is 0. In
+	Constructs a string by formatting values using `printf`-style specification `fmt`.
+	The first argument can give an initial buffer size, but will be automatically calculated if it is 0. In
 	any case, the function will automatically allocate _space as needed.
 	*/
 	String(int n, const char* fmt, ...);
@@ -300,6 +300,10 @@ public:
 		return QString::QTFROM(str());
 	}
 #endif
+	/**
+	Creates a string by formatting values using `printf`-style specification `fmt`.
+	*/
+	static String f(const char* fmt, ...);
 	/**
 	Converts this string to an integer number
 	*/

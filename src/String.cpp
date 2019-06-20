@@ -278,6 +278,23 @@ String::String(int n, const char* fmt, ...)
 	_len=n;
 }
 
+String String::f(const char* fmt, ...)
+{
+	String s(15, 0);
+	va_list arg;
+	va_start(arg, fmt);
+	int i = 0, n = 100;
+	int space = s._size ? s._size : ASL_STR_SPACE;
+	while (((n = vsnprintf(s.str(), space, fmt, arg)) == -1 || n >= space) && ++i < 10) {
+		s.resize((n >= space) ? n : 2 * space, false);
+		space = s._size ? s._size : ASL_STR_SPACE;
+		va_start(arg, fmt);
+	}
+	va_end(arg);
+	s._len = n;
+	return s;
+}
+
 /*String::~String()
 {
 	if(_size>0)
