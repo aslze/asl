@@ -86,8 +86,10 @@ double distance(const Quaternion_<T>& a, const Quaternion_<T>& b)
 
 #ifdef __ANDROID__
 #define ASL_ASSERT(x) if(!(x)) { testResult << String(0, "\n%s: %i\nFailed: '%s'\n\n", __FILE__, __LINE__, #x); }
+#define ASL_CHECK(x, op, y) if(!((x) op (y))) { testResult << String(0, "\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, #y, *String(x)); }
 #else
 #define ASL_ASSERT(x) if(!(x)) { printf("\n%s: %i\n\n* Failed: '%s'\n\n", __FILE__, __LINE__, #x); testFailed = true;}
+#define ASL_CHECK(x, op, y) if(!((x) op (y))) { printf("\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, #y, *String(x)); testFailed = true;}
 #endif
 
 #define ASL_APPROX(x, y, d) ASL_ASSERT(distance((x), (y)) < (d))

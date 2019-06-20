@@ -6,8 +6,8 @@
 #include <asl/Thread.h>
 #include <asl/Path.h>
 #include <asl/Xml.h>
+#include <asl/testing.h>
 #include <stdio.h>
-#include "testing.h"
 
 using namespace asl;
 

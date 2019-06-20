@@ -9,7 +9,7 @@
 #include <asl/TextFile.h>
 #include <asl/util.h>
 #include <stdio.h>
-#include "testing.h"
+#include <asl/testing.h>
 
 ASL_ENABLE_TESTING();
 
@@ -282,6 +282,9 @@ ASL_TEST(String)
 	String u1(L"1");
 
 	ASL_ASSERT(u1 == "1");
+
+	String sf = String::f("a%i", 2);
+	ASL_ASSERT(sf == "a2");
 
 	String a = "a";
 	String b = 123;

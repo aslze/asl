@@ -4,7 +4,7 @@
 #include <asl/Uuid.h>
 #include <asl/StreamBuffer.h>
 #include <stdio.h>
-#include "testing.h"
+#include <asl/testing.h>
 
 using namespace asl;
 
