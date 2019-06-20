@@ -201,6 +201,10 @@ String localToString(const String& a)
 
 int String::Enumerator::operator*()
 {
+#ifdef ASL_ANSI
+	n = 1;
+	return (int)(byte)u[0];
+#else
 	char c = u[0];
 	if((c & 0x80) == 0) {
 		n = 1;
@@ -225,6 +229,7 @@ int String::Enumerator::operator*()
 		return ((c & 0x07) << 18) | ((c2 & 0x3f) << 12) | ((c3 & 0x3f) << 6) | (c4 & 0x3f);
 	}
 	return 0;
+#endif
 }
 
 
