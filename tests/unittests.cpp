@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <asl/testing.h>
 
-ASL_ENABLE_TESTING();
+ASL_TEST_ENABLE();
 
 using namespace asl;
 

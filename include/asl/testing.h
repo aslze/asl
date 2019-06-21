@@ -18,11 +18,12 @@ extern TestInfo tests[255];
 extern int numTests;
 extern bool testFailed;
 
-#define ASL_ENABLE_TESTING() \
+#define ASL_TEST_ENABLE() \
 namespace asl { \
 asl::String testResult; \
 TestInfo tests[255]; \
 int numTests = 0; \
+bool testsFailed = false;\
 bool testFailed = false;\
 int addTest(const char* name, void (*func)()) \
 { \
@@ -32,17 +33,34 @@ int addTest(const char* name, void (*func)()) \
 } \
 bool runTest(const char* name)\
 {\
+	testFailed = false;\
 	for (int i = 0; i<numTests; i++)\
 	{\
 		if (strcmp(tests[i].name, name) == 0)\
 		{\
 			tests[i].func();\
-			return true;\
+			if(testFailed) testsFailed = true;\
+			return !testFailed;\
 		}\
 	}\
 	return false;\
 }\
 }
+
+#define ASL_TEST_MAIN() \
+int main() \
+{ \
+	for (int i = 0; i<asl::numTests; i++) { \
+		printf("Test %s ", asl::tests[i].name); \
+		printf("%s\n", asl::runTest(asl::tests[i].name)? "OK" : "FAILED"); \
+	} \
+	return asl::testFailed ? 1 : 0; \
+}
+
+#define ASL_TEST_ENABLE_MAIN() \
+	ASL_TEST_ENABLE(); \
+	ASL_TEST_MAIN();
+
 
 #define ASL_TEST(Name) \
 void asl_test##Name();\
