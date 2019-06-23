@@ -51,8 +51,8 @@ bool runTest(const char* name)\
 int main() \
 { \
 	for (int i = 0; i<asl::numTests; i++) { \
-		printf("Test %s ", asl::tests[i].name); \
-		printf("%s\n", asl::runTest(asl::tests[i].name)? "OK" : "FAILED"); \
+		printf("Test %s:\n", asl::tests[i].name); \
+		printf("-> %s\n\n", asl::runTest(asl::tests[i].name)? "OK" : "FAILED"); \
 	} \
 	return asl::testFailed ? 1 : 0; \
 }
@@ -110,7 +110,7 @@ double distance(const Quaternion_<T>& a, const Quaternion_<T>& b)
 #define ASL_CHECK(x, op, y) if(!((x) op (y))) { printf("\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, #y, *String(x)); testFailed = true;}
 #endif
 
-#define ASL_APPROX(x, y, d) ASL_ASSERT(distance((x), (y)) < (d))
+#define ASL_APPROX(x, y, d) ASL_CHECK(distance((x), (y)), <, (d))
 
 }
 
