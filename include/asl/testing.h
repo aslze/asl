@@ -10,7 +10,15 @@
 
 namespace asl {
 
+/**
+\defgroup Testing Testing
+@{
+*/
+
 int addTest(const char* name, void (*func)());
+/**
+Runs the test named `name`.
+*/
 bool runTest(const char* name);
 extern asl::String testResult;
 struct TestInfo { const char* name; void (*func)(); };
@@ -18,6 +26,10 @@ extern TestInfo tests[255];
 extern int numTests;
 extern bool testFailed;
 
+/** 
+Add support for testing in this executable (use only once in the sources for one executable).
+@hideinitializer
+*/
 #define ASL_TEST_ENABLE() \
 namespace asl { \
 asl::String testResult; \
@@ -57,11 +69,18 @@ int main() \
 	return asl::testFailed ? 1 : 0; \
 }
 
+/** 
+Add support for testing in this executable and create a function `main()` that runs all tests.
+@hideinitializer
+*/
 #define ASL_TEST_ENABLE_MAIN() \
 	ASL_TEST_ENABLE(); \
 	ASL_TEST_MAIN();
 
-
+/** 
+Create a test named Name.
+@hideinitializer
+*/
 #define ASL_TEST(Name) \
 void asl_test##Name();\
 int asl_xx##Name = asl::addTest(#Name, &asl_test##Name); \
@@ -104,14 +123,33 @@ double distance(const Quaternion_<T>& a, const Quaternion_<T>& b)
 
 #ifdef __ANDROID__
 #define ASL_ASSERT(x) if(!(x)) { testResult << String(0, "\n%s: %i\nFailed: '%s'\n\n", __FILE__, __LINE__, #x); }
+
 #define ASL_CHECK(x, op, y) if(!((x) op (y))) { testResult << String(0, "\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, #y, *String(x)); }
 #else
+
+/** 
+Check that the argument is true.
+@hideinitializer
+*/
 #define ASL_ASSERT(x) if(!(x)) { printf("\n%s: %i\n\n* Failed: '%s'\n\n", __FILE__, __LINE__, #x); testFailed = true;}
+
+/** 
+Check a condition with the given operator and operands.
+~~~
+ASL_CHECK(sqrt(x), >=, 0);
+~~~
+@hideinitializer
+*/
 #define ASL_CHECK(x, op, y) if(!((x) op (y))) { printf("\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, #y, *String(x)); testFailed = true;}
 #endif
 
+/** 
+Check that `x` and `y` are approximately equal (within distance `d`).
+@hideinitializer
+*/
 #define ASL_APPROX(x, y, d) ASL_CHECK(distance((x), (y)), <, (d))
 
+/**@}*/
 }
 
 #endif

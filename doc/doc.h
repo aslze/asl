@@ -29,6 +29,8 @@ __Utilities__:
 - Command line arguments and options parsing
 - Singletons and Factories
 - Base64, hex encoding/decoding
+- Binary buffer endian-aware reading/writing
+- Tiny testing
 
 __Basic data types__:
 
@@ -500,6 +502,33 @@ socket.read(data.ptr(), 12);                       // read 12 bytes into a buffe
 StreamBufferReader reader(ENDIAN_BIG);
 int32_t x, y;
 reader >> x >> y;                                  // read 2 int32 variables from the buffer
+~~~
+*/
+
+
+/**
+\defgroup Testing Testing
+
+Tiny testing functionality. The `ASL_TEST_ENABLE_MAIN()` macro adds testing functionality and creates a main function
+that runs all defined tests. Use the `ASL_TEST_ENABLE()` macro if you will provide your own main function.
+
+~~~
+#include <asl/testing.h>
+
+ASL_TEST_ENABLE_MAIN();
+
+ASL_TEST(Car)
+{
+	Car car;
+	ASL_ASSERT(car.isStopped());
+	ASL_CHECK(car.numWheels(), >, 2);
+}
+
+ASL_TEST(Volume)
+{
+    Sphere sphere(1.0);
+    ASL_APPROX(sphere.volume(), 4.1888, 1e-3);
+}
 ~~~
 */
 

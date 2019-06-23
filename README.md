@@ -4,10 +4,9 @@ _**An old, bad and outdated C++ utility library**_
 
 ASL is a collection of multiplatform general purpose classes and utilities focused on simplicity and ease of use. Builds in seconds and facilitates writing code that works on different operating systems and compilers.
 
-- Multiplatform (**Windows**, **Linux**, **macOS**, **Android**), 32/64 bit
+- Crossplatform (**Windows**, **Linux**, **macOS**, **Android**), 32/64 bit
 - Works on older compilers (e.g. VisualStudio 2005, gcc 3.4) but can use some C++11 features if available (e.g. lambdas, range-based for, initializer lists)
-- Almost no dependencies (not even the standard C++ library, just the C part). Optionally the **mbedTLS**
-library for TLS sockets (e.g. HTTPS)
+- Almost no dependencies. Optionally the **mbedTLS** library for TLS sockets (e.g. HTTPS)
 - [Online API documentation](https://aslze.github.io/asl-doc/)
 
 
@@ -37,6 +36,8 @@ __Utilities__:
 - Command line arguments and options parsing
 - Singletons and Factories
 - Base64 and hex encoding/decoding
+- Binary buffer reading/writing (endian-aware)
+- Tiny testing
 
 __Basic data types__:
 
