@@ -40,7 +40,7 @@ void Var::copy(const Var& v)
 	switch(_type) {
 	case STRING:
 		NEW_STRINGC(s, (*v.s).length());
-		strcpy((*s).ptr(), (*v.s).ptr());
+		memcpy((*s).ptr(), (*v.s).ptr(), (*v.s).length() + 1);
 		break;
 	case ARRAY:
 		NEW_ARRAYC(a, *v.a);
@@ -93,14 +93,15 @@ Var::Var(double x)
 
 Var::Var(const char* y)
 {
-	if(strlen(y) < VAR_SSPACE) {
+	int len = (int)strlen(y);
+	if(len < VAR_SSPACE) {
 		_type=SSTRING;
-		strcpy(ss, y);
+		memcpy(ss, y, len + 1);
 	}
 	else {
 		_type=STRING;
-		NEW_STRINGC(s, (int)strlen(y)+1);
-		strcpy((*s).ptr(), y);
+		NEW_STRINGC(s, len + 1);
+		memcpy((*s).ptr(), y, len + 1);
 	}
 }
 
@@ -320,7 +321,7 @@ void Var::operator=(const Var& v)
 	if(_type == STRING && v._type == STRING) {
 		//(*s) = (*v.s);
 		(*s).resize((*v.s).length() + 1);
-		strcpy((*s).ptr(), (*v.s).ptr());
+		memcpy((*s).ptr(), (*v.s).ptr(), (*v.s).length() + 1);
 		return;
 	}
 	if(_type == ARRAY && v._type == ARRAY) {
@@ -339,7 +340,7 @@ void Var::operator=(const Var& v)
 	{
 	case STRING:
 		NEW_STRINGC(s, (*v.s).length());
-		strcpy((*s).ptr(), (*v.s).ptr());
+		memcpy((*s).ptr(), (*v.s).ptr(), (*v.s).length());
 		break;
 	case ARRAY:
 		NEW_ARRAYC(a, *v.a);
@@ -417,25 +418,26 @@ void Var::operator=(bool x)
 
 void Var::operator=(const char* x)
 {
+	int n = (int)strlen(x);
 	if (_type == STRING) {
-		(*s).resize((int)strlen(x) + 1);
-		strcpy((*s).ptr(), x);
+		(*s).resize(n + 1);
+		memcpy((*s).ptr(), x, n + 1);
 	}
-	if(_type==SSTRING && strlen(x) < VAR_SSPACE)
-		strcpy(ss, x);
+	if(_type==SSTRING && n < VAR_SSPACE)
+		memcpy(ss, x, n + 1);
 	else
 	{
 		free();
-		if(strlen(x) < VAR_SSPACE)
+		if(n < VAR_SSPACE)
 		{
 			_type = SSTRING;
-			strcpy(ss, x);
+			memcpy(ss, x, n + 1);
 		}
 		else
 		{
 			_type=STRING;
-			NEW_STRINGC(s, (int)strlen(x) + 1);
-			strcpy((*s).ptr(), x);
+			NEW_STRINGC(s, n + 1);
+			memcpy((*s).ptr(), x, n + 1);
 		}
 	}
 }
@@ -446,12 +448,12 @@ void Var::operator=(const String& x)
 	Type t = _type;
 	if(t==NONE) {}
 	else if(t==STRING) {
-		(*s).resize(x.length() + 1);
-		strcpy((*s).ptr(), x);
+		(*s).resize(len + 1);
+		memcpy((*s).ptr(), *x, len + 1);
 		return;
 	}
 	else if(t==SSTRING && len < VAR_SSPACE) {
-		strcpy(ss, x);
+		memcpy(ss, *x, len + 1);
 		return;
 	}
 
@@ -462,13 +464,13 @@ void Var::operator=(const String& x)
 		if(len < VAR_SSPACE)
 		{
 			_type = SSTRING;
-			strcpy(ss, x);
+			memcpy(ss, *x, len + 1);
 		}
 		else
 		{
 			_type=STRING;
-			NEW_STRINGC(s, x.length() + 1);
-			strcpy((*s).ptr(), x);
+			NEW_STRINGC(s, len + 1);
+			memcpy((*s).ptr(), *x, len + 1);
 		}
 	}
 }

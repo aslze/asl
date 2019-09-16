@@ -227,12 +227,12 @@ class ASL_API Var
 	{
 		if(v.length() < VAR_SSPACE) {
 			_type=SSTRING;
-			strcpy(ss, v);
+			memcpy(ss, *v, v.length() + 1);
 		}
 		else {
 			_type=STRING;
 			NEW_STRINGC(s, v.length()+1);
-			strcpy(&(*s)[0], &v[0]);
+			memcpy((*s).ptr(), *v, v.length() + 1);
 		}
 	}
 	template<class T>
