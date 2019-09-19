@@ -1,6 +1,6 @@
 project(asl)
 
-include_directories(${asl_SOURCE_DIR}/../include)
+include_directories(../include)
 
 set( ASL_SRC
 	String.cpp
