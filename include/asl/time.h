@@ -28,7 +28,7 @@ Long ASL_API inow();
 #ifdef _WIN32
 
 /*
-Makes the current thread sleep for the given number of seconds
+Makes the current thread sleep for the given time in seconds
 */
 inline void sleep(int s)
 {
@@ -36,7 +36,7 @@ inline void sleep(int s)
 }
 
 /**
-Makes the current thread sleep for the given number of microseconds
+Makes the current thread sleep for the given time in microseconds
 */
 inline void usleep(int us)
 {
@@ -53,7 +53,7 @@ inline void sleep(double s)
 #else
 
 /**
-Makes the current thread sleep for the given number of seconds
+Makes the current thread sleep for the given time in seconds
 */
 inline void sleep(int s)
 {
