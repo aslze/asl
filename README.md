@@ -309,4 +309,11 @@ asl::Directory dir;
 ## SSL/TLS sockets and HTTPS support
 
 HTTPS, TLS WebSockets and TlsSocket require the *mbedTLS* library ( https://tls.mbed.org ). Download and compile
-the library, enable `ASL_TLS` in CMake and provide the *mbedTLS* install directory and library location.
+the library, enable `ASL_TLS` in CMake and provide the *mbedTLS* install directory (and library locations, which should
+normally be automatically found).
+
+In Ubuntu Linux you can just install package **libmbedtls-dev** with:
+
+```
+sudo apt-get install libmbedtls-dev
+```
