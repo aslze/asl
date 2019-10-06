@@ -475,7 +475,7 @@ void Var::operator=(const String& x)
 	}
 }
 
-Var& Var::operator[](int i) const
+const Var& Var::operator[](int i) const
 {
 	if(_type==ARRAY)
 	{
@@ -521,7 +521,7 @@ Var& Var::operator[](const String& k)
 	return *(Var*)this;
 }
 
-Var& Var::operator[](const String& k) const
+const Var& Var::operator[](const String& k) const
 {
 	if(_type==DIC)
 		return (*o)[k];
@@ -531,7 +531,7 @@ Var& Var::operator[](const String& k) const
 }
 
 /*
-Var& Var::operator()(const String& k) const
+const Var& Var::operator()(const String& k) const
 {
 	if(_type==DIC)
 		return (*o)[k];

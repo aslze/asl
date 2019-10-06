@@ -342,13 +342,13 @@ class ASL_API Var
 			a->resize(n);
 	}
 	/** Returns the element at index `i` if this var is an array */
-	Var& operator[](int i) const;
+	const Var& operator[](int i) const;
 	/** Returns the element at index `i` if this var is an array */
 	Var& operator[](int i);
 	/** Returns the property named `key` if this var is an object */
 	Var& operator[](const String& key);
 	/** Returns the property named `key` if this var is an object */
-	Var& operator[](const String& key) const;
+	const Var& operator[](const String& key) const;
 	
 	Var operator()(const String& key) const { return has(key) ? (*this)[key] : Var(); }
 
@@ -360,7 +360,7 @@ class ASL_API Var
 	/** Returns the property named `key` if this var is an object */
 	Var& operator[](const char* key) {return (*this)[String(key)];}
 	/** Returns the property named `key` if this var is an object */
-	Var& operator[](const char* key) const {return (*this)[String(key)];}
+	const Var& operator[](const char* key) const { return (*this)[String(key)]; }
 
 	/** Returns the length of this var if it is an array or a dic */
 	int length() const;
@@ -505,18 +505,22 @@ class ASL_API Var
 	friend struct Enumerator;
 
  protected:
-	 Type _type;
-	 union{double d; int i; bool b;
+	Type _type;
+	union {
+		double d;
+		int i;
+		bool b;
 #ifndef ASL_VAR_STATIC
-	Array<Var>* a;
-	HDic<Var>* o;
-	Array<char>* s;
+		Array<Var>* a;
+		HDic<Var>* o;
+		Array<char>* s;
 #else
-	StaticSpace< Array<Var> > a;
-	StaticSpace< HDic<Var> > o;
-	StaticSpace< Array<char> > s;
+		StaticSpace< Array<Var> > a;
+		StaticSpace< HDic<Var> > o;
+		StaticSpace< Array<char> > s;
 #endif
-	char ss[VAR_SSPACE];};
+		char ss[VAR_SSPACE];
+	};
 	void free();
 	friend class XdlEncoder;
 };
