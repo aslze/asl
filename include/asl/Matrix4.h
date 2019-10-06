@@ -54,25 +54,42 @@ class Matrix4_
 		T a31, T a32, T a33, T a34,
 		T a41=0, T a42=0, T a43=0, T a44=1)
 	{
-		a[0][0]=a11; a[0][1]=a12; a[0][2]=a13; a[0][3]=a14;
-		a[1][0]=a21; a[1][1]=a22; a[1][2]=a23; a[1][3]=a24;
-		a[2][0]=a31; a[2][1]=a32; a[2][2]=a33; a[2][3]=a34;
-		a[3][0]=a41; a[3][1]=a42; a[3][2]=a43; a[3][3]=a44;
+		a[0][0] = a11; a[0][1] = a12; a[0][2] = a13; a[0][3] = a14;
+		a[1][0] = a21; a[1][1] = a22; a[1][2] = a23; a[1][3] = a24;
+		a[2][0] = a31; a[2][1] = a32; a[2][2] = a33; a[2][3] = a34;
+		a[3][0] = a41; a[3][1] = a42; a[3][2] = a43; a[3][3] = a44;
 	}
-	Matrix4_(const Vec3& v1, const Vec3& v2, const Vec3& v3, const Vec3& v4=Vec3(0,0,0)) // by columns
+
+	/**
+	Constructs a matrix from 4 3D vectors used as columns, setting the last row as [0 0 0 1]
+	*/
+	Matrix4_(const Vec3& v1, const Vec3& v2, const Vec3& v3, const Vec3& v4=Vec3(0,0,0))
 	{
-		a[0][0]=v1.x; a[0][1]=v2.x; a[0][2]=v3.x; a[0][3]=v4.x;
-		a[1][0]=v1.y; a[1][1]=v2.y; a[1][2]=v3.y; a[1][3]=v4.y;
-		a[2][0]=v1.z; a[2][1]=v2.z; a[2][2]=v3.z; a[2][3]=v4.z;
-		a[3][0]=0;    a[3][1]=0;    a[3][2]=0 ;   a[3][3]=1;
+		a[0][0] = v1.x; a[0][1] = v2.x; a[0][2] = v3.x; a[0][3] = v4.x;
+		a[1][0] = v1.y; a[1][1] = v2.y; a[1][2] = v3.y; a[1][3] = v4.y;
+		a[2][0] = v1.z; a[2][1] = v2.z; a[2][2] = v3.z; a[2][3] = v4.z;
+		a[3][0] = 0;    a[3][1] = 0;    a[3][2] = 0;    a[3][3] = 1;
 	}
-	Matrix4_(const T* m, bool gl=true)
+	
+	/**
+	Constructs a matrix from 4 4D vectors used as columns
+	*/
+	Matrix4_(const Vec4& v1, const Vec4& v2, const Vec4& v3, const Vec4& v4)
 	{
-		a[0][0]=m[0]; a[0][1]=m[4]; a[0][2]=m[8]; a[0][3]=m[12];
-		a[1][0]=m[1]; a[1][1]=m[5]; a[1][2]=m[9]; a[1][3]=m[13];
-		a[2][0]=m[2]; a[2][1]=m[6]; a[2][2]=m[10]; a[2][3]=m[14];
-		a[3][0]=m[3]; a[3][1]=m[7]; a[3][2]=m[11]; a[3][3]=m[15];
+		a[0][0] = v1.x; a[0][1] = v2.x; a[0][2] = v3.x; a[0][3] = v4.x;
+		a[1][0] = v1.y; a[1][1] = v2.y; a[1][2] = v3.y; a[1][3] = v4.y;
+		a[2][0] = v1.z; a[2][1] = v2.z; a[2][2] = v3.z; a[2][3] = v4.z;
+		a[3][0] = v1.w; a[3][1] = v2.w; a[3][2] = v3.w; a[3][3] = v4.w;
 	}
+	
+	Matrix4_(const T* m, bool gl = true)
+	{
+		a[0][0] = m[0]; a[0][1] = m[4]; a[0][2] = m[8]; a[0][3] = m[12];
+		a[1][0] = m[1]; a[1][1] = m[5]; a[1][2] = m[9]; a[1][3] = m[13];
+		a[2][0] = m[2]; a[2][1] = m[6]; a[2][2] = m[10]; a[2][3] = m[14];
+		a[3][0] = m[3]; a[3][1] = m[7]; a[3][2] = m[11]; a[3][3] = m[15];
+	}
+
 	/**
 	Returns this matrix transposed
 	*/
@@ -179,6 +196,16 @@ class Matrix4_
 	Returns the *rotation* part of this matrix as a Quaternion
 	*/
 	Quaternion_<T> rotation() const;
+
+	/**
+	Returns the i-th column's top 3 elements as a Vec3
+	*/
+	Vec3_<T> column3(int i) const { return Vec3_<T>(a[0][i], a[1][i], a[2][i]); }
+
+	/**
+	Returns the i-th column as a Vec4
+	*/
+	Vec4_<T> column(int i) const { return Vec4_<T>(a[0][i], a[1][i], a[2][i], a[3][i]); }
 	/**
 	Returns the *translation* part of this matrix (the last column) as a Vec3
 	*/
