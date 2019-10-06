@@ -48,6 +48,14 @@ public:
 		return Quaternion_(cos((T)0.5 * angle), sin((T)0.5 * angle) * axis);
 	}
 	/**
+	Creates a quaternion from a **rotation vector** (aligned with the rotation axis and
+	with length equal to the rotation angle)
+	*/
+	static Quaternion_ fromAxisAngle(const Vec3_<T>& v)
+	{
+		return fromAxisAngle(v, v.length());
+	}
+	/**
 	Returns the angle rotated by this quaternion
 	*/
 	T angle() const { return 2 * acos(w); }
