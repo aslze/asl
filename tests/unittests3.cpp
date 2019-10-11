@@ -32,7 +32,11 @@ ASL_TEST(Process)
 			lines << line;
 		}
 		proc.wait();
-		printf("<%i>\n", proc.exitStatus());
+		printf("<exitcode: %i>\n", proc.exitStatus());
+		if (lines.length() == 0) {
+			ASL_ASSERT(lines.length() > 0);
+			return;
+		}
 		printf("<%s>\n", *lines[0]);
 		ASL_ASSERT(proc.exitStatus() == 4);
 		ASL_ASSERT(lines[0] == "subprocess -subproc,5,a \"b");

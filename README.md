@@ -312,8 +312,14 @@ HTTPS, TLS WebSockets and TlsSocket require the *mbedTLS* library ( https://tls.
 the library, enable `ASL_TLS` in CMake and provide the *mbedTLS* install directory (and library locations, which should
 normally be automatically found).
 
-In Ubuntu Linux you can just install package **libmbedtls-dev** with:
+On Ubuntu Linux you can just install package **libmbedtls-dev** with:
 
 ```
 sudo apt-get install libmbedtls-dev
+```
+
+On FreeBSD use:
+
+```
+pkg install mbedtls
 ```

@@ -293,6 +293,13 @@ namespace asl {
 //#include <dlfcn.h>
 #include <stdint.h>
 #endif
+#if __FreeBSD__
+#include <sys/sysctl.h>
+#endif
+
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined (__bsdi__) || defined (__DragonFly__)
+#define ASL_OS_BSD
+#endif
 
 namespace asl {
 
@@ -351,10 +358,23 @@ String Process::myPath()
 		return "";
 	char* resolved = realpath(path, buffer2);
 	return buffer2;
+#elif defined(__FreeBSD__)
+	int mib[4];
+	size_t len = 255;
+	char path[255];
+	mib[0] = CTL_KERN;
+	mib[1] = KERN_PROC;
+	mib[2] = KERN_PROC_PATHNAME;
+	mib[3] = -1;
+	sysctl(mib, 4, path, &len, NULL, 0);
+	return path;
 #else
-	String link = "/proc/self/exe";
 	char buffer[1024];
-	int n = readlink(link, buffer, 1023);
+	int n = readlink("/proc/self/exe", buffer, 1023); // linux
+	if(n == -1)
+		n = readlink("/proc/curproc/exe", buffer, 1023); // netbsd
+	if(n == -1)
+		n = readlink("/proc/curproc/file", buffer, 1023); // freebsd, old openbsd,
 	if (n != -1) 
 	{
 		buffer[n] = '\0';
@@ -367,7 +387,9 @@ String Process::myPath()
 String Process::loadedLibPath(const String& lib)
 {
 	//TextFile mapfile("/proc/self/maps", File::READ);
-	FILE* mapfile = fopen("/proc/self/maps", "rt");
+	FILE* mapfile = fopen("/proc/self/maps", "rt"); // linux
+	if(!mapfile)
+		mapfile = fopen("/proc/curproc/map", "rt"); // freebsd
 	if(!mapfile)
 		return "";
 	
@@ -381,10 +403,11 @@ String Process::loadedLibPath(const String& lib)
 		char* s = fgets(SafeString(line), 1000, mapfile);
 		if(!s) break;
 		Array<String> parts = line.split();
-		if(parts.last().contains(name1) || parts.last().contains(name2))
+		for(int i=0; i<parts.length(); i++)
+		if(parts[i].contains(name1) || parts[i].contains(name2))
 		{
 			fclose(mapfile);
-			return parts.last();
+			return parts[i];
 		}
 	}
 	fclose(mapfile);
