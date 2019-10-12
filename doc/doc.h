@@ -87,12 +87,6 @@ In Ubuntu Linux you can just install package **libmbedtls-dev** with:
 sudo apt-get install libmbedtls-dev
 ```
 
-On FreeBSD use:
-
-```
-pkg install mbedtls
-```
-
 */
 
 /**
@@ -543,6 +537,36 @@ ASL_TEST(Volume)
     ASL_APPROX(sphere.volume(), 4.1888, 1e-3);
 }
 ~~~
+*/
+
+/**
+\defgroup Library Dynamically loadable libraries
+
+Class Library allows loading a dynamic/shared library at runtime and import symbols from it (usually functions).
+
+It also allows importing classes exported from a library and instantiating objects with them.
+
+A dynamic library can contain this:
+
+~~~
+class Cat : public Animal {...}; // implements virtual functions from class Animal
+
+ASL_EXPORT_CLASS_AS(Cat, Animal)
+~~~
+
+And a program can load it at runtime and intantiate the exported class `Cat`, with the name `Animal`.
+
+~~~
+#include "Animal.h"
+
+Library lib("plugins/cat"); // Loads "cat.dll" on Widows or "libcat.so" on Linux
+Animal* cat = lib.create("Animal");
+cat->speak();
+~~~
+
+The program does not need the declaration of class `Cat`, only that of the base class `Animal`.
+
+\sa Factory
 */
 
 }

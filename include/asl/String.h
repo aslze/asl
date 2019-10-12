@@ -528,17 +528,11 @@ public:
 	*/
 	String toUpperCase() const;
 	/**
-	Returns a list of strings obtained by cutting this string by occurences of the separator `sep`
-	*/
-	Array<String> split(const String& sep) const
-	{
-		Array<String> a;
-		split(sep, a);
-		return a;
-	}
-	void split(const String& sep, Array<String>& out) const;
-	/**
-	Returns a list of strings obtained by cutting this string by whitespace
+	Returns a list of strings obtained by cutting this string by whitespace.
+
+	~~~
+	String("  a  \t\n b  c   ").split() -> ["a", "b", "c"]
+	~~~
 	*/
 	Array<String> split() const;
 	template <class T>
@@ -563,8 +557,26 @@ public:
 		return a;
 	}
 	/**
-	Parses a string and creates a `Dic` using `sep1` as pair separator (e.g. ','), and `sep2` as key/value separator (e.g. '=').
-	It is the opposite of `join()`.
+	Returns a list of strings obtained by cutting this string by occurences of the separator `sep`.
+
+	~~~
+	String("a,b,c").split(",") -> ["a", "b", "c"]
+	~~~
+	*/
+	Array<String> split(const String& sep) const
+	{
+		Array<String> a;
+		split(sep, a);
+		return a;
+	}
+
+	void split(const String& sep, Array<String>& out) const;
+	/**
+	Parses a string and creates a `Dic` using `sep1` as pair separator (e.g.\ ','), and `sep2` as key/value separator (e.g.\ '=').
+	
+	~~~
+	String("a:1,b:2,c:3").split(",", ":") -> {"a": "1", "b": "2", "c": "3"}
+	~~~
 	*/
 	Dic<String> split(const String& sep1, const String& sep2) const;
 

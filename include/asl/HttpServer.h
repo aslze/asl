@@ -36,7 +36,7 @@ public:
 	}
 	void serve(HttpRequest& request, HttpResponse& response)
 	{
-		if(request.is("GET", "/api/clients/ *"))
+		if(request.is("GET", "/api/clients/*"))
 		{
 			String clientID = request.suffix();
 			response.put( Var("id", clientID)

@@ -9,9 +9,20 @@
 
 #ifdef _WIN32
 #include <windows.h>
+/**
+Extension of dynamic/shared libraries (OS-dependent: "dll", "so" or "dylib")
+@hideinitializer
+\ingroup Library
+*/
 #define ASL_LIB_EXT "dll"
+
+/**
+Standard prefix of libraries (OS-dependent: "lib" on Unix)
+@hideinitializer
+\ingroup Library
+*/
 #define ASL_LIB_PREFIX ""
-#define PATH_SEP '\\'
+#define ASL_PATH_SEP '\\'
 #else
 #include <dlfcn.h>
 #include <stdio.h>
@@ -24,7 +35,7 @@
  #define ASL_LIB_EXT "so"
  #define ASL_LIB_PREFIX "lib"
 #endif
-#define PATH_SEP '/'
+#define ASL_PATH_SEP '/'
 
 #endif
 
@@ -87,6 +98,8 @@ name so that clients don't need knowledge about what classes are exported.
 ASL_EXPORT_CLASS_AS(Cat, Animal)
 Animal* cat = lib.create("Animal");
 ~~~
+
+\ingroup Library
 */
 
 class Library
@@ -126,9 +139,9 @@ class Library
 #endif
 		if(!_lib && tryprefix)
 		{
-			if(file.contains(PATH_SEP))
+			if(file.contains(ASL_PATH_SEP))
 			{
-				int i=file.lastIndexOf(PATH_SEP);
+				int i=file.lastIndexOf(ASL_PATH_SEP);
 				file = file.substring(0, i+1) + "lib" + file.substring(i+1);
 			}
 			else
@@ -177,23 +190,35 @@ class Library
 	}
 	
 	/**
-	Creates an object of class 'obj' exported in the library with the ASL_EXPORT_CLASS macro
+	Creates an object of class 'className' exported in the library with the `ASL_EXPORT_CLASS` macro
 	Returns a null pointer if that class is not exported
 	*/
-	void* create(const String& obj)
+	void* create(const String& className)
 	{
-		void* p = get("new_" + obj);
+		void* p = get("new_" + className);
 		if(!p)
 			return 0;
 		return ((void*(*)())p)();
 	}
 };
 
+/**
+Export a class to be instantiated with dynamic runtime loading with `Library::create("className")`.
+The argument must be an identifier (no "::") and it will be used when importing.
+@hideinitializer
+\ingroup Library
+*/
 #define ASL_EXPORT_CLASS(Class) \
 extern "C" {\
 	ASL_EXPORT void* new_##Class() {return new Class;}\
 }
 
+/**
+Export a class to be instantiated with dynamic runtime loading but giving a specific name for importing.
+The arguments must be identifiers (no "::") and the second will be used when importing.
+@hideinitializer
+\ingroup Library
+*/
 #define ASL_EXPORT_CLASS_AS(Class, Name) \
 extern "C" {\
 	ASL_EXPORT void* new_##Name() {return new Class;}\

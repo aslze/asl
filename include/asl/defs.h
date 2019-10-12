@@ -99,7 +99,7 @@ namespace asl {
 #define ASL_PATH_SEP '/'
 #endif
 
-#define ASL_ASSERT_FATAL(x) if(!(x)) { printf("\n%s: %i\n\n* Failed: '%s'\n\n", __FILE__, __LINE__, #x); exit(1); }
+#define ASL_ASSERT(x) if(!(x)) { printf("\n%s: %i\n\n* Failed: '%s'\n\n", __FILE__, __LINE__, #x); exit(1); }
 
 typedef unsigned char byte;
 
