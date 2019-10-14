@@ -225,6 +225,8 @@ typedef Matrix4_<double> Matrix4d;
 
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
 #include <asl/Quaternion.h>
 
 namespace asl {
@@ -416,5 +418,7 @@ T Matrix4_<T>::det() const
 template class Matrix4_<float>;
 template class Matrix4_<double>;
 }
+
+#endif
 
 #endif

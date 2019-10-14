@@ -30,7 +30,8 @@ __Utilities__:
 - Singletons and Factories
 - Base64, hex encoding/decoding
 - Binary buffer endian-aware reading/writing
-- Tiny testing
+- %Random number generator
+- Simple testing support
 
 __Basic data types__:
 

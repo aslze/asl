@@ -36,7 +36,8 @@ const T* ref2nulp(const T& x) { return 0; } // avoid warning with temporary Enum
 @{
 */
 
-/** A for loop for containers resembling the `foreach` keyword of D. In each iteration, `variable` takes 
+/**
+A for loop for containers resembling the `foreach` keyword of D. In each iteration, `variable` takes 
 the value of *each* element in `set`. Variable can have a type declaration (equaling the type of elements
 of `set`) and an even be a reference.
 
@@ -52,7 +53,8 @@ This will not work for temporary containers (i.e. returned by functions).
 	for (const asl::EnumWrapper_& _b_ = asl::newEnumerator((set)); asl::enumData(ASL_TY(set), _b_) && _b_.more; ++asl::enumData(ASL_TY(set), _b_).e, _b_.more = 1-_b_.more) \
 	for (variable = *asl::enumData(ASL_TY(set), _b_).e; _b_.more; _b_.more=0)
 
-/** A for loop for associative containers resembling the `foreach` keyword of D. Similar to `foreach` but 
+/**
+A for loop for associative containers resembling the `foreach` keyword of D. Similar to `foreach` but 
 using two variables: the first will take the value of each *key* and the second will take its associated
 value.
 ~~~.cpp
@@ -121,9 +123,9 @@ void shuffle(E& a)
 	}
 }
 
-}
-
 /**@}*/
+
+}
 
 #define ASL_FOREACH foreach
 
