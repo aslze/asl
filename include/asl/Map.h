@@ -259,9 +259,9 @@ public:
 	/** Adds all elements from dictionary d to this */
 	void add(const Map& d)
 	{
-		for(int i=0; i<d.length(); i++)
+		for(int i=0; i<d.a.length(); i++)
 		{
-			(*this)[d[i].key] = d[i].value;
+			(*this)[d.a[i].key] = d.a[i].value;
 		}
 	}
 

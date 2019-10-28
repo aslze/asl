@@ -53,11 +53,9 @@ public:
 
 	static void add(void* other)
 	{
-		Dic<T*(*)()> ctors2 = ((Factory*)(((void*(*)())other)()))->_constructors;
-		foreach2(String& k, T*(*f)(), ctors2)
-		{
-			S::instance()->_constructors[k] = f;
-		}
+		Factory* fact = (Factory*)(((void*(*)())other)());
+		S::instance()->_constructors.add(fact->_constructors);
+		S::instance()->_classInfo.add(fact->_classInfo);
 	}
 
 	/**
