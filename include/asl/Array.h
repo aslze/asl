@@ -28,6 +28,7 @@ namespace asl {
 
 template<class T, int N>
 class Array_;
+class Var;
 
 /**
 An Array is a contiguous and resizable array of any type of elements.
@@ -160,13 +161,22 @@ public:
 	*/
 	void clear() { resize(0); }
 	/* Frees all elements (with delete) and clears the array; elements must be pointers */
-	void destroy() {for(int i=0; i<length(); i++) delete _a[i]; clear();}
+	void destroy() { for(int i=0; i<length(); i++) delete _a[i]; clear(); }
 	/**
 	Returns a pointer to the base of the array
 	*/
-	operator const T*() const {return &_a[0];}
-	operator T*() {return &_a[0];}
-	const T* ptr() const {return &_a[0];}
+	operator const T*() const { return &_a[0]; }
+	/**
+	Returns a pointer to the base of the array
+	*/
+	operator T*() { return &_a[0]; }
+	/**
+	Returns a pointer to the first element
+	*/
+	const T* ptr() const { return &_a[0]; }
+	/**
+	Returns a pointer to the first element
+	*/
 	T* ptr() {return &_a[0];}
 	//operator bool() const { return d().n != 0; }
 	operator const void*() const { return d().n == 0 ? 0 : this; }
@@ -285,6 +295,9 @@ public:
 		++d().rc;
 		return *this;
 	}
+
+	Array& operator=(const Var& b);
+
 	/**
 	Adds element x at the end of the array
 	*/
@@ -451,6 +464,18 @@ public:
 		quicksort(_a, length(), f);
 		return *this;
 	}
+
+	/**
+	Sorts the array by the elements' f comparable property
+	*/
+	template<class F>
+	Array& sortBy(F f)
+	{
+		IsLess<T, F> p(f);
+		quicksort(_a, length(), p);
+		return *this;
+	}
+
 /*	/// Adds all elements from array b at the end of the array
 	Array& operator<<(const Array& b)
 	{

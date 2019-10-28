@@ -590,6 +590,13 @@ void Var::operator=(const HDic<T>& x)
 		o->set(k, v);
 }
 
+template<class T>
+Array<T>& Array<T>::operator=(const Var& b)
+{
+	*this = Array<T>(b.array());
+	return *this;
+}
+
 #ifdef ASL_HAVE_RANGEFOR
 
 inline Var::Enumerator begin(const Var& a)

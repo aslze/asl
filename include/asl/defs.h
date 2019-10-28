@@ -368,6 +368,13 @@ ASL_POD_CONSTRUCT(unsigned short)
 ASL_POD_CONSTRUCT(Long)
 ASL_POD_CONSTRUCT(ULong)
 
+template<class T, class F>
+struct IsLess {
+	IsLess(const F& f) : f(f) {}
+	bool operator()(const T& a, const T& b) const { return f(a) < f(b); }
+	F f;
+};
+
 }
 
 #include "time.h"
