@@ -308,7 +308,7 @@ void XdlParser::parse(const char* s)
 				buffer += '/';
 			else if(c=='u')
 			{
-				state=UNICODE;
+				state = UNICODECHAR;
 				unicodeCount = 0;
 				break;
 			}
@@ -318,7 +318,7 @@ void XdlParser::parse(const char* s)
 		case IDENTIFIER:
 			if(!isalnum(c) && c!='_')
 			{
-				if(buffer=="Y" || buffer=="N" || buffer=="false" ||buffer=="true" )
+				if(buffer=="Y" || buffer=="N" || buffer=="false" || buffer=="true" )
 				{
 					new_bool(buffer=="true"||buffer=="Y");
 					value_end();
@@ -344,7 +344,7 @@ void XdlParser::parse(const char* s)
 				return;
 			}
 			break;
-		case UNICODE:
+		case UNICODECHAR:
 			unicode[unicodeCount++] = c;
 			if(unicodeCount == 4) // still only BMP!
 			{
