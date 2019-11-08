@@ -295,6 +295,16 @@ public:
 		++d().rc;
 		return *this;
 	}
+	
+	template<class K>
+	Array& operator=(const Array<K>& b)
+	{
+		int n = (int)b.size();
+		resize(n);
+		for (int i = 0; i<n; i++)
+			_a[i] = (T)b._a[i];
+		return *this;
+	}
 
 	Array& operator=(const Var& b);
 
