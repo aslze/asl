@@ -302,7 +302,7 @@ public:
 		int n = b.length();
 		resize(n);
 		for (int i = 0; i<n; i++)
-			_a[i] = (T)b._a[i];
+			_a[i] = (T)b[i];
 		return *this;
 	}
 
