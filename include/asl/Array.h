@@ -299,7 +299,7 @@ public:
 	template<class K>
 	Array& operator=(const Array<K>& b)
 	{
-		int n = (int)b.size();
+		int n = b.length();
 		resize(n);
 		for (int i = 0; i<n; i++)
 			_a[i] = (T)b._a[i];
