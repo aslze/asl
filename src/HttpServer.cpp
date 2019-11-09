@@ -33,6 +33,7 @@ HttpServer::HttpServer(int port)
 		"json:application/json,"
 		"png:image/png,"
 		"txt:text/plain,"
+		"mp4:video/mp4,"
 		"xml:text/xml", ',', ':');
 }
 
@@ -86,7 +87,26 @@ void HttpServer::serve(Socket client)
 				response.setHeader("Content-Type", mime);
 				if (!response.hasHeader("Cache-Control"))
 					response.setHeader("Cache-Control", "max-age=60, public");
-				response.putFile(file.path());
+				if (request.hasHeader("Range"))
+				{
+					String range = request.header("Range");
+					if (range.startsWith("bytes=") && !range.contains(',')) // no multiple ranges
+					{
+						Array<String> parts = range.substr(6).split('-');
+						int begin = parts[0];
+						int end = parts[1];
+						response.setCode(206);
+						response.setHeader("Content-Range", "");
+						response.putFile(file.path(), begin, end);
+					}
+				}
+				else
+					response.putFile(file.path());
+				if (response.header("Content-Range").contains('*'))
+				{
+					response.setCode(416);
+					response.write();
+				}
 			}
 			else
 				response.write();

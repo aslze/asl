@@ -142,11 +142,11 @@ public:
 	/**
 	Sends the content of the given file in the message body
 	*/
-	void writeFile(const String& path);
+	void writeFile(const String& path, int begin = 0, int end = 0);
 	/**
 	Sends the content of the given file as the message body and sets the content-length header
 	*/
-	void putFile(const String& path);
+	void putFile(const String& path, int begin = 0, int end = 0);
 
 	operator String() const { return text(); }
 	operator Var() const { return data(); }

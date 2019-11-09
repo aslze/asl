@@ -445,7 +445,15 @@ HttpResponse::HttpResponse(const HttpRequest& r, const String& proto, int code):
 void HttpResponse::setCode(int code)
 {
 	_code = code;
-	_command = String(0, "%s %i %s", *_proto, code, (code==200)? "OK" : "Not found");
+	String msg = "OK";
+	if (code == 404)
+		msg = "Not Found";
+	else if (code == 206)
+		msg = "Partial Content";
+	else
+		msg = "Not found";
+
+	_command = String(0, "%s %i %s", *_proto, code, *msg);
 }
 
 bool HttpResponse::is(HttpResponse::StatusType code) const
@@ -502,7 +510,7 @@ int HttpMessage::write(const char* buffer, int n)
 	return m;
 }
 
-void HttpMessage::writeFile(const String& path)
+void HttpMessage::writeFile(const String& path, int begin, int end)
 {
 	File file(path, File::READ);
 	if (!file)
@@ -510,20 +518,44 @@ void HttpMessage::writeFile(const String& path)
 	if (!_headersSent)
 		sendHeaders();
 	int n = 1;
-	while(n > 0)
+	file.seek(begin);
+	Long size = file.size();
+	if (begin != end)
+		size = end - begin + 1;
+	int bytesSent = 0;
+	while(n > 0 && bytesSent < (int)size)
 	{
 		char buf[16384];
-		n = file.read(buf, sizeof(buf));
-		if (n>0)
-			if (write(buf, n) < 0)
+		n = file.read(buf, min((int)sizeof(buf), (int)size - bytesSent));
+		if (n > 0) {
+			int w = 0;
+			if ((w = write(buf, n)) < 0)
+			{
 				break;
+			}
+			bytesSent += n;
+		}
 	};
 }
 
-void HttpMessage::putFile(const String& path)
+void HttpMessage::putFile(const String& path, int begin, int end)
 {
-	setHeader("Content-Length", File(path).size());
-	writeFile(path);
+	if (begin == 0 && end == 0 && !hasHeader("Content-Range"))
+		setHeader("Content-Length", File(path).size());
+	else
+	{
+		Long size = File(path).size();
+		if (end == 0)
+			end = (int)size - 1;
+		if (end <= begin || begin < 0 || end > size)
+		{
+			setHeader("Content-Range", String::f("bytes */%" ASL_LONG_FMT, size));
+			return;
+		}
+		setHeader("Content-Length", end - begin + 1);
+		setHeader("Content-Range", String::f("bytes %i-%i/%" ASL_LONG_FMT, begin, end, size));
+	}
+	writeFile(path, begin, end);
 }
 
 }
