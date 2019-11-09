@@ -77,18 +77,15 @@ set( ASL_SRC
 	../include/asl/SHA1.h
 )
 
-set(ASLS_DEFS ASL_STATIC)
 set(ASL_DEFS "")
 
 if(ASL_TLS)
 	list(APPEND ASL_SRC TlsSocket.cpp)
 	list(APPEND ASL_DEFS ASL_TLS)
-	list(APPEND ASLS_DEFS ASL_TLS)
 endif()
 
 if( ASL_USE_LOCAL8BIT )
 	list(APPEND ASL_DEFS ASL_ANSI)
-	list(APPEND ASLS_DEFS ASL_ANSI)
 endif()
 
 if(POLICY CMP0022)
@@ -97,7 +94,6 @@ endif()
 
 if( ANDROID )
 	list(APPEND ASL_DEFS ASL_NOEXCEPT)
-	list(APPEND ASLS_DEFS ASL_NOEXCEPT)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fno-exceptions ") # -fno-rtti
 endif()
 
@@ -105,11 +101,16 @@ if(ASL_IPV6)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASL_IPV6")
 endif()
 
+if(NOT MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8) # 64 bit linux complains
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+endif()
+
+
 set(TARGETS "")
 
 if(ASL_BUILD_STATIC)
 	add_library( asls STATIC ${ASL_SRC} )
-	target_compile_definitions(asls PUBLIC ${ASLS_DEFS})
+	target_compile_definitions(asls PUBLIC ${ASL_DEFS} ASL_STATIC)
 	target_include_directories(asls PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include> $<INSTALL_INTERFACE:include> )
 	if( WIN32 )
 		target_link_libraries(asls ws2_32 shell32 advapi32)
@@ -120,11 +121,6 @@ if(ASL_BUILD_STATIC)
 		target_link_libraries(asls pthread dl)
 		if(NOT APPLE)
 			target_link_libraries(asls rt)
-		endif()
-
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-		if(CMAKE_SIZEOF_VOID_P EQUAL 8) # 64 bit linux complains
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 		endif()
 	endif()
 
@@ -149,10 +145,6 @@ if(ASL_BUILD_SHARED)
 		if(NOT APPLE)
 			target_link_libraries(asl LINK_PUBLIC rt)
 		endif()
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-		if(CMAKE_SIZEOF_VOID_P EQUAL 8) # 64 bit linux complains
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-		endif()
 	endif()
 
 	if( ASL_TLS )
@@ -160,8 +152,6 @@ if(ASL_BUILD_SHARED)
 	endif()
 	list(APPEND TARGETS asl)
 endif()
-
-link_directories( ${LIBRARY_OUTPUT_PATH} )
 
 install( TARGETS ${TARGETS} EXPORT asl RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib )
 install( DIRECTORY ../include/ DESTINATION include )
