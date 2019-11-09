@@ -11,9 +11,9 @@
 #include <asl/Array.h>
 
 #if defined(MINGW) || !defined __GNUC__
-#define LONG_FMT "I64i"
+#define ASL_LONG_FMT "I64i"
 #else
-#define LONG_FMT "lli"
+#define ASL_LONG_FMT "lli"
 #endif
 
 #ifdef _WIN32
