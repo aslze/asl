@@ -31,10 +31,17 @@ It uses the current source file as *category*.
 ASL_LOG_(WARNING, "Ignored unknown mode %i", mode);
 ~~~
 
+That is equivalent to:
+
+~~~
+ASL_LOG_W("Ignored unknown mode %i", mode);
+~~~
+
 On Android this class uses the system logger.
 
 Log files do not grow indefinitely. When reaching about 1 MB, they will be moved to a file with "-1" appended
 to its name (like "log-1.txt"), and a new empty file will be started. Any logs older than that will be lost.
+\ingroup Logging
 */
 
 class ASL_API Log : public Singleton<Log>
@@ -54,7 +61,7 @@ public:
 	Message levels (ERR, WARNING, INFO, DEBUG, VERBOSE).
 	*/
 	enum Level {
-		ERR, WARNING, INFO, DEBUG, VERBOSE, DEBUG1 = DEBUG, DEBUG2 = VERBOSE, DEBUG3 = VERBOSE
+		ERR, WARNING, INFO, DEBUG, VERBOSE
 	};
 
 	friend ASL_API void log(const String& cat, Log::Level level, const String& message);
@@ -75,7 +82,7 @@ public:
 	*/
 	static void useFile(bool on);
 	/**
-	Sets the maximum level of messages to be logged. By default this is 3, so messages up to *debug level 1* are logged.
+	Sets the maximum level of messages to be logged; By default this is 3, so messages up to *level DEBUG* are logged.
 	*/
 	static void setMaxLevel(int level);
 
@@ -89,10 +96,48 @@ ASL_API void log(const String& cat, Log::Level level, const String& message);
 
 
 #if (defined( _MSC_VER ) && _MSC_VER > 1310) || !defined(_MSC_VER)
-#define ASL_LOG_(L, ...) asl::log(__FILE__, asl::Log::L, __VA_ARGS__)
+
+/**
+Log a formatted message with the given level (`ERR`, `WARNING`, `INFO`, `DEBUG` or `VERBOSE`)
+\ingroup Logging
+\hideinitializer
+*/
+#define ASL_LOG_(LEVEL, ...) asl::log(__FILE__, asl::Log::LEVEL, __VA_ARGS__)
+
+/**
+Log a formatted message with the ERROR level
+\ingroup Logging
+\hideinitializer
+*/
+#define ASL_LOG_E(...) asl::log(__FILE__, asl::Log::ERR, __VA_ARGS__)
+/**
+Log a formatted message with the WARNING level
+\ingroup Logging
+\hideinitializer
+*/
+#define ASL_LOG_W(...) asl::log(__FILE__, asl::Log::WARNING, __VA_ARGS__)
+/**
+Log a formatted message with the INFO level
+\ingroup Logging
+\hideinitializer
+*/
+#define ASL_LOG_I(...) asl::log(__FILE__, asl::Log::INFO, __VA_ARGS__)
+/**
+Log a formatted message with the DEBUG level
+\ingroup Logging
+\hideinitializer
+*/
+#define ASL_LOG_D(...) asl::log(__FILE__, asl::Log::DEBUG, __VA_ARGS__)
+/**
+Log a formatted message with the VERBOSE level
+\ingroup Logging
+\hideinitializer
+*/
+#define ASL_LOG_V(...) asl::log(__FILE__, asl::Log::VERBOSE, __VA_ARGS__)
+
 #endif
 
-#define ASL_LOG_WHERE_AM_I() ASL_LOG_(DEBUG1, "At %s: %i [%s]", \
+#define ASL_LOG_WHERE_AM_I() ASL_LOG_(DEBUG, "At %s: %i [%s]", \
 	*asl::String(__FILE__).split(ASL_PATH_SEP).last(), __LINE__, __FUNCTION__)
 
 template<class T1>

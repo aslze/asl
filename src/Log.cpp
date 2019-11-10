@@ -16,7 +16,7 @@ Log::Log()
 	_logfile = "log.txt";
 	_useconsole = true;
 	_usefile = true;
-	_maxLevel = 4;
+	_maxLevel = 3;
 	_mutex = new Mutex;
 }
 
