@@ -598,8 +598,8 @@ int Socket_::read(void* data, int size)
 int Socket_::write(const void* data, int n)
 {
 #ifndef _WIN32
-	//int m = ::send(_handle, data, n, MSG_NOSIGNAL);
-	int m = ::write(_handle, data, n);
+	int m = ::send(_handle, data, n, MSG_NOSIGNAL);
+	//int m = ::write(_handle, data, n);
 	if (m != n) {
 		verbose_print("socket %i wrote %i of %i\n", _handle, m, n);
 	}
