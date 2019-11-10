@@ -292,6 +292,9 @@ ASL_TEST(String)
 	ASL_ASSERT(a+b+c == "a123c");
 	ASL_ASSERT("a" + b + 'c' == "a123c");
 
+	Long l = String("1234567890123456").toLong();
+	ASL_ASSERT(String(l) == "1234567890123456");
+
 	String n = -65536;
 
 	ASL_ASSERT(n == "-65536");
