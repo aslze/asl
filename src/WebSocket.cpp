@@ -25,7 +25,7 @@ WebSocketMsg::operator String() const
 
 WebSocketMsg::operator Var() const
 {
-	return Json::decode((const char*)_data.ptr());
+	return Json::decode(String(_data));
 }
 
 const char* WebSocketMsg::operator*() const

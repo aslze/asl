@@ -549,11 +549,11 @@ void HttpMessage::putFile(const String& path, int begin, int end)
 			end = (int)size - 1;
 		if (end <= begin || begin < 0 || end > size)
 		{
-			setHeader("Content-Range", String::f("bytes */%" ASL_LONG_FMT, size));
+			setHeader("Content-Range", String::f("bytes */%lli", size));
 			return;
 		}
 		setHeader("Content-Length", end - begin + 1);
-		setHeader("Content-Range", String::f("bytes %i-%i/%" ASL_LONG_FMT, begin, end, size));
+		setHeader("Content-Range", String::f("bytes %i-%i/%lli", begin, end, size));
 	}
 	writeFile(path, begin, end);
 }

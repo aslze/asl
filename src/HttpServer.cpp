@@ -22,7 +22,7 @@ HttpServer::HttpServer(int port)
 		bind(port);
 	_wsserver = NULL;
 	_cors = false;
-	_mimetypes = split(
+	_mimetypes = String(
 		"css:text/css,"
 		"gif:image/gif,"
 		"htm:text/html,"
@@ -34,7 +34,10 @@ HttpServer::HttpServer(int port)
 		"png:image/png,"
 		"txt:text/plain,"
 		"mp4:video/mp4,"
-		"xml:text/xml", ',', ':');
+		"ogv:video/ogg,"
+		"webm:video/webm,"
+		"xml:text/xml"
+		).split(',', ':');
 }
 
 void HttpServer::addMimeType(const String& ext, const String& type)
