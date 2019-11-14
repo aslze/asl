@@ -111,13 +111,18 @@ void IniFile::write(const String& fname)
 	{
 		if(line[0]=='[')
 		{
-			String name = line.substring(1, line.indexOf(']'));
+			int end = line.indexOf(']');
+			if (end < 0)
+				continue;
+			String name = line.substring(1, end);
 			_currentTitle = name;
 			section = &sections[name];
 		}
 		else if(line[0]!='#' && line[0]>31 && line[0]!=';')
 		{
 			int i=line.indexOf('=');
+			if (i < 0)
+				continue;
 			String key = line.substring(0,i).trimmed();
 			String value0 = line.substring(i+1).trimmed();
 			const String& value1 = (*section)[key];
@@ -176,7 +181,7 @@ void IniFile::write(const String& fname)
 		foreach2(String& name, String& value, section._vars)
 		{
 			String line = name;
-			line << " = " << value;
+			line << "=" << value;
 			_lines.insert(j++, line);
 			_modified = true;
 		}
