@@ -306,7 +306,7 @@ FileInfo Directory::getInfo(const String& path)
 bool Directory::createOne(const String& name)
 {
 	int a = mkdir(name, 0777);
-	return a == 0 || a == EEXIST;
+	return a == 0 || (a < 0 && errno == EEXIST);
 }
 
 String Directory::current()
