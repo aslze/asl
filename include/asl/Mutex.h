@@ -95,6 +95,13 @@ public:
 	{
 		WaitForSingleObject(_semaphore, INFINITE);
 	}
+	/**
+	Wait for the semaphore to signal up to a timeout (s) and return true if it has signaled
+	*/
+	bool wait(double timeout)
+	{
+		return WaitForSingleObject(_semaphore, DWORD(timeout * 1000)) == WAIT_OBJECT_0;
+	}
 	//bool trywait() {if(sem_trywait(&sem)) return false;}
 	//int value() {int i; sem_getvalue(&sem, &i); return i;}
 };
@@ -244,6 +251,14 @@ public:
 	{
 		sem_wait(&_sem);
 	}
+	bool wait(double timeout)
+	{
+		double t = now() + timeout;
+		struct timespec to;
+		to.tv_sec = (time_t)floor(t);
+		to.tv_nsec = (long)((t - floor(t))*1e9);
+		return sem_timedwait(&_sem, &to) == 0;
+	}
 	bool trywait()
 	{
 		return sem_trywait(&_sem) == 0;
@@ -253,46 +268,6 @@ public:
 		int i;
 		sem_getvalue(&_sem, &i);
 		return i;
-	}
-};
-
-#elif 0
-
-class Semaphore
-{
-	sem_t* _sem;
-	char _name[32];
-public:
-	Semaphore(int count=0)
-	{
-		sprintf(_name, "/%x-%p", (int)getpid(), this);
-		_sem = sem_open(_name, O_CREAT, 0700, 0);
-	}
-	~Semaphore()
-	{
-		sem_close(_sem);
-		sem_unlink(_name);
-	}
-	void post()
-	{
-		sem_post(_sem);
-	}
-	void post(int n)
-	{
-		for(int i=0; i<n; i++)
-			sem_post(_sem);
-	}
-	void wait()
-	{
-		sem_wait(_sem);
-	}
-	bool trywait()
-	{
-		return sem_trywait(_sem) == 0;
-	}
-	int value()
-	{
-		return 0;
 	}
 };
 
@@ -328,8 +303,10 @@ public:
 	void wait()
 	{
 		dispatch_semaphore_wait(_sem, DISPATCH_TIME_FOREVER);
-		
-		//dispatch_semaphore_wait(_sem, dispatch_time(DISPATCH_TIME_NOW, timeout); // ns
+	}
+	bool wait(double timeout)
+	{
+		return dispatch_semaphore_wait(_sem, dispatch_time(DISPATCH_TIME_NOW, dispatch_time_t(timeout * 1e9)) == 0;
 	}
 	bool trywait()
 	{
