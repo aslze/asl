@@ -179,7 +179,7 @@ void Log::log(const String& cat, Log::Level level, const String& message)
 	case Log::ERR:
 		androidlevel = ANDROID_LOG_ERROR;
 		break;
-	case Log::DEBUG1:
+	case Log::VERBOSE:
 		androidlevel = ANDROID_LOG_VERBOSE;
 		break;
 	default:
