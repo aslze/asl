@@ -494,6 +494,21 @@ ASL_TEST(Var)
 	}
 	ASL_ASSERT(sum == 6);
 #endif
+
+	a = "My taylor is not rich";
+	ASL_ASSERT((bool)a);
+	a = "";
+	ASL_ASSERT(!a);
+	for (int i = 6; i < 50; i++)
+	{
+		String s = String::repeat('x', i);
+		Var v = s;
+		ASL_ASSERT(v == s);
+		Var w = v;
+		ASL_ASSERT(w == v);
+		v = w;
+		ASL_ASSERT(w == v);
+	}
 }
 
 

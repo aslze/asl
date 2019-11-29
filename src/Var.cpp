@@ -39,8 +39,8 @@ void Var::copy(const Var& v)
 {
 	switch(_type) {
 	case STRING:
-		NEW_STRINGC(s, (*v.s).length());
-		memcpy((*s).ptr(), (*v.s).ptr(), (*v.s).length() + 1);
+		NEW_STRINGC(s, v.s->length());
+		memcpy(s->ptr(), v.s->ptr(), v.s->length());
 		break;
 	case ARRAY:
 		NEW_ARRAYC(a, *v.a);
@@ -101,7 +101,7 @@ Var::Var(const char* y)
 	else {
 		_type=STRING;
 		NEW_STRINGC(s, len + 1);
-		memcpy((*s).ptr(), y, len + 1);
+		memcpy(s->ptr(), y, len + 1);
 	}
 }
 
@@ -231,7 +231,7 @@ Var::operator bool() const
 	case DIC:
 		return true;
 	case STRING:
-		return s->length() != 0;
+		return s->length() > 1;
 	case SSTRING:
 		return ss[0] != 0;
 	case NUL:
@@ -320,8 +320,8 @@ void Var::operator=(const Var& v)
 {
 	if(_type == STRING && v._type == STRING) {
 		//(*s) = (*v.s);
-		(*s).resize((*v.s).length() + 1);
-		memcpy((*s).ptr(), (*v.s).ptr(), (*v.s).length() + 1);
+		s->resize(v.s->length());
+		memcpy(s->ptr(), v.s->ptr(), v.s->length());
 		return;
 	}
 	if(_type == ARRAY && v._type == ARRAY) {
@@ -339,8 +339,8 @@ void Var::operator=(const Var& v)
 	switch(_type)
 	{
 	case STRING:
-		NEW_STRINGC(s, (*v.s).length());
-		memcpy((*s).ptr(), (*v.s).ptr(), (*v.s).length());
+		NEW_STRINGC(s, v.s->length());
+		memcpy(s->ptr(), v.s->ptr(), v.s->length());
 		break;
 	case ARRAY:
 		NEW_ARRAYC(a, *v.a);
@@ -423,7 +423,7 @@ void Var::operator=(const char* x)
 		(*s).resize(n + 1);
 		memcpy((*s).ptr(), x, n + 1);
 	}
-	if(_type==SSTRING && n < VAR_SSPACE)
+	else if(_type==SSTRING && n < VAR_SSPACE)
 		memcpy(ss, x, n + 1);
 	else
 	{
