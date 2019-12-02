@@ -440,7 +440,7 @@ bool String::isTrue() const
 Array<int> String::chars() const
 {
 	Array<int> c(length());
-	int n = utf8toUtf32(str(), c, 1);
+	int n = utf8toUtf32(str(), c.ptr(), 1);
 	c.resize(n);
 	return c;
 }

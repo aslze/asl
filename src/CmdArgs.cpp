@@ -34,7 +34,7 @@ CmdArgs::CmdArgs(const String& spec)
 	}
 
 	LocalFree(arglist);
-	*this = CmdArgs(-nArgs, (Array<char*>)a);
+	*this = CmdArgs(-nArgs, ((Array<char*>)a).ptr());
 #else
 	File file("/proc/self/cmdline", File::READ);
 	if(!file)
@@ -57,7 +57,7 @@ CmdArgs::CmdArgs(const String& spec)
 		a << String(&all[i]);
 		i = j+1;
 	}
-	*this = CmdArgs(a.length(), (Array<char*>)a, spec);
+	*this = CmdArgs(a.length(), ((Array<char*>)a).ptr(), spec);
 #endif
 }
 #endif
