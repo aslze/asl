@@ -2,6 +2,7 @@
 #include <asl/TextFile.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <locale.h>
 
 #if defined(_MSC_VER) && _MSC_VER < 1800
 #include <float.h>
@@ -173,7 +174,16 @@ void XdlParser::parse(const char* s)
 			}
 			else if(buffer != '-')
 			{
+#ifndef ASL_FAST_JSON
+				for(char* p = buffer; *p; p++)
+					if (*p == '.')
+					{
+						*p = ldp;
+						break;
+					}
+#endif
 				new_number(ASL_ATOF(buffer));
+
 				value_end();
 				s--;
 			}
@@ -365,6 +375,8 @@ void XdlParser::parse(const char* s)
 
 XdlParser::XdlParser()
 {
+	lconv* loc = localeconv();
+	ldp = *loc->decimal_point;
 	context << ROOT;
 	state = WAIT_VALUE;
 	inComment = false;

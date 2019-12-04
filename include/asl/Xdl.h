@@ -28,6 +28,7 @@ protected:
 	bool inComment;
 	int unicodeCount;
 	char unicode[5];
+	char ldp;
 public:
 	XdlCodec() {}
 	virtual ~XdlCodec() {}
