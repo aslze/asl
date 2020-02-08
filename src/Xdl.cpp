@@ -568,6 +568,7 @@ void XdlEncoder::_encode(const Var& v)
 		out += "null";
 		break;
 	case Var::NONE:
+		out += "null";
 		break;
 	}
 }
