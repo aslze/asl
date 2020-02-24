@@ -481,7 +481,7 @@ void HttpMessage::write()
 	if (!_headersSent)
 		sendHeaders();
 	if (_chunked)
-		*_socket << String("%x\r\n", _body.length());
+		*_socket << String(15, "%x\r\n", _body.length());
 	*_socket << _body;
 	if (_chunked)
 		*_socket << "\r\n";
@@ -492,7 +492,7 @@ void HttpMessage::write(const String& text)
 	if(!_headersSent)
 		sendHeaders();
 	if (_chunked)
-		*_socket << String("%x\r\n", text.length());
+		*_socket << String(15, "%x\r\n", text.length());
 	*_socket << text;
 	if (_chunked)
 		*_socket << "\r\n";
@@ -503,7 +503,7 @@ int HttpMessage::write(const char* buffer, int n)
 	if(!_headersSent)
 		sendHeaders();
 	if (_chunked)
-		*_socket << String("%x\r\n", n);
+		*_socket << String(15, "%x\r\n", n);
 	int m = _socket->write(buffer, n);
 	if (_chunked)
 		*_socket << "\r\n";
