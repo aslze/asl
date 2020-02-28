@@ -823,10 +823,10 @@ int myitoa(int x, char* s)
 		ss[i++] = (x % 10) + '0';
 		x = x / 10;
 	}
-	while (i >= 0)
+	while (i > 0)
 		s[j++] = ss[--i];
-	s[j - 1] = '\0';
-	return j - 1;
+	s[j] = '\0';
+	return j;
 }
 
 int myltoa(Long x, char* s)
@@ -848,10 +848,10 @@ int myltoa(Long x, char* s)
 		ss[i++] = (x % 10) + '0';
 		x = x / 10;
 	}
-	while (i >= 0)
+	while (i > 0)
 		s[j++] = ss[--i];
-	s[j - 1] = '\0';
-	return j - 1;
+	s[j] = '\0';
+	return j;
 }
 
 }
