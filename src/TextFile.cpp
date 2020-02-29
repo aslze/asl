@@ -95,7 +95,7 @@ bool TextFile::readLine(String& s)
 		if (s[n-1] == '\n') {
 			n--;
 			s[n] = '\0';
-			if (s[n-1] == '\r') {
+			if (n > 0 && s[n-1] == '\r') {
 				n--;
 				s[n] = '\0';
 			}
