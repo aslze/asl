@@ -1,7 +1,7 @@
 #include <asl/Path.h>
 #include <asl/Directory.h>
 
-using namespace asl;
+namespace asl {
 
 #ifdef _WIN32
 #define SEP '\\'
@@ -32,8 +32,10 @@ String Path::extension() const
 
 bool Path::hasExtension(const String& extensions) const
 {
-	Array<String> exts = extensions.toLowerCase().split('|');
 	String ext = extension().toLowerCase();
+	if (!extensions.contains('|'))
+		return extensions.toLowerCase() == ext;
+	Array<String> exts = extensions.toLowerCase().split('|');
 	for (int i = 0; i < exts.length(); i++)
 		if (ext == exts[i])
 			return true;
@@ -98,4 +100,4 @@ Path Path::noExt() const
 	return (dot >= 0 && dot > n) ? _path.substring(0, dot) : _path;
 }
 
-
+}
