@@ -57,16 +57,20 @@ bool runTest(const char* name)\
 	}\
 	return false;\
 }\
+bool runAllTests()\
+{\
+	for (int i = 0; i<asl::numTests; i++) { \
+		printf("Test %s:\n", asl::tests[i].name); \
+		printf("----------------> %s\n\n", asl::runTest(asl::tests[i].name)? "OK" : "FAILED"); \
+	}\
+	return !asl::testsFailed;\
+}\
 }
 
 #define ASL_TEST_MAIN() \
 int main() \
 { \
-	for (int i = 0; i<asl::numTests; i++) { \
-		printf("Test %s:\n", asl::tests[i].name); \
-		printf("-> %s\n\n", asl::runTest(asl::tests[i].name)? "OK" : "FAILED"); \
-	} \
-	return asl::testFailed ? 1 : 0; \
+	return runAllTests() ? 0 : 1; \
 }
 
 /** 

@@ -17,7 +17,7 @@ ASL_TEST(Process)
 	{
 		Process proc = Process::execute(Process::myPath(), "-subproc", 1);
 		ASL_ASSERT(proc.exitStatus() == 3);
-		printf("<%s>\n", *proc.output());
+		//printf("<%s>\n", *proc.output());
 		ASL_ASSERT(proc.output().trimmed() == "subprocess -subproc,1");
 	}
 	{
@@ -32,12 +32,12 @@ ASL_TEST(Process)
 			lines << line;
 		}
 		proc.wait();
-		printf("<exitcode: %i>\n", proc.exitStatus());
+		//printf("<exitcode: %i>\n", proc.exitStatus());
 		if (lines.length() == 0) {
 			ASL_ASSERT(lines.length() > 0);
 			return;
 		}
-		printf("<%s>\n", *lines[0]);
+		//printf("<%s>\n", *lines[0]);
 		ASL_ASSERT(proc.exitStatus() == 4);
 		ASL_ASSERT(lines[0] == "subprocess -subproc,5,a \"b");
 	}
@@ -53,7 +53,8 @@ ASL_TEST(SHA1)
 	ASL_ASSERT(encodeHex(h2, 20) == "84983e441c3bd26ebaae4aa1f95129e5e54670f1");
 }
 
-#define TRACE() for(int i=0; i<count; i++) printf(" "); printf("%s\n", __FUNCTION__)
+//#define TRACE() for(int i=0; i<count; i++) printf(" "); printf("%s\n", __FUNCTION__)
+#define TRACE() {}
 
 ASL_SMART_CLASS(Shape, SmartObject)
 {

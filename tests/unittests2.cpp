@@ -318,7 +318,7 @@ ASL_TEST(AtomicCount)
 	int n = AThread::n;
 	threads.join();
 	double t2 = now();
-	printf("n = %i, t = %.3f (%i)s\n", (int)AThread::n, t2 - t1, n);
+	//printf("n = %i, t = %.3f (%i)s\n", (int)AThread::n, t2 - t1, n);
 	ASL_ASSERT(AThread::n == 0);
 }
 

@@ -321,7 +321,6 @@ ASL_TEST(String)
 
 	String untrimmed = " \t troll\r \n ";
 	untrimmed.trim();
-	printf("[%s]\n", *untrimmed);
 	ASL_ASSERT(untrimmed == "troll");
 
 	String e;
@@ -544,8 +543,7 @@ int main(int narg, char* argv[])
 	}
 	
 	if (narg < 2) {
-		printf("No arguments\n");
-		return EXIT_SUCCESS;
+		return asl::runAllTests() ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
 
 	if(!asl::runTest(argv[1]))
