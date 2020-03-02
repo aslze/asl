@@ -522,7 +522,7 @@ public:
 	};
 
 	/**
-	Returns an enumarator of the children elements with the given tag.
+	Returns an enumerator of the children elements with the given tag.
 	*/
 	ChildrenEnumerator children(const String& tag)
 	{
