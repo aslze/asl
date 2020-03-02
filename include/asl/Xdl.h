@@ -20,8 +20,10 @@ namespace asl {
 class ASL_API XdlCodec
 {
 protected:
-	enum State {NUMBER, INT, STRING, PROPERTY, IDENTIFIER, WAIT_EQUAL, WAIT_VALUE, WAIT_PROPERTY, QPROPERTY, ESCAPE, ERR, UNICODECHAR};
+	enum State {NUMBER, INT, STRING, PROPERTY, IDENTIFIER, WAIT_EQUAL, WAIT_VALUE, WAIT_PROPERTY, WAIT_OBJ, QPROPERTY, ESCAPE, ERR, UNICODECHAR};
 	enum Context {ROOT, ARRAY, OBJECT, COMMENT1, COMMENT, LINECOMMENT, ENDCOMMENT};
+	//typedef char State;
+	//typedef char Context;
 	State state;
 	Stack<Context> context;
 	String buffer;
@@ -80,7 +82,7 @@ public:
 	~XdlParser();
 	void parse(const char* s);
 	void value_end();
-	virtual void reset() {context.clear(); context << ROOT; state=WAIT_VALUE; buffer="";}
+	virtual void reset();
 	Var value() const;
 	Var decode(const char* s);
 	virtual void new_number(int x) {put(x);}

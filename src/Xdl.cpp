@@ -20,6 +20,9 @@
 
 namespace asl {
 
+//enum StateN {NUMBER, INT, STRING, PROPERTY, IDENTIFIER, WAIT_EQUAL, WAIT_VALUE, WAIT_PROPERTY, WAIT_OBJ, QPROPERTY, ESCAPE, ERR, UNICODECHAR};
+//enum ContextN {ROOT, ARRAY, OBJECT, COMMENT1, COMMENT, LINECOMMENT, ENDCOMMENT};
+
 #define INDENT_CHAR ' '
 
 Var decodeXDL(const String& xdl)
@@ -78,6 +81,14 @@ inline void XdlParser::value_end()
 	else
 		state=WAIT_VALUE;
 	buffer="";
+}
+
+void XdlParser::reset()
+{
+	context.clear();
+	context << ROOT;
+	state = WAIT_VALUE;
+	buffer = "";
 }
 
 void XdlParser::parse(const char* s)
@@ -283,6 +294,20 @@ void XdlParser::parse(const char* s)
 				return;
 			}
 			break;
+		case WAIT_OBJ:
+			if (c == '{')
+			{
+				begin_object(buffer);
+				state = WAIT_PROPERTY;
+				context << OBJECT;
+				buffer = "";
+			}
+			else if (!myisspace(c))
+			{
+				state = ERR;
+				return;
+			}
+			break;
 		case WAIT_PROPERTY:
 			if(isalnum(c)||c=='_'||c=='$')
 			{
@@ -339,7 +364,7 @@ void XdlParser::parse(const char* s)
 					value_end();
 				}
 				else
-					state=WAIT_VALUE;
+					state = WAIT_OBJ;
 				s--;
 			}
 			else
@@ -396,6 +421,8 @@ XdlParser::~XdlParser()
 Var XdlParser::value() const
 {
 	Var v;
+	if (state == ERR)
+		return v;
 	Array<Var>& l = *(Array<Var>*)lists[0].list;
 	if(context.top() == ROOT && state == WAIT_VALUE && l.length() > 0)
 		v = l[l.length()-1];
