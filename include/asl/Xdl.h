@@ -20,10 +20,8 @@ namespace asl {
 class ASL_API XdlCodec
 {
 protected:
-	enum State {NUMBER, INT, STRING, PROPERTY, IDENTIFIER, WAIT_EQUAL, WAIT_VALUE, WAIT_PROPERTY, WAIT_OBJ, QPROPERTY, ESCAPE, ERR, UNICODECHAR};
-	enum Context {ROOT, ARRAY, OBJECT, COMMENT1, COMMENT, LINECOMMENT, ENDCOMMENT};
-	//typedef char State;
-	//typedef char Context;
+	typedef char State;
+	typedef char Context;
 	State state;
 	Stack<Context> context;
 	String buffer;
