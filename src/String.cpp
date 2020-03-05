@@ -112,17 +112,23 @@ int utf8toUtf32(const char* u, int* p, int)
 		}
 		else if ((c & 0xe0) == 0xc0) {
 			char c2 = *u++;
+			if (c2 == 0) break;
 			*p++ = ((c & 0x1f) << 6) | (c2 & 0x3f);
 		}
 		else if ((c & 0xf0) == 0xe0) {
 			char c2 = *u++;
+			if (c2 == 0) break;
 			char c3 = *u++;
+			if (c3 == 0) break;
 			*p++ = ((c & 0x0f) << 12) | ((c2 & 0x3f) << 6) | (c3 & 0x3f);
 		}
 		else if ((c & 0xf8) == 0xf0) {
 			char c2 = *u++;
+			if (c2 == 0) break;
 			char c3 = *u++;
+			if (c3 == 0) break;
 			char c4 = *u++;
+			if (c4 == 0) break;
 			*p++ = ((c & 0x07) << 18) | ((c2 & 0x3f) << 12) | ((c3 & 0x3f) << 6) | (c4 & 0x3f);
 		}
 	}
@@ -171,17 +177,23 @@ int utf8toUtf16(const char* u, wchar_t* p, int)
 		}
 		else if ((c & 0xe0) == 0xc0) {
 			char c2 = *u++;
+			if (c2 == 0) break;
 			*p++ = ((c & 0x1f) << 6) | (c2 & 0x3f);
 		}
 		else if ((c & 0xf0) == 0xe0) {
 			char c2 = *u++;
+			if (c2 == 0) break;
 			char c3 = *u++;
+			if (c3 == 0) break;
 			*p++ = ((c & 0x0f) << 12) | ((c2 & 0x3f) << 6) | (c3 & 0x3f);
 		}
 		else if ((c & 0xf8) == 0xf0) {
 			char c2 = *u++;
+			if (c2 == 0) break;
 			char c3 = *u++;
+			if (c3 == 0) break;
 			char c4 = *u++;
+			if (c4 == 0) break;
 			unsigned int d = (((c & 0x07) << 18) | ((c2 & 0x3f) << 12) | ((c3 & 0x3f) << 6) | (c4 & 0x3f)) - 0x10000;
 			*p++ = (d >> 10) + 0xd800;
 			*p++ = (d & 0x3ff) + 0xdc00;
@@ -212,20 +224,26 @@ int String::Enumerator::operator*()
 	}
 	else if ((c & 0xe0) == 0xc0) {
 		char c2 = u[1];
+		if (c2 == 0) { n = 1; return 0; }
 		n = 2;
 		return ((c & 0x1f) << 6) | (c2 & 0x3f);
 	}
 	else if ((c & 0xf0) == 0xe0) {
 		char c2 = u[1];
+		if (c2 == 0) { n = 1; return 0; }
 		char c3 = u[2];
+		if (c3 == 0) { n = 2; return 0; }
 		n = 3;
 		return ((c & 0x0f) << 12) | ((c2 & 0x3f) << 6) | (c3 & 0x3f);
 	}
 	else {
 		n = 4;
 		char c2 = u[1];
+		if (c2 == 0) { n = 1; return 0; }
 		char c3 = u[2];
+		if (c3 == 0) { n = 2; return 0; }
 		char c4 = u[3];
+		if (c4 == 0) { n = 3; return 0; }
 		return ((c & 0x07) << 18) | ((c2 & 0x3f) << 12) | ((c3 & 0x3f) << 6) | (c4 & 0x3f);
 	}
 	return 0;
@@ -236,7 +254,7 @@ int String::Enumerator::operator*()
 String::operator const wchar_t*() const
 {
 	((String*)this)->resize(_len + 1 + (_len + 2)*sizeof(wchar_t), true, false);
-	int offset = (_len + 1)/* & ~0x03*/;
+	int offset = (_len + 1) + ((4 - ((_len + 1) & 0x03)) & 0x03);
 	wchar_t* wstr = (wchar_t*)(str() + offset);
 	from8bit(str(), wstr, _len);
 	return wstr;
@@ -256,7 +274,7 @@ String& String::fix()
 
 String& String::fixW()
 {
-	int offset = (_len + 1) /*& ~0x03*/;
+	int offset = (_len + 1) + ((4 - ((_len + 1) & 0x03)) & 0x03);
 	to8bit((wchar_t*)(str() + offset), str(), cap());
 	_len = (int)strlen(str());
 	return *this;
@@ -321,8 +339,6 @@ void String::alloc(int n)
 		if (!_str) ASL_BAD_ALLOC();
 	}
 }
-
-/** Changes the _size keeping its contents */
 
 String& String::resize(int n, bool keep, bool newlen)
 {
