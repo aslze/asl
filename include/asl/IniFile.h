@@ -110,7 +110,7 @@ public:
 	void write(const String& fname="");
 
 	/**
-	Sets the current section to 'name'
+	Sets the current section to 'name' (variables will be read from here by default)
 	*/
 	Section& section(const String& name);
 
