@@ -22,7 +22,7 @@ namespace asl {
 
 enum StateN {
 	NUMBER, INT, STRING, PROPERTY, IDENTIFIER,
-	NUMBER_E, NUMBER_ES, NUMBER_EV,
+	NUMBER_E, NUMBER_ES, NUMBER_EV, NUMBER_DOT,MINUS,
 	WAIT_EQUAL, WAIT_VALUE, WAIT_PROPERTY, WAIT_OBJ, QPROPERTY, ESCAPE, ERR, UNICODECHAR
 };
 enum ContextN {ROOT, ARRAY, OBJECT, COMMENT1, COMMENT, LINECOMMENT, ENDCOMMENT};
@@ -159,6 +159,18 @@ void XdlParser::parse(const char* s)
 		NOCOMMENT:
 		switch(state)
 		{
+		case MINUS:
+			if (c >= '0' && c <= '9')
+			{
+				state = INT;
+				buffer += c;
+			}
+			else
+			{
+				state = ERR;
+				return;
+			}
+			break;
 		case INT:
 			if(c>='0' && c<='9')
 			{
@@ -166,7 +178,7 @@ void XdlParser::parse(const char* s)
 			}
 			else if(c=='.')
 			{
-				state=NUMBER;
+				state = NUMBER_DOT;
 				buffer+=c;
 			}
 			else if (c == 'e' || c == 'E')
@@ -179,6 +191,18 @@ void XdlParser::parse(const char* s)
 				new_number(myatoiz(buffer));
 				value_end();
 				s--;
+			}
+			else
+			{
+				state = ERR;
+				return;
+			}
+			break;
+		case NUMBER_DOT:
+			if (c >= '0' && c <= '9')
+			{
+				state = NUMBER;
+				buffer += c;
 			}
 			else
 			{
@@ -220,7 +244,7 @@ void XdlParser::parse(const char* s)
 			{
 				buffer += c;
 			}
-			else if (myisspace(c) || c == ']' || c == '}' || c == ',')
+			else if (c == ',' || myisspace(c) || c == ']' || c == '}')
 			{
 #ifndef ASL_FAST_JSON
 				for (char* p = buffer; *p; p++)
@@ -250,7 +274,7 @@ void XdlParser::parse(const char* s)
 				state = NUMBER_E;
 				buffer += c;
 			}
-			else if(myisspace(c) || c == ']' || c == '}' || c == ',')
+			else if(c == ',' || myisspace(c) || c == ']' || c == '}')
 			{
 #ifndef ASL_FAST_JSON
 				for(char* p = buffer; *p; p++)
@@ -311,9 +335,14 @@ void XdlParser::parse(const char* s)
 			break;
 
 		case WAIT_VALUE:
-			if ((c >= '0' && c <= '9') || c == '-')
+			if (c >= '0' && c <= '9')
 			{
 				state = INT;
+				buffer += c;
+			}
+			else if (c == '-')
+			{
+				state = MINUS;
 				buffer += c;
 			}
 			else if (c == '\"')
