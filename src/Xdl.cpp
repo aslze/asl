@@ -174,7 +174,7 @@ void XdlParser::parse(const char* s)
 		case INT:
 			if(c>='0' && c<='9')
 			{
-				buffer+=c;		/// check length and go to number if over 2^31
+				buffer+=c;
 			}
 			else if(c=='.')
 			{
@@ -188,7 +188,10 @@ void XdlParser::parse(const char* s)
 			}
 			else if(buffer != '-')
 			{
-				new_number(myatoiz(buffer));
+				if (buffer.length() > 9) // check better if it fits in an int32
+					new_number(ASL_ATOF(buffer));
+				else
+					new_number(myatoiz(buffer));
 				value_end();
 				s--;
 			}
@@ -297,7 +300,7 @@ void XdlParser::parse(const char* s)
 			break;
 
 		case STRING:
-			if(c!='\"' && c!='\\')
+			if(c!='\"' /*&& c!='\\'*/)
 				buffer+=c;
 			else if(c=='\\')
 			{
@@ -372,7 +375,7 @@ void XdlParser::parse(const char* s)
 				value_end();
 				end_object();
 			}
-			else if (isalnum(c) || c == '_' || c == '$')
+			else if (myisalnum(c) || c == '_' || c == '$')
 			{
 				state=IDENTIFIER;
 				buffer += c;
@@ -404,7 +407,7 @@ void XdlParser::parse(const char* s)
 			}
 			break;
 		case WAIT_PROPERTY:
-			if(isalnum(c)||c=='_'||c=='$')
+			if(myisalnum(c)||c=='_'||c=='$')
 			{
 				state=PROPERTY;
 				buffer += c;
@@ -446,7 +449,7 @@ void XdlParser::parse(const char* s)
 			break;
 
 		case IDENTIFIER:
-			if(!isalnum(c) && c!='_')
+			if(!myisalnum(c) && c!='_')
 			{
 				if(buffer=="Y" || buffer=="N" || buffer=="false" || buffer=="true" )
 				{

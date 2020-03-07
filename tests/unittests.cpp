@@ -387,18 +387,20 @@ ASL_TEST(XDL)
 	ASL_ASSERT(c == "A{x=3.5,y=\"s\",z=[Y,N]}");
 	String d = "A/*...*/{x=3.5, //...\ny=\"s\", z=[Y, N)}";
 	Var e = decodeXDL(d);
-	ASL_ASSERT(e.is(Var::NONE));
+	ASL_ASSERT(!e.ok());
 	Var f = decodeJSON("{\"x\":null,\"y\":3}");
-	ASL_ASSERT(!f.is(Var::NONE));
+	ASL_ASSERT(f.ok());
 	ASL_ASSERT(f["y"] == 3);
 	ASL_ASSERT(f["x"].is(Var::NUL));
+
+	ASL_ASSERT(decodeXDL("9123456789") == 9123456789.0);
 
 	ASL_ASSERT(Xdl::encode("a\nb") == "\"a\\nb\"");
 
 	ASL_ASSERT(Json::encode( (Var(), 1, Var::NUL, false) ) == "[1,null,false]");
 
-	ASL_ASSERT(!decodeXDL("1.25e08").is(Var::NONE));
-	ASL_ASSERT(!decodeXDL("1.25e+08").is(Var::NONE));
+	ASL_ASSERT(decodeXDL("1.25e08").ok());
+	ASL_ASSERT(decodeXDL("1.25e+08").ok());
 	ASL_ASSERT(fabs( (double)decodeXDL("1.25e8") - 1.25e8) < 1e-6);
 	ASL_ASSERT(fabs( (double)decodeXDL("1.25e+8") - 1.25e8) < 1e-6);
 
