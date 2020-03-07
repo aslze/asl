@@ -22,6 +22,7 @@ namespace asl {
 
 enum StateN {
 	NUMBER, INT, STRING, PROPERTY, IDENTIFIER,
+	NUMBER_E, NUMBER_ES, NUMBER_EV,
 	WAIT_EQUAL, WAIT_VALUE, WAIT_PROPERTY, WAIT_OBJ, QPROPERTY, ESCAPE, ERR, UNICODECHAR
 };
 enum ContextN {ROOT, ARRAY, OBJECT, COMMENT1, COMMENT, LINECOMMENT, ENDCOMMENT};
@@ -161,12 +162,17 @@ void XdlParser::parse(const char* s)
 		case INT:
 			if(c>='0' && c<='9')
 			{
-				buffer+=c;
+				buffer+=c;		/// check length and go to number if over 2^31
 			}
-			else if(c=='.' || c=='e' || c=='E')
+			else if(c=='.')
 			{
 				state=NUMBER;
 				buffer+=c;
+			}
+			else if (c == 'e' || c == 'E')
+			{
+				state = NUMBER_E;
+				buffer += c;
 			}
 			else if(buffer != '-')
 			{
@@ -180,13 +186,71 @@ void XdlParser::parse(const char* s)
 				return;
 			}
 			break;
-
-		case NUMBER:
-			if((c>='0' && c<='9') || c=='-' || c=='.' || c=='e' || c=='E' || c=='+')
+		case NUMBER_E:
+			if (c == '-' || c == '+')
 			{
-				buffer+=c;
+				state = NUMBER_ES;
+				buffer += c;
 			}
-			else if(buffer != '-')
+			else if (c >= '0' && c <= '9')
+			{
+				state = NUMBER_EV;
+				buffer += c;
+			}
+			else
+			{
+				state = ERR;
+				return;
+			}
+			break;
+		case NUMBER_ES:
+			if (c >= '0' && c <= '9')
+			{
+				state = NUMBER_EV;
+				buffer += c;
+			}
+			else
+			{
+				state = ERR;
+				return;
+			}
+			break;
+		case NUMBER_EV:
+			if (c >= '0' && c <= '9')
+			{
+				buffer += c;
+			}
+			else if (myisspace(c) || c == ']' || c == '}' || c == ',')
+			{
+#ifndef ASL_FAST_JSON
+				for (char* p = buffer; *p; p++)
+					if (*p == '.')
+					{
+						*p = ldp;
+						break;
+					}
+#endif
+				new_number(ASL_ATOF(buffer));
+				value_end();
+				s--;
+			}
+			else
+			{
+				state = ERR;
+				return;
+			}
+			break;
+		case NUMBER:
+			if(c >= '0' && c <= '9')
+			{
+				buffer += c;
+			}
+			else if (c == 'e' || c == 'E')
+			{
+				state = NUMBER_E;
+				buffer += c;
+			}
+			else if(myisspace(c) || c == ']' || c == '}' || c == ',')
 			{
 #ifndef ASL_FAST_JSON
 				for(char* p = buffer; *p; p++)
@@ -197,7 +261,6 @@ void XdlParser::parse(const char* s)
 					}
 #endif
 				new_number(ASL_ATOF(buffer));
-
 				value_end();
 				s--;
 			}
@@ -269,11 +332,11 @@ void XdlParser::parse(const char* s)
 				context << OBJECT;
 				buffer="";
 			}
-			else if(c=='.')
+			/*else if(c=='.') // not JSON
 			{
 				state=NUMBER;
 				buffer += c;
-			}
+			}*/
 			else if (c == '}' && ctx == OBJECT)
 			{
 				context.pop();
