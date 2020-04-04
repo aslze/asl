@@ -360,7 +360,7 @@ public:
 	double toDouble() const { return atof(str()); }
 	float toFloat() const {return (float)atof(str());}
 	/**
-	Returns true if this string represents a non-false value (none of: "0", "N", "false", "no")
+	Returns true if this string represents a non-false value (e.g. none of: "", "0", "N", "false", "no")
 	*/
 	bool isTrue() const;
 	Long toLong() const;
