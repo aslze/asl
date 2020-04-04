@@ -178,9 +178,6 @@ public:
 	Returns a pointer to the first element
 	*/
 	T* ptr() {return &_a[0];}
-	//operator bool() const { return d().n != 0; }
-	operator const void*() const { return d().n == 0 ? 0 : this; }
-	//explicit operator bool() const { return d().n != 0; }
 	bool operator!() const { return d().n == 0; }
 	/**
 	Tests for equality of all elements of both arrays
@@ -476,13 +473,21 @@ public:
 	}
 
 	/**
-	Sorts the array by the elements' f comparable property
+	Sorts the array by the elements' f comparable property (in ascending order by default)
 	*/
 	template<class F>
-	Array& sortBy(F f)
+	Array& sortBy(F f, bool ascending = true)
 	{
-		IsLess<T, F> p(f);
-		quicksort(_a, length(), p);
+		if (ascending)
+		{
+			IsLess<T, F> p(f);
+			quicksort(_a, length(), p);
+		}
+		else
+		{
+			IsMore<T, F> p(f);
+			quicksort(_a, length(), p);
+		}
 		return *this;
 	}
 
