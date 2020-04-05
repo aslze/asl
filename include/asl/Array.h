@@ -525,11 +525,15 @@ public:
 	template<class F>
 	Array& removeIf(F f)
 	{
-		for (int i = 0; i < length(); i++)
+		int n = length();
+		for (int i = 0, j = 0; i < length(); i++)
 			if (f(_a[i])) {
-				remove(i);
-				--i;
+				asl_destroy(&_a[i]);
+				n--;
 			}
+			else
+				memcpy(&_a[j++], &_a[i], sizeof(T));
+		d().n = n;
 		return *this;
 	}
 
