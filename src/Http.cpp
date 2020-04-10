@@ -92,12 +92,12 @@ Url parseUrl(const String& url)
 }
 
 
-HttpMessage::HttpMessage() : _progress(NULL), _fileBody(false), _chunked(false)
+HttpMessage::HttpMessage() : _socket(NULL), _progress(NULL), _fileBody(false), _chunked(false)
 {
 	_headersSent = false;
 }
 
-HttpMessage::HttpMessage(const Dic<>& headers) : _headers(headers), _progress(NULL), _fileBody(false), _chunked(false)
+HttpMessage::HttpMessage(const Dic<>& headers) : _socket(NULL), _headers(headers), _progress(NULL), _fileBody(false), _chunked(false)
 {
 	_headersSent = false;
 }
@@ -555,7 +555,13 @@ void HttpMessage::putFile(const String& path, int begin, int end)
 		setHeader("Content-Length", end - begin + 1);
 		setHeader("Content-Range", String::f("bytes %i-%i/%lli", begin, end, size));
 	}
+	// if (multipart-form-data)
+	//  increase content-length
+	//  write Content-Type: multipart/form-data; boundary=abc
+	//  write --abc\r\n
+	//  write Content-Type: ...\r\n\r\n
 	writeFile(path, begin, end);
+	//  write --abc--\r\n
 }
 
 }

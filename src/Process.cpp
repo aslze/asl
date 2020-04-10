@@ -31,6 +31,7 @@ Process::Process(const Process& p) : _output(p._output), _errors(p._errors)
 	_hasExited = p._hasExited;
 	_ok = p._hasExited;
 	_ready = false;
+	_detached = p._detached;
 
 	_stdin = _stdout = _stderr = 0;
 	_pipe_in[0] = _pipe_out[0] = _pipe_err[0] = 0;
@@ -104,10 +105,10 @@ namespace asl {
 		_exitstat = 0;
 		_pid = -1;
 		_detached = false;
-
 		_hasExited = false;
-		SECURITY_ATTRIBUTES sec;
+		_stderr = _stdin = _stdout = 0;
 
+		SECURITY_ATTRIBUTES sec;
 		sec.nLength = sizeof(SECURITY_ATTRIBUTES);
 		sec.bInheritHandle = TRUE;
 		sec.lpSecurityDescriptor = NULL;
@@ -193,7 +194,11 @@ namespace asl {
 			&procInfo) != 0;
 
 		if (_ok)
+		{
 			_pid = procInfo.dwProcessId;
+			CloseHandle(procInfo.hProcess);
+			CloseHandle(procInfo.hThread);
+		}
 		else
 		{
 			_pid = -1;

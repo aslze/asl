@@ -595,6 +595,8 @@ void XdlParser::put(const Var& x)
 
 XdlWriter::XdlWriter()
 {
+	pretty = false;
+	json = false;
 	out.resize(512);
 }
 

@@ -294,7 +294,7 @@ bool InetAddress::set(const String& host, int port)
 		hints.ai_next = NULL;
 
 		int s = getaddrinfo(host, NULL, &hints, &info);
-		if (s != 0) {
+		if (s != 0 || !info) {
 			printf("Cannot resolve %s\n", *host);
 			data.clear();
 			return false;

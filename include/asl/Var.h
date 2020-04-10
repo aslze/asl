@@ -176,7 +176,7 @@ class ASL_API Var
   public:
 	enum Type {NONE, NUL, NUMBER, BOOL, INT, SSTRING, FLOAT, STRING=8, ARRAY, DIC, OBJ=10};
 	bool isPod() const {return (_type & 8)==0;}
-	Var(): _type(NONE) {}
+	Var(): _type(NONE), ll(0) {}
 	Var(Type t);
 	Var(const Var& v)
 	{
@@ -510,6 +510,7 @@ class ASL_API Var
 		double d;
 		int i;
 		bool b;
+		Long ll;
 #ifndef ASL_VAR_STATIC
 		Array<Var>* a;
 		HDic<Var>* o;
