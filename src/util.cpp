@@ -32,83 +32,111 @@ void Random::getBytes(void* buffer, int n)
 	}
 #endif
 	Random random;
-	random.init((ULong)inow(), (ULong)inow());
 	for(int i=0; i<n; i++)
 		((byte*)buffer)[i] = (byte)random(255);
 }
 
 #if 0 // linear congruential
 
-Random::Random()
-{
-	_state[0] = 1;
-}
+const int Random::_size = 1;
 
 unsigned Random::get()
 {
 	const unsigned a = 1103515245;
 	const unsigned c = 12345;
-	const ULong m = 1 << 31;
+	const ULong m = 1ull << 31;
 	_state[0] = (((ULong)_state[0] * a + c) % m);
 	return _state[0] & 0xffffffff;
 }
 
-void Random::init(Long n)
+ULong Random::getLong()
 {
-	_state[0] = (n>=0)? n : (Long)(1e9 * fract(1e-6 * now()));
+	return ((ULong)get() << 32) | (ULong)get();
 }
 
-#else // xoroshiro128+
+#elif 0 // xoroshiro128+
+
+const int Random::_size = 2;
 
 inline ULong rotl(ULong x, int k)
 {
 	return (x << k) | (x >> (64 - k));
 }
 
-Random::Random(bool autoseed, bool fast)
-{
-	_state[0] = 1921312345;
-	_state[1] = 1312312876;
-	if (autoseed)
-		init(fast);
-}
-
-// maybe add a getLong() to get the full 64 bits, and use it to generate doubles... ?
-
-unsigned Random::get()
+ULong Random::getLong()
 {
 	const ULong s0 = _state[0];
 	ULong s1 = _state[1];
 	const ULong result = s0 + s1;
 	s1 ^= s0;
-	_state[0] = rotl(s0, 55) ^ s1 ^ (s1 << 14); // a, b
-	_state[1] = rotl(s1, 36); // c
-	return (result >> 32) & 0xffffffff;
+	_state[0] = rotl(s0, 24) ^ s1 ^ (s1 << 16); // a, b
+	_state[1] = rotl(s1, 37); // c
+	return result;
 }
 
-void Random::init(ULong s1, ULong s2)
+unsigned Random::get()
 {
-	_state[0] = s1;
-	_state[1] = s2;
+	return (getLong() >> 32) & 0xffffffff;
+}
+
+#else // xoshiro256**
+
+const int Random::_size = 4;
+
+inline ULong rotl(const ULong x, int k)
+{
+	return (x << k) | (x >> (64 - k));
+}
+
+ULong Random::getLong()
+{
+	const ULong result = rotl(_state[1] * 5, 7) * 9;
+	const ULong t = _state[1] << 17;
+	_state[2] ^= _state[0];
+	_state[3] ^= _state[1];
+	_state[1] ^= _state[2];
+	_state[0] ^= _state[3];
+	_state[2] ^= t;
+	_state[3] = rotl(_state[3], 45);
+	return result;
+}
+
+unsigned Random::get()
+{
+	return (getLong() >> 32) & 0xffffffff;
+}
+
+#endif
+
+Random::Random(bool autoseed, bool fast)
+{
+	for (int i = 0; i < _size; i++)
+		_state[i] = (ULong)1921312345 << i;
+
+	if (autoseed)
+		init(fast);
+}
+
+void Random::seed(ULong s)
+{
+	for (int i = 0; i < _size; i++)
+		_state[i] = (ULong)s ^ ((ULong)s << (i + 1));
 }
 
 void Random::init(bool fast)
 {
 	if (fast)
 	{
-		Long n = inow();
-		_state[0] = (ULong)n;
-		int k = get();
-		_state[1] = (ULong)n + (ULong(k) << 30);
+		ULong n = (ULong)inow();
+		for (int i=0; i < _size; i++)
+			_state[i] = n ^ (777ull * n << i) ^ (3333333333ull * n << (i+1));
 		get();
 	}
 	else
 		getBytes(_state, sizeof(_state));
 }
 
-#endif
-
-Random random(true);
+Random random;
 
 double now()
 {

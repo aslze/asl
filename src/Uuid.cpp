@@ -20,9 +20,8 @@ String Uuid::operator*() const
 		_u[0], _u[1], _u[2], _u[3], _u[4], _u[5], _u[6], _u[7], _u[8], _u[9], _u[10], _u[11], _u[12], _u[13], _u[14], _u[15]);
 }
 
-UuidGenerator::UuidGenerator()
+UuidGenerator::UuidGenerator() : _random(true, false)
 {
-	_random.init(false);
 }
 
 Uuid UuidGenerator::generate()

@@ -101,6 +101,10 @@ namespace asl {
 #define ASL_PATH_SEP '/'
 #endif
 
+/**
+Check that the argument is true.
+@hideinitializer
+*/
 #define ASL_ASSERT(x) if(!(x)) { printf("\n%s: %i\n\n* Failed: '%s'\n\n", __FILE__, __LINE__, #x); exit(1); }
 
 typedef unsigned char byte;
@@ -177,24 +181,13 @@ Generates uniformly distributed pseudo-random numbers, except in the `normal()` 
 
 ```
 Random random;
-int n = random(256);          // get an integer between 0 and 255
-double x = random(-1.5, 1.5); // get a number between -1.5 and +1.5
+int n = random(256);                // get an integer between 0 and 255
+double x = random(-1.5, 1.5);       // get a number between -1.5 and +1.5
 double y = random.normal(10, 0.75); // get a number from a normal distribution
 ```
 
-The generator initially has a constant seed, so it will always produce the same sequence. You
-can change the seed with the `init()` function, either with values or with no arguments to
-automatically seed it randomly:
-
-```
-random.init();
-```
-
-Or you can create the object with a true argument to auto seed it :
-
-```
-Random random(true);
-```
+The generator initially is seeded pseudorandomly. If you need a constant sequence you can create with
+a false argument, to prevent this or call seed().
 
 For compatibility with older code, there is a global `asl::random` object already random initialized
 ready for use. But it is recommended to use new Random objects when separate sequences or multithreading
@@ -202,20 +195,25 @@ are needed.
 */
 class ASL_API Random
 {
-	ULong _state[2];
+	ULong _state[4];
+	static const int _size;
 public:
-	Random(bool autoseed = false, bool fast = true);
+	Random(bool autoseed = true, bool fast = true);
 	/** Returns an integer pseudo-random number in the [0, 2^32-1] interval */
 	unsigned get();
 
+	ULong getLong();
+
 	/** Returns a floating point random number in the [0, m] interval */
-	double operator()(double m) { return get()*m*(1.0 / 4294967297.0); }
+	double operator()(double m) { return m * (getLong() >> 11) * 0x1.0p-53; }
 
 	/** Returns a floating point random number in the [m, M] interval */
-	double operator()(double m, double M) { return m + get()*(M - m)*(1.0 / 4294967297.0); }
+	double operator()(double m, double M) { return m + (*this)(M - m); }
 
+	/** Returns a floating point random number in the [0, M] interval */
 	float operator()(float m) { return (float)(*this)((double)m); }
 
+	/** Returns a floating point random number in the [m, M] interval */
 	float operator()(float m, float M) { return (float)(*this)((double)m, (double)M); }
 
 	/** Returns an integer random number in the [0, M] interval */
@@ -230,8 +228,11 @@ public:
 	/** Returns a floating point random number with normal distribution with given mean and variance */
 	double normal(double m, double s2) { return m + s2 * normal(); }
 
+	/** Returns true or false given a probability (by default it is 0.5, like flipping a coin) */
+	bool coin(double p = 0.5) { return (*this)(1.0) < p; }
+
 	/** Initializes the seed for the random functions */
-	void init(ULong s1, ULong s2);
+	void seed(ULong s);
 
 	/** Initializes the seed for the random functions randomly (set fast=false for a high quality random seed) */
 	void init(bool fast = true);
@@ -374,6 +375,13 @@ template<class T, class F>
 struct IsLess {
 	IsLess(const F& f) : f(f) {}
 	bool operator()(const T& a, const T& b) const { return f(a) < f(b); }
+	F f;
+};
+
+template<class T, class F>
+struct IsMore {
+	IsMore(const F& f) : f(f) {}
+	bool operator()(const T& a, const T& b) const { return f(a) > f(b); }
 	F f;
 };
 

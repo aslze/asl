@@ -35,7 +35,7 @@ const char* WebSocketMsg::operator*() const
 
 WebSocketMsg& WebSocketMsg::fix()
 {
-	_data << '\0';
+	_data << byte(0);
 	_data.resize(_data.length() - 1);
 	return *this;
 }
@@ -138,7 +138,6 @@ WebSocket::WebSocket()
 	_closed = true;
 	_code = 1000;
 	_socket.setEndian(ENDIAN_BIG);
-	_random.init();
 }
 
 WebSocket::WebSocket(const Socket& s, bool isclient):
@@ -149,7 +148,6 @@ WebSocket::WebSocket(const Socket& s, bool isclient):
 	_code = 1000;
 	_socket.setEndian(ENDIAN_BIG);
 	_socket.setBlocking(true);
-	_random.init();
 }
 
 bool WebSocket::connect(const String& uri, int port)
