@@ -205,7 +205,7 @@ public:
 	ULong getLong();
 
 	/** Returns a floating point random number in the [0, m] interval */
-	double operator()(double m) { return m * (getLong() >> 11) * 0x1.0p-53; }
+	double operator()(double m) { return m * (getLong() >> 11) * 1.1102230246251565e-16; } // 0x1.0p-53
 
 	/** Returns a floating point random number in the [m, M] interval */
 	double operator()(double m, double M) { return m + (*this)(M - m); }
