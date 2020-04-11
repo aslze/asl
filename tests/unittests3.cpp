@@ -23,7 +23,7 @@ ASL_TEST(Process)
 	{
 		Array<String> lines;
 		Process proc;
-		proc.run(Process::myPath(), array<String>("-subproc", 5, "a \"b"));
+		proc.run(Process::myPath(), array<String>("-subproc", 5, "a \"b\\"));
 		while (1)
 		{
 			String line = proc.readOutputLine();
@@ -39,7 +39,7 @@ ASL_TEST(Process)
 		}
 		//printf("<%s>\n", *lines[0]);
 		ASL_ASSERT(proc.exitStatus() == 4);
-		ASL_ASSERT(lines[0] == "subprocess -subproc,5,a \"b");
+		ASL_ASSERT(lines[0] == "subprocess -subproc,5,a \"b\\");
 	}
 }
 

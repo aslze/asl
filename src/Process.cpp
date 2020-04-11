@@ -79,6 +79,31 @@ void Process::ignoreOutput()
 
 namespace asl {
 
+	static String joinCmdArgs(const Array<String> args)
+	{
+		String cmdline;
+		foreach(const String & arg, args)
+		{
+			cmdline << '"';
+			for (int i = 0; i < arg.length(); i++)
+			{
+				int nbs = 0;
+				while (i < arg.length() && arg[i] == '\\')
+				{
+					++i;
+					++nbs;
+				}
+				if (i == arg.length())
+					cmdline << String::repeat('\\', 2 * nbs);
+				else
+					cmdline << String::repeat('\\', (arg[i] == '"') ? 2 * nbs + 1 : nbs) << arg[i];
+			}
+			cmdline << "\" ";
+		}
+
+		return cmdline;
+	}
+
 	String Process::env(const String& var)
 	{
 		String value;
@@ -177,9 +202,7 @@ namespace asl {
 		startInfo.hStdError = !_detached ? _pipe_err[1] : 0;
 
 		String commandline;
-		commandline << '\"' << command << '\"';
-		foreach(const String& arg, args)
-			commandline << " \"" << arg.replace('\"', "\\\"") << "\"";
+		commandline << '"' << command << "\" " << joinCmdArgs(args);
 
 		PROCESS_INFORMATION procInfo;
 		_ok = CreateProcessW(NULL,
