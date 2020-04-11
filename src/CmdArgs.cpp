@@ -19,19 +19,11 @@ CmdArgs::CmdArgs(const String& spec)
 #ifdef _WIN32
 	int nArgs;
 	LPWSTR* arglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
-
-	/*TextFile log("i:/log.txt", TextFile::APPEND);
-	log << *(String)GetCommandLineW() << " " << (int)wcslen(GetCommandLineW()) << "\n";
-	log.printf("args: %i\n", nArgs);*/
 	if( NULL == arglist )
 		return;
 	Array<String> a;
 	for (int i = 0; i < nArgs; i++)
-	{
 		a << arglist[i];
-		//log << (int)arglist[i][12] << "\n";
-		//log << *(String)arglist[i] << "\n";
-	}
 
 	LocalFree(arglist);
 	*this = CmdArgs(-nArgs, ((Array<char*>)a).ptr());
