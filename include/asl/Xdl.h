@@ -22,13 +22,13 @@ class ASL_API XdlCodec
 protected:
 	typedef char State;
 	typedef char Context;
-	State state;
-	Stack<Context> context;
-	String buffer;
-	bool inComment;
-	int unicodeCount;
-	char unicode[5];
-	char ldp;
+	State _state;
+	Stack<Context> _context;
+	String _buffer;
+	bool _inComment;
+	int _unicodeCount;
+	char _unicode[5];
+	char _ldp;
 public:
 	XdlCodec() {}
 	virtual ~XdlCodec() {}
@@ -72,8 +72,8 @@ class ASL_API XdlParser: public XdlCodec
 		//Container(Array<Var>* a): type(Var::ARRAY), list(a) {}
 		//Container(HDic<Var>* d): type(Var::DIC), dict(d) {}
 	};
-	Stack<Container> lists;
-	Stack<String> props;
+	Stack<Container> _lists;
+	Stack<String> _props;
 	void put(const Var& x);
 public:
 	XdlParser();
@@ -100,12 +100,12 @@ public:
 class ASL_API XdlWriter: public XdlCodec
 {
 protected:
-	String out;
-	bool pretty, json;
+	String _out;
+	bool _pretty, _json;
 public:
 	XdlWriter();
 	~XdlWriter() {}
-	String data() const {return out;}
+	String data() const {return _out;}
 	void put_separator();
 	virtual void reset();
 	virtual void new_number(int x);
@@ -124,15 +124,15 @@ public:
 
 class ASL_API XdlEncoder: public XdlWriter
 {
-	String indent;
-	int level;
+	String _indent;
+	int _level;
 	void _encode(const Var& v);
 public:
-	XdlEncoder() {level=0;}
+	XdlEncoder() {_level=0;}
 	String encode(const Var& v, bool p=false, bool j=false)
 	{
-		pretty = p;
-		json = j;
+		_pretty = p;
+		_json = j;
 		reset();
 		_encode(v);
 		return data();

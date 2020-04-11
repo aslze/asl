@@ -22,7 +22,7 @@ namespace asl {
 
 enum StateN {
 	NUMBER, INT, STRING, PROPERTY, IDENTIFIER,
-	NUMBER_E, NUMBER_ES, NUMBER_EV, NUMBER_DOT,MINUS,
+	NUMBER_E, NUMBER_ES, NUMBER_EV, NUMBER_DOT, MINUS, WAIT_SEP,
 	WAIT_EQUAL, WAIT_VALUE, WAIT_PROPERTY, WAIT_OBJ, QPROPERTY, ESCAPE, ERR, UNICODECHAR
 };
 enum ContextN {ROOT, ARRAY, OBJECT, COMMENT1, COMMENT, LINECOMMENT, ENDCOMMENT};
@@ -80,34 +80,31 @@ bool Json::write(const String& file, const Var& v, bool pretty)
 
 inline void XdlParser::value_end()
 {
-	if(context.top()==OBJECT)
-		state=WAIT_PROPERTY;
-	else
-		state=WAIT_VALUE;
-	buffer="";
+	_state = (_context.top() == ROOT) ? WAIT_VALUE : WAIT_SEP;
+	_buffer="";
 }
 
 void XdlParser::reset()
 {
-	context.clear();
-	context << ROOT;
-	state = WAIT_VALUE;
-	buffer = "";
+	_context.clear();
+	_context << ROOT;
+	_state = WAIT_VALUE;
+	_buffer = "";
 }
 
 void XdlParser::parse(const char* s)
 {
-	if(state == ERR)
+	if(_state == ERR)
 		return;
 	while(char c=*s++)
 	{
-		Context ctx = context.top();
-		if(!inComment)
+		Context ctx = _context.top();
+		if(!_inComment)
 		{
-			if(c=='/' && state != STRING)
+			if(c=='/' && _state != STRING && _state != ESCAPE)
 			{
-				inComment = true;
-				context << COMMENT1;
+				_inComment = true;
+				_context << COMMENT1;
 				continue;
 			}
 			goto NOCOMMENT;
@@ -115,200 +112,212 @@ void XdlParser::parse(const char* s)
 		switch(ctx)
 		{
 		case COMMENT1:
-			context.pop();
-			if(c=='/')
-				context << LINECOMMENT;
-			else if(c=='*')
-				context << COMMENT;
+			_context.pop();
+			if (c == '/')
+				_context << LINECOMMENT;
+			else if (c == '*')
+				_context << COMMENT;
+			else
+				_state = ERR;
 			break;
 		case LINECOMMENT:
 			if(c=='\n' || c=='\r')
 			{
-				inComment = false;
-				context.pop();
+				_inComment = false;
+				_context.pop();
 			}
 			break;
 		case COMMENT:
 			if(c=='*')
-				context << ENDCOMMENT;
+				_context << ENDCOMMENT;
 			break;
 		case ENDCOMMENT:
-			context.pop();
+			_context.pop();
 			if(c=='/') {
-				inComment = false;
-				context.pop();
+				_inComment = false;
+				_context.pop();
 				continue;
 			}
 			break;
 		default:
-			if(c=='/' && state != STRING)
+			if(c=='/' && _state != STRING)
 			{
-				inComment = true;
-				context << COMMENT1;
+				_inComment = true;
+				_context << COMMENT1;
 			}
 			continue;
 		}
-		ctx = context.top();
+		ctx = _context.top();
 		if(ctx==COMMENT || ctx==LINECOMMENT || ctx==COMMENT1 || ctx==ENDCOMMENT)
 		{
-			inComment = true;
+			_inComment = true;
 			continue;
 		}
 		else
-			inComment = false;
+			_inComment = false;
 		NOCOMMENT:
-		switch(state)
+		switch(_state)
 		{
 		case MINUS:
 			if (c >= '0' && c <= '9')
 			{
-				state = INT;
-				buffer += c;
+				_state = INT;
+				_buffer += c;
 			}
 			else
 			{
-				state = ERR;
+				_state = ERR;
 				return;
 			}
 			break;
 		case INT:
 			if(c>='0' && c<='9')
 			{
-				buffer+=c;
+				_buffer+=c;
 			}
 			else if(c=='.')
 			{
-				state = NUMBER_DOT;
-				buffer+=c;
+				_state = NUMBER_DOT;
+				_buffer+=c;
 			}
 			else if (c == 'e' || c == 'E')
 			{
-				state = NUMBER_E;
-				buffer += c;
+				_state = NUMBER_E;
+				_buffer += c;
 			}
-			else if(buffer != '-')
+			else if(_buffer != '-')
 			{
-				if (buffer.length() > 9) // check better if it fits in an int32
-					new_number(ASL_ATOF(buffer));
+				if (_buffer[0] == '-') // this block to check starting zero !
+				{
+					if (_buffer[1] == '0' && _buffer[2] != '\0')
+						_state = ERR;
+				}
+				else if (_buffer[0] == '0' && _buffer[1] != '\0')
+					_state = ERR;
+				if (_state == ERR)
+					return;
+
+				if (_buffer.length() > 9) // check better if it fits in an int32
+					new_number(ASL_ATOF(_buffer));
 				else
-					new_number(myatoiz(buffer));
+					new_number(myatoiz(_buffer));
 				value_end();
 				s--;
 			}
 			else
 			{
-				state = ERR;
+				_state = ERR;
 				return;
 			}
 			break;
 		case NUMBER_DOT:
 			if (c >= '0' && c <= '9')
 			{
-				state = NUMBER;
-				buffer += c;
+				_state = NUMBER;
+				_buffer += c;
 			}
 			else
 			{
-				state = ERR;
+				_state = ERR;
 				return;
 			}
 			break;
 		case NUMBER_E:
 			if (c == '-' || c == '+')
 			{
-				state = NUMBER_ES;
-				buffer += c;
+				_state = NUMBER_ES;
+				_buffer += c;
 			}
 			else if (c >= '0' && c <= '9')
 			{
-				state = NUMBER_EV;
-				buffer += c;
+				_state = NUMBER_EV;
+				_buffer += c;
 			}
 			else
 			{
-				state = ERR;
+				_state = ERR;
 				return;
 			}
 			break;
 		case NUMBER_ES:
 			if (c >= '0' && c <= '9')
 			{
-				state = NUMBER_EV;
-				buffer += c;
+				_state = NUMBER_EV;
+				_buffer += c;
 			}
 			else
 			{
-				state = ERR;
+				_state = ERR;
 				return;
 			}
 			break;
 		case NUMBER_EV:
 			if (c >= '0' && c <= '9')
 			{
-				buffer += c;
+				_buffer += c;
 			}
 			else if (c == ',' || myisspace(c) || c == ']' || c == '}')
 			{
 #ifndef ASL_FAST_JSON
-				for (char* p = buffer; *p; p++)
+				for (char* p = _buffer; *p; p++)
 					if (*p == '.')
 					{
-						*p = ldp;
+						*p = _ldp;
 						break;
 					}
 #endif
-				new_number(ASL_ATOF(buffer));
+				new_number(ASL_ATOF(_buffer));
 				value_end();
 				s--;
 			}
 			else
 			{
-				state = ERR;
+				_state = ERR;
 				return;
 			}
 			break;
 		case NUMBER:
 			if(c >= '0' && c <= '9')
 			{
-				buffer += c;
+				_buffer += c;
 			}
 			else if (c == 'e' || c == 'E')
 			{
-				state = NUMBER_E;
-				buffer += c;
+				_state = NUMBER_E;
+				_buffer += c;
 			}
 			else if(c == ',' || myisspace(c) || c == ']' || c == '}')
 			{
 #ifndef ASL_FAST_JSON
-				for(char* p = buffer; *p; p++)
+				for(char* p = _buffer; *p; p++)
 					if (*p == '.')
 					{
-						*p = ldp;
+						*p = _ldp;
 						break;
 					}
 #endif
-				new_number(ASL_ATOF(buffer));
+				new_number(ASL_ATOF(_buffer));
 				value_end();
 				s--;
 			}
 			else
 			{
-				state = ERR;
+				_state = ERR;
 				return;
 			}
 
 			break;
 
 		case STRING:
-			if(c!='\"' /*&& c!='\\'*/)
-				buffer+=c;
+			if(c!='\"' && c!='\\')
+				_buffer+=c;
 			else if(c=='\\')
 			{
-				state=ESCAPE;
+				_state=ESCAPE;
 			}
-			else
+			else // disallow TAB and newline?
 			{
-				new_string(buffer);
+				new_string(_buffer);
 				value_end();
 			}
 			break;
@@ -317,176 +326,213 @@ void XdlParser::parse(const char* s)
 			//if(!isalnum(c) && c!='_')
 			if (c == '=' || myisspace(c))
 			{
-				new_property(buffer);
+				new_property(_buffer);
 				s--;
-				state=WAIT_EQUAL;
-				buffer="";
+				_state=WAIT_EQUAL;
+				_buffer="";
 			}
-			else
-				buffer+=c;
+			else // not checking possible identifier chars !
+				_buffer+=c;
 			break;
 		case QPROPERTY: // JSON
 			if(c !='"')
-				buffer+=c;
+				_buffer+=c;
 			else
 			{
-				new_property(buffer);
+				new_property(_buffer);
 				//s--;
-				state=WAIT_EQUAL;
-				buffer="";
+				_state=WAIT_EQUAL;
+				_buffer="";
 			}
 			break;
 
 		case WAIT_VALUE:
 			if (c >= '0' && c <= '9')
 			{
-				state = INT;
-				buffer += c;
+				_state = INT;
+				_buffer += c;
 			}
 			else if (c == '-')
 			{
-				state = MINUS;
-				buffer += c;
+				_state = MINUS;
+				_buffer += c;
 			}
 			else if (c == '\"')
 			{
-				state = STRING;
+				_state = STRING;
 			}
 			else if (c == '[')
 			{
 				begin_array();
-				context << ARRAY;
+				_context << ARRAY;
 			}
 			else if(c=='{')
 			{
-				begin_object(buffer);
-				state=WAIT_PROPERTY;
-				context << OBJECT;
-				buffer="";
+				begin_object(_buffer);
+				_state=WAIT_PROPERTY;
+				_context << OBJECT;
+				_buffer="";
 			}
 			/*else if(c=='.') // not JSON
 			{
 				state=NUMBER;
 				buffer += c;
 			}*/
-			else if (c == '}' && ctx == OBJECT)
+			else if (c == '}' && ctx == OBJECT) // only if we allow {}
 			{
-				context.pop();
+				_context.pop();
 				value_end();
 				end_object();
 			}
 			else if (myisalnum(c) || c == '_' || c == '$')
 			{
-				state=IDENTIFIER;
-				buffer += c;
+				_state=IDENTIFIER;
+				_buffer += c;
 			}
 			else if(c==']' && ctx==ARRAY)
 			{
-				context.pop();
+				/*if ((*(Array<Var>*)_lists.top().list).length() != 0)
+				{
+					_state = ERR;
+					return;
+				}*/
+				_context.pop();
 				value_end();
 				end_array();
 			}
-			else if(!myisspace(c) && c != ',')
+			else if(!myisspace(c) /*&& c != ','*/)
 			{
-				state = ERR;
+				_state = ERR;
+				return;
+			}
+			break;
+		case WAIT_SEP:
+			if (c == ',' || c == '\n')
+				_state = (ctx == OBJECT) ? WAIT_PROPERTY : WAIT_VALUE;
+			else if (c == '}' && ctx == OBJECT)
+			{
+				_context.pop();
+				value_end();
+				end_object();
+			}
+			else if (c == ']' && ctx == ARRAY)
+			{
+				_context.pop();
+				value_end();
+				end_array();
+			}
+			else if (!myisspace(c))
+			{
+				_state = ERR;
 				return;
 			}
 			break;
 		case WAIT_OBJ:
 			if (c == '{')
 			{
-				begin_object(buffer);
-				state = WAIT_PROPERTY;
-				context << OBJECT;
-				buffer = "";
+				begin_object(_buffer);
+				_state = WAIT_PROPERTY;
+				_context << OBJECT;
+				_buffer = "";
 			}
 			else if (!myisspace(c))
 			{
-				state = ERR;
+				_state = ERR;
 				return;
 			}
 			break;
 		case WAIT_PROPERTY:
 			if(myisalnum(c)||c=='_'||c=='$')
 			{
-				state=PROPERTY;
-				buffer += c;
+				_state=PROPERTY;
+				_buffer += c;
 			}
 			else if(c=='"') // JSON
 			{
-				state=QPROPERTY;
+				_state=QPROPERTY;
 			}
 			else if(c=='}')
 			{
-				context.pop();
+				_context.pop();
 				value_end();
 				end_object();
 			}
-			else if(!myisspace(c) && c != ',' && c != '}')
+			else if(!myisspace(c) /*&& c != ','*/ && c != '}')
 			{
-				state = ERR;
+				_state = ERR;
 				return;
 			}
 			break;
 		case ESCAPE:
-			if(c=='\\')
+			if (c == '\\')
+				_buffer += '\\';
+			else if (c == '"')
+				_buffer += '"';
+			else if (c == 'n')
+				_buffer += '\n';
+			else if (c == '/')
+				_buffer += '/';
+			else if (c == 'r')
+				_buffer += '\r';
+			else if (c == 't')
+				_buffer += '\t';
+			else if (c == 'f')
+				_buffer += '\f';
+			else if (c == 'b')
+				_buffer += '\b';
+			else if (c == 'u')
 			{
-				buffer += '\\';
-			}
-			else if(c=='"')
-				buffer += '"';
-			else if(c=='n')
-				buffer += '\n';
-			else if(c=='/')
-				buffer += '/';
-			else if(c=='u')
-			{
-				state = UNICODECHAR;
-				unicodeCount = 0;
+				_state = UNICODECHAR;
+				_unicodeCount = 0;
 				break;
 			}
-			state=STRING;
+			else
+			{
+				_state = ERR;
+				break;
+			}
+			_state=STRING;
 			break;
 
 		case IDENTIFIER:
 			if(!myisalnum(c) && c!='_')
 			{
-				if(buffer=="Y" || buffer=="N" || buffer=="false" || buffer=="true" )
+				if(_buffer=="Y" || _buffer=="N" || _buffer=="false" || _buffer=="true" )
 				{
-					new_bool(buffer=="true"||buffer=="Y");
+					new_bool(_buffer=="true"||_buffer=="Y");
 					value_end();
 				}
-				else if(buffer=="null")
+				else if(_buffer=="null")
 				{
 					put(Var::NUL);
 					value_end();
 				}
 				else
-					state = WAIT_OBJ;
+					_state = WAIT_OBJ;
 				s--;
 			}
 			else
-				buffer+=c;
+				_buffer+=c;
 			break;
 		case WAIT_EQUAL:
 			if(c=='=' || c==':')
-				state=WAIT_VALUE;
+				_state=WAIT_VALUE;
 			else if(!myisspace(c))
 			{
-				state = ERR;
+				_state = ERR;
 				return;
 			}
 			break;
 		case UNICODECHAR:
-			unicode[unicodeCount++] = c;
-			if(unicodeCount == 4) // still only BMP!
+			_unicode[_unicodeCount++] = c;
+			if(_unicodeCount == 4) // still only BMP!
 			{
-				unicode[4] = '\0';
-				wchar_t wch[2] = {(wchar_t)strtoul(unicode, NULL, 16), 0};
+				_unicode[4] = '\0';
+				wchar_t wch[2] = {(wchar_t)strtoul(_unicode, NULL, 16), 0};
 				char ch[4];
 				utf16toUtf8(wch, ch, 1);
-				buffer += ch;
-				state=STRING;
+				_buffer += ch;
+				_state=STRING;
 			}
 			break;
 		case ERR:
@@ -499,30 +545,30 @@ void XdlParser::parse(const char* s)
 XdlParser::XdlParser()
 {
 	lconv* loc = localeconv();
-	ldp = *loc->decimal_point;
-	context << ROOT;
-	state = WAIT_VALUE;
-	inComment = false;
-	lists << Container(Var::ARRAY);
-	lists.top().init();
+	_ldp = *loc->decimal_point;
+	_context << ROOT;
+	_state = WAIT_VALUE;
+	_inComment = false;
+	_lists << Container(Var::ARRAY);
+	_lists.top().init();
 }
 
 XdlParser::~XdlParser()
 {
-	while(lists.length() > 0)
+	while(_lists.length() > 0)
 	{
-		lists.top().free();
-		lists.pop();
+		_lists.top().free();
+		_lists.pop();
 	}
 }
 
 Var XdlParser::value() const
 {
 	Var v;
-	if (state == ERR)
+	if (_state == ERR)
 		return v;
-	Array<Var>& l = *(Array<Var>*)lists[0].list;
-	if(context.top() == ROOT && state == WAIT_VALUE && l.length() > 0)
+	Array<Var>& l = *(Array<Var>*)_lists[0].list;
+	if(_context.top() == ROOT && _state == WAIT_VALUE && l.length() > 0)
 		v = l[l.length()-1];
 	return v;
 }
@@ -537,56 +583,56 @@ Var XdlParser::decode(const char* s)
 
 void XdlParser::begin_array()
 {
-	lists << Container(Var::ARRAY);
-	lists.top().init();
+	_lists << Container(Var::ARRAY);
+	_lists.top().init();
 }
 
 void XdlParser::end_array()
 {
-	Var v = *(Array<Var>*)lists.top().list;
-	lists.top().free();
-	lists.pop();
+	Var v = *(Array<Var>*)_lists.top().list;
+	_lists.top().free();
+	_lists.pop();
 	put(v);
 }
 
 void XdlParser::begin_object(const char* _class)
 {
-	lists << Container(Var::DIC);
-	lists.top().init();
+	_lists << Container(Var::DIC);
+	_lists.top().init();
 	if(_class[0] != '\0')
-		(*(HDic<Var>*)lists.top().dict)[ASL_XDLCLASS]=_class;
+		(*(HDic<Var>*)_lists.top().dict)[ASL_XDLCLASS]=_class;
 }
 
 void XdlParser::end_object()
 {
-	Var v = *(HDic<Var>*)lists.top().dict;
-	lists.top().free();
-	lists.pop();
+	Var v = *(HDic<Var>*)_lists.top().dict;
+	_lists.top().free();
+	_lists.pop();
 	put(v);
 }
 
 void XdlParser::new_property(const char* name)
 {
-	props << (String)name;
+	_props << (String)name;
 }
 
 void XdlParser::new_property(const String& name)
 {
-	props << name;
+	_props << name;
 }
 
 void XdlParser::put(const Var& x)
 {
-	Container& top = lists.top();
+	Container& top = _lists.top();
 	switch(top.type)
 	{
 	case Var::ARRAY:
 		(*(Array<Var>*)top.list) << x;
 		break;
 	case Var::DIC: {
-		const String& name = props.top();
+		const String& name = _props.top();
 		(*(HDic<Var>*)top.dict).set(name, x);
-		props.pop();
+		_props.pop();
 		break;
 	}
 	default: break;
@@ -595,9 +641,9 @@ void XdlParser::put(const Var& x)
 
 XdlWriter::XdlWriter()
 {
-	pretty = false;
-	json = false;
-	out.resize(512);
+	_pretty = false;
+	_json = false;
+	_out.resize(512);
 }
 
 void XdlEncoder::_encode(const Var& v)
@@ -626,13 +672,13 @@ void XdlEncoder::_encode(const Var& v)
 		begin_array();
 		int n = v.length();
 		const Var& v0 = n>0? v[0] : v;
-		bool multi = (pretty && (n > 10 || (n>0  && (v0.is(Var::ARRAY) || v0.is(Var::DIC)))));
+		bool multi = (_pretty && (n > 10 || (n>0  && (v0.is(Var::ARRAY) || v0.is(Var::DIC)))));
 		bool big = n>0 && (v0.is(Var::ARRAY) || v0.is(Var::DIC));
 		if(multi)
 		{
-			out += '\n';
-			indent = String(INDENT_CHAR, ++level);
-			out += indent;
+			_out += '\n';
+			_indent = String(INDENT_CHAR, ++_level);
+			_out += _indent;
 			//linestart = out.length;
 		}
 		for(int i=0; i<v.length(); i++)
@@ -640,9 +686,9 @@ void XdlEncoder::_encode(const Var& v)
 			if(i>0) {
 				if(multi) {
 					if(big || (i%16)==0) {
-						if(json) out += ',';
-						out += '\n';
-						out += indent;
+						if(_json) _out += ',';
+						_out += '\n';
+						_out += _indent;
 					}
 					else put_separator();
 				}
@@ -652,9 +698,9 @@ void XdlEncoder::_encode(const Var& v)
 			_encode(v[i]);
 		}
 		if(multi) {
-			out += '\n';
-			indent = String(INDENT_CHAR, --level);
-			out += indent;
+			_out += '\n';
+			_indent = String(INDENT_CHAR, --_level);
+			_out += _indent;
 		}
 		end_array();
 		//if(multi) out += '\n';
@@ -666,60 +712,60 @@ void XdlEncoder::_encode(const Var& v)
 			begin_object(v[ASL_XDLCLASS].toString());
 		else
 			begin_object("");
-		int k = (hasclass && json)?1:0;
-		indent = String(INDENT_CHAR, ++level);
+		int k = (hasclass && _json)?1:0;
+		_indent = String(INDENT_CHAR, ++_level);
 		foreach2(String& name, Var& value, v)
 		{
 			if(!value.is(Var::NONE) && name!=ASL_XDLCLASS)
 			{
-				if(pretty) {
-					if(json && k++!=0) out += ',';
-					out += '\n';
-					out += indent;
+				if(_pretty) {
+					if(_json && k++!=0) _out += ',';
+					_out += '\n';
+					_out += _indent;
 				}
 				else if(k++>0) put_separator();
 				new_property(name);
 				_encode(value);
 			}
 		}
-		if(pretty) {
-			out += '\n';
-			indent = String(INDENT_CHAR, --level);
-			out += indent;
+		if(_pretty) {
+			_out += '\n';
+			_indent = String(INDENT_CHAR, --_level);
+			_out += _indent;
 		}
 		end_object();
 		//if(pretty) out += '\n';
 		}
 		break;
 	case Var::NUL:
-		out += "null";
+		_out += "null";
 		break;
 	case Var::NONE:
-		out += "null";
+		_out += "null";
 		break;
 	}
 }
 
 void XdlWriter::put_separator()
 {
-	out += ',';
+	_out += ',';
 }
 
 void XdlWriter::reset()
 {
-	out = "";
+	_out = "";
 }
 
 void XdlWriter::new_number(int x)
 {
-	int n = out.length();
-	out.resize(n+11);
-	out.fix(n + myitoa(x, &out[n]));
+	int n = _out.length();
+	_out.resize(n+11);
+	_out.fix(n + myitoa(x, &_out[n]));
 }
 
 void XdlWriter::new_number(double x)
 {
-	int n = out.length();
+	int n = _out.length();
 #if defined(_MSC_VER) && _MSC_VER < 1800
 	if (!_finite(x))
 #else
@@ -727,17 +773,17 @@ void XdlWriter::new_number(double x)
 #endif
 	{
 		if (x != x)
-			out += "null";
+			_out += "null";
 		else
-			out += (x < 0)? "-1e400" : "1e400";
+			_out += (x < 0)? "-1e400" : "1e400";
 		return;
 	}
-	out.resize(n+26);
-	out.fix(n + sprintf(&out[n], DOUBLE_F, x));
+	_out.resize(n+26);
+	_out.fix(n + sprintf(&_out[n], DOUBLE_F, x));
 
 	// Fix decimal comma of some locales
 #ifndef ASL_NO_FIX_DOT
-	char* p = &out[n];
+	char* p = &_out[n];
 	while (*p)
 	{
 		if (*p == ',') {
@@ -751,7 +797,7 @@ void XdlWriter::new_number(double x)
 
 void XdlWriter::new_number(float x)
 {
-	int n = out.length();
+	int n = _out.length();
 #if defined(_MSC_VER) && _MSC_VER < 1800
 	if (!_finite(x))
 #else
@@ -759,17 +805,17 @@ void XdlWriter::new_number(float x)
 #endif
 	{
 		if (x != x)
-			out += "null";
+			_out += "null";
 		else
-			out += (x < 0) ? "-1e400" : "1e400";
+			_out += (x < 0) ? "-1e400" : "1e400";
 		return;
 	}
-	out.resize(n + 16);
-	out.fix(n + sprintf(&out[n], FLOAT_F, x));
+	_out.resize(n + 16);
+	_out.fix(n + sprintf(&_out[n], FLOAT_F, x));
 
 	// Fix decimal comma of some locales
 #ifndef ASL_NO_FIX_DOT
-	char* p = &out[n];
+	char* p = &_out[n];
 	while (*p)
 	{
 		if (*p == ',') {
@@ -783,83 +829,87 @@ void XdlWriter::new_number(float x)
 
 void XdlWriter::new_string(const char* x)
 {
-	out += '\"';
+	_out += '\"';
 	const char* p = x;
 	while(char c = *p++) // optimizable: not appending chars directly
 	{
 		if(c=='\\')
-			out += "\\\\";
+			_out += "\\\\";
 		else if (c == '\"')
-			out += "\\\"";
+			_out += "\\\"";
 		else if (c == '\n')
-			out += "\\n";
+			_out += "\\n";
 		else if (c == '\r')
-			out += "\\r";
+			_out += "\\r";
+		else if (c == '\t')
+			_out += "\\t";
+		else if (c == '\f')
+			_out += "\\f";
 		else
-			out += c;
+			_out += c;
 	}
-	out += '\"';
+	_out += '\"';
 }
 
 
 void XdlWriter::new_bool(bool x)
 {
-	if(json)
-		out += (x)?"true":"false";
+	if(_json)
+		_out += (x)?"true":"false";
 	else
-		out += (x)?"Y":"N";
+		_out += (x)?"Y":"N";
 }
 
 void XdlWriter::begin_array()
 {
-	out += '[';
+	_out += '[';
 }
 
 void XdlWriter::end_array()
 {
-	out += ']';
+	_out += ']';
 }
 
 void XdlWriter::begin_object(const char* _class)
 {
-	if(!json)
-		out += _class;
-	out += '{';
-	if(json && _class[0] != '\0') {
-		out += "\"" ASL_XDLCLASS "\":\"";
-		out += _class;
-		out +="\"";
+	if(!_json)
+		_out += _class;
+	_out += '{';
+	if(_json && _class[0] != '\0') {
+		_out += "\"" ASL_XDLCLASS "\":\"";
+		_out += _class;
+		_out +="\"";
 	}
 }
 
 void XdlWriter::end_object()
 {
-	out += '}';
+	_out += '}';
 }
 
 void XdlWriter::new_property(const char* name)
 {
-	if(json) {
-		out += '\"';
-		out += name;
-		out += "\":";
+	if(_json) {
+		_out += '\"';
+		_out += name;
+		_out += "\":";
 	}
 	else {
-		out += name;
-		out += '=';
+		_out += name;
+		_out += '=';
 	}
 }
 
 void XdlWriter::new_property(const String& name)
 {
-	if(json) {
-		out += '\"';
-		out += name;
-		out += "\":";
+	if(_json) {
+		_out += '\"';
+		_out += name;
+		_out += "\":";
 	}
 	else {
-		out += name;
-		out += '=';
+		_out += name;
+		_out += '=';
 	}
 }
 
