@@ -56,12 +56,6 @@ int num_retries = config("network/num_retries", 5);
 
 class ASL_API IniFile
 {
-	String _currentTitle;
-	String _filename;
-	Array<String> _lines;
-	bool _modified;
-	bool _shouldwrite;
-	bool _ok;
 public:
 	class Section
 	{
@@ -75,7 +69,6 @@ public:
 		const HashDic<String>& vars() const {return _vars;}
 		friend class IniFile;
 	};
-	Dic<Section> sections;
 
 	/**
 	Opens an INI file from the given file
@@ -114,6 +107,8 @@ public:
 	*/
 	Section& section(const String& name);
 
+	const Dic<Section>& sections() const { return _sections; }
+
 	/**
 	Returns true if the file contains a key named `name`. If the name is like
 	`section/name` then function tests a variable `name` in section `section`.
@@ -130,6 +125,16 @@ public:
 	with `arraysize()`.
 	*/
 	String array(const String& name, int index);
+
+protected:
+	Dic<Section> _sections;
+	String _currentTitle;
+	String _filename;
+	Array<String> _lines;
+	bool _modified;
+	bool _shouldwrite;
+	bool _ok;
 };
+
 }
 #endif

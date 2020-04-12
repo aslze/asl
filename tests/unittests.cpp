@@ -66,8 +66,8 @@ ASL_TEST(IniFile)
 	}
 	{
 		IniFile file("config.ini");
-		ASL_ASSERT(file.sections.length() == 4);
-		ASL_ASSERT(file.sections["sec1"].vars().length() == 2);
+		ASL_ASSERT(file.sections().length() == 4);
+		ASL_ASSERT(file.sections()["sec1"].vars().length() == 2);
 		ASL_ASSERT(file["global"] == "global value");
 		ASL_ASSERT(file["sec1/field1"] == "value1");
 		ASL_ASSERT(file["sec1/field2"] == "value2");
@@ -375,7 +375,7 @@ ASL_TEST(String)
 ASL_TEST(XDL)
 {
 	String a = "A/*...*/{x=3.5, //...\ny=\"s\", z=[Y, N]}";
-	Var b = decodeXDL(a);
+	Var b = Xdl::decode(a);
 	ASL_ASSERT(b.is("A"));
 	ASL_ASSERT(b["x"].is(Var::NUMBER) && fabs((double)b["x"] - 3.5) < .0000001);
 	ASL_ASSERT(b["y"]=="s");
@@ -383,26 +383,26 @@ ASL_TEST(XDL)
 	ASL_ASSERT(b["z"].length() == 2);
 	ASL_ASSERT(b["z"][0] == true);
 	ASL_ASSERT(b["z"][1] == false);
-	String c = encodeXDL(b);
+	String c = Xdl::encode(b);
 	ASL_ASSERT(c == "A{x=3.5,y=\"s\",z=[Y,N]}");
 	String d = "A/*...*/{x=3.5, //...\ny=\"s\", z=[Y, N)}";
-	Var e = decodeXDL(d);
+	Var e = Xdl::decode(d);
 	ASL_ASSERT(!e.ok());
-	Var f = decodeJSON("{\"x\":null,\"y\":3}");
+	Var f = Json::decode("{\"x\":null,\"y\":3}");
 	ASL_ASSERT(f.ok());
 	ASL_ASSERT(f["y"] == 3);
 	ASL_ASSERT(f["x"].is(Var::NUL));
 
-	ASL_ASSERT(decodeXDL("9123456789") == 9123456789.0);
+	ASL_ASSERT(Xdl::decode("9123456789") == 9123456789.0);
 
 	ASL_ASSERT(Xdl::encode("a\nb") == "\"a\\nb\"");
 
 	ASL_ASSERT(Json::encode( (Var(), 1, Var::NUL, false) ) == "[1,null,false]");
 
-	ASL_ASSERT(decodeXDL("1.25e08").ok());
-	ASL_ASSERT(decodeXDL("1.25e+08").ok());
-	ASL_ASSERT(fabs( (double)decodeXDL("1.25e8") - 1.25e8) < 1e-6);
-	ASL_ASSERT(fabs( (double)decodeXDL("1.25e+8") - 1.25e8) < 1e-6);
+	ASL_ASSERT(Xdl::decode("1.25e08").ok());
+	ASL_ASSERT(Xdl::decode("1.25e+08").ok());
+	ASL_ASSERT(fabs( (double)Xdl::decode("1.25e8") - 1.25e8) < 1e-6);
+	ASL_ASSERT(fabs( (double)Xdl::decode("1.25e+8") - 1.25e8) < 1e-6);
 
 	ASL_ASSERT(Json::encode(nan()) == "null");
 }

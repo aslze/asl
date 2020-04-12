@@ -33,7 +33,7 @@ IniFile::IniFile(const String& name, bool shouldwrite)
 				continue;
 			String name = line.substring(1, end);
 			_currentTitle = name;
-			sections[_currentTitle] = Section(_currentTitle);
+			_sections[_currentTitle] = Section(_currentTitle);
 		}
 		else if(firstchar!='#' && firstchar>32 && firstchar!=';')
 		{
@@ -45,7 +45,7 @@ IniFile::IniFile(const String& name, bool shouldwrite)
 			for(char* p=key; *p; p++)
 				if(*p == '/')
 					*p = '\\';
-			sections[_currentTitle][key] = value;
+			_sections[_currentTitle][key] = value;
 		}
 	}
 	_currentTitle = "-";
@@ -59,8 +59,8 @@ IniFile::IniFile(const String& name, bool shouldwrite)
 IniFile::Section& IniFile::section(const String& name)
 {
 	_currentTitle = name;
-	sections[name]._title = name;
-	return sections[name];
+	_sections[name]._title = name;
+	return _sections[name];
 }
 
 String& IniFile::operator[](const String& name)
@@ -68,13 +68,13 @@ String& IniFile::operator[](const String& name)
 	int slash = name.indexOf('/');
 	if(slash < 0)
 	{
-		sections[_currentTitle]._title= _currentTitle;
-		return sections[_currentTitle][name];
+		_sections[_currentTitle]._title= _currentTitle;
+		return _sections[_currentTitle][name];
 	}
 	else
 	{
 		String sec = name.substring(0, slash);
-		Section& section = sections[sec];
+		Section& section = _sections[sec];
 		section._title = sec;
 		return section[name.substring(slash+1)];
 	}
@@ -90,22 +90,22 @@ bool IniFile::has(const String& name) const
 	int slash = name.indexOf('/');
 	if(slash < 0)
 	{
-		return sections[_currentTitle]._vars.has(name);
+		return _sections[_currentTitle]._vars.has(name);
 	}
 	else
 	{
 		String sec = name.substring(0, slash);
-		if(!sections.has(sec))
+		if(!_sections.has(sec))
 			return false;
-		return sections[sec]._vars.has(name.substring(slash+1));
+		return _sections[sec]._vars.has(name.substring(slash+1));
 	}
 }
 
 void IniFile::write(const String& fname)
 {
-	Dic<Section> newsec = sections.clone();
+	Dic<Section> newsec = _sections.clone();
 
-	Section* section = &sections["-"];
+	Section* section = &_sections["-"];
 
 	foreach(String& line, _lines)
 	{
@@ -116,7 +116,7 @@ void IniFile::write(const String& fname)
 				continue;
 			String name = line.substring(1, end);
 			_currentTitle = name;
-			section = &sections[name];
+			section = &_sections[name];
 		}
 		else if(line[0]!='#' && line[0]>31 && line[0]!=';')
 		{
@@ -209,14 +209,14 @@ IniFile::~IniFile()
 int IniFile::arraysize(const String& name)
 {
 	section(name);
-	return sections[_currentTitle]["size"];
+	return _sections[_currentTitle]["size"];
 }
 
 String IniFile::array(const String& name, int index)
 {
 	String key = index+1;
 	key << '\\' << name;
-	return sections[_currentTitle][key];
+	return _sections[_currentTitle][key];
 }
 
 }
