@@ -110,27 +110,28 @@ unsigned Random::get()
 
 Random::Random(bool autoseed, bool fast)
 {
-	for (int i = 0; i < _size; i++)
-		_state[i] = (ULong)1921312345 << i;
-
-	if (autoseed)
+	if(!autoseed)
+		seed(0);
+	else
 		init(fast);
 }
 
 void Random::seed(ULong s)
 {
+	if (s == 0)
+		s = 0x7a12345fb678ce93ull;
 	for (int i = 0; i < _size; i++)
-		_state[i] = (ULong)s ^ ((ULong)s << (i + 1));
+		_state[i] = s ^ (s << (i + 2));
 }
 
 void Random::init(bool fast)
 {
 	if (fast)
 	{
-		ULong n = (ULong)inow();
-		for (int i=0; i < _size; i++)
-			_state[i] = n ^ (777ull * n << i) ^ (3333333333ull * n << (i+1));
-		get();
+		ULong s = (ULong)inow();
+		for (int i = 0; i < sizeof(s)/2; i++)
+			s ^= ((s & (255ull << i)) ^ (255ull << i)) << 8 * (sizeof(s) - i - i - 1);
+		seed(s);
 	}
 	else
 		getBytes(_state, sizeof(_state));

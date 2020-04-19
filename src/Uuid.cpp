@@ -27,13 +27,9 @@ UuidGenerator::UuidGenerator() : _random(true, false)
 Uuid UuidGenerator::generate()
 {
 	Uuid u;
-	_random.get();
 	for(int i=0; i<16; i++)
-	{
-		int r = _random.get();
-		r >>= (r & 0xf);
-		u[i] = (byte)(r & 0xff);
-	}
+		u[i] = (byte)(_random.get() & 0xff);
+
 	u[6] = (u[6] & ~0xf0) | 0x40; // version 4
 	u[8] = (u[8] & ~0xc0) | 0x80; // variant 1
 	return u;
