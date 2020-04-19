@@ -39,7 +39,7 @@ class Vec3_
 	template<class T2>
 	Vec3_(const Vec3_<T2>& v) : x((T)v.x), y((T)v.y), z((T)v.z) {}
 	Vec3_(const T* v): x(v[0]), y(v[1]), z(v[2]) {}
-	operator const float*() const {return (float*)this;}
+	operator const T*() const {return (T*)this;}
 	/** Returns the *x* and *y* components as a Vec2 */
 	Vec2_<T> xy() const {return Vec2_<T>(x, y);}
 	/** Returns the cartesian coordinates vector corresponding to this homogenous coordinates */
