@@ -188,21 +188,27 @@ namespace asl {
 
 	void Process::run(const String& command, const Array<String>& args)
 	{
-		if(!_ready)
+		if (!_ready)
 			return;
 
-		_hasExited=false;
+		_hasExited = false;
 		STARTUPINFOW startInfo;
 		ZeroMemory(&startInfo, sizeof(startInfo));
 		startInfo.cb = sizeof(startInfo);
 		startInfo.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
-		startInfo.wShowWindow = SW_HIDE; // SW_SHOWNORMAL;
+		startInfo.wShowWindow = SW_HIDE;
 		startInfo.hStdInput = !_detached ? _pipe_in[0] : 0;
 		startInfo.hStdOutput = !_detached ? _pipe_out[1] : 0;
 		startInfo.hStdError = !_detached ? _pipe_err[1] : 0;
 
+		String cmd = command;
+		if (command.endsWith('*')) {
+			startInfo.wShowWindow = SW_SHOWNORMAL;
+			cmd = cmd.substr(0, cmd.length() - 1);
+		}
+	
 		String commandline;
-		commandline << '"' << command << "\" " << joinCmdArgs(args);
+		commandline << '"' << cmd << "\" " << joinCmdArgs(args);
 
 		PROCESS_INFORMATION procInfo;
 		_ok = CreateProcessW(NULL,

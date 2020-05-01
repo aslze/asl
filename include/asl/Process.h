@@ -38,6 +38,9 @@ if( p.success() )
 	text = p.output();
 ~~~
 
+In Windows you can append a '*' to program names (e.g. "notepad.exe*") to show their window if they are Win32 GUI apps. Or to
+show their console. Otherwise they run in the background with no window.
+
 * **Warning**: If a process is run with the run() method and we will not read its output, the process can hang if it writes
 a lot to its output stream (because it will fill a buffer that no one will free). To avoid that, call detach() before calling
 run().
@@ -180,7 +183,8 @@ public:
 	*/
 	static void setEnv(const String& var, const String& value);
 	/**
-	Executes `command` and returns the process' output (written to *stdout*) as a `String`
+	Executes `command` and returns the process' output (written to *stdout*) as a `String`. Add a '*' at the end
+	of the command name to show the program's window in case of Win32 apps.
 	*/
 	static Process execute(const String& command, const Array<String>& args = Array<String>());
 
