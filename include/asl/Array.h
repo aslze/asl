@@ -520,6 +520,17 @@ public:
 		return b;
 	}
 	/**
+	Returns an array of another type formed by applying a function to each item
+	*/
+	template<class K, class F>
+	Array<K> map_(F f) const
+	{
+		Array<K> b(length());
+		for (int i = 0; i < length(); i++)
+			b[i] = f(_a[i]);
+		return b;
+	}
+	/**
 	Removes items that meet a predicate
 	*/
 	template<class F>
