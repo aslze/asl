@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2019 aslze
+// Copyright(c) 1999-2020 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #if !defined(ASL_TLSSOCKET_H) && defined(ASL_TLS)

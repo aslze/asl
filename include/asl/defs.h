@@ -1,5 +1,5 @@
 // ASL - All-purpose Simple Library
-// Copyright(c) 1999-2019 aslze
+// Copyright(c) 1999-2020 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_DEFS_H

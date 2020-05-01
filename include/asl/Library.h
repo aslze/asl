@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2019 aslze
+// Copyright(c) 1999-2020 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_LIB_H
@@ -114,7 +114,7 @@ class Library
 	/**
 	Creates and opens a dynamic library
 	*/
-	Library(const char* name)
+	Library(const String& name)
 	{
 		_lib=0;
 		open(name);
