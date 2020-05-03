@@ -37,6 +37,10 @@ struct IUnknown; // Workaround for "combaseapi.h(229): error C2187: syntax error
 #define AF_TYPE AF_INET
 #endif
 
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
+
 static void verbose_print(...) {}
 //#define verbose_print printf
 

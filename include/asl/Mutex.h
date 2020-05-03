@@ -306,7 +306,7 @@ public:
 	}
 	bool wait(double timeout)
 	{
-		return dispatch_semaphore_wait(_sem, dispatch_time(DISPATCH_TIME_NOW, dispatch_time_t(timeout * 1e9)) == 0;
+		return dispatch_semaphore_wait(_sem, dispatch_time(DISPATCH_TIME_NOW, dispatch_time_t(timeout * 1e9))) == 0;
 	}
 	bool trywait()
 	{
