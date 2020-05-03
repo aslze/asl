@@ -1,0 +1,27 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ master, test-ci ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: configure
+      run: |
+        cd ${{ github.workspace }}
+        mkdir build
+        cd build
+        cmake ..
+    - name: make
+      run: |
+       cd build
+       cmake --build .
+    - name: test
+      run: cmake -- test
