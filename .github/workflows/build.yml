@@ -18,10 +18,10 @@ jobs:
         cd ${{ github.workspace }}
         mkdir build
         cd build
-        cmake ..
+        cmake -DASL_TESTS=ON -DASL_BUILD_SHARED=OFF ..
     - name: make
       run: |
-       cd build
-       cmake --build .
+        cd build
+        cmake --build .
     - name: test
-      run: cmake -- test
+      run: ctest
