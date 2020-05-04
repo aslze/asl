@@ -216,9 +216,14 @@ ASL_TEST(Array)
 	ASL_ASSERT(!a);
 
 	Array<String> names;
-	names << "Alvaro" << "Segura";
+	names << "Homer" << "Simpson";
 
-	ASL_ASSERT( names.join(",") == "Alvaro,Segura" );
+	ASL_ASSERT( names.join(",") == "Homer,Simpson" );
+
+#ifdef ASL_HAVE_LAMBDA
+	names.sortBy([](const String& s) { return s.substring(1); }); // sort by the strings skipping first char
+	ASL_ASSERT(names.join(",") == "Simpson,Homer");
+#endif
 
 #ifdef ASL_HAVE_INITLIST
 	Array<int> c = { 1, 2 };

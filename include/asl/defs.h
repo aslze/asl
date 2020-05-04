@@ -381,7 +381,7 @@ struct IsLess {
 template<class T, class F>
 struct IsMore {
 	IsMore(const F& f) : f(f) {}
-	bool operator()(const T& a, const T& b) const { return f(a) > f(b); }
+	bool operator()(const T& a, const T& b) const { return f(b) < f(a); }
 	F f;
 };
 
