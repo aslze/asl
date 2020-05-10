@@ -388,9 +388,11 @@ public:
 	}
 };
 
+template<class T>
+class Locked;
 
 /**
-%Atomic version of another type.
+%Atomic version of another type. (still somewhat experimental)
 
 ~~~
 Atomic<double> value = 0;
@@ -411,6 +413,13 @@ int appendAtomic(Atomic<Array<int>>& list, double number)
 	return list->length();
 }
 ~~~
+
+Alternatively the operator () returns a locked version of the object, e.g. to be used to call member functions.
+
+~~~
+list()->sort();
+~~~
+
 \ingroup Threading
 */
 
@@ -481,17 +490,28 @@ public:
 	}
 
 	/**
+	Returns a locked wrapper for short time use
+	*/
+	Locked<T> operator()()
+	{
+		return Locked<T>(*this);
+	}
+
+	const Locked<T> operator()() const
+	{
+		return Locked<T>(*this);
+	}
+
+	/**
 	Allows calling member functions of the internal object
 	*/
 	const T* operator->() const
 	{
-		Lock _(_mutex);
 		return (const T*)&_x;
 	}
 
 	T* operator->()
 	{
-		Lock _(_mutex);
 		return (T*)&_x;
 	}
 
@@ -607,11 +627,34 @@ public:
 		return *this;
 	}
 
+	template<class K>
+	Atomic& operator<<(const K& x)
+	{
+		Lock _(_mutex);
+		_x << x;
+		return *this;
+	}
+
+
 private:
 	T _x;
 	mutable Mutex _mutex;
 };
 
+template<class T>
+class Locked
+{
+	Atomic<T>& x;
+public:
+	Locked(Atomic<T>& x) : x(x) { x.mutex().lock(); }
+	~Locked() { x.mutex().unlock(); }
+	T* operator->() { return (T*)&*x; }
+	const T* operator->() const { return (const T*)&*x; }
+	T& operator*() { return *x; }
+	const T& operator*() const { return *x; }
+	operator T& () { return *x; }
+	operator const T& () const { return *x; }
+};
 
 }
 
