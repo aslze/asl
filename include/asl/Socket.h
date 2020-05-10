@@ -241,13 +241,13 @@ public:
 	Waits until there is incoming data in the socket or it is disconnected for a maximum time, and
 	returns true if some of that happened before timeout
 	*/
-	bool waitInput(double timeout = 60) { return _()->waitInput(timeout); }
+	bool waitInput(double timeout = 2) { return _()->waitInput(timeout); }
 
 	/**
 	Waits until there is incoming data in the socket or it is disconnected for a maximum time, and
 	returns true only if there is data to read (false may mean no data or disconnection)
 	*/
-	bool waitData(double timeout = 60) { return waitInput(timeout) && !disconnected(); }
+	bool waitData(double timeout = 2) { return waitInput(timeout) && !disconnected(); }
 	/**
 	Returns true if there was some communication error in this socket
 	*/
