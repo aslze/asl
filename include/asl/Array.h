@@ -17,6 +17,7 @@ class Array;
 
 #include <asl/defs.h>
 #include "foreach1.h"
+#include "cast.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -125,6 +126,9 @@ public:
 	}
 #endif
 	~Array() {if(_a && --d().rc==0) free();}
+
+	ASL_DEF_AUTOCAST(Array<T>)
+
 	struct Enumerator
 	{
 		Array<T>& a;

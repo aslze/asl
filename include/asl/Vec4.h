@@ -6,6 +6,7 @@
 
 #include <asl/defs.h>
 #include <asl/Vec3.h>
+#include <asl/cast.h>
 #include <math.h>
 
 namespace asl {
@@ -30,6 +31,7 @@ class Vec4_
 	Vec4_(const Vec3& v, T w) : x(v.x), y(v.y), z(v.z), w(w) {}
 	Vec4_(const Vec4_& v): x(v.x), y(v.y), z(v.z), w(v.w) {}
 	Vec4_(const T* v) : x(v[0]), y(v[1]), z(v[2]), w(v[3]) {}
+	ASL_DEF_AUTOCAST(Vec4_<T>)
 	operator const T*() const {return &x;}
 	/** Returns the *x*, *y*, *z* components as a Vec3 */
 	Vec3_<T> xyz() const {return Vec3_<T>(x, y, z);}

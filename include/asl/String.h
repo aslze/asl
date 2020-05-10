@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <wchar.h>
 #include <asl/Array.h>
+#include <asl/cast.h>
 
 #if defined(MINGW) || !defined __GNUC__
 #define ASL_LONG_FMT "I64i"
@@ -350,7 +351,9 @@ public:
 	operator const wchar_t*() const;
 
 	operator wchar_t*() const {return (wchar_t*)(const wchar_t*)*this;}
-	
+
+	ASL_DEF_AUTOCAST(String)
+
 	/**
 	Returns a const pointer to the beginning of the character data (suitable for functions
 	for functions requiring C-style strings)
@@ -408,12 +411,8 @@ public:
 
 	template<class T>
 	String& operator<<(const T& x) {*this += String(x); return *this;}
-
-	//template<>
 	String& operator<<(const String& x) {*this += x; return *this;}
-
 	String& operator<<(char x) {*this += x; return *this;}
-
 	String& operator<<(const char* x) {*this += x; return *this;}
 
 	bool operator==(const String& s) const
@@ -439,7 +438,8 @@ public:
 	const char& operator[](int i) const {return str()[i];}
 	int compare(const String& s) const {return strcmp(str(), s.str());}
 	int compare(const char* s) const {return strcmp(str(), s);}
-	bool equalsNocase(const String& s) const {return toUpperCase() == s.toUpperCase();}
+	
+	bool equalsNocase(const String& s) const {return toUpperCase().operator==(s.toUpperCase());}
 	/**
 	Returns the first index where character `c` appears in this string, optionally starting search at position
 	`i0`, or -1 if it is not found.
@@ -527,6 +527,7 @@ public:
 	Returns an uppercase version of this string
 	*/
 	String toUpperCase() const;
+
 	/**
 	Returns a list of strings obtained by cutting this string by whitespace.
 
@@ -535,6 +536,7 @@ public:
 	~~~
 	*/
 	Array<String> split() const;
+	
 	template <class T>
 	Array<T> split_() const
 	{
@@ -588,7 +590,7 @@ public:
 	Replaces all occurences of character `a` with `b` *in place*
 	*/
 	String& replaceme(char a, char b);
-
+	
 	struct ASL_API Enumerator
 	{
 		const char* u;
@@ -679,7 +681,6 @@ GetCurrentDirectoryW(200, SafeString(name, 200));
 That will expand the internal space of `name` to 200 characters, then call that Unicode Win32 function, then
 convert the resulting data back to UTF-8, and the internal length will be set to the real string length.
 */
-
 class SafeString
 {
 	String& _s;
@@ -706,7 +707,7 @@ String ASL_API localToString(const String& a);
 }
 
 #ifdef QSTRING_H
-#include <asl/qt_interop.h>
+#include <asl/qt.h>
 #endif
 
 #endif

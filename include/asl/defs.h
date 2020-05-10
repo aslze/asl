@@ -66,7 +66,11 @@ namespace asl {
 #endif
 
 #ifndef __has_feature
- #define __has_feature(x) 0
+#define __has_feature(x) 0
+#endif
+
+#if (defined _MSC_VER && _MSC_VER < 1800) || (defined __GNUC__ && ASL_C_VER < 40400 && !defined __clang__) || (defined __clang__ && __clang_major__ < 3)
+#define ASL_NO_CAST
 #endif
 
 #if __has_feature(cxx_auto_type) || (defined( _MSC_VER ) && _MSC_VER >= 1600) || (defined(__GNUC__) && ASL_C_VER >= 40400)

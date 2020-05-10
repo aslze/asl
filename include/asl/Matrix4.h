@@ -6,6 +6,7 @@
 
 #include <asl/Vec3.h>
 #include <asl/Vec4.h>
+#include <asl/cast.h>
 
 namespace asl {
 
@@ -89,6 +90,8 @@ class Matrix4_
 		a[2][0] = m[2]; a[2][1] = m[6]; a[2][2] = m[10]; a[2][3] = m[14];
 		a[3][0] = m[3]; a[3][1] = m[7]; a[3][2] = m[11]; a[3][3] = m[15];
 	}
+
+	ASL_DEF_AUTOCAST(Matrix4_<T>)
 
 	/**
 	Returns this matrix transposed

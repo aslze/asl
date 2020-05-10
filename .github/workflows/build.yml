@@ -2,7 +2,7 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ master, test-ci ]
+    branches: [ master, test-ci, feature_cast ]
   pull_request:
     branches: [ master ]
 
