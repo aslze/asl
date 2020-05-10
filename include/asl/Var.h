@@ -296,6 +296,9 @@ class ASL_API Var
 	/** Returns this var if it is defined or `v` otherwise */
 	const Var& operator|(const Var& v) const { return is(NONE) ? v : *this; }
 
+	/**
+	Assigns the value of this object's key property if it exists to x
+	*/
 	template<class T>
 	void read(const String& key, T& x) const { if (has(key)) x = (*this)[key]; }
 	/**
