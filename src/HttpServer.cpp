@@ -47,10 +47,11 @@ void HttpServer::addMimeType(const String& ext, const String& type)
 
 void HttpServer::serve(Socket client)
 {
-	while(client.waitInput())
+	double t1 = now();
+	while(!client.disconnected() && now() - t1 < 10.0 && !_requestStop)
 	{
-		if(client.disconnected())
-			break;
+		if (!client.waitData(5))
+			continue;
 
 		HttpRequest request(client);
 		if (client.error())

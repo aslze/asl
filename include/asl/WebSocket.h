@@ -90,9 +90,16 @@ public:
 	*/
 	void send(const Var& v);
 	/**
-	Waits for incoming data for a maximum time (60 seconds by default)
+	Waits for incoming data for a maximum time or a disconnection, returns true if something
+	happened before timeout
 	*/
-	bool wait(double timeout = 60);
+	bool wait(double timeout = 5);
+
+	/**
+	Waits for incoming data for a maximum time or a disconnection, returns true only if there is
+	incoming data
+	*/
+	bool waitData(double timeout = 5) { return wait() && !closed(); }
 
 	/** Checks if there is some input available */
 	bool hasInput();

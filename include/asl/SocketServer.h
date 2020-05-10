@@ -9,6 +9,7 @@
 namespace asl {
 	
 struct SockServerThread;
+struct SockClientThread;
 
 /**
 This is a reusable TCP socket server that listens to incoming connections and answers them concurrently (default) or sequentially.
@@ -44,12 +45,14 @@ server.useCert(cert, key);
 
 class ASL_API SocketServer
 {
+	friend struct SockClientThread;;
 	SockServerThread* _thread;
 protected:
 	Sockets _sockets;
 	bool _requestStop;
 	bool _sequential;
 	bool _running;
+	AtomicCount _numClients;
 public:
 	SocketServer();
 	~SocketServer();
@@ -83,16 +86,19 @@ public:
 	virtual void service(Socket client) {}
 	void startLoop();
 	/**
-	Requests the server to stop receiving connections.
+	Requests the server to stop receiving connections, and waits for all clients to exit if sync is true.
 	*/
-	void stop();
+	void stop(bool sync = false);
 	/**
 	Sets the mode of operation: sequential (connections will be handled in sequence) or concurrent (
 	connections will be handled in parallel by starting a new thread each time); this must be called before calling
 	`start()` to start the server.
 	*/
 	void setSequential(bool on) { _sequential = on; }
-	bool running() const { return _running; }
+	/**
+	Returns true if this server started and has not yet stopped or still has clients running
+	*/
+	bool running() const { return _running || _numClients != 0; }
 };
 }
 
