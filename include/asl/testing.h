@@ -20,11 +20,21 @@ int addTest(const char* name, void (*func)());
 Runs the test named `name`.
 */
 bool runTest(const char* name);
+/**
+Runs all tests and returns true if all succeded; prints results to console or appends them to `testResult` on Android
+*/
+bool runAllTests();
 extern asl::String testResult;
 struct TestInfo { const char* name; void (*func)(); };
 extern TestInfo tests[255];
 extern int numTests;
 extern bool testFailed;
+
+#ifndef __ANDROID__
+#define ASL_PRINT_TEST_RESULT(name, result)
+#else
+#define ASL_PRINT_TEST_RESULT(name, result) asl::testResult << name << ": " << (result ? "OK\n" : "FAILED\n");
+#endif
 
 /** 
 Add support for testing in this executable (use only once in the sources for one executable).
@@ -60,8 +70,10 @@ bool runTest(const char* name)\
 bool runAllTests()\
 {\
 	for (int i = 0; i<asl::numTests; i++) { \
-		printf("Test %s:\n", asl::tests[i].name); \
-		printf("----------------> %s\n\n", asl::runTest(asl::tests[i].name)? "OK" : "FAILED"); \
+		const char* name = asl::tests[i].name;\
+		bool result = asl::runTest(name); \
+		printf("Test %s:\n----------------> %s\n\n", name, result? "OK" : "FAILED"); \
+		ASL_PRINT_TEST_RESULT(name, result); \
 	}\
 	return !asl::testsFailed;\
 }\
