@@ -392,7 +392,7 @@ template<class T>
 class Locked;
 
 /**
-%Atomic version of another type. (still somewhat experimental)
+%Atomic version of another type.
 
 ~~~
 Atomic<double> value = 0;
@@ -401,23 +401,24 @@ value += 1.5;
 
 Variable `value` can be read or written from different threads without interfering.
 
-Basic operators of the underlying type are exposed (+=, -=, *=, /=, ==, ...). For other operations you can cast to
-the underlying type or use operator `~`. Or you can use operator `*` to get a reference to the internal variable
-(with no synchronization). In that case you can use the objet's mutex to protect access:
+Basic operators of the underlying type are exposed (++, +=, -=, *=, /=, ==, <<, ...). If the underlying type is a
+class you can call methods using opertor `->`, and those calls will be syncronized.
+
+~~~
+Aromic<Array<float>> numbers;
+numbers->sort();             // this is atomic
+~~~
+
+For other operations you can cast to the underlying type or use operator `~`. Or you can use operator `*` to get a
+reference to the internal variable (with no synchronization). In that case you can use the objet's mutex to protect access:
 
 ~~~
 int appendAtomic(Atomic<Array<int>>& list, double number)
 {
 	Lock _(list);
-	*list << number;
-	return list->length();
+	(*list) << number;        // can't use operator -> when explicitly locked!
+	return (*list).length();
 }
-~~~
-
-Alternatively the operator () returns a locked version of the object, e.g. to be used to call member functions.
-
-~~~
-list()->sort();
 ~~~
 
 \ingroup Threading
@@ -505,14 +506,14 @@ public:
 	/**
 	Allows calling member functions of the internal object
 	*/
-	const T* operator->() const
+	Locked<T> operator->()
 	{
-		return (const T*)&_x;
+		return Locked<T>(*this);
 	}
 
-	T* operator->()
+	const Locked<T> operator->() const
 	{
-		return (T*)&_x;
+		return Locked<T>(*this);
 	}
 
 	bool operator!()
@@ -632,6 +633,13 @@ public:
 	{
 		Lock _(_mutex);
 		_x << x;
+		return *this;
+	}
+	template<class K>
+	Atomic& operator>>(K& x)
+	{
+		Lock _(_mutex);
+		_x >> x;
 		return *this;
 	}
 

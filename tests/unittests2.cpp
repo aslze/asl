@@ -295,7 +295,6 @@ struct AThread : public Thread
 {
 	static AtomicCount n;
 	static const int N = 20000;
-public:
 	void run()
 	{
 		for (int i = 0; i < N; i++)
@@ -306,7 +305,23 @@ public:
 	}
 };
 
+struct BThread : public Thread
+{
+	static Atomic<double> n;
+	static const int N = 10000;
+	void run()
+	{
+		for (int i = 0; i < N; i++)
+			n += 2;
+
+		for (int i = 0; i < N; i++)
+			--n;
+	}
+};
+
 AtomicCount AThread::n = 0;
+
+Atomic<double> BThread::n = 0;
 
 ASL_TEST(AtomicCount)
 {
@@ -318,7 +333,18 @@ ASL_TEST(AtomicCount)
 	int n = AThread::n;
 	threads.join();
 	double t2 = now();
-	//printf("n = %i, t = %.3f (%i)s\n", (int)AThread::n, t2 - t1, n);
+	//printf("n = %i, t = %.3f (%i)s\n", (int)AThread::n, t2 - t1, (int)AThread::n);
 	ASL_ASSERT(AThread::n == 0);
+
+	t1 = now();
+	ThreadGroup<BThread> bthreads;
+	for (int i = 0; i < 50; i++)
+		bthreads << BThread();
+	bthreads.start();
+	double bn = BThread::n;
+	bthreads.join();
+	t2 = now();
+	//printf("n = %i, t = %.3f (%.0f)s\n", (int)BThread::n, t2 - t1, (double)BThread::n);
+	ASL_ASSERT(BThread::n == 50.0 * BThread::N);
 }
 
