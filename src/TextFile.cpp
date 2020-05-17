@@ -123,7 +123,7 @@ String TextFile::text()
 {
 	int n = (int)(size() & 0x7fffffff); // truncate
 	String text;
-	if(!open(_path)) {
+	if (!_file && !open(_path, READ)) {
 		return text;
 	}
 	byte head[8];
@@ -185,7 +185,7 @@ String TextFile::text()
 
 bool TextFile::append(const String& text)
 {
-	if(!open(_path, APPEND))
+	if (!_file && !open(_path, APPEND))
 		return false;
 	return fprintf(_file, "%s", *text) >= 0;
 }
