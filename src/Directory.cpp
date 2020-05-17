@@ -99,14 +99,12 @@ bool File::remove()
 }
 
 #ifdef _WIN32
-
-#if !defined(ASL_ANSI)
-#define UNICODE
 #undef WIN32_FIND_DATA
 #undef FindFirstFile
 #undef FindNextFile
 #undef CreateDirectory
 #undef SetCurrentDirectory
+#ifndef ASL_ANSI
 #define WIN32_FIND_DATA WIN32_FIND_DATAW
 #define FindFirstFile FindFirstFileW
 #define FindNextFile FindNextFileW
@@ -115,6 +113,11 @@ bool File::remove()
 #define STR_PREFIX(x) L##x
 #define strcmpX wcscmp
 #else
+#define WIN32_FIND_DATA WIN32_FIND_DATAA
+#define FindFirstFile FindFirstFileA
+#define FindNextFile FindNextFileA
+#define CreateDirectory CreateDirectoryA
+#define SetCurrentDirectory SetCurrentDirectoryA
 #define STR_PREFIX(x) x
 #define strcmpX strcmp
 #endif
