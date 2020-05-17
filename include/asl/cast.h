@@ -45,7 +45,7 @@ template <class T1, typename U = typename Castable<Class, T1>::is> \
 Class(const T1& x) { asl_construct_copy(this, to<Class>(x)); }
 
 #else
-#define ASL_DEF_CASTABLE(Class)
+#define ASL_DEF_AUTOCAST(Class)
 #endif
 
 
