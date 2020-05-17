@@ -392,7 +392,7 @@ template<class T>
 class Locked;
 
 /**
-%Atomic version of another type.
+%Atomic version of another type. This adds some space and overhead, use with care.
 
 ~~~
 Atomic<double> value = 0;
@@ -493,12 +493,12 @@ public:
 	/**
 	Returns a locked wrapper for short time use
 	*/
-	Locked<T> operator()()
+	Locked<T> locked()
 	{
 		return Locked<T>(*this);
 	}
 
-	const Locked<T> operator()() const
+	const Locked<T> locked() const
 	{
 		return Locked<T>(*this);
 	}
@@ -655,6 +655,7 @@ class Locked
 	Atomic<T>& x;
 public:
 	Locked(Atomic<T>& x) : x(x) { x.mutex().lock(); }
+	Locked(const Atomic<T>& x) : x((Atomic<T>&)x) { x.mutex().lock(); }
 	~Locked() { x.mutex().unlock(); }
 	T* operator->() { return (T*)&*x; }
 	const T* operator->() const { return (const T*)&*x; }

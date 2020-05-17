@@ -251,7 +251,6 @@ public:
 	template<class F>
 	Thread(const F& f)
 	{
-		_thread = 0;
 		_threadFinished = false;
 		*this = start(f, this);
 	}
