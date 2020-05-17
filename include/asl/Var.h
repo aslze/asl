@@ -296,9 +296,6 @@ class ASL_API Var
 	/** Returns this var if it is defined or `v` otherwise */
 	const Var& operator|(const Var& v) const { return is(NONE) ? v : *this; }
 
-	/**
-	Assigns the value of this object's key property if it exists to x
-	*/
 	template<class T>
 	void read(const String& key, T& x) const { if (has(key)) x = (*this)[key]; }
 	/**
@@ -354,6 +351,13 @@ class ASL_API Var
 	const Var& operator[](const String& key) const;
 	
 	Var operator()(const String& key) const { return has(key) ? (*this)[key] : Var(); }
+
+	/**
+	Gets a pointer to the property named `key` if it exists or a null pointer otherwise
+	*/
+	Var* getp(const String& key) { return has(key) ? &(*this)[key] : NULL; }
+
+	const Var* getp(const String& key) const { return has(key) ? &(*this)[key] : NULL; }
 
 	/** Sets the value of property `key` of this var to `v` (Useful for Var construction) */
 	template <class T>

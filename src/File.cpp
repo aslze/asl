@@ -1,6 +1,5 @@
 #undef __STRICT_ANSI__
 #include <asl/File.h>
-//#include <asl/Directory.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -8,27 +7,23 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <io.h>
-#if !defined(ASL_ANSI)
-#define UNICODE
 #undef WIN32_FIND_DATA
 #undef FindFirstFile
+#ifdef ASL_ANSI
+#define WIN32_FIND_DATA WIN32_FIND_DATAA
+#define FindFirstFile FindFirstFileA
+#else
 #define WIN32_FIND_DATA WIN32_FIND_DATAW
 #define FindFirstFile FindFirstFileW
 #endif
 #define fdopen _fdopen
 #define dup _dup
-
-namespace asl {
-
-const char File::SEP='\\';
 #else
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <errno.h>
 #include <utime.h>
-namespace asl {
-const char File::SEP='/';
 #endif
 
 #if defined(_WIN32) && !defined(ASL_ANSI)
@@ -41,7 +36,11 @@ const char File::SEP='/';
 #define CHART char
 #endif
 
+namespace asl {
+
 #ifdef _WIN32
+
+const char File::SEP = '\\';
 
 inline double ft2t(const FILETIME& ft)
 {
@@ -78,6 +77,8 @@ static FileInfo getFileInfo(const String& path)
 }
 
 #else
+
+const char File::SEP = '/';
 
 inline double ft2t(const time_t& ft)
 {

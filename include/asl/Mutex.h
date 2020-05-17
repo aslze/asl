@@ -388,9 +388,11 @@ public:
 	}
 };
 
+template<class T>
+class Locked;
 
 /**
-%Atomic version of another type.
+%Atomic version of another type. This adds some space and overhead, use with care.
 
 ~~~
 Atomic<double> value = 0;
@@ -399,18 +401,26 @@ value += 1.5;
 
 Variable `value` can be read or written from different threads without interfering.
 
-Basic operators of the underlying type are exposed (+=, -=, *=, /=, ==, ...). For other operations you can cast to
-the underlying type or use operator `~`. Or you can use operator `*` to get a reference to the internal variable
-(with no synchronization). In that case you can use the objet's mutex to protect access:
+Basic operators of the underlying type are exposed (++, +=, -=, *=, /=, ==, <<, ...). If the underlying type is a
+class you can call methods using opertor `->`, and those calls will be syncronized.
+
+~~~
+Aromic<Array<float>> numbers;
+numbers->sort();             // this is atomic
+~~~
+
+For other operations you can cast to the underlying type or use operator `~`. Or you can use operator `*` to get a
+reference to the internal variable (with no synchronization). In that case you can use the objet's mutex to protect access:
 
 ~~~
 int appendAtomic(Atomic<Array<int>>& list, double number)
 {
 	Lock _(list);
-	*list << number;
-	return list->length();
+	(*list) << number;        // can't use operator -> when explicitly locked!
+	return (*list).length();
 }
 ~~~
+
 \ingroup Threading
 */
 
@@ -481,18 +491,29 @@ public:
 	}
 
 	/**
-	Allows calling member functions of the internal object
+	Returns a locked wrapper for short time use
 	*/
-	const T* operator->() const
+	Locked<T> locked()
 	{
-		Lock _(_mutex);
-		return (const T*)&_x;
+		return Locked<T>(*this);
 	}
 
-	T* operator->()
+	const Locked<T> locked() const
 	{
-		Lock _(_mutex);
-		return (T*)&_x;
+		return Locked<T>(*this);
+	}
+
+	/**
+	Allows calling member functions of the internal object
+	*/
+	Locked<T> operator->()
+	{
+		return Locked<T>(*this);
+	}
+
+	const Locked<T> operator->() const
+	{
+		return Locked<T>(*this);
 	}
 
 	bool operator!()
@@ -607,11 +628,42 @@ public:
 		return *this;
 	}
 
+	template<class K>
+	Atomic& operator<<(const K& x)
+	{
+		Lock _(_mutex);
+		_x << x;
+		return *this;
+	}
+	template<class K>
+	Atomic& operator>>(K& x)
+	{
+		Lock _(_mutex);
+		_x >> x;
+		return *this;
+	}
+
+
 private:
 	T _x;
 	mutable Mutex _mutex;
 };
 
+template<class T>
+class Locked
+{
+	Atomic<T>& x;
+public:
+	Locked(Atomic<T>& x) : x(x) { x.mutex().lock(); }
+	Locked(const Atomic<T>& x) : x((Atomic<T>&)x) { x.mutex().lock(); }
+	~Locked() { x.mutex().unlock(); }
+	T* operator->() { return (T*)&*x; }
+	const T* operator->() const { return (const T*)&*x; }
+	T& operator*() { return *x; }
+	const T& operator*() const { return *x; }
+	operator T& () { return *x; }
+	operator const T& () const { return *x; }
+};
 
 }
 
