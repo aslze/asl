@@ -39,7 +39,7 @@ public:
 	Array_(const Array_<K, N>& b)
 	{
 		for(int i=0; i<length(); i++)
-			_a[i]=b[i];
+			_a[i]=(T)b[i];
 	}
 	Array_(const Array_& b)
 	{
@@ -59,6 +59,12 @@ public:
 #endif
 	~Array_()
 	{}
+
+	template<class T2>
+	Array_<T2, N> with() const
+	{
+		return Array_<T2, N>(*this);
+	}
 
 	Array<T> array() const
 	{

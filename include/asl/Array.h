@@ -125,6 +125,19 @@ public:
 	}
 #endif
 	~Array() {if(_a && --d().rc==0) free();}
+
+	/**
+	Returns a copy of this array with all element converted to another type
+	*/
+	template<class K>
+	Array<K> with() const
+	{
+		Array<K> b(length());
+		for (int i = 0; i < length(); i++)
+			b[i] = (K)_a[i];
+		return b;
+	}
+
 	struct Enumerator
 	{
 		Array<T>& a;

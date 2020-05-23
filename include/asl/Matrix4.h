@@ -90,6 +90,12 @@ class Matrix4_
 		a[3][0] = m[3]; a[3][1] = m[7]; a[3][2] = m[11]; a[3][3] = m[15];
 	}
 
+	template<class T2>
+	Matrix4_<T2> with() const
+	{
+		return Matrix4_<T2>(*this);
+	}
+
 	/**
 	Returns this matrix transposed
 	*/
@@ -100,6 +106,8 @@ class Matrix4_
 		a[0][2], a[1][2], a[2][2], a[3][2],
 		a[0][3], a[1][3], a[2][3], a[3][3]);
 	}
+
+	bool isColmajor() const { return false; }
 	/**
 	Returns this matrix plus `B`
 	*/
