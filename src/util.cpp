@@ -103,7 +103,7 @@ ULong Random::getLong()
 
 unsigned Random::get()
 {
-	return (getLong() >> 32) & 0xffffffff;
+	return unsigned(getLong() >> 32);
 }
 
 #endif
@@ -335,11 +335,6 @@ void os_error(const char* msg)
 	exit(1);
 }
 
-double inf = 1e300;
-
-float infinity()
-{
-	return float(inf);
-}
+ double ASL_API bigval = 1e300;
 
 }

@@ -130,18 +130,24 @@ struct Exception {};
 	typedef unsigned long long ULong;
 #endif
 
+extern double ASL_API bigval;
+
+/**
+Returns +infinity
+*/
+inline float infinity()
+{
+	return float(bigval);
+}
+
 /**
 Returns a NaN value
 */
 inline float nan()
 {
-	return float((1e100*1e100))*0.0f;
+	static const float n = infinity() / infinity();
+	return n;
 }
-
-/**
-Returns +infinity
-*/
-ASL_API float infinity();
 
 /** Returns `x` squared */
 template <class T>

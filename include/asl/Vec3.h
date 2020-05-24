@@ -46,6 +46,12 @@ class Vec3_
 	Vec2_<T> xy() const {return Vec2_<T>(x, y);}
 	/** Returns the cartesian coordinates vector corresponding to this homogenous coordinates */
 	Vec2_<T> h2c() const {T iz=1/z; return Vec2_<T>(iz*x, iz*y);}
+
+	template<class T2>
+	Vec3_<T2> with() const
+	{
+		return Vec3_<T2>(T2(x), T2(y), T2(z));
+	}
 	static Vec3_ fromCylindrical( T r, T a, T z) {return Vec3_(r*cos(a), r*sin(a), z);}
 	static Vec3_ fromSpherical( T r, T a, T b) {float R=r*cos(b); return Vec3_(R*cos(a), R*sin(b), r*sin(b));}
 

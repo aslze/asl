@@ -29,6 +29,7 @@ struct TestInfo { const char* name; void (*func)(); };
 extern TestInfo tests[255];
 extern int numTests;
 extern bool testFailed;
+extern bool testsFailed;
 
 #ifndef __ANDROID__
 #define ASL_PRINT_TEST_RESULT(name, result)

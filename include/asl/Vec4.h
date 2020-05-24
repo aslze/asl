@@ -32,6 +32,11 @@ class Vec4_
 	Vec4_(const Vec4_& v): x(v.x), y(v.y), z(v.z), w(v.w) {}
 	Vec4_(const T* v) : x(v[0]), y(v[1]), z(v[2]), w(v[3]) {}
 	ASL_DEF_AUTOCAST(Vec4_<T>)
+	template<class T2>
+	Vec4_<T2> with() const
+	{
+		return Vec4_<T2>(T2(x), T2(y), T2(z), T2(w));
+	}
 	operator const T*() const {return &x;}
 	/** Returns the *x*, *y*, *z* components as a Vec3 */
 	Vec3_<T> xyz() const {return Vec3_<T>(x, y, z);}
