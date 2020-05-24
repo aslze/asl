@@ -335,11 +335,6 @@ void os_error(const char* msg)
 	exit(1);
 }
 
-double inf = 1e300;
-
-float infinity()
-{
-	return float(inf);
-}
+ double ASL_API bigval = 1e300;
 
 }
