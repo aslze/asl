@@ -103,7 +103,7 @@ ULong Random::getLong()
 
 unsigned Random::get()
 {
-	return (getLong() >> 32) & 0xffffffff;
+	return unsigned(getLong() >> 32);
 }
 
 #endif
