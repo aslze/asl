@@ -264,18 +264,20 @@ HttpResponse Http::request(HttpRequest& request)
 	HttpResponse response;
 
 	Url url = parseUrl(request.url());
+	bool hasPort = url.port != 0;
+
 	if (url.protocol == "https")
 	{
 #ifdef ASL_TLS
 		socket = TlsSocket();
-		if (url.port == 0) url.port = 443;
+		if (!hasPort) url.port = 443;
 #else
 		return response;
 #endif
 	}
 	else {
 		socket = Socket();
-		if (url.port == 0) url.port = 80;
+		if (!hasPort) url.port = 80;
 	}
 
 	response.use(socket);
@@ -292,7 +294,8 @@ HttpResponse Http::request(HttpRequest& request)
 	}
 
 	String title;
-	title << request.method() << ' ' << url.path << " HTTP/1.1\r\nHost: " << url.host << ':' << url.port;
+	title << request.method() << ' ' << url.path << " HTTP/1.1\r\nHost: " << url.host;
+	if (hasPort) title << ':' << url.port;
 	request._command = title;
 	request.sendHeaders();
 
