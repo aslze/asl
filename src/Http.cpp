@@ -292,7 +292,8 @@ HttpResponse Http::request(HttpRequest& request)
 	}
 
 	String title;
-	title << request.method() << ' ' << url.path << " HTTP/1.1\r\nHost: " << url.host << ':' << url.port;
+	title << request.method() << ' ' << url.path << " HTTP/1.1\r\nHost: " << url.host;
+	if (url.port != 0) title  << ':' << url.port;
 	request._command = title;
 	request.sendHeaders();
 
