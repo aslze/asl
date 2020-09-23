@@ -231,6 +231,21 @@ class Matrix4_
 typedef Matrix4_<float> Matrix4;
 typedef Matrix4_<double> Matrix4d;
 
+/**
+Returns an orthonormal approximation of this transform matrix
+*/
+template <class T>
+asl::Matrix4_<T> orthonormalize(const asl::Matrix4_<T>& m)
+{
+	auto v1 = m.column3(0);
+	auto v2 = m.column3(1);
+	auto v3 = m.column3(2);
+	auto x = (v2 ^ v3).normalized();
+	auto y = (v3 ^ x).normalized();
+	auto z = (x ^ y).normalized();
+	return asl::Matrix4_<T>(x, y, z, m.column3(3));
+}
+
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
