@@ -27,7 +27,7 @@ enum StateN {
 };
 enum ContextN {ROOT, ARRAY, OBJECT, COMMENT1, COMMENT, LINECOMMENT, ENDCOMMENT};
 
-#define INDENT_CHAR ' '
+#define INDENT_CHAR '\t'
 
 Var decodeXDL(const String& xdl)
 {

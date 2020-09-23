@@ -3,6 +3,8 @@
 #include <asl/TextFile.h>
 #include <stdio.h>
 
+#define INDENT_CHAR '\t'
+
 namespace asl {
 
 Xml Xml::read(const String& file)
@@ -450,7 +452,7 @@ void XmlCodec::encode(const Xml& e)
 	// write prolog?
 	// if (!e.parent()) _xml << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 	if(_formatted)
-		for (int i = 0; i < _level; i++) _xml << ' ';
+		for (int i = 0; i < _level; i++) _xml << INDENT_CHAR;
 	_level++;
 	_xml << '<' << e.tag();
 	const Map<>& attribs = e.attribs();
