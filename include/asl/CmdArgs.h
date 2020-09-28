@@ -94,7 +94,7 @@ public:
 	bool is(const String& opt) const;
 	/** Returns the value of option named `opt` or an empty string of it was not defined */
 	String operator[](const String& opt) const;
-	/** Returns the value of option named `opt` or teh default value `def` if it was not defined */
+	/** Returns the value of option named `opt` or the default value `def` if it was not defined */
 	String operator()(const String& opt, const String& def) const;
 	/** Returns the rest argument at index `i` (after the options) */
 	String operator[](int i) const;
