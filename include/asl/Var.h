@@ -377,9 +377,15 @@ class ASL_API Var
 			return !strcmp((*s).ptr(), other.ss);
 		else if(_type == SSTRING && other._type == STRING)
 			return !strcmp(ss, (*other.s).ptr());
+		else if (_type == NUMBER || _type == FLOAT || _type == INT)
+		{
+			double x = *this;
+			return other == x;
+		}
 		else if(_type != other._type) return false;
 		switch(_type){
 			case NUMBER: return d==other.d;
+			case FLOAT: return d == other.d;
 			case INT: return i==other.i;
 			case BOOL: return b==other.b;
 			case STRING: return !strcmp((*s).ptr(), (*other.s).ptr());
@@ -405,6 +411,7 @@ class ASL_API Var
 		switch(_type){
 		case INT: return i==other;
 		case NUMBER: return d==other;
+		case FLOAT: return d == other;
 		default: return false;
 		}
 		return false;
@@ -414,6 +421,17 @@ class ASL_API Var
 		switch(_type){
 		case NUMBER: return d==other;
 		case INT: return i==other;
+		case FLOAT: return d == other;
+		default: return false;
+		}
+		return false;
+	}
+	bool operator==(float other) const
+	{
+		switch (_type) {
+		case NUMBER: return d == other;
+		case INT: return i == other;
+		case FLOAT: return d == other;
 		default: return false;
 		}
 		return false;
