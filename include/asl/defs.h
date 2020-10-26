@@ -155,7 +155,7 @@ inline T fract(T x) {return x - floor(x);}
 
 /** Clamps the value of x to make it lie inside the [a,b] interval */
 template <class T, class C>
-inline T clamp(T x, C a, C b) {if (x<a) return a; else if (x>b) return b; return x;}
+inline T clamp(T x, C a, C b) { const T t = x < a ? a : x; return t > b ? b : t; }
 
 /** Returns `x` degrees converted to radians */
 template <class T>
