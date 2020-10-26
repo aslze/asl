@@ -2,6 +2,7 @@
 #define ASL_BUFFER_H
 
 #include "Array.h"
+#include "String.h"
 
 namespace asl {
 
