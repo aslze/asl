@@ -110,10 +110,21 @@ public:
 	bool operator==(const Array_& b) const
 	{
 		for(int i=0; i<N; i++)
-			if(b._a[i] != _a[i])
+			if(_a[i] != b._a[i])
 				return false;
 		return true;
 	}
+
+	bool operator!=(const Array_& b) const { return !(*this == b); }
+
+	bool operator<(const Array_& b) const
+	{
+		for (int i = 0; i < N; i++)
+			if (_a[i] < b._a[i])
+				return true;
+		return false;
+	}
+
 	/** Returns the element at index i */
 	const T& operator[](int i) const
 	{
@@ -221,7 +232,6 @@ String Array_<T, N>::join(const String& sep) const
 	for(int i=1; i<N; i++) {s += sep; String v=_a[i]; s += (v);}
 	return s;
 }
-
 
 /**
 Creates an array with the 2 elements given as arguments (there are overloads from 1 to 6 elements)
