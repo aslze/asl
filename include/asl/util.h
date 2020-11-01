@@ -46,8 +46,8 @@ inline String encodeBase64(const String& s)
 }
 
 
-//template<int N>
-//String encodeBase64(const Array_<byte,N>& src) { return encodeBase64((byte*)src, N); }
+template<int N>
+String encodeBase64(const Array_<byte,N>& src) { return encodeBase64((const byte*)src, N); }
 
 ASL_API String encodeHex(const byte* data, int n);
 
@@ -55,6 +55,9 @@ ASL_API String encodeHex(const byte* data, int n);
 Encodes a byte array as a string using hexadecimal
 */
 inline String encodeHex(const Array<byte>& src) { return encodeHex(src.ptr(), src.length()); }
+
+template<int N>
+String encodeHex(const Array_<byte, N>& src) { return encodeHex((const byte*)src, N); }
 
 /**
 Decodes a hexadecimal encoded string into a byte array
