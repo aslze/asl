@@ -305,14 +305,17 @@ struct AThread : public Thread
 	}
 };
 
+template <class T>
 struct A2Thread : public Thread
 {
-	static Atomic<double> n;
-	static const int N = 10000;
+	static T n;
+	static const int N = 5000;
 	void run()
 	{
 		for (int i = 0; i < N; i++)
 			n += 2;
+
+		sleep(0.001);
 
 		for (int i = 0; i < N; i++)
 			--n;
@@ -320,25 +323,30 @@ struct A2Thread : public Thread
 };
 
 AtomicCount AThread::n = 0;
-Atomic<double> A2Thread::n = 0;
+
+template<class T>
+T A2Thread<T>::n = 0;
 
 ASL_TEST(AtomicCount)
 {
-	ThreadGroup<AThread> threads;
-	for (int i = 0; i < 50; i++)
-		threads << AThread();
-	threads.start();
+	AThread::n = 0;
+	A2Thread< Atomic<double> >::n = 0;
+	ThreadGroup<AThread> threads1;
+	for (int i = 0; i < 30; i++)
+		threads1 << AThread();
+	threads1.start();
 	int n = AThread::n;
-	threads.join();
+	threads1.join();
 	ASL_ASSERT(AThread::n == 0);
-	
-	ThreadGroup<A2Thread> bthreads;
-	for (int i = 0; i < 25; i++)
-		bthreads << A2Thread();
-	bthreads.start();
+
+	typedef Atomic<double> ItemType;
+	ThreadGroup<A2Thread<ItemType> > threads2;
+	for (int i = 0; i < 20; i++)
+		threads2 << A2Thread<ItemType>();
+	threads2.start();
 	sleep(0.001);
-	double bn = A2Thread::n;
-	bthreads.join();
-	ASL_ASSERT(A2Thread::n == 25.0 * A2Thread::N);
+	double bn = A2Thread<ItemType>::n;
+	threads2.join();
+	ASL_ASSERT(A2Thread<ItemType>::n == ItemType(20.0 * A2Thread<ItemType>::N));
 }
 
