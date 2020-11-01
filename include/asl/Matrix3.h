@@ -20,7 +20,7 @@ Vec2 v = translation * rotation * Vec2(x, y);
 \ingroup Math3D
 */
 template<class T>
-class ASL_API Matrix3_
+class Matrix3_
 {
 public:
 	Matrix3_() {}

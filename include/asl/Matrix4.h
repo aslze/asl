@@ -26,6 +26,8 @@ class Matrix4_
 {
 	T a[4][4]; // row-major
  public:
+	bool isRowMajor() const { return true; }
+
 	Matrix4_() {}
 	/**
 	Returns the element at row `i`, column `j`.
