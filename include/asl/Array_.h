@@ -32,6 +32,7 @@ class Array_
 {
 protected:
 	T _a[N];
+	operator void* () { return NULL; }
 public:
 	Array_()
 	{}
@@ -98,14 +99,7 @@ public:
 	/** Returns a pointer to the base of the array */
 	operator const T*() const {return &_a[0];}
 	operator T*() {return &_a[0];}
-	operator const void*() const
-	{
-		return &_a[0];
-	}
-	operator void*()
-	{
-		return &_a[0];
-	}
+
 	/** Tests for equality of all elements of both arrays*/
 	bool operator==(const Array_& b) const
 	{
