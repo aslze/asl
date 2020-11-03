@@ -144,7 +144,7 @@ static FileInfo infoFor(const WIN32_FIND_DATA& data)
 	return info;
 }
 
-const Array<File>& Directory::items(const String& which, Directory::ItemType t)
+const Array<File> Directory::items(const String& which, Directory::ItemType t)
 {
 	_files.clear();
 	WIN32_FIND_DATA data;
@@ -265,7 +265,7 @@ static bool match(const String& a, const String& patt)
 	return a.startsWith(patt.substring(0,i)) && a.endsWith(patt.substring(i+1));
 }
 
-const Array<File>& Directory::items(const String& which, Directory::ItemType t)
+const Array<File> Directory::items(const String& which, Directory::ItemType t)
 {
 	_files.clear();
 	DIR* d = opendir(_path != ""? _path : "/");
