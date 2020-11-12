@@ -66,6 +66,80 @@ ASL_API Array<byte> decodeHex(const String& src);
 
 /**@}*/
 
+struct NoType {};
+
+template<class R, class T1, class T2 = NoType>
+struct FuncB
+{
+	virtual ~FuncB() {}
+	virtual R operator()() { return R(); }
+	virtual R operator()(T1 x) { return R(); }
+	virtual R operator()(T1 x, T2 y) { return R(); }
+};
+
+template<class F, class R, class T1, class T2>
+struct Func : FuncB<R, T1, T2>
+{
+	Func(const F& f) : f(f) {}
+	R operator()(T1 x, T2 y) { return f(x, y); }
+	F f;
+};
+
+template<class F, class R, class T1>
+struct Func<F, R, T1, NoType> : FuncB<R, T1, NoType>
+{
+	Func(const F& f) : f(f) {}
+	R operator()(T1 x) { return f(x); }
+	F f;
+};
+
+template<class F, class R>
+struct Func<F, R, NoType, NoType> : FuncB<R, NoType, NoType>
+{
+	Func(const F& f) : f(f) {}
+	R operator()() { return f(); }
+	F f;
+};
+
+#define ASL_FUNC(T1, T2) \
+	Function() : f(NULL) {} \
+	Function(const Function& f) : f(f.f) { ((Function&)f).f = NULL; } \
+	void operator=(const Function& ff) { f = ff.f; ((Function&)ff).f = NULL; } \
+	operator bool() const { return f != 0; } \
+	template<class F> \
+	Function(const F& f) : f(new Func<F, R, T1, T2>(f)) {} \
+	~Function() { delete f; } \
+	FuncB<R, T1, T2>* f;
+
+/**
+A simple function object that can wrap function pointers, functors and lambdas.
+
+Supports up to 2 arguments and a return value. In C++11 you can do:
+
+~~~
+Function<bool, int> isEven = [=](int x) { return x % 2 == 0; };
+
+bool sixeven = isEven(6);
+~~~
+*/
+template<class R, class T1 = NoType, class T2 = NoType>
+struct Function {
+	ASL_FUNC(T1, T2)
+	R operator()(T1 x, T2 y) { return (*f)(x, y); }
+};
+
+template<class R, class T1>
+struct Function<R, T1, NoType> {
+	ASL_FUNC(T1, NoType)
+	R operator()(T1 x) { return (*f)(x); }
+};
+
+template<class R>
+struct Function<R, NoType, NoType> {
+	ASL_FUNC(NoType, NoType)
+	R operator()() { return (*f)(); }
+};
+
 }
 
 #endif
