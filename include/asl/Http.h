@@ -7,6 +7,7 @@
 #include <asl/Map.h>
 #include <asl/String.h>
 #include <asl/Var.h>
+#include <asl/util.h>
 
 namespace asl {
 
@@ -14,11 +15,6 @@ class HttpResponse;
 class HttpRequest;
 class Http;
 class File;
-
-struct HttpProgress
-{
-	virtual void operator()(int percent) {}
-};
 
 struct Url
 {
@@ -46,6 +42,14 @@ String ASL_API decodeUrl(const String& params);
 
 /**@}*/
 
+
+struct HttpStatus
+{
+	int sent;
+	int received;
+	int totalSend;
+	int totalReceive;
+};
 
 /**
 Base class of HttpRequest and HttpResponse with common functionality.
@@ -151,6 +155,8 @@ public:
 	operator String() const { return text(); }
 	operator Var() const { return data(); }
 
+	HttpMessage& onProgress(const Function<void, const HttpStatus&>& f) { _progress = f; return *this; }
+
 protected:
 	void readHeaders();
 	void readBody();
@@ -158,7 +164,7 @@ protected:
 	Dic<> _headers;
 	Array<byte> _body;
 	mutable Socket* _socket;
-	HttpProgress* _progress;
+	Function<void, const HttpStatus&> _progress;
 	bool _fileBody;
 	bool _chunked;
 	bool _headersSent;
@@ -448,6 +454,10 @@ public:
 		HttpRequest req("PATCH", url, body, headers);
 		return request(req);
 	}
+
+	typedef Function<void, const HttpStatus&> HttpProgress;
+	// dummy function until a better one arrives with progressive saving
+	static bool download(const String& url, const String& path, const Function<void, const HttpStatus&>& f = HttpProgress(), const Dic<>& headers = Dic<>());
 };
 
 

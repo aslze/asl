@@ -92,17 +92,17 @@ Url parseUrl(const String& url)
 }
 
 
-HttpMessage::HttpMessage() : _socket(NULL), _progress(NULL), _fileBody(false), _chunked(false)
+HttpMessage::HttpMessage() : _socket(NULL), _fileBody(false), _chunked(false)
 {
 	_headersSent = false;
 }
 
-HttpMessage::HttpMessage(const Dic<>& headers) : _socket(NULL), _headers(headers), _progress(NULL), _fileBody(false), _chunked(false)
+HttpMessage::HttpMessage(const Dic<>& headers) : _socket(NULL), _headers(headers), _fileBody(false), _chunked(false)
 {
 	_headersSent = false;
 }
 
-HttpMessage::HttpMessage(Socket& s) : _socket(&s), _progress(NULL), _fileBody(false), _chunked(false)
+HttpMessage::HttpMessage(Socket& s) : _socket(&s), _fileBody(false), _chunked(false)
 {
 	_headersSent = false;
 }
@@ -211,6 +211,10 @@ void HttpMessage::readBody()
 	else if(!chunked)
 		return;
 
+	HttpStatus status;
+	status.totalReceive = size;
+	status.received = 0;
+
 	while (!end)
 	{
 		int av = _socket->available();
@@ -232,8 +236,10 @@ void HttpMessage::readBody()
 				return;
 			}
 			currentsize += bytesRead;
-			//_progress(currentsize, totalsize);
+			status.received = currentsize;
 			_body.append(buffer, bytesRead);
+			if(_progress)
+				_progress(status);
 			maxToRead -= bytesRead;
 			if (size) {
 				size -= bytesRead;
@@ -320,6 +326,8 @@ HttpResponse Http::request(HttpRequest& request)
 
 	int code = response.code();
 
+	response.onProgress(request._progress);
+
 	if (request.followRedirects())
 	{
 		if (code == 301 || code == 302 || code == 307 || code == 308) // 303 ?
@@ -327,6 +335,7 @@ HttpResponse Http::request(HttpRequest& request)
 			socket.close();
 			String url = response.header("Location");
 			HttpRequest req(request.method(), url, request.headers());
+			req.onProgress(response._progress);
 			int n = request.recursion() + 1;
 			if (n < 4) {
 				req.setRecursion(n);
@@ -565,6 +574,17 @@ void HttpMessage::putFile(const String& path, int begin, int end)
 	//  write Content-Type: ...\r\n\r\n
 	writeFile(path, begin, end);
 	//  write --abc--\r\n
+}
+
+bool Http::download(const String& url, const String& path, const Function<void, const HttpStatus&>& f, const Dic<>& headers)
+{
+	HttpRequest req("GET", url, headers);
+	req.onProgress(f);
+	HttpResponse res = request(req);
+	if (res.ok())
+		return File(path).put(res.body());
+	else
+		return false;
 }
 
 }
