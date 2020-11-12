@@ -354,4 +354,13 @@ File File::temp(const String& ext)
 #endif
 }
 
+template<> template<>
+ASL_API Array<String> Array<File>::with<String>() const
+{
+	Array<String> b(length());
+	for (int i = 0; i < length(); i++)
+		b[i] = _a[i].path();
+	return b;
+}
+
 }
