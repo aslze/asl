@@ -273,11 +273,11 @@ String Var::toString() const
 		break;
 	case FLOAT:
 		r.resize(16);
-		r.fix(sprintf(r, "%.9g", d));
+		r.fix(sprintf(r, "%.7g", d));
 		break;
 	case NUMBER:
 		r.resize(29);
-		r.fix(sprintf(r, "%.17g", d));
+		r.fix(sprintf(r, "%.15g", d));
 		break;
 	case BOOL:
 		r=b?"true":"false";
