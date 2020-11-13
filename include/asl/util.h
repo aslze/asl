@@ -112,15 +112,28 @@ struct Func<F, R, NoType, NoType> : FuncB<R, NoType, NoType>
 	FuncB<R, T1, T2>* f;
 
 /**
-A simple function object that can wrap function pointers, functors and lambdas.
+A simple function object that can wrap a function pointer, a functor or a lambda. The first
+parameter is the return type, which can be `void`, and the rest, if given, are argument types.
+Currently supports up to 2 arguments.
 
-Supports up to 2 arguments and a return value. In C++11 you can do:
+In C++11 you can do this (in older C++ you would assign a function pointer
+or a class object implementing `operator()`):
 
 ~~~
 Function<bool, int> isEven = [=](int x) { return x % 2 == 0; };
 
 bool sixeven = isEven(6);
 ~~~
+
+A default constructed Function object is null and cannot be invoked. You can check if the function
+has been initialized with the `bool` conversion:
+
+~~~
+if (function)
+	function(a, b);
+~~~
+
+Be aware that currently Function objects copied invalidate the source object. This might change in the future.
 */
 template<class R, class T1 = NoType, class T2 = NoType>
 struct Function {
