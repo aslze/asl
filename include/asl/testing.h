@@ -148,7 +148,7 @@ double distance(const Quaternion_<T>& a, const Quaternion_<T>& b)
 Check that the argument is true.
 @hideinitializer
 */
-#define ASL_ASSERT(x) if(!(x)) { printf("\n%s: %i\n\n* Failed: '%s'\n\n", __FILE__, __LINE__, #x); testFailed = true;}
+#define ASL_ASSERT(x) if(!(x)) { printf("\n%s(%i): error: '%s'\n\n", __FILE__, __LINE__, #x); testFailed = true;}
 
 /** 
 Check a condition with the given operator and operands.
@@ -157,7 +157,7 @@ ASL_CHECK(sqrt(x), >=, 0);
 ~~~
 @hideinitializer
 */
-#define ASL_CHECK(x, op, y) if(!((x) op (y))) { printf("\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, #y, *String(x)); testFailed = true;}
+#define ASL_CHECK(x, op, y) if(!((x) op (y))) { printf("\n%s(%i): error: Expected '%s' %s '%s' but it is %s\n\n", __FILE__, __LINE__, #x, #op, *String(y), *String(x)); testFailed = true;}
 #endif
 
 /** 
