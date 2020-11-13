@@ -148,7 +148,7 @@ const Array<File> Directory::items(const String& which, Directory::ItemType t)
 {
 	_files.clear();
 	WIN32_FIND_DATA data;
-	String basedir = nat(_path) + '/';
+	String basedir = (_path.endsWith('/') || _path.endsWith('\\'))? nat(_path) : nat(_path) + '/';
 	HANDLE hdir = FindFirstFile(basedir + which, &data);
 	if(hdir == INVALID_HANDLE_VALUE)
 		return _files;
@@ -271,7 +271,7 @@ const Array<File> Directory::items(const String& which, Directory::ItemType t)
 	DIR* d = opendir(_path != ""? _path : "/");
 	if(!d)
 		return _files;
-	String dir = _path+'/';
+	String dir = _path.endsWith('/')? _path : _path+'/';
 	bool wildcard = which.contains('*') && which != "*";
 	
 	while(dirent* entry=readdir(d))
