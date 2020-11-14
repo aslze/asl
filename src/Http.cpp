@@ -91,12 +91,34 @@ Url parseUrl(const String& url)
 	return u;
 }
 
+struct HttpSinkArray : public HttpSink
+{
+	Array<byte>* a;
+	HttpSinkArray(Array<byte>& a) : a(&a) {}
+	int write(byte* p, int n)
+	{
+		a->append(p, n);
+		return n;
+	}
+};
+
+struct HttpSinkFile : public HttpSink
+{
+	File* file;
+	HttpSinkFile(File& f) : file(&f) {}
+	int write(byte* p, int n)
+	{
+		return file->write(p, n);
+	}
+};
 
 HttpMessage::HttpMessage() : _socket(NULL), _fileBody(false), _chunked(false)
 {
+	_sink = new HttpSinkArray(_body);
 	_headersSent = false;
 }
 
+/*
 HttpMessage::HttpMessage(const Dic<>& headers) : _socket(NULL), _headers(headers), _fileBody(false), _chunked(false)
 {
 	_headersSent = false;
@@ -106,6 +128,7 @@ HttpMessage::HttpMessage(Socket& s) : _socket(&s), _fileBody(false), _chunked(fa
 {
 	_headersSent = false;
 }
+*/
 
 String HttpMessage::text() const
 {
@@ -237,7 +260,8 @@ void HttpMessage::readBody()
 			}
 			currentsize += bytesRead;
 			status.received = currentsize;
-			_body.append(buffer, bytesRead);
+			//_body.append(buffer, bytesRead);
+			_sink->write(buffer, bytesRead);
 			if(_progress)
 				_progress(status);
 			maxToRead -= bytesRead;
@@ -257,6 +281,7 @@ void HttpMessage::readBody()
 				break;
 		}
 	}
+	printf("readbody end\n");
 }
 
 HttpRequest::~HttpRequest()
@@ -327,6 +352,7 @@ HttpResponse Http::request(HttpRequest& request)
 	int code = response.code();
 
 	response.onProgress(request._progress);
+	response.useSink(request._sink);
 
 	if (request.followRedirects())
 	{
@@ -336,6 +362,7 @@ HttpResponse Http::request(HttpRequest& request)
 			String url = response.header("Location");
 			HttpRequest req(request.method(), url, request.headers());
 			req.onProgress(response._progress);
+			req.useSink(response._sink);
 			int n = request.recursion() + 1;
 			if (n < 4) {
 				req.setRecursion(n);
@@ -446,9 +473,10 @@ HttpResponse::HttpResponse()
 	setCode(0);
 }
 
-HttpResponse::HttpResponse(const HttpRequest& r, const String& proto, int code):
-	HttpMessage(*r._socket)
+HttpResponse::HttpResponse(const HttpRequest& r, const String& proto, int code)/*:
+	HttpMessage(*r._socket)*/
 {
+	_socket = r._socket;
 	_proto = proto;
 	_headersSent = false;
 	setCode(200);
@@ -535,6 +563,9 @@ void HttpMessage::writeFile(const String& path, int begin, int end)
 	if (begin != end)
 		size = end - begin + 1;
 	int bytesSent = 0;
+	HttpStatus status;
+	status.sent = 0;
+	status.totalSend = (int)size;
 	while(n > 0 && bytesSent < (int)size)
 	{
 		char buf[16384];
@@ -578,11 +609,13 @@ void HttpMessage::putFile(const String& path, int begin, int end)
 
 bool Http::download(const String& url, const String& path, const Function<void, const HttpStatus&>& f, const Dic<>& headers)
 {
+	File file(path, File::WRITE);
 	HttpRequest req("GET", url, headers);
 	req.onProgress(f);
+	req.useSink(new HttpSinkFile(file));
 	HttpResponse res = request(req);
 	if (res.ok())
-		return File(path).put(res.body());
+		return true;
 	else
 		return false;
 }

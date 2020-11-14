@@ -51,6 +51,11 @@ struct HttpStatus
 	int totalReceive;
 };
 
+struct HttpSink
+{
+	virtual int write(byte* p, int n) { return 0; }
+};
+
 /**
 Base class of HttpRequest and HttpResponse with common functionality.
 */
@@ -60,8 +65,8 @@ class ASL_API HttpMessage
 	friend class Http;
 public:
 	HttpMessage();
-	HttpMessage(const Dic<>& headers);
-	HttpMessage(Socket& s);
+	//HttpMessage(const Dic<>& headers);
+	//HttpMessage(Socket& s);
 	/**
 	Returns the value of the specified header
 	*/
@@ -157,6 +162,8 @@ public:
 
 	HttpMessage& onProgress(const Function<void, const HttpStatus&>& f) { _progress = f; return *this; }
 
+	void useSink(const Shared<HttpSink>& s) { _sink = s; }
+
 protected:
 	void readHeaders();
 	void readBody();
@@ -165,6 +172,7 @@ protected:
 	Array<byte> _body;
 	mutable Socket* _socket;
 	Function<void, const HttpStatus&> _progress;
+	Shared<HttpSink> _sink;
 	bool _fileBody;
 	bool _chunked;
 	bool _headersSent;
@@ -194,7 +202,10 @@ public:
 	/**
 	Constructs an HttpRequest with the given method and headers
 	*/
-	HttpRequest(const String& method, const String& url, const Dic<>& headers) : HttpMessage(headers), _method(method), _url(url) { init(); }
+	HttpRequest(const String& method, const String& url, const Dic<>& headers) : _method(method), _url(url)
+	{
+		_headers = headers; init();
+	}
 	/**
 	Constructs an HttpRequest with the given method and body
 	*/
@@ -204,9 +215,13 @@ public:
 	Constructs an HttpRequest with the given method, headers and body
 	*/
 	template<class T>
-	HttpRequest(const String& method, const String& url, const T& data, const Dic<>& headers) : HttpMessage(headers), _method(method), _url(url) { put(data); init(); }
-	HttpRequest(Socket& s) : HttpMessage(s)
+	HttpRequest(const String& method, const String& url, const T& data, const Dic<>& headers) : _method(method), _url(url)
 	{
+		_headers = headers; put(data); init();
+	}
+	HttpRequest(Socket& s) // : HttpMessage(s)
+	{
+		_socket = &s;
 		init();
 		read();
 	}
@@ -403,6 +418,15 @@ String content = "My New File!\n";
 auto res = Http::post("https://content.dropboxapi.com/1/files_put/auto/myfile.txt", content, Dic<>("Authorization", "Bearer ..."));
 ~~~
 
+To download larger files you can use the download function, which saves directly to a file, instead of loading into a large memory buffer.
+
+~~~
+Http::download("http://someserver/some/large/file.zip", "./file.zip",
+	[=](const HttpStatus& s) {
+	printf("\r%i / %i bytes (%.0f %%)   ", s.received, s.totalReceive, 100.0 * s.received / s.totalReceive);
+});
+~~~
+
 Using IPv6 addresses is supported with square brackets in the host part `[ipv6]:port`:
 
 ~~~
@@ -456,7 +480,10 @@ public:
 	}
 
 	typedef Function<void, const HttpStatus&> HttpProgress;
-	// dummy function until a better one arrives with progressive saving
+	
+	/**
+	* Downloads the given URL to the specified local path, optionally notifying progress
+	*/
 	static bool download(const String& url, const String& path, const Function<void, const HttpStatus&>& f = HttpProgress(), const Dic<>& headers = Dic<>());
 };
 
