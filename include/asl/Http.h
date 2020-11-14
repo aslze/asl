@@ -11,6 +11,7 @@
 
 namespace asl {
 
+class HttpMessage;
 class HttpResponse;
 class HttpRequest;
 class Http;
@@ -43,6 +44,9 @@ String ASL_API decodeUrl(const String& params);
 /**@}*/
 
 
+/**
+
+*/
 struct HttpStatus
 {
 	int sent;
@@ -54,6 +58,7 @@ struct HttpStatus
 struct HttpSink
 {
 	virtual int write(byte* p, int n) { return 0; }
+	virtual void use(HttpMessage* m) {}
 };
 
 /**
@@ -65,8 +70,6 @@ class ASL_API HttpMessage
 	friend class Http;
 public:
 	HttpMessage();
-	//HttpMessage(const Dic<>& headers);
-	//HttpMessage(Socket& s);
 	/**
 	Returns the value of the specified header
 	*/
@@ -108,6 +111,7 @@ public:
 	Sets the body of the message as a text string.
 	*/
 	void put(const String& body);
+
 	void put(const char* body) { put(Array<byte>((const byte*)body, (int)strlen(body))); }
 	/**
 	Sets the body of the message as a JSON document.
@@ -162,7 +166,7 @@ public:
 
 	HttpMessage& onProgress(const Function<void, const HttpStatus&>& f) { _progress = f; return *this; }
 
-	void useSink(const Shared<HttpSink>& s) { _sink = s; }
+	void useSink(const Shared<HttpSink>& s) { _sink = s; _sink->use(this); }
 
 protected:
 	void readHeaders();
@@ -219,7 +223,7 @@ public:
 	{
 		_headers = headers; put(data); init();
 	}
-	HttpRequest(Socket& s) // : HttpMessage(s)
+	HttpRequest(Socket& s)
 	{
 		_socket = &s;
 		init();
@@ -421,13 +425,12 @@ auto res = Http::post("https://content.dropboxapi.com/1/files_put/auto/myfile.tx
 To download larger files you can use the download function, which saves directly to a file, instead of loading into a large memory buffer.
 
 ~~~
-Http::download("http://someserver/some/large/file.zip", "./file.zip",
-	[=](const HttpStatus& s) {
+Http::download("http://someserver/some/large/file.zip", "./file.zip", [=](const HttpStatus& s) {
 	printf("\r%i / %i bytes (%.0f %%)   ", s.received, s.totalReceive, 100.0 * s.received / s.totalReceive);
 });
 ~~~
 
-Using IPv6 addresses is supported with square brackets in the host part `[ipv6]:port`:
+Using **IPv6** addresses is supported with square brackets in the host part `[ipv6]:port`:
 
 ~~~
 auto res = Http::get("http://[::1]:80/path");
@@ -479,6 +482,9 @@ public:
 		return request(req);
 	}
 
+	/**
+	Type for HTTP progress callbacks 
+	*/
 	typedef Function<void, const HttpStatus&> HttpProgress;
 	
 	/**

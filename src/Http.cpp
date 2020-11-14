@@ -100,6 +100,10 @@ struct HttpSinkArray : public HttpSink
 		a->append(p, n);
 		return n;
 	}
+	void use(HttpMessage* m)
+	{
+		a = (Array<byte>*)&m->body();
+	}
 };
 
 struct HttpSinkFile : public HttpSink
@@ -117,18 +121,6 @@ HttpMessage::HttpMessage() : _socket(NULL), _fileBody(false), _chunked(false)
 	_sink = new HttpSinkArray(_body);
 	_headersSent = false;
 }
-
-/*
-HttpMessage::HttpMessage(const Dic<>& headers) : _socket(NULL), _headers(headers), _fileBody(false), _chunked(false)
-{
-	_headersSent = false;
-}
-
-HttpMessage::HttpMessage(Socket& s) : _socket(&s), _fileBody(false), _chunked(false)
-{
-	_headersSent = false;
-}
-*/
 
 String HttpMessage::text() const
 {
@@ -518,24 +510,28 @@ void HttpMessage::sendHeaders()
 
 void HttpMessage::write()
 {
-	if (!_headersSent)
+	write((const char*)_body.ptr(), _body.length());
+	/*if (!_headersSent)
 		sendHeaders();
 	if (_chunked)
 		*_socket << String(15, "%x\r\n", _body.length());
 	*_socket << _body;
 	if (_chunked)
 		*_socket << "\r\n";
+	*/
 }
 
 void HttpMessage::write(const String& text)
 {
-	if(!_headersSent)
+	write(*text, text.length());
+	/*if(!_headersSent)
 		sendHeaders();
 	if (_chunked)
 		*_socket << String(15, "%x\r\n", text.length());
 	*_socket << text;
 	if (_chunked)
 		*_socket << "\r\n";
+	*/
 }
 
 int HttpMessage::write(const char* buffer, int n)
@@ -544,7 +540,7 @@ int HttpMessage::write(const char* buffer, int n)
 		sendHeaders();
 	if (_chunked)
 		*_socket << String(15, "%x\r\n", n);
-	int m = _socket->write(buffer, n);
+	int m = _socket->write(buffer, n); // do this in chunks and report progress
 	if (_chunked)
 		*_socket << "\r\n";
 	return m;
