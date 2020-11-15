@@ -59,6 +59,7 @@ struct HttpSink
 {
 	virtual int write(byte* p, int n) { return 0; }
 	virtual void use(HttpMessage* m) {}
+	virtual void init(int n) {}
 };
 
 /**

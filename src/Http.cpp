@@ -104,6 +104,10 @@ struct HttpSinkArray : public HttpSink
 	{
 		a = (Array<byte>*)&m->body();
 	}
+	void init(int n)
+	{
+		a->reserve(n);
+	}
 };
 
 struct HttpSinkFile : public HttpSink
@@ -212,8 +216,7 @@ void HttpMessage::readBody()
 
 	bool chunked = header("Transfer-Encoding") == "chunked"; // Handle specially!!
 
-	_body.resize(size);
-	_body.clear();
+	_sink->init(size);
 
 	_socket->setBlocking(true);
 
@@ -252,7 +255,6 @@ void HttpMessage::readBody()
 			}
 			currentsize += bytesRead;
 			status.received = currentsize;
-			//_body.append(buffer, bytesRead);
 			_sink->write(buffer, bytesRead);
 			if(_progress)
 				_progress(status);
@@ -343,29 +345,27 @@ HttpResponse Http::request(HttpRequest& request)
 
 	int code = response.code();
 
-	response.onProgress(request._progress);
-	response.useSink(request._sink);
-
-	if (request.followRedirects())
+	if (request.followRedirects() && (code == 301 || code == 302 || code == 307 || code == 308)) // 303 ?
 	{
-		if (code == 301 || code == 302 || code == 307 || code == 308) // 303 ?
-		{
-			socket.close();
-			String url = response.header("Location");
-			HttpRequest req(request.method(), url, request.headers());
-			req.onProgress(response._progress);
-			req.useSink(response._sink);
-			int n = request.recursion() + 1;
-			if (n < 4) {
-				req.setRecursion(n);
-				return Http::request(req);
-			}
-			else {
-				response.setCode(421);
-				return response;
-			}
+		socket.close();
+		String url = response.header("Location");
+		HttpRequest req(request);
+		req.setUrl(url);
+		HttpProgress progress = req._progress;
+		req.onProgress(progress);
+		int n = request.recursion() + 1;
+		if (n < 4) {
+			req.setRecursion(n);
+			return Http::request(req);
+		}
+		else {
+			response.setCode(421);
+			return response;
 		}
 	}
+
+	response.onProgress(request._progress);
+	response.useSink(request._sink);
 
 	response.readBody();
 
@@ -465,8 +465,7 @@ HttpResponse::HttpResponse()
 	setCode(0);
 }
 
-HttpResponse::HttpResponse(const HttpRequest& r, const String& proto, int code)/*:
-	HttpMessage(*r._socket)*/
+HttpResponse::HttpResponse(const HttpRequest& r, const String& proto, int code)
 {
 	_socket = r._socket;
 	_proto = proto;
@@ -511,39 +510,38 @@ void HttpMessage::sendHeaders()
 void HttpMessage::write()
 {
 	write((const char*)_body.ptr(), _body.length());
-	/*if (!_headersSent)
-		sendHeaders();
-	if (_chunked)
-		*_socket << String(15, "%x\r\n", _body.length());
-	*_socket << _body;
-	if (_chunked)
-		*_socket << "\r\n";
-	*/
 }
 
 void HttpMessage::write(const String& text)
 {
 	write(*text, text.length());
-	/*if(!_headersSent)
-		sendHeaders();
-	if (_chunked)
-		*_socket << String(15, "%x\r\n", text.length());
-	*_socket << text;
-	if (_chunked)
-		*_socket << "\r\n";
-	*/
 }
 
 int HttpMessage::write(const char* buffer, int n)
 {
 	if(!_headersSent)
 		sendHeaders();
-	if (_chunked)
-		*_socket << String(15, "%x\r\n", n);
-	int m = _socket->write(buffer, n); // do this in chunks and report progress
-	if (_chunked)
-		*_socket << "\r\n";
-	return m;
+	const int block = 64000;
+	int sent = 0;
+	while (n > 0)
+	{
+		int m = min(n, block);
+		if (_chunked)
+			*_socket << String(15, "%x\r\n", m);
+		int written = _socket->write(buffer, m);
+		if (written != m)
+			return sent;
+
+		//if(_progress)
+		//	_progress(?)
+
+		sent += written;
+		if (_chunked)
+			*_socket << "\r\n";
+		n -= m;
+		buffer += m;
+	}
+	return sent;
 }
 
 void HttpMessage::writeFile(const String& path, int begin, int end)
@@ -606,6 +604,8 @@ void HttpMessage::putFile(const String& path, int begin, int end)
 bool Http::download(const String& url, const String& path, const Function<void, const HttpStatus&>& f, const Dic<>& headers)
 {
 	File file(path, File::WRITE);
+	if (!file)
+		return false;
 	HttpRequest req("GET", url, headers);
 	req.onProgress(f);
 	req.useSink(new HttpSinkFile(file));
