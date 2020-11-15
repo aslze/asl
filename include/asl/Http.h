@@ -72,13 +72,6 @@ class ASL_API HttpMessage
 public:
 	HttpMessage();
 	/**
-	Returns the value of the specified header
-	*/
-	String operator[] (const String& header) const
-	{
-		return _headers.get(header, "");
-	}
-	/**
 	Adds a message header with name `header` and value `value`
 	*/
 	void setHeader(const String& header, const String& value);
@@ -140,7 +133,7 @@ public:
 	*/
 	Var data() const { return json(); }
 
-	void write();
+	bool write();
 	/**
 	Sends the currently set headers and starts the message body.
 	*/
@@ -160,7 +153,7 @@ public:
 	/**
 	Sends the content of the given file as the message body and sets the content-length header
 	*/
-	void putFile(const String& path, int begin = 0, int end = 0);
+	bool putFile(const String& path, int begin = 0, int end = 0);
 
 	operator String() const { return text(); }
 	operator Var() const { return data(); }
@@ -181,6 +174,7 @@ protected:
 	bool _fileBody;
 	bool _chunked;
 	bool _headersSent;
+	Shared<HttpStatus> _status;
 };
 
 

@@ -7,6 +7,9 @@
 #include <asl/TlsSocket.h>
 #include <ctype.h>
 
+#define SEND_BLOCK_SIZE 64000
+#define RECV_BLOCK_SIZE 16000
+
 namespace asl {
 
 String decodeUrl(const String& q0)
@@ -124,6 +127,8 @@ HttpMessage::HttpMessage() : _socket(NULL), _fileBody(false), _chunked(false)
 {
 	_sink = new HttpSinkArray(_body);
 	_headersSent = false;
+	_status = new HttpStatus;
+	memset(&*_status, 0, sizeof(*_status));
 }
 
 String HttpMessage::text() const
@@ -229,9 +234,8 @@ void HttpMessage::readBody()
 	else if(!chunked)
 		return;
 
-	HttpStatus status;
-	status.totalReceive = size;
-	status.received = 0;
+	_status->totalReceive = size;
+	_status->received = 0;
 
 	while (!end)
 	{
@@ -239,7 +243,7 @@ void HttpMessage::readBody()
 		if (av < 0 || !_socket->waitInput()) {
 			break;
 		}
-		byte buffer[16384];
+		byte buffer[RECV_BLOCK_SIZE];
 		int maxToRead = _socket->available(), bytesRead = 0;
 		if (chunked)
 		{
@@ -254,10 +258,10 @@ void HttpMessage::readBody()
 				return;
 			}
 			currentsize += bytesRead;
-			status.received = currentsize;
+			_status->received = currentsize;
 			_sink->write(buffer, bytesRead);
 			if(_progress)
-				_progress(status);
+				_progress(*_status);
 			maxToRead -= bytesRead;
 			if (size) {
 				size -= bytesRead;
@@ -280,13 +284,13 @@ void HttpMessage::readBody()
 
 HttpRequest::~HttpRequest()
 {
-	//_socket->close();
 }
 
 HttpResponse Http::request(HttpRequest& request)
 {
 	Socket socket((Socket::Ptr)NULL);
-	HttpResponse response;
+	HttpResponse response(request);
+	response.setCode(0);
 
 	Url url = parseUrl(request.url());
 	bool hasPort = url.port != 0;
@@ -322,10 +326,11 @@ HttpResponse Http::request(HttpRequest& request)
 	title << request.method() << ' ' << url.path << " HTTP/1.1\r\nHost: " << url.host;
 	if (hasPort) title << ':' << url.port;
 	request._command = title;
-	request.sendHeaders();
+	//request.sendHeaders();
 
-	if (request.body().length() != 0)
-		request.write();
+	//if (request.body().length() != 0)
+	if (!request.write())
+		return response;
 	
 	String line = socket.readLine();
 	if (!line) {
@@ -340,7 +345,6 @@ HttpResponse Http::request(HttpRequest& request)
 
 	response.setProto(parts[0]);
 	response.setCode(parts[1]);
-
 	response.readHeaders();
 
 	int code = response.code();
@@ -468,6 +472,9 @@ HttpResponse::HttpResponse()
 HttpResponse::HttpResponse(const HttpRequest& r, const String& proto, int code)
 {
 	_socket = r._socket;
+	_status = r._status;
+	_status->sent = 0;
+	_status->received = 0;
 	_proto = proto;
 	_headersSent = false;
 	setCode(200);
@@ -505,11 +512,15 @@ void HttpMessage::sendHeaders()
 	*_socket << s;
 	_headersSent = true;
 	_chunked = !_headers.has("Content-Length");
+	_status->totalSend = _chunked ? 0 : int(_headers["Content-Length"]);
 }
 
-void HttpMessage::write()
+bool HttpMessage::write()
 {
-	write((const char*)_body.ptr(), _body.length());
+	if (_fileBody)
+		return putFile(_body);
+	else
+		return write((const char*)_body.ptr(), _body.length()) > 0;
 }
 
 void HttpMessage::write(const String& text)
@@ -521,19 +532,18 @@ int HttpMessage::write(const char* buffer, int n)
 {
 	if(!_headersSent)
 		sendHeaders();
-	const int block = 64000;
 	int sent = 0;
 	while (n > 0)
 	{
-		int m = min(n, block);
+		int m = min(n, SEND_BLOCK_SIZE);
 		if (_chunked)
 			*_socket << String(15, "%x\r\n", m);
 		int written = _socket->write(buffer, m);
 		if (written != m)
 			return sent;
-
-		//if(_progress)
-		//	_progress(?)
+		_status->sent += written;
+		if (_progress)
+			_progress(*_status);
 
 		sent += written;
 		if (_chunked)
@@ -562,7 +572,7 @@ void HttpMessage::writeFile(const String& path, int begin, int end)
 	status.totalSend = (int)size;
 	while(n > 0 && bytesSent < (int)size)
 	{
-		char buf[16384];
+		char buf[RECV_BLOCK_SIZE];
 		n = file.read(buf, min((int)sizeof(buf), (int)size - bytesSent));
 		if (n > 0) {
 			int w = 0;
@@ -575,30 +585,57 @@ void HttpMessage::writeFile(const String& path, int begin, int end)
 	};
 }
 
-void HttpMessage::putFile(const String& path, int begin, int end)
+bool HttpMessage::putFile(const String& path, int begin, int end)
 {
+	File file(path);
+	if (!file.exists())
+	{
+		printf("file to upload not found %s\n", *path);
+		return false;
+	}
 	if (begin == 0 && end == 0 && !hasHeader("Content-Range"))
-		setHeader("Content-Length", File(path).size());
+		setHeader("Content-Length", file.size());
 	else
 	{
-		Long size = File(path).size();
+		Long size = file.size();
 		if (end == 0)
 			end = (int)size - 1;
 		if (end <= begin || begin < 0 || end > size)
 		{
 			setHeader("Content-Range", String::f("bytes */%lli", size));
-			return;
+			return false;
 		}
 		setHeader("Content-Length", end - begin + 1);
 		setHeader("Content-Range", String::f("bytes %i-%i/%lli", begin, end, size));
 	}
-	// if (multipart-form-data)
-	//  increase content-length
-	//  write Content-Type: multipart/form-data; boundary=abc
-	//  write --abc\r\n
-	//  write Content-Type: ...\r\n\r\n
+
+	bool multipart = header("Content-Type") == "multipart/form-data";
+
+	String boundary;
+
+	if (multipart)
+	{
+		boundary = "-----------";
+		for (int i = 0; i < 64; i++)
+			boundary += (char)random('0', '9');
+
+		String head = "--" + boundary + "\r\n" +
+			"Content-Disposition: form-data; name=\"files\"; filename=\"" + file.name() + "\"\r\n" +
+			"Content-Type: application/octet-stream\r\n\r\n";
+
+		setHeader("Content-Length", int(header("Content-Length")) + head.length() + boundary.length() + 8);
+		setHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
+
+		write(head);
+	}
 	writeFile(path, begin, end);
-	//  write --abc--\r\n
+	
+	if (multipart)
+	{
+		write("\r\n--" + boundary + "--\r\n");
+	}
+
+	return true;
 }
 
 bool Http::download(const String& url, const String& path, const Function<void, const HttpStatus&>& f, const Dic<>& headers)
