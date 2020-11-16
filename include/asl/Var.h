@@ -293,8 +293,9 @@ class ASL_API Var
 	operator bool() const;
 	operator const char*() const;
 	const char* operator*() const {return (const char*)*this;}
-	/** Returns this var if it is defined or `v` otherwise */
-	const Var& operator|(const Var& v) const { return is(NONE) ? v : *this; }
+	/** Returns the left value if it is defined or the right otherwise */
+	template<class T>
+	Var operator|(const T& v) const { return is(NONE) ? Var(v) : *this; }
 
 	template<class T>
 	void read(const String& key, T& x) const { if (has(key)) x = (*this)[key]; }
