@@ -77,9 +77,8 @@ void Server::serve(HttpRequest& request, HttpResponse& response)
 	else if (request.is("PUT", "/conf"))
 	{
 		Var data = request.data();
-		printf("HTTP %s\n", *data.string());
-		data.read("r", _r);
-		data.read("v", _v);
+		_r = data["r"] | _r;
+		_v = data["v"] | _v;
 		response.put(Var("status", "OK"));
 		return;
 	}
