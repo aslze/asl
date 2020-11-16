@@ -7,7 +7,7 @@
 #include <asl/TlsSocket.h>
 #include <ctype.h>
 
-#define SEND_BLOCK_SIZE 64000
+#define SEND_BLOCK_SIZE 128000
 #define RECV_BLOCK_SIZE 16000
 
 namespace asl {
@@ -312,6 +312,9 @@ HttpResponse Http::request(HttpRequest& request)
 	response.use(socket);
 	request.use(socket);
 
+	//socket.setOption(SOL_SOCKET, SO_SNDBUF, )
+	//socket.setOption(0xffff, 0x1001, 64000);
+
 	if (!socket.connect(url.host, url.port)) {
 		//printf("Cannot connect to %s : %i\n", *url.host, url.port);
 		socket.close();
@@ -326,9 +329,7 @@ HttpResponse Http::request(HttpRequest& request)
 	title << request.method() << ' ' << url.path << " HTTP/1.1\r\nHost: " << url.host;
 	if (hasPort) title << ':' << url.port;
 	request._command = title;
-	//request.sendHeaders();
 
-	//if (request.body().length() != 0)
 	if (!request.write())
 		return response;
 	
@@ -355,7 +356,7 @@ HttpResponse Http::request(HttpRequest& request)
 		String url = response.header("Location");
 		HttpRequest req(request);
 		req.setUrl(url);
-		HttpProgress progress = req._progress;
+		Http::Progress progress = req._progress;
 		req.onProgress(progress);
 		int n = request.recursion() + 1;
 		if (n < 4) {
@@ -647,10 +648,18 @@ bool Http::download(const String& url, const String& path, const Function<void, 
 	req.onProgress(f);
 	req.useSink(new HttpSinkFile(file));
 	HttpResponse res = request(req);
-	if (res.ok())
-		return true;
-	else
+	return res.ok();
+}
+
+bool asl::Http::upload(const String& url, const String& path, const Dic<>& headers, const Function<void, const HttpStatus&>& f)
+{
+	if (!File(path).exists())
 		return false;
+	HttpRequest req("POST", url, File(path), headers);
+	req.setHeader("Content-Type", "multipart/form-data");
+	req.onProgress(f);
+	HttpResponse res = request(req);
+	return res.ok();
 }
 
 }
