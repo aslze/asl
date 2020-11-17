@@ -153,8 +153,8 @@ InetAddress::InetAddress(InetAddress::Type t)
 #endif
 	default: ;
 	}
-	data.resize(n);
-	memset(data.ptr(), 0, n);
+	_data.resize(n);
+	memset(_data.ptr(), 0, n);
 }
 
 InetAddress::InetAddress(int port)
@@ -163,24 +163,24 @@ InetAddress::InetAddress(int port)
 }
 
 InetAddress::InetAddress(const InetAddress& a):
-	data(a.data), _type(a._type)
+	_data(a._data), _type(a._type)
 {
 }
 
 void InetAddress::operator=(const InetAddress& a)
 {
-	data = a.data;
+	_data = a._data;
 	_type = a._type;
 }
 
 int InetAddress::port() const
 {
 	if (_type == IPv6) {
-		sockaddr_in6* addr = (sockaddr_in6*)data.ptr();
+		sockaddr_in6* addr = (sockaddr_in6*)_data.ptr();
 		return ntohs(addr->sin6_port);
 	}
 	else if (_type == IPv4) {
-		sockaddr_in* addr = (sockaddr_in*)data.ptr();
+		sockaddr_in* addr = (sockaddr_in*)_data.ptr();
 		return ntohs(addr->sin_port);
 	}
 	return 0;
@@ -189,11 +189,11 @@ int InetAddress::port() const
 InetAddress& InetAddress::setPort(int port)
 {
 	if (_type == IPv6) {
-		sockaddr_in6* addr = (sockaddr_in6*)data.ptr();
+		sockaddr_in6* addr = (sockaddr_in6*)_data.ptr();
 		addr->sin6_port = htons(port);
 	}
 	else if (_type == IPv4) {
-		sockaddr_in* addr = (sockaddr_in*)data.ptr();
+		sockaddr_in* addr = (sockaddr_in*)_data.ptr();
 		addr->sin_port = htons(port);
 	}
 	return *this;
@@ -203,7 +203,7 @@ String InetAddress::host() const
 {
 	if (_type == IPv6)
 	{
-		sockaddr_in6* addr = (sockaddr_in6*)data.ptr();
+		sockaddr_in6* addr = (sockaddr_in6*)_data.ptr();
 		unsigned short* ip = (unsigned short*)&addr->sin6_addr;
 		return String(40, "%x:%x:%x:%x:%x:%x:%x:%x",
 			bytesSwapped(ip[0]), bytesSwapped(ip[1]), bytesSwapped(ip[2]), bytesSwapped(ip[3]),
@@ -211,12 +211,12 @@ String InetAddress::host() const
 	}
 	else if (_type == IPv4)
 	{
-		sockaddr_in* addr = (sockaddr_in*)data.ptr();
+		sockaddr_in* addr = (sockaddr_in*)_data.ptr();
 		byte* ip = (byte*)&addr->sin_addr;
 		return String(15, "%i.%i.%i.%i", ip[0], ip[1], ip[2], ip[3]);
 	}
 #ifndef _WIN32
-	sockaddr_un* addr = (sockaddr_un*)data.ptr();
+	sockaddr_un* addr = (sockaddr_un*)_data.ptr();
 	return addr->sun_path;
 #else
 	return "";
@@ -236,7 +236,7 @@ String InetAddress::toString() const
 
 bool InetAddress::operator==(const InetAddress& a)
 {
-	return _type == a._type && data == a.data;
+	return _type == a._type && _data == a._data;
 }
 
 Array<InetAddress> InetAddress::lookup(const String& host)
@@ -267,8 +267,8 @@ Array<InetAddress> InetAddress::lookup(const String& host)
 			a._type = IPv4;
 		else
 			a._type = IPv6;
-		a.data.resize((int)ai->ai_addrlen);
-		memcpy(a.data.ptr(), ai->ai_addr, ai->ai_addrlen);
+		a._data.resize((int)ai->ai_addrlen);
+		memcpy(a._data.ptr(), ai->ai_addr, ai->ai_addrlen);
 		if (!addresses.contains(a)) {
 			if (a._type == IPv4)
 				addresses.insert(0, a);
@@ -300,7 +300,7 @@ bool InetAddress::set(const String& host, int port)
 		int s = getaddrinfo(host, NULL, &hints, &info);
 		if (s != 0 || !info) {
 			printf("Cannot resolve %s\n", *host);
-			data.clear();
+			_data.clear();
 			return false;
 		}
 		addrinfo* inf = info;
@@ -310,23 +310,23 @@ bool InetAddress::set(const String& host, int port)
 				break;
 			}
 		}
-		data.resize((int)inf->ai_addrlen);
-		memcpy(data.ptr(), inf->ai_addr, inf->ai_addrlen);
+		_data.resize((int)inf->ai_addrlen);
+		memcpy(_data.ptr(), inf->ai_addr, inf->ai_addrlen);
 		if (inf->ai_family == AF_INET)
 		{
-			((sockaddr_in*)data.ptr())->sin_port = htons(port);
+			((sockaddr_in*)_data.ptr())->sin_port = htons(port);
 			_type = IPv4;
 		}
 		else if (inf->ai_family == AF_INET6)
 		{
-			((sockaddr_in6*)data.ptr())->sin6_port = htons(port);
+			((sockaddr_in6*)_data.ptr())->sin6_port = htons(port);
 			_type = IPv6;
 		}
 		freeaddrinfo(info);
 	}
 	else {
-		data.resize(sizeof(sockaddr_in));
-		sockaddr_in* addr = (sockaddr_in*)data.ptr();
+		_data.resize(sizeof(sockaddr_in));
+		sockaddr_in* addr = (sockaddr_in*)_data.ptr();
 		addr->sin_addr.s_addr = INADDR_ANY;
 		addr->sin_family = AF_INET;
 		addr->sin_port = htons(port);
@@ -367,12 +367,17 @@ HostPort parseHostPort(const String& u)
 
 bool InetAddress::set(const String& host)
 {
-	HostPort hp = parseHostPort(host);
+	String thehost = host;
+	int c = host.indexOf(':');
+	if (host[0] != '[' && c >= 0 && host.indexOf(':', c + 1) > 0)
+		thehost = '[' + host + ']';
+
+	HostPort hp = parseHostPort(thehost);
 	if(!hp.port && hp.host.contains('/'))
 	{
 #ifndef _WIN32
-		data.resize(sizeof(sockaddr_un));
-		sockaddr_un* a=(sockaddr_un*)data.ptr();
+		_data.resize(sizeof(sockaddr_un));
+		sockaddr_un* a=(sockaddr_un*)_data.ptr();
 		a->sun_family=AF_UNIX;
 		strcpy(a->sun_path, host.substring(0, min(107, host.length())));
 		_type = LOCAL;
