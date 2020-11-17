@@ -137,7 +137,7 @@ public:
 	/**
 	Sends the currently set headers and starts the message body.
 	*/
-	void sendHeaders();
+	bool sendHeaders();
 	/**
 	Writes the given text string to the message body.
 	*/
@@ -262,6 +262,7 @@ public:
 	}
 	void setUrl(const String& url)
 	{
+		_headersSent = false;
 		_url = url;
 	}
 	/**

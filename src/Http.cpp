@@ -312,9 +312,6 @@ HttpResponse Http::request(HttpRequest& request)
 	response.use(socket);
 	request.use(socket);
 
-	//socket.setOption(SOL_SOCKET, SO_SNDBUF, )
-	//socket.setOption(0xffff, 0x1001, 64000);
-
 	if (!socket.connect(url.host, url.port)) {
 		//printf("Cannot connect to %s : %i\n", *url.host, url.port);
 		socket.close();
@@ -501,7 +498,7 @@ bool HttpResponse::is(HttpResponse::StatusType code) const
 }
 
 
-void HttpMessage::sendHeaders()
+bool HttpMessage::sendHeaders()
 {
 	String s;
 	s << _command << "\r\n";
@@ -510,10 +507,13 @@ void HttpMessage::sendHeaders()
 		s << name << ": " << value << "\r\n";
 	}
 	s << "\r\n";
-	*_socket << s;
+	int sent = _socket->write(*s, s.length());
+	if (sent <= 0)
+		return false;
 	_headersSent = true;
 	_chunked = !_headers.has("Content-Length");
 	_status->totalSend = _chunked ? 0 : int(_headers["Content-Length"]);
+	return true;
 }
 
 bool HttpMessage::write()
@@ -531,9 +531,10 @@ void HttpMessage::write(const String& text)
 
 int HttpMessage::write(const char* buffer, int n)
 {
-	if(!_headersSent)
-		sendHeaders();
-	int sent = 0;
+	if (!_headersSent)
+		if (!sendHeaders())
+			return false;
+	int sent = n == 0 ? 1 : 0;
 	while (n > 0)
 	{
 		int m = min(n, SEND_BLOCK_SIZE);
