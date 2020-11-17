@@ -107,9 +107,8 @@ public:
 			Var msg = ws.receive(); // receive message and extract radius and speed
 			if (msg.ok())
 			{
-				printf("WS %s\n", *msg.string());
-				msg.read("r", Server::_r);
-				msg.read("v", Server::_v);
+				Server::_r = msg["r"] | Server::_r;
+				Server::_v = msg["v"] | Server::_v;
 				ws.send(Var("status", "ok"));
 			}
 		}

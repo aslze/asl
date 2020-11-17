@@ -31,7 +31,7 @@ int main(int narg, char* argv[])
 {
 	// Log a message to the console and to a file:
 
-	ASL_LOG_(INFO, "Starting demo");
+	ASL_LOG_I("Starting demo");
 
 	// Extraction of Path parts:
 
@@ -84,7 +84,7 @@ int main(int narg, char* argv[])
 	Directory::copy("newdata.txt", "newdata2.txt");
 	Directory::move("newdata2.txt", subdir);
 
-	ASL_LOG_(WARNING, "A subdirectory and files were created. Press a key to delete them.");
+	ASL_LOG_W("A subdirectory and files were created. Press a key to delete them.");
 
 	getchar(); // wait a Return key press (in the mean time you can check that the files were created)
 
