@@ -36,6 +36,7 @@ class Vec3_
 	Vec3_() {}
 	Vec3_(T x, T y, T z) : x(x), y(y), z(z) {}
 	Vec3_(const Vec3_& v): x(v.x), y(v.y), z(v.z) {}
+	Vec3_(const Vec2_<T>& v, T z) : x(v.x), y(v.y), z(z) {}
 	template<class T2>
 	Vec3_(const Vec3_<T2>& v) : x((T)v.x), y((T)v.y), z((T)v.z) {}
 	Vec3_(const T* v): x(v[0]), y(v[1]), z(v[2]) {}

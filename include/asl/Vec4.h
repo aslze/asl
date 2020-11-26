@@ -27,7 +27,7 @@ class Vec4_
  public:
 	Vec4_() {}
 	Vec4_(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
-	Vec4_(const Vec3& v, T w) : x(v.x), y(v.y), z(v.z), w(w) {}
+	Vec4_(const Vec3_<T>& v, T w) : x(v.x), y(v.y), z(v.z), w(w) {}
 	Vec4_(const Vec4_& v): x(v.x), y(v.y), z(v.z), w(v.w) {}
 	Vec4_(const T* v) : x(v[0]), y(v[1]), z(v[2]), w(v[3]) {}
 	template<class T2>
