@@ -157,8 +157,18 @@ void HttpMessage::put(const Array<byte>& data)
 
 void HttpMessage::put(const Var& body)
 {
-	put(Json::encode(body));
-	setHeader("Content-Type", "application/json");
+	if (header("Content-Type") == "application/x-www-form-urlencoded")
+	{
+		Dic<> dic;
+		foreach2(String & k, Var & v, body)
+			dic[encodeUrl(k)] = encodeUrl(v);
+		put(dic.join('&', '='));
+	}
+	else
+	{
+		put(Json::encode(body));
+		setHeader("Content-Type", "application/json");
+	}
 }
 
 void HttpMessage::put(const File& body)
