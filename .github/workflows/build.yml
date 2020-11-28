@@ -36,6 +36,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: doc
+      env:
+        DOCTOK: ${{ secrets.DOCTOK }}
       run: |
         sudo apt-get install doxygen
         cd ${{ github.workspace }}
@@ -50,5 +52,5 @@ jobs:
         cp -rf ../asl/build/doc/* .
         git add --all
         git commit -m "Update documentation" -a
-        git push https://aslze:${{ secrets.GITHUB_TOKEN }}@github.com/aslze/asl-doc.git
+        git push https://aslze:$DOCTOK@github.com/aslze/asl-doc.git
         
