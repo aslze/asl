@@ -50,5 +50,5 @@ jobs:
         cp -rf ../asl/build/doc/* .
         git add --all
         git commit -m "Update documentation" -a
-        git push
+        git push https://aslze:${{ secrets.GITHUB_TOKEN }}@github.com/asl-doc.git
         
