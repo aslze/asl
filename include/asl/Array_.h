@@ -32,6 +32,7 @@ class Array_
 {
 protected:
 	T _a[N];
+	operator void* () { return NULL; }
 public:
 	Array_()
 	{}
@@ -39,7 +40,7 @@ public:
 	Array_(const Array_<K, N>& b)
 	{
 		for(int i=0; i<length(); i++)
-			_a[i]=b[i];
+			_a[i]=(T)b[i];
 	}
 	Array_(const Array_& b)
 	{
@@ -59,6 +60,12 @@ public:
 #endif
 	~Array_()
 	{}
+
+	template<class T2>
+	Array_<T2, N> with() const
+	{
+		return Array_<T2, N>(*this);
+	}
 
 	Array<T> array() const
 	{
@@ -92,22 +99,26 @@ public:
 	/** Returns a pointer to the base of the array */
 	operator const T*() const {return &_a[0];}
 	operator T*() {return &_a[0];}
-	operator const void*() const
-	{
-		return &_a[0];
-	}
-	operator void*()
-	{
-		return &_a[0];
-	}
+
 	/** Tests for equality of all elements of both arrays*/
 	bool operator==(const Array_& b) const
 	{
 		for(int i=0; i<N; i++)
-			if(b._a[i] != _a[i])
+			if(_a[i] != b._a[i])
 				return false;
 		return true;
 	}
+
+	bool operator!=(const Array_& b) const { return !(*this == b); }
+
+	bool operator<(const Array_& b) const
+	{
+		for (int i = 0; i < N; i++)
+			if (_a[i] < b._a[i])
+				return true;
+		return false;
+	}
+
 	/** Returns the element at index i */
 	const T& operator[](int i) const
 	{
@@ -215,7 +226,6 @@ String Array_<T, N>::join(const String& sep) const
 	for(int i=1; i<N; i++) {s += sep; String v=_a[i]; s += (v);}
 	return s;
 }
-
 
 /**
 Creates an array with the 2 elements given as arguments (there are overloads from 1 to 6 elements)

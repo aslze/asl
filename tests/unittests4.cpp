@@ -51,6 +51,11 @@ ASL_TEST(Matrix4)
 					ASL_APPROX(q1, q2, EPS);
 					ASL_APPROX(q1.matrix(), q2.matrix(), EPS);
 				}
+
+	m1 = Matrix4d::translate(1, 2, 3) * mrot;
+	Matrix4d mi = m1.inverse();
+	ASL_APPROX(mi * m1, Matrix4d::identity(), EPS);
+	ASL_APPROX(mi.inverse(), m1, EPS);
 }
 
 ASL_TEST(Uuid)

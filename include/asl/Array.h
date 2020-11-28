@@ -125,6 +125,19 @@ public:
 	}
 #endif
 	~Array() {if(_a && --d().rc==0) free();}
+
+	/**
+	Returns a copy of this array with all element converted to another type
+	*/
+	template<class K>
+	Array<K> with() const
+	{
+		Array<K> b(length());
+		for (int i = 0; i < length(); i++)
+			b[i] = (K)_a[i];
+		return b;
+	}
+
 	struct Enumerator
 	{
 		Array<T>& a;
@@ -191,7 +204,21 @@ public:
 				return false;
 		return true;
 	}
+
 	bool operator!=(const Array&b) const { return !(*this == b); }
+
+	bool operator<(const Array& b) const
+	{
+		int n = min(length(), b.length());
+		bool eq = true;
+		for (int i = 0; i < n; i++)
+			if (_a[i] < b._a[i])
+				return true;
+			else if (_a[i] != b._a[i])
+				eq = false;
+		return eq? length() < b.length() : false;
+	}
+
 	/**
 	Returns the element at index i
 	*/

@@ -7,18 +7,15 @@
 #include <asl/Map.h>
 #include <asl/String.h>
 #include <asl/Var.h>
+#include <asl/util.h>
 
 namespace asl {
 
+class HttpMessage;
 class HttpResponse;
 class HttpRequest;
 class Http;
 class File;
-
-struct HttpProgress
-{
-	virtual void operator()(int percent) {}
-};
 
 struct Url
 {
@@ -48,6 +45,24 @@ String ASL_API decodeUrl(const String& params);
 
 
 /**
+
+*/
+struct HttpStatus
+{
+	int sent;
+	int received;
+	int totalSend;
+	int totalReceive;
+};
+
+struct HttpSink
+{
+	virtual int write(byte* p, int n) { return 0; }
+	virtual void use(HttpMessage* m) {}
+	virtual void init(int n) {}
+};
+
+/**
 Base class of HttpRequest and HttpResponse with common functionality.
 */
 
@@ -56,15 +71,6 @@ class ASL_API HttpMessage
 	friend class Http;
 public:
 	HttpMessage();
-	HttpMessage(const Dic<>& headers);
-	HttpMessage(Socket& s);
-	/**
-	Returns the value of the specified header
-	*/
-	String operator[] (const String& header) const
-	{
-		return _headers.get(header, "");
-	}
 	/**
 	Adds a message header with name `header` and value `value`
 	*/
@@ -99,6 +105,7 @@ public:
 	Sets the body of the message as a text string.
 	*/
 	void put(const String& body);
+
 	void put(const char* body) { put(Array<byte>((const byte*)body, (int)strlen(body))); }
 	/**
 	Sets the body of the message as a JSON document.
@@ -126,11 +133,11 @@ public:
 	*/
 	Var data() const { return json(); }
 
-	void write();
+	bool write();
 	/**
 	Sends the currently set headers and starts the message body.
 	*/
-	void sendHeaders();
+	bool sendHeaders();
 	/**
 	Writes the given text string to the message body.
 	*/
@@ -146,10 +153,14 @@ public:
 	/**
 	Sends the content of the given file as the message body and sets the content-length header
 	*/
-	void putFile(const String& path, int begin = 0, int end = 0);
+	bool putFile(const String& path, int begin = 0, int end = 0);
 
 	operator String() const { return text(); }
 	operator Var() const { return data(); }
+
+	HttpMessage& onProgress(const Function<void, const HttpStatus&>& f) { _progress = f; return *this; }
+
+	void useSink(const Shared<HttpSink>& s) { _sink = s; _sink->use(this); }
 
 protected:
 	void readHeaders();
@@ -158,10 +169,12 @@ protected:
 	Dic<> _headers;
 	Array<byte> _body;
 	mutable Socket* _socket;
-	HttpProgress* _progress;
+	Function<void, const HttpStatus&> _progress;
+	Shared<HttpSink> _sink;
 	bool _fileBody;
 	bool _chunked;
 	bool _headersSent;
+	Shared<HttpStatus> _status;
 };
 
 
@@ -188,7 +201,10 @@ public:
 	/**
 	Constructs an HttpRequest with the given method and headers
 	*/
-	HttpRequest(const String& method, const String& url, const Dic<>& headers) : HttpMessage(headers), _method(method), _url(url) { init(); }
+	HttpRequest(const String& method, const String& url, const Dic<>& headers) : _method(method), _url(url)
+	{
+		_headers = headers; init();
+	}
 	/**
 	Constructs an HttpRequest with the given method and body
 	*/
@@ -198,9 +214,13 @@ public:
 	Constructs an HttpRequest with the given method, headers and body
 	*/
 	template<class T>
-	HttpRequest(const String& method, const String& url, const T& data, const Dic<>& headers) : HttpMessage(headers), _method(method), _url(url) { put(data); init(); }
-	HttpRequest(Socket& s) : HttpMessage(s)
+	HttpRequest(const String& method, const String& url, const T& data, const Dic<>& headers) : _method(method), _url(url)
 	{
+		_headers = headers; put(data); init();
+	}
+	HttpRequest(Socket& s)
+	{
+		_socket = &s;
 		init();
 		read();
 	}
@@ -242,6 +262,7 @@ public:
 	}
 	void setUrl(const String& url)
 	{
+		_headersSent = false;
 		_url = url;
 	}
 	/**
@@ -397,7 +418,15 @@ String content = "My New File!\n";
 auto res = Http::post("https://content.dropboxapi.com/1/files_put/auto/myfile.txt", content, Dic<>("Authorization", "Bearer ..."));
 ~~~
 
-Using IPv6 addresses is supported with square brackets in the host part `[ipv6]:port`:
+To download larger files you can use the download function, which saves directly to a file, instead of loading into a large memory buffer.
+
+~~~
+Http::download("http://someserver/some/large/file.zip", "./file.zip", [=](const HttpStatus& s) {
+	printf("\r%i / %i bytes (%.0f %%)   ", s.received, s.totalReceive, 100.0 * s.received / s.totalReceive);
+});
+~~~
+
+Using **IPv6** addresses is supported with square brackets in the host part `[ipv6]:port`:
 
 ~~~
 auto res = Http::get("http://[::1]:80/path");
@@ -426,7 +455,9 @@ public:
 		return request(req);
 	}
 
-	/** Sends an HTTP POST request for the given url with the given data and returns the response. */
+	/** Sends an HTTP POST request for the given url with the given data and returns the response. If body is a
+	File and headers contain `Content-Type` `multipart/form-data`, the file will be uploaded as an HTML form's file item
+	*/
 	template<class T>
 	static HttpResponse post(const String& url, const T& body, const Dic<>& headers = Dic<>())
 	{
@@ -448,8 +479,22 @@ public:
 		HttpRequest req("PATCH", url, body, headers);
 		return request(req);
 	}
-};
 
+	/**
+	Type for HTTP progress callbacks 
+	*/
+	typedef Function<void, const HttpStatus&> Progress;
+	
+	/**
+	* Downloads the given URL to the specified local path, optionally notifying progress
+	*/
+	static bool download(const String& url, const String& path, const Function<void, const HttpStatus&>& f = Progress(), const Dic<>& headers = Dic<>());
+
+	/**
+	* Uploads to the given URL the file specified, optionally notifying progress.
+	*/
+	static bool upload(const String& url, const String& path, const Dic<>& headers = Dic<>(), const Function<void, const HttpStatus&>& f = Progress());
+};
 
 
 }

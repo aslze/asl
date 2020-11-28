@@ -79,15 +79,15 @@ public:
 	/**
 	Returns the contents of a directory
 	*/
-	const Array<File>& items(const String& which="*", ItemType t=ALL);
+	const Array<File> items(const String& which="*", ItemType t=ALL);
 	/**
 	Returns the files in a directory
 	*/
-	const Array<File>& files(const String& which="*") {return items(which, FILE);}
+	const Array<File> files(const String& which="*") {return items(which, FILE);}
 	/**
 	Returns the subdirectories of a directory
 	*/
-	const Array<File>& subdirs(const String& which="*") {return items(which, DIRE);}
+	const Array<File> subdirs(const String& which="*") {return items(which, DIRE);}
 	static FileInfo getInfo(const String& path);
 	/**
 	Returns the current working directory

@@ -77,9 +77,8 @@ void Server::serve(HttpRequest& request, HttpResponse& response)
 	else if (request.is("PUT", "/conf"))
 	{
 		Var data = request.data();
-		printf("HTTP %s\n", *data.string());
-		if (data.has("r")) _r = data["r"];
-		if (data.has("v")) _v = data["v"];
+		_r = data["r"] | _r;
+		_v = data["v"] | _v;
 		response.put(Var("status", "OK"));
 		return;
 	}
@@ -101,24 +100,16 @@ public:
 	void serve(WebSocket& ws)
 	{
 		printf("New client: %i\n", clients().length());
-		while (1) {
-			if( ws.wait() )
+		while (!ws.closed() && !_requestStop)
+		{
+			if (!ws.waitData())
+				continue;
+			Var msg = ws.receive(); // receive message and extract radius and speed
+			if (msg.ok())
 			{
-				if (ws.closed())
-					break;
-				Var msg = ws.receive(); // receive message and extract radius and speed
-				if (msg.ok())
-				{
-					printf("WS %s\n", *msg.string());
-					if (msg.has("r"))
-						Server::_r = msg["r"];
-					if (msg.has("v"))
-						Server::_v = msg["v"];
-					ws.send(Var("status", "ok"));
-				}
-			}
-			if (ws.closed()) {
-				break;
+				Server::_r = msg["r"] | Server::_r;
+				Server::_v = msg["v"] | Server::_v;
+				ws.send(Var("status", "ok"));
 			}
 		}
 		printf("Client out: %i (code %i)\n", clients().length()-1, ws.code());

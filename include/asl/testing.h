@@ -20,11 +20,22 @@ int addTest(const char* name, void (*func)());
 Runs the test named `name`.
 */
 bool runTest(const char* name);
+/**
+Runs all tests and returns true if all succeded; prints results to console or appends them to `testResult` on Android
+*/
+bool runAllTests();
 extern asl::String testResult;
 struct TestInfo { const char* name; void (*func)(); };
 extern TestInfo tests[255];
 extern int numTests;
 extern bool testFailed;
+extern bool testsFailed;
+
+#ifndef __ANDROID__
+#define ASL_PRINT_TEST_RESULT(name, result)
+#else
+#define ASL_PRINT_TEST_RESULT(name, result) asl::testResult << name << ": " << (result ? "OK\n" : "FAILED\n");
+#endif
 
 /** 
 Add support for testing in this executable (use only once in the sources for one executable).
@@ -60,8 +71,10 @@ bool runTest(const char* name)\
 bool runAllTests()\
 {\
 	for (int i = 0; i<asl::numTests; i++) { \
-		printf("Test %s:\n", asl::tests[i].name); \
-		printf("----------------> %s\n\n", asl::runTest(asl::tests[i].name)? "OK" : "FAILED"); \
+		const char* name = asl::tests[i].name;\
+		bool result = asl::runTest(name); \
+		printf("Test %s:\n----------------> %s\n\n", name, result? "OK" : "FAILED"); \
+		ASL_PRINT_TEST_RESULT(name, result); \
 	}\
 	return !asl::testsFailed;\
 }\
@@ -122,20 +135,21 @@ double distance(const Quaternion_<T>& a, const Quaternion_<T>& b)
 }
 #endif
 
+inline String _toStr_(const String& s) { return s; }
 
 #undef ASL_ASSERT
 
 #ifdef __ANDROID__
 #define ASL_ASSERT(x) if(!(x)) { testResult << String(0, "\n%s: %i\nFailed: '%s'\n\n", __FILE__, __LINE__, #x); }
 
-#define ASL_CHECK(x, op, y) if(!((x) op (y))) { testResult << String(0, "\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, #y, *String(x)); }
+#define ASL_CHECK(x, op, y) if(!((x) op (y))) { testResult << String(0, "\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, #y, *_toStr_(x)); }
 #else
 
 /** 
 Check that the argument is true.
 @hideinitializer
 */
-#define ASL_ASSERT(x) if(!(x)) { printf("\n%s: %i\n\n* Failed: '%s'\n\n", __FILE__, __LINE__, #x); testFailed = true;}
+#define ASL_ASSERT(x) if(!(x)) { printf("\n%s(%i): error: '%s'\n\n", __FILE__, __LINE__, #x); testFailed = true;}
 
 /** 
 Check a condition with the given operator and operands.
@@ -144,7 +158,7 @@ ASL_CHECK(sqrt(x), >=, 0);
 ~~~
 @hideinitializer
 */
-#define ASL_CHECK(x, op, y) if(!((x) op (y))) { printf("\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, #y, *String(x)); testFailed = true;}
+#define ASL_CHECK(x, op, y) if(!((x) op (y))) { printf("\n%s(%i): error: Expected '%s' %s '%s' but it is %s\n\n", __FILE__, __LINE__, #x, #op, *String(y), *_toStr_(x)); testFailed = true;}
 #endif
 
 /** 

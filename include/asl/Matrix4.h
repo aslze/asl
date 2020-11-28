@@ -26,6 +26,8 @@ class Matrix4_
 {
 	T a[4][4]; // row-major
  public:
+	bool isRowMajor() const { return true; }
+
 	Matrix4_() {}
 	/**
 	Returns the element at row `i`, column `j`.
@@ -90,6 +92,12 @@ class Matrix4_
 		a[3][0] = m[3]; a[3][1] = m[7]; a[3][2] = m[11]; a[3][3] = m[15];
 	}
 
+	template<class T2>
+	Matrix4_<T2> with() const
+	{
+		return Matrix4_<T2>(*this);
+	}
+
 	/**
 	Returns this matrix transposed
 	*/
@@ -100,6 +108,8 @@ class Matrix4_
 		a[0][2], a[1][2], a[2][2], a[3][2],
 		a[0][3], a[1][3], a[2][3], a[3][3]);
 	}
+
+	bool isColmajor() const { return false; }
 	/**
 	Returns this matrix plus `B`
 	*/
@@ -222,6 +232,28 @@ class Matrix4_
 
 typedef Matrix4_<float> Matrix4;
 typedef Matrix4_<double> Matrix4d;
+
+/**
+Returns an orthonormal approximation of this transform matrix
+\ingroup Math3D
+*/
+template <class T>
+asl::Matrix4_<T> orthonormalize(const asl::Matrix4_<T>& m)
+{
+	Vec3_<T> v1 = m.column3(0).normalized();
+	Vec3_<T> v2 = m.column3(1).normalized();
+	Vec3_<T> v3 = m.column3(2).normalized();
+	Vec3_<T> x = v2 ^ v3;
+	Vec3_<T> y = v3 ^ v1;
+	Vec3_<T> z = v1 ^ v2;
+	v1 += x;
+	v2 += y;
+	v3 += z;
+	x = (v2 ^ v3).normalized();
+	y = (v3 ^ x).normalized();
+	z = (x ^ y).normalized();
+	return asl::Matrix4_<T>(x, y, z, m.column3(3));
+}
 
 }
 
@@ -359,21 +391,16 @@ Vec3_<T> Matrix4_<T>::operator%(const Vec3_<T>& p) const
 template<class T>
 Matrix4_<T> Matrix4_<T>::inverse() const
 {
-	T det = a[0][0]*a[1][1]*a[2][2]-a[0][0]*a[2][1]*a[1][2]-a[1][0]*a[0][1]*a[2][2]+
-		a[1][0]*a[2][1]*a[0][2]+a[2][0]*a[0][1]*a[1][2]-a[2][0]*a[1][1]*a[0][2];
-
-	T x = -a[0][1]*a[1][2]*a[2][3]+a[0][1]*a[1][3]*a[2][2]+a[1][1]*a[0][2]*a[2][3]-
-		a[1][1]*a[0][3]*a[2][2]-a[2][1]*a[0][2]*a[1][3]+a[2][1]*a[0][3]*a[1][2];
-	T y = a[0][0]*a[1][2]*a[2][3]-a[0][0]*a[1][3]*a[2][2]-a[1][0]*a[0][2]*a[2][3]+
-		a[1][0]*a[0][3]*a[2][2]+a[2][0]*a[0][2]*a[1][3]-a[2][0]*a[0][3]*a[1][2];
-	T z = -a[0][0]*a[1][1]*a[2][3]+a[0][0]*a[1][3]*a[2][1]+a[1][0]*a[0][1]*a[2][3]-
-		a[1][0]*a[0][3]*a[2][1]-a[2][0]*a[0][1]*a[1][3]+a[2][0]*a[0][3]*a[1][1];
+	T d = a[0][0] * (a[1][1] * a[2][2] - a[1][2] * a[2][1]) + a[1][0] * (a[0][2] * a[2][1] - a[0][1] * a[2][2]) + a[2][0] * (a[0][1] * a[1][2] - a[0][2] * a[1][1]);
+	T x = a[0][1] * (a[1][3] * a[2][2] - a[1][2] * a[2][3]) + a[1][1] * (a[0][2] * a[2][3] - a[0][3] * a[2][2]) + a[2][1] * (a[0][3] * a[1][2] - a[0][2] * a[1][3]);
+	T y = a[0][0] * (a[1][2] * a[2][3] - a[1][3] * a[2][2]) + a[1][0] * (a[0][3] * a[2][2] - a[0][2] * a[2][3]) + a[2][0] * (a[0][2] * a[1][3] - a[0][3] * a[1][2]);
+	T z = a[0][0] * (a[1][3] * a[2][1] - a[1][1] * a[2][3]) + a[1][0] * (a[0][1] * a[2][3] - a[0][3] * a[2][1]) + a[2][0] * (a[0][3] * a[1][1] - a[0][1] * a[1][3]);
 
 	Matrix4_<T> m(
-		-(-a[1][1] * a[2][2] + a[2][1] * a[1][2]), -a[0][1] * a[2][2] + a[2][1] * a[0][2], a[0][1] * a[1][2] - a[1][1] * a[0][2], x,
-		-a[1][0] * a[2][2] + a[2][0] * a[1][2], -(-a[0][0] * a[2][2] + a[2][0] * a[0][2]), -(a[0][0] * a[1][2] - a[1][0] * a[0][2]), y,
-		-(-a[1][0] * a[2][1] + a[2][0] * a[1][1]), -a[0][0] * a[2][1] + a[2][0] * a[0][1], a[0][0] * a[1][1] - a[1][0] * a[0][1], z);
-	m *= 1/det;
+		a[1][1] * a[2][2] - a[1][2] * a[2][1], a[0][2] * a[2][1] - a[0][1] * a[2][2], a[0][1] * a[1][2] - a[0][2] * a[1][1], x,
+		a[1][2] * a[2][0] - a[1][0] * a[2][2], a[0][0] * a[2][2] - a[0][2] * a[2][0], a[0][2] * a[1][0] - a[0][0] * a[1][2], y,
+		a[1][0] * a[2][1] - a[1][1] * a[2][0], a[0][1] * a[2][0] - a[0][0] * a[2][1], a[0][0] * a[1][1] - a[0][1] * a[1][0], z);
+	m *= T(1)/d;
 	m(3, 3) = 1;
 	return m;
 }

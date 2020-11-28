@@ -150,12 +150,15 @@ namespace asl {
 	Process::~Process()
 	{
 		if (_ready) {
-			CloseHandle(_pipe_in[0]);
+			if (!_ok)
+			{
+				CloseHandle(_pipe_in[0]);
+				CloseHandle(_pipe_out[1]);
+				CloseHandle(_pipe_err[1]);
+			}
+			CloseHandle(_pipe_in[1]);
 			CloseHandle(_pipe_out[0]);
 			CloseHandle(_pipe_err[0]);
-			CloseHandle(_pipe_in[1]);
-			CloseHandle(_pipe_out[1]);
-			CloseHandle(_pipe_err[1]);
 		}
 	}
 

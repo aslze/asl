@@ -314,5 +314,8 @@ public:
 	T read() { T x; *this >> x; return x; }
 };
 
+template<> template<>
+Array<String> Array<File>::with<String>() const;
+
 }
 #endif

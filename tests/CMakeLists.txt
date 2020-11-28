@@ -33,6 +33,7 @@ set(TESTS
 	Matrix4
 	Uuid
 	StreamBuffer
+	Function
 )
 
 foreach(T ${TESTS})

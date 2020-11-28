@@ -148,8 +148,6 @@ ASL_TEST(CmdArgs)
 	Array<const char*> argv;
 	argv << "convert" << "-format" << "jpeg" << "-fast" << "-q" << "85" <<
 		"-k" << "k1" << "-k" << "k2" << "-gray" << "on" << "-rgb" << "no" << "-progressive!" << "-scale" << "-1.0" << "image1.png" << "image2.bmp";
-	//const char* argvv[] = {"convert" , "-format" , "jpeg" , "-fast" , "-q" , "85" ,
-	//	"-k" , "k1" , "-k" , "k2" , "-gray" , "on" , "-rgb" , "no", "-progressive!", "image1.png" , "image2.bmp"};
 
 	CmdArgs args(argv.length(), (char**)argv.ptr());
 
@@ -216,9 +214,14 @@ ASL_TEST(Array)
 	ASL_ASSERT(!a);
 
 	Array<String> names;
-	names << "Alvaro" << "Segura";
+	names << "Homer" << "Simpson";
 
-	ASL_ASSERT( names.join(",") == "Alvaro,Segura" );
+	ASL_ASSERT( names.join(",") == "Homer,Simpson" );
+
+#ifdef ASL_HAVE_LAMBDA
+	names.sortBy([](const String& s) { return s.substring(1); }); // sort by the strings skipping first char
+	ASL_ASSERT(names.join(",") == "Simpson,Homer");
+#endif
 
 #ifdef ASL_HAVE_INITLIST
 	Array<int> c = { 1, 2 };
@@ -427,6 +430,8 @@ ASL_TEST(Var)
 	ASL_ASSERT(a.has("x", Var::NUMBER));
 
 	ASL_ASSERT((a("z") | a["x"]) == 3);
+
+	ASL_CHECK((a("w") | 35), ==, 35);
 
 	Var a2 = a.clone();
 	ASL_ASSERT(a2 == a);

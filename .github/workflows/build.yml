@@ -2,7 +2,7 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ master, test-ci ]
+    branches: [ master, develop, test-ci ]
   pull_request:
     branches: [ master ]
 
@@ -30,3 +30,16 @@ jobs:
       run: |
         cd build
         ctest --output-on-failure
+
+  doc:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: doc
+      run: |
+        apt install doxygen
+        cd ${{ github.workspace }}
+        mkdir build
+        cd build
+        cmake ..
+        make DOC

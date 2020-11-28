@@ -10,6 +10,8 @@
 Main definitions.
 */
 
+#define ASL_VERSION 11000
+
 #ifdef _WIN32
 #ifndef _CRT_SECURE_NO_DEPRECATE
  #define _CRT_SECURE_NO_DEPRECATE
@@ -126,18 +128,24 @@ struct Exception {};
 	typedef unsigned long long ULong;
 #endif
 
+extern double ASL_API bigval;
+
+/**
+Returns +infinity
+*/
+inline float infinity()
+{
+	return float(bigval);
+}
+
 /**
 Returns a NaN value
 */
 inline float nan()
 {
-	return float((1e100*1e100))*0.0f;
+	static const float n = infinity() / infinity();
+	return n;
 }
-
-/**
-Returns +infinity
-*/
-ASL_API float infinity();
 
 /** Returns `x` squared */
 template <class T>
@@ -149,7 +157,7 @@ inline T fract(T x) {return x - floor(x);}
 
 /** Clamps the value of x to make it lie inside the [a,b] interval */
 template <class T, class C>
-inline T clamp(T x, C a, C b) {if (x<a) return a; else if (x>b) return b; return x;}
+inline T clamp(T x, C a, C b) { const T t = x < a ? a : x; return t > b ? b : t; }
 
 /** Returns `x` degrees converted to radians */
 template <class T>
@@ -381,7 +389,7 @@ struct IsLess {
 template<class T, class F>
 struct IsMore {
 	IsMore(const F& f) : f(f) {}
-	bool operator()(const T& a, const T& b) const { return f(a) > f(b); }
+	bool operator()(const T& a, const T& b) const { return f(b) < f(a); }
 	F f;
 };
 

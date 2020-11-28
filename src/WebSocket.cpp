@@ -214,7 +214,7 @@ bool WebSocket::connect(const String& uri, int port)
 	Dic<String> headers;
 	while (line = _socket.readLine(), line != "\r")
 	{
-		line = line.trim();
+		line.trim();
 		int i = line.indexOf(':');
 		if (i<0) {
 			_socket.close();

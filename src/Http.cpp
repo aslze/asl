@@ -7,6 +7,9 @@
 #include <asl/TlsSocket.h>
 #include <ctype.h>
 
+#define SEND_BLOCK_SIZE 128000
+#define RECV_BLOCK_SIZE 16000
+
 namespace asl {
 
 String decodeUrl(const String& q0)
@@ -91,20 +94,41 @@ Url parseUrl(const String& url)
 	return u;
 }
 
-
-HttpMessage::HttpMessage() : _socket(NULL), _progress(NULL), _fileBody(false), _chunked(false)
+struct HttpSinkArray : public HttpSink
 {
-	_headersSent = false;
-}
+	Array<byte>* a;
+	HttpSinkArray(Array<byte>& a) : a(&a) {}
+	int write(byte* p, int n)
+	{
+		a->append(p, n);
+		return n;
+	}
+	void use(HttpMessage* m)
+	{
+		a = (Array<byte>*)&m->body();
+	}
+	void init(int n)
+	{
+		a->reserve(n);
+	}
+};
 
-HttpMessage::HttpMessage(const Dic<>& headers) : _socket(NULL), _headers(headers), _progress(NULL), _fileBody(false), _chunked(false)
+struct HttpSinkFile : public HttpSink
 {
-	_headersSent = false;
-}
+	File* file;
+	HttpSinkFile(File& f) : file(&f) {}
+	int write(byte* p, int n)
+	{
+		return file->write(p, n);
+	}
+};
 
-HttpMessage::HttpMessage(Socket& s) : _socket(&s), _progress(NULL), _fileBody(false), _chunked(false)
+HttpMessage::HttpMessage() : _socket(NULL), _fileBody(false), _chunked(false)
 {
+	_sink = new HttpSinkArray(_body);
 	_headersSent = false;
+	_status = new HttpStatus;
+	memset(&*_status, 0, sizeof(*_status));
 }
 
 String HttpMessage::text() const
@@ -133,8 +157,18 @@ void HttpMessage::put(const Array<byte>& data)
 
 void HttpMessage::put(const Var& body)
 {
-	put(Json::encode(body));
-	setHeader("Content-Type", "application/json");
+	if (header("Content-Type") == "application/x-www-form-urlencoded")
+	{
+		Dic<> dic;
+		foreach2(String & k, Var & v, body)
+			dic[encodeUrl(k)] = encodeUrl(v);
+		put(dic.join('&', '='));
+	}
+	else
+	{
+		put(Json::encode(body));
+		setHeader("Content-Type", "application/json");
+	}
 }
 
 void HttpMessage::put(const File& body)
@@ -197,8 +231,7 @@ void HttpMessage::readBody()
 
 	bool chunked = header("Transfer-Encoding") == "chunked"; // Handle specially!!
 
-	_body.resize(size);
-	_body.clear();
+	_sink->init(size);
 
 	_socket->setBlocking(true);
 
@@ -211,13 +244,16 @@ void HttpMessage::readBody()
 	else if(!chunked)
 		return;
 
+	_status->totalReceive = size;
+	_status->received = 0;
+
 	while (!end)
 	{
 		int av = _socket->available();
 		if (av < 0 || !_socket->waitInput()) {
 			break;
 		}
-		byte buffer[16384];
+		byte buffer[RECV_BLOCK_SIZE];
 		int maxToRead = _socket->available(), bytesRead = 0;
 		if (chunked)
 		{
@@ -232,8 +268,10 @@ void HttpMessage::readBody()
 				return;
 			}
 			currentsize += bytesRead;
-			//_progress(currentsize, totalsize);
-			_body.append(buffer, bytesRead);
+			_status->received = currentsize;
+			_sink->write(buffer, bytesRead);
+			if(_progress)
+				_progress(*_status);
 			maxToRead -= bytesRead;
 			if (size) {
 				size -= bytesRead;
@@ -251,31 +289,34 @@ void HttpMessage::readBody()
 				break;
 		}
 	}
+	printf("readbody end\n");
 }
 
 HttpRequest::~HttpRequest()
 {
-	//_socket->close();
 }
 
 HttpResponse Http::request(HttpRequest& request)
 {
 	Socket socket((Socket::Ptr)NULL);
-	HttpResponse response;
+	HttpResponse response(request);
+	response.setCode(0);
 
 	Url url = parseUrl(request.url());
+	bool hasPort = url.port != 0;
+
 	if (url.protocol == "https")
 	{
 #ifdef ASL_TLS
 		socket = TlsSocket();
-		if (url.port == 0) url.port = 443;
+		if (!hasPort) url.port = 443;
 #else
 		return response;
 #endif
 	}
 	else {
 		socket = Socket();
-		if (url.port == 0) url.port = 80;
+		if (!hasPort) url.port = 80;
 	}
 
 	response.use(socket);
@@ -292,12 +333,12 @@ HttpResponse Http::request(HttpRequest& request)
 	}
 
 	String title;
-	title << request.method() << ' ' << url.path << " HTTP/1.1\r\nHost: " << url.host << ':' << url.port;
+	title << request.method() << ' ' << url.path << " HTTP/1.1\r\nHost: " << url.host;
+	if (hasPort) title << ':' << url.port;
 	request._command = title;
-	request.sendHeaders();
 
-	if (request.body().length() != 0)
-		request.write();
+	if (!request.write())
+		return response;
 	
 	String line = socket.readLine();
 	if (!line) {
@@ -312,29 +353,31 @@ HttpResponse Http::request(HttpRequest& request)
 
 	response.setProto(parts[0]);
 	response.setCode(parts[1]);
-
 	response.readHeaders();
 
 	int code = response.code();
 
-	if (request.followRedirects())
+	if (request.followRedirects() && (code == 301 || code == 302 || code == 307 || code == 308)) // 303 ?
 	{
-		if (code == 301 || code == 302 || code == 307 || code == 308) // 303 ?
-		{
-			socket.close();
-			String url = response.header("Location");
-			HttpRequest req(request.method(), url, request.headers());
-			int n = request.recursion() + 1;
-			if (n < 4) {
-				req.setRecursion(n);
-				return Http::request(req);
-			}
-			else {
-				response.setCode(421);
-				return response;
-			}
+		socket.close();
+		String url = response.header("Location");
+		HttpRequest req(request);
+		req.setUrl(url);
+		Http::Progress progress = req._progress;
+		req.onProgress(progress);
+		int n = request.recursion() + 1;
+		if (n < 4) {
+			req.setRecursion(n);
+			return Http::request(req);
+		}
+		else {
+			response.setCode(421);
+			return response;
 		}
 	}
+
+	response.onProgress(request._progress);
+	response.useSink(request._sink);
 
 	response.readBody();
 
@@ -434,9 +477,12 @@ HttpResponse::HttpResponse()
 	setCode(0);
 }
 
-HttpResponse::HttpResponse(const HttpRequest& r, const String& proto, int code):
-	HttpMessage(*r._socket)
+HttpResponse::HttpResponse(const HttpRequest& r, const String& proto, int code)
 {
+	_socket = r._socket;
+	_status = r._status;
+	_status->sent = 0;
+	_status->received = 0;
 	_proto = proto;
 	_headersSent = false;
 	setCode(200);
@@ -462,7 +508,7 @@ bool HttpResponse::is(HttpResponse::StatusType code) const
 }
 
 
-void HttpMessage::sendHeaders()
+bool HttpMessage::sendHeaders()
 {
 	String s;
 	s << _command << "\r\n";
@@ -471,43 +517,53 @@ void HttpMessage::sendHeaders()
 		s << name << ": " << value << "\r\n";
 	}
 	s << "\r\n";
-	*_socket << s;
+	int sent = _socket->write(*s, s.length());
+	if (sent <= 0)
+		return false;
 	_headersSent = true;
 	_chunked = !_headers.has("Content-Length");
+	_status->totalSend = _chunked ? 0 : int(_headers["Content-Length"]);
+	return true;
 }
 
-void HttpMessage::write()
+bool HttpMessage::write()
 {
-	if (!_headersSent)
-		sendHeaders();
-	if (_chunked)
-		*_socket << String(15, "%x\r\n", _body.length());
-	*_socket << _body;
-	if (_chunked)
-		*_socket << "\r\n";
+	if (_fileBody)
+		return putFile(_body);
+	else
+		return write((const char*)_body.ptr(), _body.length()) > 0;
 }
 
 void HttpMessage::write(const String& text)
 {
-	if(!_headersSent)
-		sendHeaders();
-	if (_chunked)
-		*_socket << String(15, "%x\r\n", text.length());
-	*_socket << text;
-	if (_chunked)
-		*_socket << "\r\n";
+	write(*text, text.length());
 }
 
 int HttpMessage::write(const char* buffer, int n)
 {
-	if(!_headersSent)
-		sendHeaders();
-	if (_chunked)
-		*_socket << String(15, "%x\r\n", n);
-	int m = _socket->write(buffer, n);
-	if (_chunked)
-		*_socket << "\r\n";
-	return m;
+	if (!_headersSent)
+		if (!sendHeaders())
+			return false;
+	int sent = n == 0 ? 1 : 0;
+	while (n > 0)
+	{
+		int m = min(n, SEND_BLOCK_SIZE);
+		if (_chunked)
+			*_socket << String(15, "%x\r\n", m);
+		int written = _socket->write(buffer, m);
+		if (written != m)
+			return sent;
+		_status->sent += written;
+		if (_progress)
+			_progress(*_status);
+
+		sent += written;
+		if (_chunked)
+			*_socket << "\r\n";
+		n -= m;
+		buffer += m;
+	}
+	return sent;
 }
 
 void HttpMessage::writeFile(const String& path, int begin, int end)
@@ -523,9 +579,12 @@ void HttpMessage::writeFile(const String& path, int begin, int end)
 	if (begin != end)
 		size = end - begin + 1;
 	int bytesSent = 0;
+	HttpStatus status;
+	status.sent = 0;
+	status.totalSend = (int)size;
 	while(n > 0 && bytesSent < (int)size)
 	{
-		char buf[16384];
+		char buf[RECV_BLOCK_SIZE];
 		n = file.read(buf, min((int)sizeof(buf), (int)size - bytesSent));
 		if (n > 0) {
 			int w = 0;
@@ -538,30 +597,80 @@ void HttpMessage::writeFile(const String& path, int begin, int end)
 	};
 }
 
-void HttpMessage::putFile(const String& path, int begin, int end)
+bool HttpMessage::putFile(const String& path, int begin, int end)
 {
+	File file(path);
+	if (!file.exists())
+	{
+		printf("file to upload not found %s\n", *path);
+		return false;
+	}
 	if (begin == 0 && end == 0 && !hasHeader("Content-Range"))
-		setHeader("Content-Length", File(path).size());
+		setHeader("Content-Length", file.size());
 	else
 	{
-		Long size = File(path).size();
+		Long size = file.size();
 		if (end == 0)
 			end = (int)size - 1;
 		if (end <= begin || begin < 0 || end > size)
 		{
 			setHeader("Content-Range", String::f("bytes */%lli", size));
-			return;
+			return false;
 		}
 		setHeader("Content-Length", end - begin + 1);
 		setHeader("Content-Range", String::f("bytes %i-%i/%lli", begin, end, size));
 	}
-	// if (multipart-form-data)
-	//  increase content-length
-	//  write Content-Type: multipart/form-data; boundary=abc
-	//  write --abc\r\n
-	//  write Content-Type: ...\r\n\r\n
+
+	bool multipart = header("Content-Type") == "multipart/form-data";
+
+	String boundary;
+
+	if (multipart)
+	{
+		boundary = "-----------";
+		for (int i = 0; i < 64; i++)
+			boundary += (char)random('0', '9');
+
+		String head = "--" + boundary + "\r\n" +
+			"Content-Disposition: form-data; name=\"files\"; filename=\"" + file.name() + "\"\r\n" +
+			"Content-Type: application/octet-stream\r\n\r\n";
+
+		setHeader("Content-Length", int(header("Content-Length")) + head.length() + boundary.length() + 8);
+		setHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
+
+		write(head);
+	}
 	writeFile(path, begin, end);
-	//  write --abc--\r\n
+	
+	if (multipart)
+	{
+		write("\r\n--" + boundary + "--\r\n");
+	}
+
+	return true;
+}
+
+bool Http::download(const String& url, const String& path, const Function<void, const HttpStatus&>& f, const Dic<>& headers)
+{
+	File file(path, File::WRITE);
+	if (!file)
+		return false;
+	HttpRequest req("GET", url, headers);
+	req.onProgress(f);
+	req.useSink(new HttpSinkFile(file));
+	HttpResponse res = request(req);
+	return res.ok();
+}
+
+bool asl::Http::upload(const String& url, const String& path, const Dic<>& headers, const Function<void, const HttpStatus&>& f)
+{
+	if (!File(path).exists())
+		return false;
+	HttpRequest req("POST", url, File(path), headers);
+	req.setHeader("Content-Type", "multipart/form-data");
+	req.onProgress(f);
+	HttpResponse res = request(req);
+	return res.ok();
 }
 
 }

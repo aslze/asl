@@ -60,7 +60,8 @@ public:
 #endif
 	operator int() const { return n; }
 	bool operator==(int m) const { return n == m; }
-	bool operator<(int m) const { return n<m; }
+	bool operator<(int m) const { return n < m; }
+	bool operator>(int m) const { return n > m; }
 	bool operator<=(int m) const { return n <= m; }
 };
 

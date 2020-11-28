@@ -293,8 +293,9 @@ class ASL_API Var
 	operator bool() const;
 	operator const char*() const;
 	const char* operator*() const {return (const char*)*this;}
-	/** Returns this var if it is defined or `v` otherwise */
-	const Var& operator|(const Var& v) const { return is(NONE) ? v : *this; }
+	/** Returns the left value if it is defined or the right otherwise */
+	template<class T>
+	Var operator|(const T& v) const { return is(NONE) ? Var(v) : *this; }
 
 	template<class T>
 	void read(const String& key, T& x) const { if (has(key)) x = (*this)[key]; }
@@ -352,6 +353,13 @@ class ASL_API Var
 	
 	Var operator()(const String& key) const { return has(key) ? (*this)[key] : Var(); }
 
+	/**
+	Gets a pointer to the property named `key` if it exists or a null pointer otherwise
+	*/
+	Var* getp(const String& key) { return has(key) ? &(*this)[key] : NULL; }
+
+	const Var* getp(const String& key) const { return has(key) ? &(*this)[key] : NULL; }
+
 	/** Sets the value of property `key` of this var to `v` (Useful for Var construction) */
 	template <class T>
 	Var& operator()(const char* key, const T& v) {(*this)[String(key)]=v; return *this;}
@@ -370,9 +378,15 @@ class ASL_API Var
 			return !strcmp((*s).ptr(), other.ss);
 		else if(_type == SSTRING && other._type == STRING)
 			return !strcmp(ss, (*other.s).ptr());
+		else if (_type == NUMBER || _type == FLOAT || _type == INT)
+		{
+			double x = *this;
+			return other == x;
+		}
 		else if(_type != other._type) return false;
 		switch(_type){
 			case NUMBER: return d==other.d;
+			case FLOAT: return d == other.d;
 			case INT: return i==other.i;
 			case BOOL: return b==other.b;
 			case STRING: return !strcmp((*s).ptr(), (*other.s).ptr());
@@ -398,6 +412,7 @@ class ASL_API Var
 		switch(_type){
 		case INT: return i==other;
 		case NUMBER: return d==other;
+		case FLOAT: return d == other;
 		default: return false;
 		}
 		return false;
@@ -407,6 +422,17 @@ class ASL_API Var
 		switch(_type){
 		case NUMBER: return d==other;
 		case INT: return i==other;
+		case FLOAT: return d == other;
+		default: return false;
+		}
+		return false;
+	}
+	bool operator==(float other) const
+	{
+		switch (_type) {
+		case NUMBER: return d == other;
+		case INT: return i == other;
+		case FLOAT: return d == other;
 		default: return false;
 		}
 		return false;

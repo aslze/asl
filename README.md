@@ -79,7 +79,7 @@ Do HTTP requests (you can post a body or send headers, too):
 ```cpp
 HttpResponse resp = Http::get("https://www.somewhere.com/page.xhtml");
 if(resp.code() != 200)
-	return -1;
+    return -1;
 String type = resp.header("Content-Type");
 String text = resp.text();
 ```
@@ -89,18 +89,18 @@ Or create HTTP services:
 ```cpp
 struct TimeServer : public HttpServer
 {
-	void serve(HttpRequest& req, HttpResponse& resp)
-	{
-		if(req.is("GET", "/time")
-		{
-			resp.put(Var("time", Date::now().toString()));
-		}
-		else
-		{
-			resp.put(Var("status", "error"));
-			resp.setCode(500);
-		}
-	}
+    void serve(HttpRequest& req, HttpResponse& resp)
+    {
+        if(req.is("GET", "/time")
+        {
+            resp.put(Var("time", Date::now().toString()));
+        }
+        else
+        {
+            resp.put(Var("status", "error"));
+            resp.setCode(500);
+        }
+    }
 };
 TimeServer server;
 server.bind(80);
@@ -159,7 +159,7 @@ Create threads (but you can also use lambdas):
 ```cpp
 class MyThread : public Thread
 {
-	void run() { do_stuff(); }
+    void run() { do_stuff(); }
 };
 
 MyThread thread;
@@ -224,9 +224,9 @@ Directory dir("some/dir");
 Array<File> files = dir.files("*.txt");
 foreach(File& file, files)
 {
-	String path = file.path();
-	Long size = file.size();
-	Date date = file.lastModified();
+    String path = file.path();
+    Long size = file.size();
+    Date date = file.lastModified();
 }
 ```
 
@@ -244,7 +244,7 @@ Start a subprocess and read its output:
 ```cpp
 Process p = Process::execute("someprogram.exe");
 if(p.success())
-	output = p.output();
+    output = p.output();
 ```
 
 Get the parent directory, file name and extension of a path:
@@ -269,7 +269,7 @@ double elapsed = t2 - t1; // should be around 0.5
 Log a message to the console and to a file:
 
 ```cpp
-ASL_LOG_(WARNING, "Only %i bytes available", bytesAvailable);
+ASL_LOG_W("Only %i bytes available", bytesAvailable);
 ```
 
 And much more.

@@ -21,6 +21,7 @@ struct SockClientThread : public Thread
 	{
 		_server->serve(_client);
 		_client.close();
+		--_server->_numClients;
 		delete this;
 	}
 };
@@ -45,6 +46,7 @@ SocketServer::SocketServer()
 	_requestStop = false;
 	_sequential = false;
 	_running = false;
+	_numClients = 0;
 }
 
 SocketServer::~SocketServer()
@@ -98,17 +100,18 @@ bool SocketServer::bindPath(const String& sname)
 void SocketServer::startLoop()
 {
 	int n;
-	_running = true;
 	do
 	{
-		if ((n = _sockets.waitInput(10)) > 0)
+		if ((n = _sockets.waitInput(2)) > 0)
 		{
 			for (int i = 0; i < n; i++)
 			{
 				Socket client = _sockets.activeAt(i).accept();
+				++_numClients;
 				if (_sequential) {
 					serve(client);
 					client.close();
+					--_numClients;
 				}
 				else
 					new SockClientThread(this, client);
@@ -117,7 +120,7 @@ void SocketServer::startLoop()
 		if(_requestStop || n < 0)
 		{
 			_running = false;
-			return;
+			break;
 		}
 		
 	}
@@ -126,6 +129,8 @@ void SocketServer::startLoop()
 
 void SocketServer::start(bool nonblocking)
 {
+	_running = true;
+
 	if(nonblocking) {
 		_thread = new SockServerThread(this);
 		_thread->start();
@@ -134,10 +139,16 @@ void SocketServer::start(bool nonblocking)
 		startLoop();
 }
 
-void SocketServer::stop()
+void SocketServer::stop(bool sync)
 {
 	_requestStop = true;
-	_sockets.close();
+	
+	if (sync)
+	{
+		do {
+			sleep(0.1);
+		} while (_running || _numClients > 0);
+	}
 }
 
 #ifdef ASL_TLS

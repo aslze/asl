@@ -99,14 +99,12 @@ bool File::remove()
 }
 
 #ifdef _WIN32
-
-#if !defined(ASL_ANSI)
-#define UNICODE
 #undef WIN32_FIND_DATA
 #undef FindFirstFile
 #undef FindNextFile
 #undef CreateDirectory
 #undef SetCurrentDirectory
+#ifndef ASL_ANSI
 #define WIN32_FIND_DATA WIN32_FIND_DATAW
 #define FindFirstFile FindFirstFileW
 #define FindNextFile FindNextFileW
@@ -115,6 +113,11 @@ bool File::remove()
 #define STR_PREFIX(x) L##x
 #define strcmpX wcscmp
 #else
+#define WIN32_FIND_DATA WIN32_FIND_DATAA
+#define FindFirstFile FindFirstFileA
+#define FindNextFile FindNextFileA
+#define CreateDirectory CreateDirectoryA
+#define SetCurrentDirectory SetCurrentDirectoryA
 #define STR_PREFIX(x) x
 #define strcmpX strcmp
 #endif
@@ -141,11 +144,11 @@ static FileInfo infoFor(const WIN32_FIND_DATA& data)
 	return info;
 }
 
-const Array<File>& Directory::items(const String& which, Directory::ItemType t)
+const Array<File> Directory::items(const String& which, Directory::ItemType t)
 {
 	_files.clear();
 	WIN32_FIND_DATA data;
-	String basedir = nat(_path) + '/';
+	String basedir = (_path.endsWith('/') || _path.endsWith('\\'))? nat(_path) : nat(_path) + '/';
 	HANDLE hdir = FindFirstFile(basedir + which, &data);
 	if(hdir == INVALID_HANDLE_VALUE)
 		return _files;
@@ -262,13 +265,13 @@ static bool match(const String& a, const String& patt)
 	return a.startsWith(patt.substring(0,i)) && a.endsWith(patt.substring(i+1));
 }
 
-const Array<File>& Directory::items(const String& which, Directory::ItemType t)
+const Array<File> Directory::items(const String& which, Directory::ItemType t)
 {
 	_files.clear();
 	DIR* d = opendir(_path != ""? _path : "/");
 	if(!d)
 		return _files;
-	String dir = _path+'/';
+	String dir = _path.endsWith('/')? _path : _path+'/';
 	bool wildcard = which.contains('*') && which != "*";
 	
 	while(dirent* entry=readdir(d))

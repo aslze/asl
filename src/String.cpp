@@ -861,7 +861,7 @@ int myltoa(Long x, char* s)
 		x = -x;
 	}
 	while (x != 0) {
-		ss[i++] = (x % 10) + '0';
+		ss[i++] = char(x % 10) + '0';
 		x = x / 10;
 	}
 	while (i > 0)

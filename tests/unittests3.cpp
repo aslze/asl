@@ -171,3 +171,37 @@ ASL_TEST(Date)
 		ASL_ASSERT(fabs(d - d2) < 1);
 	}
 }
+
+int add(int x, int y)
+{
+	return x + y;
+}
+
+struct Adder
+{
+	int z;
+	int operator()(int x, int y) { return x + y + z; }
+};
+
+ASL_TEST(Function)
+{
+#ifdef ASL_HAVE_LAMBDA
+	int base = 5;
+	Function<bool, int> isMultiple = [=](int x) { return x % base == 0; };
+
+	bool multiple = isMultiple(15);
+
+	ASL_ASSERT(isMultiple(15));
+	ASL_ASSERT(!isMultiple(7));
+#endif
+
+	Function<int, int, int> sum2 = &add;
+
+	ASL_CHECK(sum2(3, 5), == , 8);
+
+	Adder adder;
+	adder.z = 10;
+	Function<int, int, int> sum3 = adder;
+
+	ASL_CHECK(sum3(3, 5), == , 18);
+}

@@ -56,7 +56,7 @@ public:
 	InetAddress(const String& host, int port);
 	InetAddress(const String& host_port);
 	InetAddress(const InetAddress& a);
-	void resize(int n) { data.resize(n); }
+	void resize(int n) { _data.resize(n); }
 	bool set(const String& host, int port);
 	bool set(const String& host);
 	/**
@@ -75,9 +75,9 @@ public:
 	Returns the host IP as a string
 	*/
 	String host() const;
-	byte* ptr() {return data.ptr();}
-	const byte* ptr() const {return data.ptr();}
-	unsigned length() const {return data.length();}
+	byte* ptr() {return _data.ptr();}
+	const byte* ptr() const {return _data.ptr();}
+	unsigned length() const {return _data.length();}
 	/**
 	Returns the type IPv4 or IPv6 of this address
 	*/
@@ -88,7 +88,7 @@ public:
 	*/
 	static Array<InetAddress> lookup(const String& name);
 protected:
-	Array<byte> data;
+	Array<byte> _data;
 	Type _type;
 };
 
@@ -238,9 +238,19 @@ public:
 	*/
 	void skip(int n) { _()->skip(n); }
 	/**
-	Waits until there is incoming data in the socket for a maximum time
+	Waits until there is incoming data in the socket or it is disconnected for a maximum time, and
+	returns true if some of that happened before timeout
 	*/
-	bool waitInput(double timeout = 60) { return _()->waitInput(timeout); }
+	bool waitInput(double timeout = 2) { return _()->waitInput(timeout); }
+
+	/**
+	Waits until there is incoming data in the socket or it is disconnected for a maximum time, and
+	returns true only if there is data to read (false may mean no data or disconnection)
+	*/
+	bool waitData(double timeout = 2) { return waitInput(timeout) && !disconnected(); }
+	/**
+	Returns true if there was some communication error in this socket
+	*/
 	bool error() const { return _()->_error; }
 
 	/**
