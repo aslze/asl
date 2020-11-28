@@ -37,7 +37,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: doc
       run: |
-        #apt-get install doxygen
+        sudo apt-get install doxygen
         cd ${{ github.workspace }}
         mkdir build
         cd build
