@@ -44,11 +44,11 @@ jobs:
         cmake ..
         make DOC
         cd ../..
-        git config user.name "aslze"
         git clone -b gh-pages https://github.com/aslze/asl-doc
+        git config user.name "aslze"
         cp -rf asl/build/doc/* asl-doc
         cd asl-doc
         git add --all
-        git commit -m "Update documentation"
+        git commit -m "Update documentation" -a
         git push
         
