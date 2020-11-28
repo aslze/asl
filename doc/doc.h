@@ -31,7 +31,7 @@ __Utilities__:
 - Base64, hex encoding/decoding
 - Binary buffer endian-aware reading/writing
 - %Random number generator
-- Simple testing support
+- Simple testing
 
 __Basic data types__:
 
