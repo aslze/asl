@@ -533,7 +533,7 @@ void Process::run(const String& command, const Array<String>& args)
 	}
 }
 
-int Process::outputAvaialable()
+int Process::outputAvailable()
 {
 	if (!_ready)
 		return 0;
@@ -541,7 +541,7 @@ int Process::outputAvaialable()
 	return (ioctl(_stdout, FIONREAD, &n) == 0) ? (int)n : 0;
 }
 
-int Process::errorsAvaialable()
+int Process::errorsAvailable()
 {
 	if (!_ready)
 		return 0;
