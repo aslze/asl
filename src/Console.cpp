@@ -16,6 +16,7 @@ Console::Console()
 #ifndef ASL_ANSI
 	SetConsoleOutputCP(65001);
 #endif
+	_colorChanged = false;
 	_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	GetConsoleScreenBufferInfo(_handle, &info);
@@ -27,8 +28,11 @@ Console::Console()
 
 Console::~Console()
 {
-	color();
-	bgcolor();
+	if (_colorChanged)
+	{
+		color();
+		bgcolor();
+	}
 }
 
 void Console::gotoxy(int x, int y)
@@ -65,6 +69,7 @@ void Console::color(Color color)
 		attr |= FOREGROUND_INTENSITY;
 	_attrib = (_attrib & ~0x0f) | (attr & 0x0f);
 	SetConsoleTextAttribute(_handle, _attrib);
+	_colorChanged = true;
 }
 
 void Console::bgcolor(Color color)
@@ -80,6 +85,7 @@ void Console::bgcolor(Color color)
 	}
 	_attrib = (_attrib & ~0xf0) | (attr & 0xf0);
 	SetConsoleTextAttribute(_handle, _attrib);
+	_colorChanged = true;
 }
 
 void Console::inverse(bool on)
@@ -87,6 +93,7 @@ void Console::inverse(bool on)
 	WORD a = _attrib, b;
 	b = ((a & 0x0f) << 4) | ((a & 0xf0) >> 4);
 	SetConsoleTextAttribute(_handle, on? b : a);
+	_colorChanged = true;
 }
 
 void Console::reset()
@@ -127,6 +134,7 @@ static void sigint_handler(int sig)
 
 Console::Console()
 {
+	_colorChanged = false;
 #ifndef __ANDROID__
 	if (signal(SIGINT, sigint_handler) == SIG_ERR)
 		printf("Error\n");
@@ -137,7 +145,8 @@ Console::Console()
 
 Console::~Console()
 {
-	color();
+	if(_colorChanged)
+		color();
 }
 
 void Console::gotoxy(int x, int y)
@@ -171,6 +180,7 @@ void Console::color(Color color)
 	else
 		printf("\033[22m");
 	printf("\033[%sm", attr);
+	_colorChanged = true;
 }
 
 void Console::bgcolor(Color color)
@@ -186,16 +196,19 @@ void Console::bgcolor(Color color)
 		color==WHITE? "47":
 		"49";
 	printf("\033[%sm", attr);
+	_colorChanged = true;
 }
 
 void Console::inverse(bool on)
 {
 	printf(on? "\033[7m" : "\033[0m");
+	_colorChanged = true;
 }
 
 void Console::reset()
 {
 	printf("\033[0m");
+	_colorChanged = true;
 }
 
 Console::Size Console::size()

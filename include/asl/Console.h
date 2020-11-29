@@ -32,6 +32,7 @@ class ASL_API Console
 	int _w, _h, _fullh;
 	WORD _defaultAttrib, _attrib;
 #endif
+	bool _colorChanged;
 
 public:
 	/**
