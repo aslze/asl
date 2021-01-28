@@ -77,9 +77,8 @@ void Server::serve(HttpRequest& request, HttpResponse& response)
 	else if (request.is("PUT", "/conf"))
 	{
 		Var data = request.data();
-		printf("HTTP %s\n", *data.string());
-		data.read("r", _r);
-		data.read("v", _v);
+		_r = data["r"] | _r;
+		_v = data["v"] | _v;
 		response.put(Var("status", "OK"));
 		return;
 	}
@@ -108,9 +107,8 @@ public:
 			Var msg = ws.receive(); // receive message and extract radius and speed
 			if (msg.ok())
 			{
-				printf("WS %s\n", *msg.string());
-				msg.read("r", Server::_r);
-				msg.read("v", Server::_v);
+				Server::_r = msg["r"] | Server::_r;
+				Server::_v = msg["v"] | Server::_v;
 				ws.send(Var("status", "ok"));
 			}
 		}

@@ -73,9 +73,10 @@ public:
 	*/
 	void config(int bps, const String& mode="8N1");
 	/**
-	Waits until there is data to read for a maximum time of `timeout` seconds (or the device disconnected)
+	Waits until there is data to read for a maximum time of `timeout` seconds (or the device disconnected),
+	and return true if something happened before the timeout
 	*/
-	bool waitInput(double timeout = 60);
+	bool waitInput(double timeout = 10);
 	/**
 	Returns the number of bytes available for reading
 	*/

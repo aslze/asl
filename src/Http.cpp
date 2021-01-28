@@ -7,7 +7,7 @@
 #include <asl/TlsSocket.h>
 #include <ctype.h>
 
-#define SEND_BLOCK_SIZE 64000
+#define SEND_BLOCK_SIZE 128000
 #define RECV_BLOCK_SIZE 16000
 
 namespace asl {
@@ -157,8 +157,18 @@ void HttpMessage::put(const Array<byte>& data)
 
 void HttpMessage::put(const Var& body)
 {
-	put(Json::encode(body));
-	setHeader("Content-Type", "application/json");
+	if (header("Content-Type") == "application/x-www-form-urlencoded")
+	{
+		Dic<> dic;
+		foreach2(String & k, Var & v, body)
+			dic[encodeUrl(k)] = encodeUrl(v);
+		put(dic.join('&', '='));
+	}
+	else
+	{
+		put(Json::encode(body));
+		setHeader("Content-Type", "application/json");
+	}
 }
 
 void HttpMessage::put(const File& body)
@@ -326,9 +336,7 @@ HttpResponse Http::request(HttpRequest& request)
 	title << request.method() << ' ' << url.path << " HTTP/1.1\r\nHost: " << url.host;
 	if (hasPort) title << ':' << url.port;
 	request._command = title;
-	//request.sendHeaders();
 
-	//if (request.body().length() != 0)
 	if (!request.write())
 		return response;
 	
@@ -355,7 +363,7 @@ HttpResponse Http::request(HttpRequest& request)
 		String url = response.header("Location");
 		HttpRequest req(request);
 		req.setUrl(url);
-		HttpProgress progress = req._progress;
+		Http::Progress progress = req._progress;
 		req.onProgress(progress);
 		int n = request.recursion() + 1;
 		if (n < 4) {
@@ -500,7 +508,7 @@ bool HttpResponse::is(HttpResponse::StatusType code) const
 }
 
 
-void HttpMessage::sendHeaders()
+bool HttpMessage::sendHeaders()
 {
 	String s;
 	s << _command << "\r\n";
@@ -509,10 +517,13 @@ void HttpMessage::sendHeaders()
 		s << name << ": " << value << "\r\n";
 	}
 	s << "\r\n";
-	*_socket << s;
+	int sent = _socket->write(*s, s.length());
+	if (sent <= 0)
+		return false;
 	_headersSent = true;
 	_chunked = !_headers.has("Content-Length");
 	_status->totalSend = _chunked ? 0 : int(_headers["Content-Length"]);
+	return true;
 }
 
 bool HttpMessage::write()
@@ -530,9 +541,10 @@ void HttpMessage::write(const String& text)
 
 int HttpMessage::write(const char* buffer, int n)
 {
-	if(!_headersSent)
-		sendHeaders();
-	int sent = 0;
+	if (!_headersSent)
+		if (!sendHeaders())
+			return false;
+	int sent = n == 0 ? 1 : 0;
 	while (n > 0)
 	{
 		int m = min(n, SEND_BLOCK_SIZE);
@@ -647,10 +659,18 @@ bool Http::download(const String& url, const String& path, const Function<void, 
 	req.onProgress(f);
 	req.useSink(new HttpSinkFile(file));
 	HttpResponse res = request(req);
-	if (res.ok())
-		return true;
-	else
+	return res.ok();
+}
+
+bool asl::Http::upload(const String& url, const String& path, const Dic<>& headers, const Function<void, const HttpStatus&>& f)
+{
+	if (!File(path).exists())
 		return false;
+	HttpRequest req("POST", url, File(path), headers);
+	req.setHeader("Content-Type", "multipart/form-data");
+	req.onProgress(f);
+	HttpResponse res = request(req);
+	return res.ok();
 }
 
 }

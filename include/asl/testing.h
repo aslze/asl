@@ -135,13 +135,14 @@ double distance(const Quaternion_<T>& a, const Quaternion_<T>& b)
 }
 #endif
 
+inline String _toStr_(const String& s) { return s; }
 
 #undef ASL_ASSERT
 
 #ifdef __ANDROID__
 #define ASL_ASSERT(x) if(!(x)) { testResult << String(0, "\n%s: %i\nFailed: '%s'\n\n", __FILE__, __LINE__, #x); }
 
-#define ASL_CHECK(x, op, y) if(!((x) op (y))) { testResult << String(0, "\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, #y, *String(x)); }
+#define ASL_CHECK(x, op, y) if(!((x) op (y))) { testResult << String(0, "\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, #y, *_toStr_(x)); }
 #else
 
 /** 
@@ -157,7 +158,7 @@ ASL_CHECK(sqrt(x), >=, 0);
 ~~~
 @hideinitializer
 */
-#define ASL_CHECK(x, op, y) if(!((x) op (y))) { printf("\n%s(%i): error: Expected '%s' %s '%s' but it is %s\n\n", __FILE__, __LINE__, #x, #op, *String(y), *String(x)); testFailed = true;}
+#define ASL_CHECK(x, op, y) if(!((x) op (y))) { printf("\n%s(%i): error: Expected '%s' %s '%s' but it is %s\n\n", __FILE__, __LINE__, #x, #op, *String(y), *_toStr_(x)); testFailed = true;}
 #endif
 
 /** 

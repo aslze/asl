@@ -69,6 +69,11 @@ public:
 	~Process();
 
 	/**
+	Returns this process' ID (PID)
+	*/
+	int pid() { return _pid; }
+
+	/**
 	Reads `n` bytes of the process' *stdout* into a buffer pointed to by `p`
 	*/
 	int readOutput(void* p, int n);
@@ -95,6 +100,16 @@ public:
 	void detach() { ignoreOutput(); }
 	
 	void ignoreOutput();
+
+	/**
+	Returns the number of bytes that can be read from the process' standard output
+	*/
+	int outputAvailable();
+
+	/**
+	Returns the number of bytes that can be read from the process' standard errors
+	*/
+	int errorsAvailable();
 
 	/**
 	Returns the standard output of a subprocess as a string (if executed with Process::execute())

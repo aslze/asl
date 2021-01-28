@@ -92,7 +92,7 @@ public:
 	/**
 	Assigns a TCP port for TLS connections
 	*/
-	bool bindTLS(int port) { return bindTLS("", port); }
+	bool bindTLS(int port) { return bindTLS("0.0.0.0", port); }
 	/**
 	Sets the certificate and private key for the TLS server in PEM format.
 	*/

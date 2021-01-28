@@ -137,7 +137,7 @@ public:
 	/**
 	Sends the currently set headers and starts the message body.
 	*/
-	void sendHeaders();
+	bool sendHeaders();
 	/**
 	Writes the given text string to the message body.
 	*/
@@ -262,6 +262,7 @@ public:
 	}
 	void setUrl(const String& url)
 	{
+		_headersSent = false;
 		_url = url;
 	}
 	/**
@@ -454,7 +455,9 @@ public:
 		return request(req);
 	}
 
-	/** Sends an HTTP POST request for the given url with the given data and returns the response. */
+	/** Sends an HTTP POST request for the given url with the given data and returns the response. If body is a
+	File and headers contain `Content-Type` `multipart/form-data`, the file will be uploaded as an HTML form's file item
+	*/
 	template<class T>
 	static HttpResponse post(const String& url, const T& body, const Dic<>& headers = Dic<>())
 	{
@@ -480,14 +483,18 @@ public:
 	/**
 	Type for HTTP progress callbacks 
 	*/
-	typedef Function<void, const HttpStatus&> HttpProgress;
+	typedef Function<void, const HttpStatus&> Progress;
 	
 	/**
 	* Downloads the given URL to the specified local path, optionally notifying progress
 	*/
-	static bool download(const String& url, const String& path, const Function<void, const HttpStatus&>& f = HttpProgress(), const Dic<>& headers = Dic<>());
-};
+	static bool download(const String& url, const String& path, const Function<void, const HttpStatus&>& f = Progress(), const Dic<>& headers = Dic<>());
 
+	/**
+	* Uploads to the given URL the file specified, optionally notifying progress.
+	*/
+	static bool upload(const String& url, const String& path, const Dic<>& headers = Dic<>(), const Function<void, const HttpStatus&>& f = Progress());
+};
 
 
 }

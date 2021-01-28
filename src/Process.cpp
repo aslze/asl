@@ -9,18 +9,27 @@ Process Process::execute(const String& command, const Array<String>& args)
 {
 	Process p;
 	p.run(command, args);
-	int n;
-	char buffer[1000];
-	while (n = p.readOutput(buffer, sizeof(buffer)), n>0)
+	int n, i = 0;
+	char buffer[8000];
+	while (p.running())
 	{
+		sleep((i++)%16 == 0 ? 0.001 : 0);
+		if (p.outputAvailable() > 0)
+		{
+			n = p.readOutput(buffer, sizeof(buffer));
+			p._output.append(buffer, n);
+		}
+		if (p.errorsAvailable() > 0)
+		{
+			n = p.readErrors(buffer, sizeof(buffer));
+			p._errors.append(buffer, n);
+		}
+	}
+	while (n = p.readOutput(buffer, sizeof(buffer)), n > 0)
 		p._output.append(buffer, n);
-	}
-	while (n = p.readErrors(buffer, sizeof(buffer)), n>0)
-	{
+	while (n = p.readErrors(buffer, sizeof(buffer)), n > 0)
 		p._errors.append(buffer, n);
-	}
-	p._exitstat = p.wait();
-
+	p._exitstat = p.exitStatus();
 	return p;
 }
 
@@ -244,6 +253,22 @@ namespace asl {
 		_stdin = _pipe_in[1];
 	}
 
+	int Process::outputAvailable()
+	{
+		if (!_ready)
+			return 0;
+		DWORD n;
+		return PeekNamedPipe(_stdout, 0, 0, 0, &n, 0) ? n : 0;
+	}
+
+	int Process::errorsAvailable()
+	{
+		if (!_ready)
+			return 0;
+		DWORD n;
+		return PeekNamedPipe(_stderr, 0, 0, 0, &n, 0) ? n : 0;
+	}
+
 	int Process::readOutput(void* p, int n)
 	{
 		if(!_ready)
@@ -321,6 +346,7 @@ namespace asl {
 //#include <asl/File.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 #include <signal.h>
 #ifdef __APPLE__
@@ -505,6 +531,22 @@ void Process::run(const String& command, const Array<String>& args)
 			close(_pipe_err[1]);
 		}
 	}
+}
+
+int Process::outputAvailable()
+{
+	if (!_ready)
+		return 0;
+	long n;
+	return (ioctl(_stdout, FIONREAD, &n) == 0) ? (int)n : 0;
+}
+
+int Process::errorsAvailable()
+{
+	if (!_ready)
+		return 0;
+	long n;
+	return (ioctl(_stderr, FIONREAD, &n) == 0) ? (int)n : 0;
 }
 
 int Process::readOutput(void* p, int n)
