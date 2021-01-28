@@ -482,7 +482,7 @@ void XmlCodec::encode(const Xml& e)
 
 		_level--;
 		if (_formatted && !e.children().last().isText())
-			for (int i = 0; i < _level; i++) _xml << ' ';
+			for (int i = 0; i < _level; i++) _xml << INDENT_CHAR;
 		_xml << "</" << e.tag() << '>';
 		if (_formatted)
 			_xml << '\n';
