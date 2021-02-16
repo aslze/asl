@@ -495,13 +495,13 @@ public:
 	/**
 	Tests if this string starts with the given substring
 	*/
-	bool startsWith(const String& s) const { return strncmp(str(), s, s.length()) == 0; }
-	bool startsWith(const char* s) const { return strncmp(str(), s, strlen(s)) == 0; }
+	bool startsWith(const String& s) const { return _len >= s.length() && strncmp(str(), s, s.length()) == 0; }
+	bool startsWith(const char* s) const { int n = (int)strlen(s); return _len >= n && strncmp(str(), s, n) == 0; }
 	/**
 	Tests if this string ends with the given substring
 	*/
-	bool endsWith(const String& s) const { return strncmp(str() + _len - s.length(), s, s.length()) == 0; }
-	bool endsWith(const char* s) const { return strncmp(str() + _len - strlen(s), s, strlen(s)) == 0; }
+	bool endsWith(const String& s) const { return _len >= s.length() && strncmp(str() + _len - s.length(), s, s.length()) == 0; }
+	bool endsWith(const char* s) const { int n = (int)strlen(s); return _len >= n && strncmp(str() + _len - n, s, n) == 0; }
 	/**
 	Tests if this string starts with the given character
 	*/
@@ -647,6 +647,11 @@ String Array<T>::join(const String& sep) const
 	String s = (_a[0]);
 	for(int i=1; i<n; i++) {s+=sep; String v=_a[i]; s+=(v);}
 	return s;
+}
+
+inline unsigned hash(const String& s)
+{
+	return hash((const byte*)*s, s.length());
 }
 
 #ifdef ASL_HAVE_RANGEFOR
