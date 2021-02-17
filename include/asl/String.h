@@ -509,7 +509,7 @@ public:
 	/**
 	Tests if this string ends with the given character
 	*/
-	bool endsWith(char c) const { return str()[_len-1] == c; }
+	bool endsWith(char c) const { return _len > 0 && str()[_len-1] == c; }
 	/**
 	Tests if this string contains the given substring
 	*/
