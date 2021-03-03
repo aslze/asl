@@ -57,14 +57,23 @@ Path Path::directory() const
 Path& Path::removeDDots()
 {
 	Array<String> parts = _path.split('/');
+	bool unc = _path.startsWith("//");
+	for (int i = 1; i < parts.length(); i++)
+		if (parts[i] == "" || parts[i] == ".")
+			parts.remove(i--);
+
 	for(int i=1; i<parts.length(); i++)
 	{
 		if(parts[i]=="..") {
-			parts.remove(i-1, 2);
+			parts.remove(i > 1? i-1 : i, i > 1 ? 2 : 1);
 			i-=2;
 		}
 	}
-	_path = parts.join('/').replace("//", "/");
+	_path = parts.join('/');
+
+	if (unc)
+		_path = "/" + _path;
+
 	return *this;
 }
 
