@@ -53,6 +53,7 @@ class ASL_API Process
 	int _exitstat;
 #ifdef _WIN32
 	typedef HANDLE PipeHandle;
+	HANDLE _hProcess;
 #else
 	typedef int PipeHandle;
 #endif

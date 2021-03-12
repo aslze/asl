@@ -41,6 +41,9 @@ Process::Process(const Process& p) : _output(p._output), _errors(p._errors)
 	_ok = p._hasExited;
 	_ready = false;
 	_detached = p._detached;
+#ifdef _WIN32
+	_hProcess = NULL;
+#endif
 
 	_stdin = _stdout = _stderr = 0;
 	_pipe_in[0] = _pipe_out[0] = _pipe_err[0] = 0;
@@ -141,6 +144,7 @@ namespace asl {
 		_detached = false;
 		_hasExited = false;
 		_stderr = _stdin = _stdout = 0;
+		_hProcess = NULL;
 
 		SECURITY_ATTRIBUTES sec;
 		sec.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -169,6 +173,8 @@ namespace asl {
 			CloseHandle(_pipe_out[0]);
 			CloseHandle(_pipe_err[0]);
 		}
+		if(_hProcess)
+			CloseHandle(_hProcess);
 	}
 
 	int Process::myPid()
@@ -237,7 +243,7 @@ namespace asl {
 		if (_ok)
 		{
 			_pid = procInfo.dwProcessId;
-			CloseHandle(procInfo.hProcess);
+			_hProcess = procInfo.hProcess;
 			CloseHandle(procInfo.hThread);
 		}
 		else
@@ -323,14 +329,12 @@ namespace asl {
 		if (_pid != -1)
 		{
 			DWORD exitCode = 1;
-			HANDLE process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, _pid);
 
-			if (!process || (process && GetExitCodeProcess(process, &exitCode)))
+			if (GetExitCodeProcess(_hProcess, &exitCode))
 			{
 				_exitstat = exitCode;
+				_hasExited = (exitCode != STILL_ACTIVE);
 			}
-			_hasExited = (exitCode!=STILL_ACTIVE);
-			CloseHandle(process);
 		}
 		return _hasExited;
 	}
