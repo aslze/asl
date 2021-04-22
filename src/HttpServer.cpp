@@ -67,7 +67,8 @@ void HttpServer::serve(Socket client)
 		response.put("");
 		if (_cors && request.hasHeader("Origin"))
 		{
-			response.setHeader("Access-Control-Allow-Origin", "*");
+			response.setHeader("Access-Control-Allow-Origin", request.header("Origin"));
+			response.setHeader("Access-Control-Allow-Credentials", "true");
 		}
 		if (!handleOptions(request, response))
 		{
