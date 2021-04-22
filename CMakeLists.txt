@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8.12)
 
 set(CMAKE_DEBUG_POSTFIX "d")
 
@@ -22,9 +22,9 @@ endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-option( ASL_TLS "TLS Sockets" OFF)
+option(ASL_TLS "TLS Sockets")
 
-if( ASL_TLS )
+if(ASL_TLS)
 	find_path(mbedTLS_DIR "include/mbedtls")
 	if(mbedTLS_DIR STREQUAL mbedTLS_DIR-NOTFOUND )
 		message(FATAL_ERROR "TLS needs the directory of mbedTLS" )
@@ -45,17 +45,17 @@ endif()
 
 option(ASL_BUILD_STATIC "Build static library" ON)
 option(ASL_BUILD_SHARED "Build shared library" ${ASL_BUILD_SHARED_HINT})
-option(ASL_IPV6 "Expect also IPv6 when looking up DNS names" OFF)
+option(ASL_IPV6 "Expect also IPv6 when looking up DNS names")
 
 add_subdirectory( src )
 
-option( ASL_SAMPLES "Build samples" OFF)
+option(ASL_SAMPLES "Build samples")
 
-if( ASL_SAMPLES )
+if(ASL_SAMPLES)
 	add_subdirectory(samples)
 endif()
 
-option( ASL_TESTS "Build tests" OFF)
+option(ASL_TESTS "Build tests")
 
 if( ASL_TESTS )
 	enable_testing()
