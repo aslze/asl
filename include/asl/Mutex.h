@@ -405,7 +405,7 @@ Basic operators of the underlying type are exposed (++, +=, -=, *=, /=, ==, <<, 
 class you can call methods using opertor `->`, and those calls will be syncronized.
 
 ~~~
-Aromic<Array<float>> numbers;
+Atomic<Array<float>> numbers;
 numbers->sort();             // this is atomic
 ~~~
 

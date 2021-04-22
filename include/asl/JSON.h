@@ -40,8 +40,18 @@ The same `data` object can be built in one statement:
 
 ~~~ 
 Var data = Var("x", "abc")
-              ("y", Var::array({1, true}))
+              ("y", array<Var>(1, true))
               ("z", 3.14);
+~~~
+
+Or in C++11 compilers, also like this:
+
+~~~
+Var data {
+    {"x", "abc"},
+    {"y", Var::array({1, true}),
+    {"z", 3.14}
+};
 ~~~
 */
 struct ASL_API Json

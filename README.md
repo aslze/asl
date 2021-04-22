@@ -278,7 +278,7 @@ And much more.
 ## Compilation and use
 
 ASL can be used as a static or as a dynamic/shared library. The easiest way to 
-build and use it is with **CMake** (2.8.11 or later). By default both the dynamic 
+build and use it is with **CMake** (2.8.12 or later). By default both the dynamic 
 and static libraries are built.
 
 Just compile the library with whatever compilers and architecturs (32/64bit) you need. There is no need to *install*.
