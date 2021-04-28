@@ -10,12 +10,8 @@
 
 #ifdef ASL_FAST_JSON
 #define ASL_ATOF myatof
-#define FLOAT_F "%.8g"
-#define DOUBLE_F "%.16g"
 #else
 #define ASL_ATOF atof
-#define FLOAT_F "%.9g"
-#define DOUBLE_F "%.17g"
 #endif
 
 namespace asl {
@@ -29,52 +25,47 @@ enum ContextN {ROOT, ARRAY, OBJECT, COMMENT1, COMMENT, LINECOMMENT, ENDCOMMENT};
 
 #define INDENT_CHAR '\t'
 
-Var decodeXDL(const String& xdl)
+Var Xdl::decode(const String& xdl)
 {
 	XdlParser parser;
 	return parser.decode(xdl);
 }
 
-Var decodeJSON(const char* json)
+Var Json::decode(const String& json)
 {
 	XdlParser parser;
 	return parser.decode(json);
 }
 
-String encodeXDL(const Var& data, bool pretty, bool json)
+String Xdl::encode(const Var& data, int mode)
 {
 	XdlEncoder encoder;
-	return encoder.encode(data, pretty, json);
+	return encoder.encode(data, Json::Mode(mode));
 }
 
-Var decodeJSON(const String& json)
+String Json::encode(const Var& data, Json::Mode mode)
 {
-	return decodeXDL(json);
-}
-
-String encodeJSON(const Var& data, bool pretty)
-{
-	return encodeXDL(data, pretty, true);
+	return Xdl::encode(data, mode | Json::JSON);
 }
 
 Var Xdl::read(const String& file)
 {
-	return decodeXDL(TextFile(file).text());
+	return Xdl::decode(TextFile(file).text());
 }
 
-bool Xdl::write(const String& file, const Var& v, bool pretty)
+bool Xdl::write(const String& file, const Var& v, int mode)
 {
-	return TextFile(file).put(encodeXDL(v, pretty));
+	return TextFile(file).put(Xdl::encode(v, mode));
 }
 
 Var Json::read(const String& file)
 {
-	return decodeJSON(TextFile(file).text());
+	return Json::decode(TextFile(file).text());
 }
 
-bool Json::write(const String& file, const Var& v, bool pretty)
+bool Json::write(const String& file, const Var& v, Json::Mode mode)
 {
-	return TextFile(file).put(encodeJSON(v, pretty));
+	return TextFile(file).put(Json::encode(v, mode));
 }
 
 
@@ -639,12 +630,26 @@ void XdlParser::put(const Var& x)
 	}
 }
 
-XdlWriter::XdlWriter()
+XdlEncoder::XdlEncoder()
 {
+	_level = 0;
 	_pretty = false;
 	_json = false;
 	_out.resize(512);
 }
+
+String XdlEncoder::encode(const Var& v, Json::Mode mode)
+{
+	_pretty = mode & Json::PRETTY;
+	_json = mode & Json::JSON;
+	_simple = mode & Json::SIMPLE;
+	_fmtF = _simple ? "%.7g" : "%.9g";
+	_fmtD = _simple ? "%.16g" : "%.17g";
+	reset();
+	_encode(v);
+	return data();
+}
+
 
 void XdlEncoder::_encode(const Var& v)
 {
@@ -741,24 +746,24 @@ void XdlEncoder::_encode(const Var& v)
 	}
 }
 
-void XdlWriter::put_separator()
+void XdlEncoder::put_separator()
 {
 	_out << ',';
 }
 
-void XdlWriter::reset()
+void XdlEncoder::reset()
 {
 	_out = "";
 }
 
-void XdlWriter::new_number(int x)
+void XdlEncoder::new_number(int x)
 {
 	int n = _out.length();
 	_out.resize(n+11);
 	_out.fix(n + myitoa(x, &_out[n]));
 }
 
-void XdlWriter::new_number(double x)
+void XdlEncoder::new_number(double x)
 {
 	int n = _out.length();
 #if defined(_MSC_VER) && _MSC_VER < 1800
@@ -774,7 +779,7 @@ void XdlWriter::new_number(double x)
 		return;
 	}
 	_out.resize(n+26);
-	_out.fix(n + sprintf(&_out[n], DOUBLE_F, x));
+	_out.fix(n + sprintf(&_out[n], _fmtD, x));
 
 	// Fix decimal comma of some locales
 #ifndef ASL_NO_FIX_DOT
@@ -790,7 +795,7 @@ void XdlWriter::new_number(double x)
 #endif
 }
 
-void XdlWriter::new_number(float x)
+void XdlEncoder::new_number(float x)
 {
 	int n = _out.length();
 #if defined(_MSC_VER) && _MSC_VER < 1800
@@ -806,7 +811,7 @@ void XdlWriter::new_number(float x)
 		return;
 	}
 	_out.resize(n + 16);
-	_out.fix(n + sprintf(&_out[n], FLOAT_F, x));
+	_out.fix(n + sprintf(&_out[n], _fmtF, x));
 
 	// Fix decimal comma of some locales
 #ifndef ASL_NO_FIX_DOT
@@ -822,7 +827,7 @@ void XdlWriter::new_number(float x)
 #endif
 }
 
-void XdlWriter::new_string(const char* x)
+void XdlEncoder::new_string(const char* x)
 {
 	_out << '\"';
 	const char* p = x;
@@ -847,7 +852,7 @@ void XdlWriter::new_string(const char* x)
 }
 
 
-void XdlWriter::new_bool(bool x)
+void XdlEncoder::new_bool(bool x)
 {
 	if (_json)
 		_out << (x ? "true" : "false");
@@ -855,17 +860,17 @@ void XdlWriter::new_bool(bool x)
 		_out << (x ? "Y" : "N");
 }
 
-void XdlWriter::begin_array()
+void XdlEncoder::begin_array()
 {
 	_out << '[';
 }
 
-void XdlWriter::end_array()
+void XdlEncoder::end_array()
 {
 	_out << ']';
 }
 
-void XdlWriter::begin_object(const char* _class)
+void XdlEncoder::begin_object(const char* _class)
 {
 	if(!_json)
 		_out << _class;
@@ -874,23 +879,23 @@ void XdlWriter::begin_object(const char* _class)
 		_out << "\"" ASL_XDLCLASS "\":\"" << _class << "\"";
 }
 
-void XdlWriter::end_object()
+void XdlEncoder::end_object()
 {
 	_out << '}';
 }
 
-void XdlWriter::new_property(const char* name)
+void XdlEncoder::new_property(const char* name)
 {
 	if(_json)
-		_out << '\"' << name << "\":";
+		_out << '\"' << name << (_pretty ? "\": " : "\":");
 	else
 		_out << name << '=';
 }
 
-void XdlWriter::new_property(const String& name)
+void XdlEncoder::new_property(const String& name)
 {
-	if(_json)
-		_out << '\"' << name << "\":";
+	if (_json)
+		_out << '\"' << name << (_pretty ? "\": " : "\":");
 	else
 		_out << name << '=';
 }

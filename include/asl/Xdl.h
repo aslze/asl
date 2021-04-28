@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2020 aslze
+// Copyright(c) 1999-2021 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_XDL_H
@@ -19,16 +19,6 @@ namespace asl {
 
 class ASL_API XdlCodec
 {
-protected:
-	typedef char State;
-	typedef char Context;
-	State _state;
-	Stack<Context> _context;
-	String _buffer;
-	bool _inComment;
-	int _unicodeCount;
-	char _unicode[5];
-	char _ldp;
 public:
 	XdlCodec() {}
 	virtual ~XdlCodec() {}
@@ -72,6 +62,15 @@ class ASL_API XdlParser: public XdlCodec
 		//Container(Array<Var>* a): type(Var::ARRAY), list(a) {}
 		//Container(HDic<Var>* d): type(Var::DIC), dict(d) {}
 	};
+	typedef char State;
+	typedef char Context;
+	State _state;
+	Stack<Context> _context;
+	String _buffer;
+	bool _inComment;
+	int _unicodeCount;
+	char _unicode[5];
+	char _ldp;
 	Stack<Container> _lists;
 	Stack<String> _props;
 	void put(const Var& x);
@@ -83,12 +82,12 @@ public:
 	virtual void reset();
 	Var value() const;
 	Var decode(const char* s);
-	virtual void new_number(int x) {put(x);}
-	virtual void new_number(double x) {put(x);}
+	virtual void new_number(int x) { put(x); }
+	virtual void new_number(double x) { put(x); }
 	virtual void new_number(float x) { put(x); }
-	virtual void new_string(const char* x) {put(x);}
-	virtual void new_string(const String& x) {put(x);}
-	virtual void new_bool(bool b) {put(b);}
+	virtual void new_string(const char* x) { put(x); }
+	virtual void new_string(const String& x) { put(x); }
+	virtual void new_bool(bool b) { put(b); }
 	virtual void begin_array();
 	virtual void end_array();
 	virtual void begin_object(const char* _class);
@@ -97,62 +96,42 @@ public:
 	virtual void new_property(const String& name);
 };
 
-class ASL_API XdlWriter: public XdlCodec
+class ASL_API XdlEncoder: public XdlCodec
 {
 protected:
 	String _out;
-	bool _pretty, _json;
-public:
-	XdlWriter();
-	~XdlWriter() {}
-	String data() const {return _out;}
-	void put_separator();
-	virtual void reset();
-	virtual void new_number(int x);
-	virtual void new_number(double x);
-	virtual void new_number(float x);
-	virtual void new_string(const char* x);
-	virtual void new_string(const String& x) {new_string(*x);}
-	virtual void new_bool(bool b);
-	virtual void begin_array();
-	virtual void end_array();
-	virtual void begin_object(const char* _class);
-	virtual void end_object();
-	virtual void new_property(const char* name);
-	virtual void new_property(const String& name);
-};
-
-class ASL_API XdlEncoder: public XdlWriter
-{
+	bool _pretty;
+	bool _json;
+	bool _simple;
+	Json::Mode _mode;
+	const char* _fmtF;
+	const char* _fmtD;
 	String _indent;
 	int _level;
 	void _encode(const Var& v);
 public:
-	XdlEncoder() {_level=0;}
-	String encode(const Var& v, bool p=false, bool j=false)
-	{
-		_pretty = p;
-		_json = j;
-		reset();
-		_encode(v);
-		return data();
-	}
+	XdlEncoder();
+	~XdlEncoder() {}
+	String data() const {return _out;}
+
+	String encode(const Var& v, Json::Mode mode);
+
+	void put_separator();
+
+	void reset();
+	void new_number(int x);
+	void new_number(double x);
+	void new_number(float x);
+	void new_string(const char* x);
+	void new_string(const String& x) {new_string(*x);}
+	void new_bool(bool b);
+	void begin_array();
+	void end_array();
+	void begin_object(const char* _class);
+	void end_object();
+	void new_property(const char* name);
+	void new_property(const String& name);
 };
-
-
-/*
-Decodes the XDL-encoded string into a Var that will contain all the structure. If there are format parsing errors,
-the result will be a `Var::NONE` typed variable.
-\deprecated Use Xdl::decode()
-*/
-Var ASL_API decodeXDL(const String& xdl);
-
-/*
-Encodes the given Var into an XDL-format representation.
-If parameter `pretty` is true, an indented representation is produced.
-\deprecated Use Xdl::encode()
-*/
-String ASL_API encodeXDL(const Var& data, bool pretty = false, bool json = false);
 
 /**
 Static functions to encode/decode XDL data.
@@ -167,20 +146,22 @@ struct ASL_API Xdl
 	Reads and decodes data from a file in XDL format
 	*/
 	static Var read(const String& file);
+
 	/**
 	Writes a var to a file in XDL format
 	*/
-	static bool write(const String& file, const Var& v, bool pretty=true);
+	static bool write(const String& file, const Var& v, int mode = 0);
+
 	/**
 	Decodes the XDL-encoded string into a Var that will contain all the structure. If there are format parsing errors,
 	the result will be a `Var::NONE` typed variable.
 	*/
-	static Var decode(const String& xdl) { return decodeXDL(xdl); }
+	static Var decode(const String& xdl);
+
 	/**
 	Encodes the given Var into an XDL-format representation.
-	If parameter `pretty` is true, an indented representation is produced.
 	*/
-	static String encode(const Var& v, bool pretty = false) { return encodeXDL(v, pretty, false); }
+	static String encode(const Var& v, int mode = 0);
 };
 
 

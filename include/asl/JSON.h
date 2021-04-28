@@ -1,3 +1,6 @@
+// Copyright(c) 1999-2021 aslze
+// Licensed under the MIT License (http://opensource.org/licenses/MIT)
+
 #ifndef ASL_JSON_H
 #define ASL_JSON_H
 #include <asl/Var.h>
@@ -8,22 +11,6 @@ namespace asl {
  * \defgroup XDL XML, XDL, and JSON
  * @{
  */
-
-/*
-Decodes the JSON-encoded string into a Var that will contain all the structure. It is similar to JavaScript's
-`JSON.parse()`. If there are format parsing errors, the result will be a `Var::NONE` typed variable.
-\deprecated Use Json::decode()
-*/
-Var ASL_API decodeJSON(const String& json);
-
-Var ASL_API decodeJSON(const char* json);
-
-/*
-Encodes the given Var into a JSON-format representation. It is similar to JavaScript's
-`JSON.stringify()`. If parameter `pretty` is true, an indented representation is produced.
-\deprecated Use Json::encode()
-*/
-String ASL_API encodeJSON(const Var& data, bool pretty = false);
 
 /**
 Functions to encode/decode data as JSON. These functions use class Var to represent JSON values.
@@ -49,7 +36,7 @@ Or in C++11 compilers, also like this:
 ~~~
 Var data {
     {"x", "abc"},
-    {"y", Var::array({1, true}),
+    {"y", Var::array({1, true})},
     {"z", 3.14}
 };
 ~~~
@@ -57,26 +44,36 @@ Var data {
 struct ASL_API Json
 {
 	/**
+	Options for Json::encode and Json::write
+	*/
+	enum Mode {
+		NONE = 0,
+		PRETTY = 1, //<! Format with newlines and indentations
+		SIMPLE = 2, //<! Format real numbers with reduced precision
+		COMPACT = 4,
+		JSON = 8
+	};
+	/**
 	Reads and decodes data from a file in JSON format
 	*/
 	static Var read(const String& file);
 	/**
 	Writes a var to a file in JSON format
 	*/
-	static bool write(const String& file, const Var& v, bool pretty=true);
+	static bool write(const String& file, const Var& v, Mode mode = PRETTY);
 	/**
 	Decodes the JSON-encoded string into a Var that will contain all the structure. It is similar to JavaScript's
 	`JSON.parse()`. If there are format parsing errors, the result will be a `Var::NONE` typed variable.
 	*/
-	static Var decode(const String& json) { return decodeJSON(json); }
-
-	static Var decode(const char* json) { return decodeJSON(json); }
+	static Var decode(const String& json);
 
 	/**
 	Encodes the given Var into a JSON-format representation. It is similar to JavaScript's
-	`JSON.stringify()`. If parameter `pretty` is true, an indented representation is produced.
+	`JSON.stringify()`.
 	*/
-	static String encode(const Var& v, bool pretty = false) { return encodeJSON(v, pretty); }
+	static String encode(const Var& v, Mode mode = NONE);
+
+	static String encode(const Var& v, bool pretty) { return encode(v, pretty ? PRETTY : NONE); }
 };
 
 /**@}*/
