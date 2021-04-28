@@ -47,9 +47,9 @@ struct ASL_API Json
 	Options for Json::encode and Json::write
 	*/
 	enum Mode {
-		NONE = 0,
-		PRETTY = 1, //<! Format with newlines and indentations
-		SIMPLE = 2, //<! Format real numbers with reduced precision
+		NONE = 0,    //!< Compact format in a single line
+		PRETTY = 1,  //!< Format with newlines and indentations
+		SIMPLE = 2,  //!< Format real numbers with reduced precision
 		COMPACT = 4,
 		JSON = 8
 	};
