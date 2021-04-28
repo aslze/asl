@@ -110,15 +110,28 @@ void quicksort(T* a, int n, const Less& less)
 	quicksort(a, int(r - a + 1), less);
 	quicksort(l, int(a + n - l), less);
 }
+
 /**
 Shuffles an array of elements in place.
 */
 template <typename E>
-void shuffle(E& a)
+void shuffle(E& a, Random& rnd = random)
 {
 	int n = a.length();
 	while (n) {
-		int i = int(random(1.0) * n--);
+		int i = int(rnd(1.0) * n--);
+		swap(a[n], a[i]);
+	}
+}
+
+/**
+Shuffles an array of elements in place (n items starting at a).
+*/
+template <typename T>
+void shuffle(T* a, int n, Random& rnd = random)
+{
+	while (n) {
+		int i = int(rnd(1.0) * n--);
 		swap(a[n], a[i]);
 	}
 }
