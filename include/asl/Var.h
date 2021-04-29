@@ -68,9 +68,10 @@ pair[1] = -2;
 Arrays can also be created in one statement with one of these **pseudo-literal syntaxes**:
 
 ~~~
-Var coords = array<Var>(10, 25, -1);     // up to 6 elements
-Var indices = (Var(), 1, 3, 0, 2, -1);   // any number of elements (but is slower)
-Var numbers = Var::array({1, 3, 9, -2}); // on compilers supporting C++11 initializer lists
+Var coords = array<Var>(10, 25, -1);       // up to 6 elements
+Var indices = (Var(), 1, 3, 0, 2, -1);     // any number of elements (but is slower)
+Var numbers = {1, 3, 9, -2};               // on C++11 compilers, for all same type elements
+Var items = Var::array({1, "a", 9.5, -2}); // on C++11 compilers, for different types
 ~~~
 
 An **object** can be constructed from an existing Dic<T> or by adding elements to a Var with `var["key"]`:
@@ -88,7 +89,19 @@ Var particle = Var("name", "particle1")
                   ("x", 15.0)
                   ("y", -1.25)
                   ("visible", true)
-                  ("color", Var::array({255, 0, 255}));
+                  ("color", array<Var>(255, 0, 255));
+~~~
+
+Or in C++11:
+
+~~~
+		Var particle {
+			{ "name", "particle1" },
+			{ "x", 15.0 },
+			{ "y", -1.25 },
+			{ "visible", true },
+			{ "color", {255, 0, 255} }
+		};
 ~~~
 
 Any combination of the above can be used to create complex structured vars.
@@ -201,7 +214,30 @@ class ASL_API Var
 		for (const Obj* p = b.begin(); p != b.end(); p++)
 			o->set(p->key, p->value);
 	}
-	void operator=(std::initializer_list<Obj> b)
+	
+	template<class T>
+	Var(const std::initializer_list<T> b)
+	{
+		_type = ARRAY;
+		NEW_ARRAY(a);
+		a->resize((int)b.size());
+		const T* p = b.begin();
+		for (int i = 0; i < a->length(); i++)
+			(*a)[i] = p[i];
+	}
+
+	template<class T>
+	Var(const std::initializer_list<std::initializer_list<T>> b)
+	{
+		_type = ARRAY;
+		NEW_ARRAY(a);
+		a->resize((int)b.size());
+		const std::initializer_list<T>* p = b.begin();
+		for (int i = 0; i < a->length(); i++)
+			(*a)[i] = p[i];
+	}
+
+	void operator=(std::initializer_list<Obj>& b)
 	{
 		if (_type != DIC) {
 			free();
