@@ -644,7 +644,7 @@ String XdlEncoder::encode(const Var& v, Json::Mode mode)
 	_json = mode & Json::JSON;
 	_simple = mode & Json::SIMPLE;
 	_fmtF = _simple ? "%.7g" : "%.9g";
-	_fmtD = _simple ? "%.16g" : "%.17g";
+	_fmtD = _simple ? "%.15g" : "%.17g";
 	reset();
 	_encode(v);
 	return data();

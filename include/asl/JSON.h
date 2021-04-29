@@ -53,6 +53,7 @@ struct ASL_API Json
 		COMPACT = 4,
 		JSON = 8
 	};
+
 	/**
 	Reads and decodes data from a file in JSON format
 	*/
@@ -72,9 +73,12 @@ struct ASL_API Json
 	`JSON.stringify()`.
 	*/
 	static String encode(const Var& v, Mode mode = NONE);
-
-	static String encode(const Var& v, bool pretty) { return encode(v, pretty ? PRETTY : NONE); }
 };
+
+inline Json::Mode operator|(Json::Mode a, Json::Mode b)
+{
+	return Json::Mode(int(a) | int(b));
+}
 
 /**@}*/
 
