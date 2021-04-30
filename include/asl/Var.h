@@ -12,7 +12,7 @@
 //#define HDic HashDic
 #define HDic Dic
 #define ASL_VAR_STATIC
-#define ASL_XDLCLASS "_"
+#define ASL_XDLCLASS "$type"
 
 namespace asl {
 
@@ -237,19 +237,6 @@ class ASL_API Var
 			(*a)[i] = p[i];
 	}
 
-	void operator=(std::initializer_list<Obj>& b)
-	{
-		if (_type != DIC) {
-			free();
-			_type = DIC;
-			NEW_DIC(o);
-		}
-		else
-			o->clear();
-		o->reserve((int)b.size());
-		for (const Obj* p = b.begin(); p != b.end(); p++)
-			o->set(p->key, p->value);
-	}
 	/**
 	Constructs an array with an initializer list
 	*/

@@ -16,8 +16,8 @@ namespace asl {
 Functions to encode/decode data as JSON. These functions use class Var to represent JSON values.
 
 ~~~
-Var data = Json::decode("{\"x\":\"abc\", \"y\":[1,true]}"); // decode JSON from a string
-data["z"] = 3.14;                                           // add a property
+Var data = Json::decode("{\"a\":\"abc\", \"b\":[1.5, 3]}"); // decode JSON from a string
+data["c"] = true;                                           // add a property
 String json = Json::encode(data);                           // encode to string
 
 Json::write("data.json", data);                             // write to file
@@ -26,18 +26,18 @@ Json::write("data.json", data);                             // write to file
 The same `data` object can be built in one statement:
 
 ~~~ 
-Var data = Var("x", "abc")
-              ("y", array<Var>(1, true))
-              ("z", 3.14);
+Var data = Var("a", "abc")
+              ("b", array<Var>(1.5, 3.0))
+              ("c", true);
 ~~~
 
 Or in C++11 compilers, also like this:
 
 ~~~
 Var data {
-    {"x", "abc"},
-    {"y", Var::array({1, true})},
-    {"z", 3.14}
+    {"a", "abc"},
+    {"b", {1.5, 3.0}},
+    {"c", true}
 };
 ~~~
 */
@@ -51,7 +51,9 @@ struct ASL_API Json
 		PRETTY = 1,  //!< Format with newlines and indentations
 		SIMPLE = 2,  //!< Format real numbers with reduced precision
 		COMPACT = 4,
-		JSON = 8
+		JSON = 8,
+		EXACT = 16,
+		NICE = 3     //!< Same as PRETTY and SIMPLE
 	};
 
 	/**
@@ -62,6 +64,11 @@ struct ASL_API Json
 	Writes a var to a file in JSON format
 	*/
 	static bool write(const String& file, const Var& v, Mode mode = PRETTY);
+
+	static bool write(const Var& v, const String& file, Mode mode = PRETTY)
+	{
+		return write(file, v, mode);
+	}
 	/**
 	Decodes the JSON-encoded string into a Var that will contain all the structure. It is similar to JavaScript's
 	`JSON.parse()`. If there are format parsing errors, the result will be a `Var::NONE` typed variable.

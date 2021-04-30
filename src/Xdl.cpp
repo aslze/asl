@@ -640,9 +640,9 @@ XdlEncoder::XdlEncoder()
 
 String XdlEncoder::encode(const Var& v, Json::Mode mode)
 {
-	_pretty = mode & Json::PRETTY;
-	_json = mode & Json::JSON;
-	_simple = mode & Json::SIMPLE;
+	_pretty = (mode & Json::PRETTY) != 0;
+	_json = (mode & Json::JSON) != 0;
+	_simple = (mode & Json::SIMPLE) != 0;
 	_fmtF = _simple ? "%.7g" : "%.9g";
 	_fmtD = _simple ? "%.15g" : "%.17g";
 	reset();
@@ -683,7 +683,6 @@ void XdlEncoder::_encode(const Var& v)
 		{
 			_indent = String(INDENT_CHAR, ++_level);
 			_out << '\n' << _indent;
-			//linestart = out.length;
 		}
 		for(int i=0; i<v.length(); i++)
 		{
@@ -705,11 +704,10 @@ void XdlEncoder::_encode(const Var& v)
 			_out << '\n' << _indent;
 		}
 		end_array();
-		//if(multi) out += '\n';
 		break;
 		}
 	case Var::DIC: {
-		bool hasclass = v.has(ASL_XDLCLASS);
+		bool hasclass = !_json && v.has(ASL_XDLCLASS);
 		if(hasclass)
 			begin_object(v[ASL_XDLCLASS].toString());
 		else
@@ -718,10 +716,10 @@ void XdlEncoder::_encode(const Var& v)
 		_indent = String(INDENT_CHAR, ++_level);
 		foreach2(String& name, Var& value, v)
 		{
-			if(!value.is(Var::NONE) && name!=ASL_XDLCLASS)
+			if(value.ok() && (_json || name != ASL_XDLCLASS))
 			{
 				if(_pretty) {
-					if(_json && k++!=0) _out << ',';
+					if (_json && k++ != 0) _out << ',';
 					_out << '\n' << _indent;
 				}
 				else if(k++>0) put_separator();
@@ -734,7 +732,6 @@ void XdlEncoder::_encode(const Var& v)
 			_out << '\n' << _indent;
 		}
 		end_object();
-		//if(pretty) out << '\n';
 		}
 		break;
 	case Var::NUL:
@@ -875,8 +872,6 @@ void XdlEncoder::begin_object(const char* _class)
 	if(!_json)
 		_out << _class;
 	_out << '{';
-	if(_json && _class[0] != '\0')
-		_out << "\"" ASL_XDLCLASS "\":\"" << _class << "\"";
 }
 
 void XdlEncoder::end_object()

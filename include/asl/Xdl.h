@@ -150,7 +150,12 @@ struct ASL_API Xdl
 	/**
 	Writes a var to a file in XDL format
 	*/
-	static bool write(const String& file, const Var& v, int mode = 0);
+	static bool write(const String& file, const Var& v, int mode = Json::NICE);
+
+	static bool write(const Var& v, const String& file, int mode = Json::PRETTY)
+	{
+		return write(file, v, mode);
+	}
 
 	/**
 	Decodes the XDL-encoded string into a Var that will contain all the structure. If there are format parsing errors,
@@ -161,7 +166,7 @@ struct ASL_API Xdl
 	/**
 	Encodes the given Var into an XDL-format representation.
 	*/
-	static String encode(const Var& v, int mode = 0);
+	static String encode(const Var& v, int mode = Json::SIMPLE);
 };
 
 
