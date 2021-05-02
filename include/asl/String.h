@@ -429,6 +429,10 @@ public:
 	Returns this string or s if this string is empty
 	*/
 	const String& operator|(const String& s) const { return (_len == 0) ? s : *this; }
+
+	template<class T>
+	String operator|(const T& s) const { return (*this) | String(s); }
+
 	/**
 	Returns a reference to the `i`-th character in this string (byte-based)
 	*/
@@ -649,6 +653,10 @@ String Array<T>::join(const String& sep) const
 	return s;
 }
 
+inline unsigned hash(const String& s)
+{
+	return hash((const byte*)*s, s.length());
+}
 
 #ifdef ASL_HAVE_RANGEFOR
 

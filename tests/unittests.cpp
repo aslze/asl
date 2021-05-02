@@ -373,6 +373,11 @@ ASL_TEST(String)
 
 	ASL_ASSERT(!empty.isTrue());
 	ASL_ASSERT(!String("false").isTrue());
+
+	String x1, x2 = "a";
+	ASL_ASSERT((x1 | x2) == x2);
+	ASL_ASSERT((x1 | 123) == "123");
+	ASL_ASSERT((x2 | 123) == "a");
 }
 
 ASL_TEST(XDL)
