@@ -73,10 +73,12 @@ public:
 	Size size();
 };
 
+#ifndef __ANDROID__
 extern ASL_API Console console;
 
 // trick to get console constructed just by including this file
 
 static Console _myconsole_ = console;
+#endif
 }
 #endif
