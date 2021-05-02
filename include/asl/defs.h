@@ -10,7 +10,7 @@
 Main definitions.
 */
 
-#define ASL_VERSION 11000
+#define ASL_VERSION 11001
 
 #ifdef _WIN32
 #ifndef _CRT_SECURE_NO_DEPRECATE
@@ -217,7 +217,7 @@ public:
 
 	/** Returns a floating point random number in the [m, M] interval */
 	double operator()(double m, double M) { return m + (*this)(M - m); }
-
+	
 	/** Returns a floating point random number in the [0, M] interval */
 	float operator()(float m) { return (float)(*this)((double)m); }
 
@@ -225,10 +225,12 @@ public:
 	float operator()(float m, float M) { return (float)(*this)((double)m, (double)M); }
 
 	/** Returns an integer random number in the [0, M] interval */
-	int operator()(int m) { return (int)(*this)((double)m+1); }
+	template<class T>
+	T operator()(T m) { return (T)(*this)((double)m + 1); }
 
 	/** Returns an integer random number in the [m, M] interval */
-	int operator()(int m, int M) { return (int)(*this)((double)m, (double)M+1); }
+	template<class T>
+	T operator()(T m, T M) { return (T)(*this)((double)m, (double)M + 1); }
 
 	/** Returns a floating point random number with standard normal distribution */
 	double normal() { double u = (*this)(1e-30, 1.0), v = (*this)(1e-30, 1.0); return sqrt(-2 * log(u))*cos(2 * PI * v); }
@@ -273,8 +275,6 @@ inline bool myisalnum(char c)
 	return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9');
 }
 
-
-// Fatal errors (will become exceptions some day)
 
 void asl_die(const char* msg, int line = 0);
 
@@ -322,7 +322,7 @@ inline void swap(T& a, T& b)
 
 }
 
-inline void* operator new (size_t, int* p) /*throw()*/ {return p;}
+inline void* operator new (size_t, int* p) { return p; }
 inline void operator delete(void* p, int* r) {}
 
 namespace asl {
