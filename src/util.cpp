@@ -4,6 +4,9 @@
 
 #ifdef _WIN32
 #include <wincrypt.h>
+#else
+#include <sys/time.h>
+#include <unistd.h>
 #endif
 
 namespace asl {
@@ -175,6 +178,36 @@ Long inow()
 	return t.tv_sec * (Long)1000000 + t.tv_usec;
 #endif
 }
+
+#ifdef _WIN32
+
+void sleep(int s)
+{
+	Sleep(s * 1000);
+}
+
+void usleep(int us)
+{
+	Sleep(us / 1000);
+}
+
+void sleep(double s)
+{
+	Sleep((int)(1e3 * s));
+}
+#else
+
+void sleep(int s)
+{
+	::sleep((unsigned)s);
+}
+
+void sleep(double s)
+{
+	usleep((int)(1e6 * s));
+}
+
+#endif
 
 static const char base64_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 

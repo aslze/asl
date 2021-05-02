@@ -1,5 +1,10 @@
 #include <asl/SharedMem.h>
 
+#ifndef _WIN32
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+
 namespace asl {
 
 SharedMem::SharedMem(const String& name, int size)

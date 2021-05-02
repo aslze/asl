@@ -4,6 +4,11 @@
 #ifdef __APPLE__
 #include <sys/syslimits.h>
 #endif
+#ifndef _WIN32
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+
 
 namespace asl {
 
