@@ -653,11 +653,6 @@ String Array<T>::join(const String& sep) const
 	return s;
 }
 
-inline unsigned hash(const String& s)
-{
-	return hash((const byte*)*s, s.length());
-}
-
 #ifdef ASL_HAVE_RANGEFOR
 
 inline String::Enumerator begin(const String& s)
