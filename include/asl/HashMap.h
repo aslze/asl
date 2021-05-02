@@ -452,6 +452,12 @@ public:
 	HashDic(const HashDic& b): HashMap<String,T>(b)
 	{
 	}
+	HashDic clone() const
+	{
+		HashDic b(*this);
+		b.dup();
+		return b;
+	}
 };
 
 }
