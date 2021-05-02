@@ -3,6 +3,14 @@
 
 namespace asl {
 
+IniFile::Section IniFile::Section::clone() const
+{
+	IniFile::Section s;
+	s._title = _title;
+	s._vars = _vars.clone();
+	return s;
+}
+
 IniFile::IniFile(const String& name, bool shouldwrite)
 {
 	_modified = false;
@@ -20,12 +28,19 @@ IniFile::IniFile(const String& name, bool shouldwrite)
 		String line=file.readLine();
 		if(shouldwrite)
 			_lines << line.trimmed();
-		if(line.length()==0)
+		if(!line)
 			continue;
 		if(file.end())
 			break;
 
 		char firstchar = line[0];
+		for(int i=0; i<line.length(); i++)
+			if (!myisspace(line[i]))
+			{
+				firstchar = line[i];
+				break;
+			}
+
 		if(firstchar=='[')
 		{
 			int end = line.indexOf(']', 1);
@@ -35,11 +50,21 @@ IniFile::IniFile(const String& name, bool shouldwrite)
 			_currentTitle = name;
 			_sections[_currentTitle] = Section(_currentTitle);
 		}
-		else if(firstchar!='#' && firstchar>32 && firstchar!=';')
+		else if(firstchar!='#' && firstchar>=32 && firstchar!=';')
 		{
 			int i=line.indexOf('=');
-			if(i<1)
+			if (i < 1)
+			{
+				if (_lines.length() > 0 && _lines.last())
+					_lines.resize(_lines.length() - 1);
 				continue;
+			}
+			if (!_indent)
+				for (int i = 0; i < line.length(); i++)
+					if (myisspace(line[i]))
+						_indent += line[i];
+					else
+						break;
 			String key = line.substring(0,i).trimmed();
 			String value = line.substring(i+1).trimmed();
 			for(char* p=key; *p; p++)
@@ -104,8 +129,12 @@ bool IniFile::has(const String& name) const
 void IniFile::write(const String& fname)
 {
 	Dic<Section> newsec = _sections.clone();
+	foreach(Section & s, newsec)
+	 	s = s.clone();
 
 	Section* section = &_sections["-"];
+
+	Array<String> oldlines = _lines.clone();
 
 	foreach(String& line, _lines)
 	{
@@ -126,7 +155,7 @@ void IniFile::write(const String& fname)
 			String key = line.substring(0,i).trimmed();
 			String value0 = line.substring(i+1).trimmed();
 			const String& value1 = (*section)[key];
-			line = key; line << '=' << value1;
+			line = _indent; line << key << '=' << value1;
 			if(value0 != value1 && value1 != "")
 			{
 				_modified = true;
@@ -180,8 +209,8 @@ void IniFile::write(const String& fname)
 
 		foreach2(String& name, String& value, section._vars)
 		{
-			String line = name;
-			line << "=" << value;
+			String line = _indent;
+			line << name << "=" << value;
 			_lines.insert(j++, line);
 			_modified = true;
 		}
@@ -198,6 +227,8 @@ void IniFile::write(const String& fname)
 		}
 		file.close();
 	}
+
+	_lines = oldlines;
 }
 
 IniFile::~IniFile()

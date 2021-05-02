@@ -67,6 +67,7 @@ public:
 		const String& title() const {return _title;}
 		String& operator[](const String& k) {return _vars[k];}
 		const HashDic<String>& vars() const {return _vars;}
+		Section clone() const;
 		friend class IniFile;
 	};
 
@@ -99,7 +100,11 @@ public:
 	Returns the value associated with the key `name` or `defaultVal` if it was not found. 
 	*/
 	String operator()(const String& name, const String& defaultVal);
-
+	
+	/**
+	Writes the file with its modifications; this is done automatically on destruction, just call this if you need
+	the file written before the object is detroyed
+	*/
 	void write(const String& fname="");
 
 	/**
@@ -130,6 +135,7 @@ protected:
 	Dic<Section> _sections;
 	String _currentTitle;
 	String _filename;
+	String _indent;
 	Array<String> _lines;
 	bool _modified;
 	bool _shouldwrite;
