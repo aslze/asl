@@ -147,7 +147,6 @@ public:
 		foreach2(K& k, T& v, *this)
 			b[k] = v;
 		swap(a, b.a);
-		--b._rc();
 		return *this;
 	}
 	
