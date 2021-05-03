@@ -636,6 +636,8 @@ XdlEncoder::XdlEncoder()
 	_pretty = false;
 	_json = false;
 	_out.resize(512);
+	_sep1 = ',';
+	_sep2 = ',';
 }
 
 String XdlEncoder::encode(const Var& v, Json::Mode mode)
@@ -645,6 +647,10 @@ String XdlEncoder::encode(const Var& v, Json::Mode mode)
 	_simple = (mode & Json::SIMPLE) != 0;
 	_fmtF = _simple ? "%.7g" : "%.9g";
 	_fmtD = _simple ? "%.15g" : "%.17g";
+	if (_pretty)
+		_sep1 = ", ";
+	if (!_json && _pretty)
+		_sep2 = "";
 	reset();
 	_encode(v);
 	return data();
@@ -687,15 +693,10 @@ void XdlEncoder::_encode(const Var& v)
 		for(int i=0; i<v.length(); i++)
 		{
 			if(i>0) {
-				if(multi) {
-					if(big || (i%16)==0) {
-						if(_json) _out << ',';
-						_out << '\n' << _indent;
-					}
-					else put_separator();
-				}
+				if (multi && (big || (i % 16) == 0))
+					_out << _sep2 << '\n' << _indent;
 				else
-					put_separator();
+					_out << _sep1;
 			}
 			_encode(v[i]);
 		}
@@ -718,11 +719,11 @@ void XdlEncoder::_encode(const Var& v)
 		{
 			if(value.ok() && (_json || name != ASL_XDLCLASS))
 			{
-				if(_pretty) {
-					if (_json && k++ != 0) _out << ',';
+				if (k++ > 0)
+					_out << _sep2;
+				if (_pretty)
 					_out << '\n' << _indent;
-				}
-				else if(k++>0) put_separator();
+
 				new_property(name);
 				_encode(value);
 			}

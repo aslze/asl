@@ -107,6 +107,8 @@ protected:
 	const char* _fmtF;
 	const char* _fmtD;
 	String _indent;
+	String _sep1;
+	String _sep2;
 	int _level;
 	void _encode(const Var& v);
 public:
@@ -152,7 +154,7 @@ struct ASL_API Xdl
 	*/
 	static bool write(const String& file, const Var& v, int mode = Json::NICE);
 
-	static bool write(const Var& v, const String& file, int mode = Json::PRETTY)
+	static bool write(const Var& v, const String& file, int mode = Json::NICE)
 	{
 		return write(file, v, mode);
 	}
