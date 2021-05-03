@@ -380,7 +380,7 @@ ASL_TEST(String)
 	ASL_ASSERT((x2 | 123) == "a");
 }
 
-ASL_TEST(XDL)
+ASL_TEST(JSON)
 {
 	String a = "A/*...*/{x=3.5, //...\ny=\"s\", z=[Y, N]}";
 	Var b = Xdl::decode(a);
@@ -413,6 +413,20 @@ ASL_TEST(XDL)
 	ASL_ASSERT(fabs( (double)Xdl::decode("1.25e+8") - 1.25e8) < 1e-6);
 
 	ASL_ASSERT(Json::encode(nan()) == "null");
+
+	Var v = Var()("x", 1)("y", true)("z", 1.5)("s", "X")("a", array<Var>(1, -5));
+	String xdl1 = Xdl::encode(v, Json::COMPACT);
+	String xdl2 = Xdl::encode(v, Json::PRETTY);
+	String json1 = Json::encode(v, Json::COMPACT);
+	String json2 = Json::encode(v, Json::PRETTY);
+	printf("%s\n", *xdl1);
+	printf("%s\n", *xdl2);
+	printf("%s\n", *json1);
+	printf("%s\n", *json2);
+	ASL_CHECK(Xdl::decode(xdl1), == , v);
+	ASL_CHECK(Xdl::decode(xdl2), == , v);
+	ASL_CHECK(Json::decode(json1), == , v);
+	ASL_CHECK(Json::decode(json2), == , v);
 }
 
 ASL_TEST(Var)

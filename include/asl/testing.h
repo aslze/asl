@@ -10,6 +10,10 @@
 
 namespace asl {
 
+
+template<class T>
+inline String asString(const T& x) { return String(x); }
+
 /**
 \defgroup Testing Testing
 @{
@@ -116,6 +120,9 @@ double distance(const Vec3_<T>& a, const Vec3_<T>& b)
 {
 	return (a - b).length();
 }
+
+template<>
+inline String asString(const Vec3& x) { return String::f("(%g, %g, %g)", x.x, x.y, x.z); }
 #endif
 
 #ifdef ASL_MATRIX4_H
@@ -135,14 +142,17 @@ double distance(const Quaternion_<T>& a, const Quaternion_<T>& b)
 }
 #endif
 
-inline String _toStr_(const String& s) { return s; }
+#ifdef ASL_VAR_H
+template<>
+inline String asString(const Var& x) { return x.toString(); }
+#endif
 
 #undef ASL_ASSERT
 
 #ifdef __ANDROID__
 #define ASL_ASSERT(x) if(!(x)) { testResult << String(0, "\n%s: %i\nFailed: '%s'\n\n", __FILE__, __LINE__, #x); }
 
-#define ASL_CHECK(x, op, y) if(!((x) op (y))) { testResult << String(0, "\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, #y, *_toStr_(x)); }
+#define ASL_CHECK(x, op, y) if(!((x) op (y))) { testResult << String(0, "\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, *asString(y), *asString(x)); }
 #else
 
 /** 
@@ -158,7 +168,7 @@ ASL_CHECK(sqrt(x), >=, 0);
 ~~~
 @hideinitializer
 */
-#define ASL_CHECK(x, op, y) if(!((x) op (y))) { printf("\n%s(%i): error: Expected '%s' %s '%s' but it is %s\n\n", __FILE__, __LINE__, #x, #op, *String(y), *_toStr_(x)); testFailed = true;}
+#define ASL_CHECK(x, op, y) if(!((x) op (y))) { printf("\n%s(%i): error: Expected '%s' %s '%s' but it is %s\n\n", __FILE__, __LINE__, #x, #op, *asString(y), *asString(x)); testFailed = true;}
 #endif
 
 /** 

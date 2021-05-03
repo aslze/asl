@@ -12,7 +12,7 @@ set(TESTS
 	Array
 	String
 	Var
-	XDL
+	JSON
 	CmdArgs
 	TabularDataFile
 	IniFile
