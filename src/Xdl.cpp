@@ -300,12 +300,13 @@ void XdlParser::parse(const char* s)
 			break;
 
 		case STRING:
-			if(c!='\"' && c!='\\')
-				_buffer << c;
-			else if(c=='\\')
+			if(c == '\\')
 			{
-				_state=ESCAPE;
+				_state = ESCAPE;
+				_prevState = STRING;
 			}
+			else if (c != '"')
+				_buffer << c;
 			else // disallow TAB and newline?
 			{
 				new_string(_buffer);
@@ -314,7 +315,6 @@ void XdlParser::parse(const char* s)
 			break;
 
 		case PROPERTY:
-			//if(!isalnum(c) && c!='_')
 			if (c == '=' || myisspace(c))
 			{
 				new_property(_buffer);
@@ -326,14 +326,18 @@ void XdlParser::parse(const char* s)
 				_buffer << c;
 			break;
 		case QPROPERTY: // JSON
-			if(c !='"')
+			if (c == '\\')
+			{
+				_state = ESCAPE;
+				_prevState = QPROPERTY;
+			}
+			else if (c != '"')
 				_buffer << c;
 			else
 			{
 				new_property(_buffer);
-				//s--;
-				_state=WAIT_EQUAL;
-				_buffer="";
+				_state = WAIT_EQUAL;
+				_buffer = "";
 			}
 			break;
 
@@ -482,11 +486,11 @@ void XdlParser::parse(const char* s)
 				_state = ERR;
 				break;
 			}
-			_state=STRING;
+			_state = _prevState;
 			break;
 
 		case IDENTIFIER:
-			if(!myisalnum(c) && c!='_')
+			if(!myisalnum(c) && c != '_' && c != '.')
 			{
 				if(_buffer=="Y" || _buffer=="N" || _buffer=="false" || _buffer=="true" )
 				{
@@ -506,7 +510,7 @@ void XdlParser::parse(const char* s)
 				_buffer << c;
 			break;
 		case WAIT_EQUAL:
-			if(c=='=' || c==':')
+			if(c == ':' || c == '=')
 				_state=WAIT_VALUE;
 			else if(!myisspace(c))
 			{
@@ -523,7 +527,7 @@ void XdlParser::parse(const char* s)
 				char ch[4];
 				utf16toUtf8(wch, ch, 1);
 				_buffer << ch;
-				_state=STRING;
+				_state = _prevState;
 			}
 			break;
 		case ERR:
@@ -891,7 +895,10 @@ void XdlEncoder::new_property(const char* name)
 void XdlEncoder::new_property(const String& name)
 {
 	if (_json)
-		_out << '\"' << name << (_pretty ? "\": " : "\":");
+	{
+		new_string(name);
+		_out << (_pretty ? ": " : ":");
+	}
 	else
 		_out << name << '=';
 }

@@ -64,7 +64,7 @@ class ASL_API XdlParser: public XdlCodec
 	};
 	typedef char State;
 	typedef char Context;
-	State _state;
+	State _state, _prevState;
 	Stack<Context> _context;
 	String _buffer;
 	bool _inComment;
