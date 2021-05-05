@@ -544,17 +544,13 @@ XdlParser::XdlParser()
 	_context << ROOT;
 	_state = WAIT_VALUE;
 	_inComment = false;
-	_lists << Container(Var::ARRAY);
-	_lists.top().init();
+	_lists << Var::ARRAY;
 }
 
 XdlParser::~XdlParser()
 {
 	while(_lists.length() > 0)
-	{
-		_lists.top().free();
 		_lists.pop();
-	}
 }
 
 Var XdlParser::value() const
@@ -562,7 +558,7 @@ Var XdlParser::value() const
 	Var v;
 	if (_state == ERR)
 		return v;
-	Array<Var>& l = *(Array<Var>*)_lists[0].list;
+	const Var& l = _lists[0];
 	if(_context.top() == ROOT && _state == WAIT_VALUE && l.length() > 0)
 		v = l[l.length()-1];
 	return v;
@@ -578,37 +574,28 @@ Var XdlParser::decode(const char* s)
 
 void XdlParser::begin_array()
 {
-	_lists << Container(Var::ARRAY);
-	_lists.top().init();
+	_lists << Var::ARRAY;
 }
 
 void XdlParser::end_array()
 {
-	Var v = *(Array<Var>*)_lists.top().list;
-	_lists.top().free();
+	Var v = _lists.top();
 	_lists.pop();
 	put(v);
 }
 
 void XdlParser::begin_object(const char* _class)
 {
-	_lists << Container(Var::DIC);
-	_lists.top().init();
+	_lists << Var::DIC;
 	if(_class[0] != '\0')
-		(*(HDic<Var>*)_lists.top().dict)[ASL_XDLCLASS]=_class;
+		_lists.top()[ASL_XDLCLASS] = _class;
 }
 
 void XdlParser::end_object()
 {
-	Var v = *(HDic<Var>*)_lists.top().dict;
-	_lists.top().free();
+	Var v = _lists.top();
 	_lists.pop();
 	put(v);
-}
-
-void XdlParser::new_property(const char* name)
-{
-	_props << (String)name;
 }
 
 void XdlParser::new_property(const String& name)
@@ -618,15 +605,14 @@ void XdlParser::new_property(const String& name)
 
 void XdlParser::put(const Var& x)
 {
-	Container& top = _lists.top();
-	switch(top.type)
+	Var& top = _lists.top();
+	switch(top.type())
 	{
 	case Var::ARRAY:
-		(*(Array<Var>*)top.list) << x;
+		top << x;
 		break;
 	case Var::DIC: {
-		const String& name = _props.top();
-		(*(HDic<Var>*)top.dict).set(name, x);
+		top[_props.top()] = x;
 		_props.pop();
 		break;
 	}
@@ -882,14 +868,6 @@ void XdlEncoder::begin_object(const char* _class)
 void XdlEncoder::end_object()
 {
 	_out << '}';
-}
-
-void XdlEncoder::new_property(const char* name)
-{
-	if(_json)
-		_out << '\"' << name << (_pretty ? "\": " : "\":");
-	else
-		_out << name << '=';
 }
 
 void XdlEncoder::new_property(const String& name)

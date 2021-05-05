@@ -31,48 +31,22 @@ public:
 	virtual void end_array() {}
 	virtual void begin_object(const char* c) {}
 	virtual void end_object() {}
-	virtual void new_property(const char* name) {}
 	virtual void new_property(const String& name) {}
 };
 
 class ASL_API XdlParser: public XdlCodec
 {
-	struct Container
-	{
-		Var::Type type;
-		union {
-			char list[sizeof(Array<Var>)];
-			char dict[sizeof(HDic<Var>)];
-		};
-		Container() {}
-		Container(const Container& c) {memcpy(this, &c, sizeof(*this));}
-		Container(Var::Type t) : type(t) {}
-		void init() {
-			if(type==Var::ARRAY)
-				asl_construct((Array<Var>*)list);
-			else
-				asl_construct((HDic<Var>*)dict);
-		}
-		void free() {
-			if(type==Var::ARRAY)
-				asl_destroy((Array<Var>*)list);
-			else
-				asl_destroy((HDic<Var>*)dict);
-		}
-		//Container(Array<Var>* a): type(Var::ARRAY), list(a) {}
-		//Container(HDic<Var>* d): type(Var::DIC), dict(d) {}
-	};
 	typedef char State;
 	typedef char Context;
 	State _state, _prevState;
 	Stack<Context> _context;
+	Stack<Var> _lists;
+	Stack<String> _props;
 	String _buffer;
 	bool _inComment;
 	int _unicodeCount;
 	char _unicode[5];
 	char _ldp;
-	Stack<Container> _lists;
-	Stack<String> _props;
 	void put(const Var& x);
 public:
 	XdlParser();
@@ -92,7 +66,6 @@ public:
 	virtual void end_array();
 	virtual void begin_object(const char* _class);
 	virtual void end_object();
-	virtual void new_property(const char* name);
 	virtual void new_property(const String& name);
 };
 
@@ -107,8 +80,8 @@ protected:
 	const char* _fmtF;
 	const char* _fmtD;
 	String _indent;
-	String _sep1;
-	String _sep2;
+	String _sep1; // between items in same line
+	String _sep2; // between items, end of line
 	int _level;
 	void _encode(const Var& v);
 public:
@@ -131,7 +104,6 @@ public:
 	void end_array();
 	void begin_object(const char* _class);
 	void end_object();
-	void new_property(const char* name);
 	void new_property(const String& name);
 };
 
