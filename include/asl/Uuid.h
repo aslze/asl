@@ -61,7 +61,8 @@ public:
 	UuidGenerator();
 	Uuid generate();
 private:
-	Random _random;
+	Random _random1;
+	Random _random2;
 };
 
 }
