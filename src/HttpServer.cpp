@@ -1,10 +1,9 @@
-// Copyright(c) 1999-2020 aslze
+// Copyright(c) 1999-2021 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #include <asl/Socket.h>
 #include <asl/Map.h>
 #include <asl/File.h>
-#include <asl/IniFile.h>
 #include <asl/SocketServer.h>
 #include <asl/HttpServer.h>
 #include <asl/WebSocket.h>
