@@ -202,6 +202,7 @@ public:
 	Set endianness for binary writing
 	*/
 	void setEndian(Endian e) { _endian = e; }
+
 	void write(const void* data, int n)
 	{
 		append((const byte*)data, n);
@@ -212,29 +213,29 @@ public:
 	template<class T>
 	StreamBuffer& operator<<(const T& x)
 	{
-		T y = (_endian == ASL_OTHER_ENDIAN) ? bytesSwapped(x) : x;
-		write(&y, sizeof(x));
+		AsBytes<T> y;
+		memcpy(y.b, &x, sizeof(T));
+		if (_endian == ASL_OTHER_ENDIAN)
+			swapBytes(y);
+		write(y.b, sizeof(T));
 		return *this;
 	}
 
-	template<class T>
 	StreamBuffer& operator<<(const byte& x)
 	{
-		(*this) << x;
+		(Array<byte>&)(*this) << x;
 		return *this;
 	}
 
-	template<class T>
 	StreamBuffer& operator<<(const char& x)
 	{
-		(*this) << (byte&)x;
+		(Array<byte>&)(*this) << x;
 		return *this;
 	}
 
-	template<class T>
 	StreamBuffer& operator<<(const signed char& x)
 	{
-		(*this) << (byte&)x;
+		(Array<byte>&)(*this) << x;
 		return *this;
 	}
 
