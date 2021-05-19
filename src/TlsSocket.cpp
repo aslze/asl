@@ -324,7 +324,7 @@ int TlsSocket_::write(const void* data, int n)
 	{
 		int m;
 		do {
-			m = mbedtls_ssl_write(&_core->ssl, (unsigned char*)data, n - written);
+			m = mbedtls_ssl_write(&_core->ssl, (unsigned char*)data + written, n - written);
 			if (m == MBEDTLS_ERR_SSL_WANT_READ || m == MBEDTLS_ERR_SSL_WANT_WRITE) continue;
 			if (m <= 0)
 				return written;
