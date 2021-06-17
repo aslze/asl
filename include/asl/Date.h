@@ -57,7 +57,7 @@ int y = d.year, month = d.month, day = d.day, hours = d.hours;
 class ASL_API Date
 {
 public:
-	enum Format {LONG, SHORT, DATE_ONLY, HTTP};
+	enum Format {LONG, SHORT, DATE_ONLY, HTTP, FULL, FRACT = 8};
 	enum Zone {UTC, LOCAL};
 	Date() {}
 	Date(double t) : _t(t) {}
@@ -183,6 +183,11 @@ private:
 	void construct(Zone z, int y, int m, int d, int h = 0, int mn = 0, int s = 0);
 	static DateData calc(double t);
 };
+
+inline Date::Format operator|(Date::Format a, Date::Format b)
+{
+	return Date::Format(int(a) | int(b));
+}
 
 }
 #endif

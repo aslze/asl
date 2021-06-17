@@ -51,7 +51,8 @@ Date::Date(const String& t)
 		if(j==-1) j=0;
 	}
 	int d = t.substring(i+1, j!=0? j : t.length());
-	int h=0, mi=0, s=0;
+	int h = 0, mi = 0, s = 0;
+	double ms = 0;
 	if(j!=0)
 	{
 		i=t.indexOf(':', j+1);
@@ -62,16 +63,25 @@ Date::Date(const String& t)
 			if(j!=-1)
 			{
 				mi = t.substring(i+1, j);
-				s = t.substring(j+1);
+				i = t.indexOf('.', j + 1);
+				if (i > 0)
+				{
+					s = t.substring(j + 1, i);
+					ms = t.substring(i);
+					printf("%i %f\n", s, ms);
+				}
+				else
+					s = t.substring(j + 1);
 			}
 			else
 			{
-				mi = t.substring(i+1);
+				mi = t.substring(i + 1);
 				s = 0;
 			}
 		}
 	}
-	construct(t.endsWith("Z")? UTC : LOCAL, y, m, d, h, mi, s);
+	construct(t.endsWith('Z')? UTC : LOCAL, y, m, d, h, mi, s);
+	_t += ms;
 }
 
 static int parseSkipNumber(const char* &s)
@@ -247,7 +257,7 @@ DateData Date::calc(double t)
 	double dt = ((t / 86400.0) - floor(t / 86400.0));
 	int h = (int)floor(24*dt);
 	int m = (int)floor((24*dt-h)*60);
-	int s = (int)round(((24*dt-h)*60-m)*60.0);
+	int s = (int)floor(((24*dt-h)*60-m)*60.0 + 0.0001); // Added bias to avoid numeric error. check when counting subseconds
 	date.hours = h;
 	date.minutes = m;
 	date.seconds = s;
@@ -264,6 +274,10 @@ String Date::toString(Date::Format fmt, bool utc) const
 	case LONG:
 		s = String(0, "%04i-%02i-%02iT%02i:%02i:%02i",
 			d.year, d.month, d.day, d.hours, d.minutes, d.seconds);
+		break;
+	case FULL:
+		s = String(0, "%04i-%02i-%02iT%02i:%02i:%02i.%03i",
+			d.year, d.month, d.day, d.hours, d.minutes, d.seconds, int(1000 * fract(_t)));
 		break;
 	case SHORT:
 		s = String(15, "%04i%02i%02iT%02i%02i%02i",
