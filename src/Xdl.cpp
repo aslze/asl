@@ -19,7 +19,8 @@ namespace asl {
 enum StateN {
 	NUMBER, INT, STRING, PROPERTY, IDENTIFIER,
 	NUMBER_E, NUMBER_ES, NUMBER_EV, NUMBER_DOT, MINUS, WAIT_SEP,
-	WAIT_EQUAL, WAIT_VALUE, WAIT_PROPERTY, WAIT_OBJ, QPROPERTY, ESCAPE, ERR, UNICODECHAR
+	WAIT_EQUAL, WAIT_VALUE, WAIT_PROPERTY, WAIT_OBJ, QPROPERTY, ESCAPE, ERR, UNICODECHAR,
+	WAIT_COMMA_OR_PROPERTY, WAIT_COMMA_OR_VALUE
 };
 enum ContextN {ROOT, ARRAY, OBJECT, COMMENT1, COMMENT, LINECOMMENT, ENDCOMMENT};
 
@@ -50,7 +51,25 @@ String Json::encode(const Var& data, Json::Mode mode)
 
 Var Xdl::read(const String& file)
 {
-	return Xdl::decode(TextFile(file).text());
+	XdlParser parser;
+	TextFile tfile(file, File::READ);
+	if (!tfile)
+		return Var();
+	int size = (int)tfile.size();
+	if (size == 0)
+		return Var();
+	Array<char> buffer(min(16384, size) + 1);
+	while (1)
+	{
+		int n = tfile.read(buffer.ptr(), buffer.length() - 1);
+		buffer[n] = '\0';
+		parser.parse(buffer);
+		if (n < buffer.length() - 1)
+			break;
+	}
+	parser.parse(" ");
+	return parser.value();
+	//return Xdl::decode(TextFile(file).text());
 }
 
 bool Xdl::write(const String& file, const Var& v, int mode)
@@ -60,7 +79,8 @@ bool Xdl::write(const String& file, const Var& v, int mode)
 
 Var Json::read(const String& file)
 {
-	return Json::decode(TextFile(file).text());
+	return Xdl::read(file);
+	//return Json::decode(TextFile(file).text());
 }
 
 bool Json::write(const String& file, const Var& v, Json::Mode mode)
@@ -325,6 +345,7 @@ void XdlParser::parse(const char* s)
 			else // not checking possible identifier chars !
 				_buffer << c;
 			break;
+
 		case QPROPERTY: // JSON
 			if (c == '\\')
 			{
@@ -341,6 +362,12 @@ void XdlParser::parse(const char* s)
 			}
 			break;
 
+		case WAIT_COMMA_OR_VALUE:
+			if (c == ',')
+			{
+				_state = WAIT_VALUE;
+				break;
+			} // No more break
 		case WAIT_VALUE:
 			if (c >= '0' && c <= '9')
 			{
@@ -386,11 +413,6 @@ void XdlParser::parse(const char* s)
 			}
 			else if(c==']' && ctx==ARRAY)
 			{
-				/*if ((*(Array<Var>*)_lists.top().list).length() != 0)
-				{
-					_state = ERR;
-					return;
-				}*/
 				_context.pop();
 				value_end();
 				end_array();
@@ -402,8 +424,10 @@ void XdlParser::parse(const char* s)
 			}
 			break;
 		case WAIT_SEP:
-			if (c == ',' || c == '\n')
+			if (c == ',')
 				_state = (ctx == OBJECT) ? WAIT_PROPERTY : WAIT_VALUE;
+			else if (c == '\n')
+				_state = (ctx == OBJECT) ? WAIT_COMMA_OR_PROPERTY : WAIT_COMMA_OR_VALUE;
 			else if (c == '}' && ctx == OBJECT)
 			{
 				_context.pop();
@@ -436,6 +460,12 @@ void XdlParser::parse(const char* s)
 				return;
 			}
 			break;
+		case WAIT_COMMA_OR_PROPERTY:
+			if (c == ',')
+			{
+				_state = WAIT_PROPERTY;
+					break;
+			} // No more break
 		case WAIT_PROPERTY:
 			if(myisalnum(c)||c=='_'||c=='$')
 			{
@@ -674,7 +704,16 @@ void XdlEncoder::_encode(const Var& v)
 		int n = v.length();
 		const Var& v0 = n>0? v[0] : v;
 		bool multi = (_pretty && (n > 10 || (n>0  && (v0.is(Var::ARRAY) || v0.is(Var::DIC)))));
-		bool big = n>0 && (v0.is(Var::ARRAY) || v0.is(Var::DIC));
+		if (!multi && v0.is(Var::STRING))
+		{
+			for(int i = 0; i < n; i++)
+				if (v[i].length() > 10)
+				{
+					multi = true;
+					break;
+				}
+		}
+		bool big = n > 0 && (v0.is(Var::ARRAY) || v0.is(Var::DIC) || v0.is(Var::STRING));
 		if(multi)
 		{
 			_indent = String(INDENT_CHAR, ++_level);
