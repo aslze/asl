@@ -35,6 +35,26 @@ public:
 		a[1][0]=a10; a[1][1]=a11; a[1][2]=a12;
 		a[2][0]=a20; a[2][1]=a21; a[2][2]=a22;
 	}
+	
+	/**
+	Constructs a matrix from elements pointed by m, row-major (default) or column-major
+	*/
+	Matrix3_(const T* m, bool colmajor = false)
+	{
+		if (colmajor)
+		{
+			a[0][0] = m[0]; a[0][1] = m[3]; a[0][2] = m[6];
+			a[1][0] = m[1]; a[1][1] = m[4]; a[1][2] = m[7];
+			a[2][0] = m[2]; a[2][1] = m[5]; a[2][2] = m[8];
+		}
+		else
+		{
+			a[0][0] = m[0]; a[0][1] = m[1]; a[0][2] = m[2];
+			a[1][0] = m[3]; a[1][1] = m[4]; a[1][2] = m[5];
+			a[2][0] = m[6]; a[2][1] = m[7]; a[2][2] = m[8];
+		}
+	}
+
 	/** Returns the element at row `i`, column `j`. */
 	T& operator()(int i, int j) {return a[i][j];}
 	T operator()(int i, int j) const {return a[i][j];}
@@ -173,6 +193,11 @@ public:
 			a[1][0] * a[2][1] - a[2][0] * a[1][1], a[2][0] * a[0][1] - a[0][0] * a[2][1], a[0][0] * a[1][1] - a[1][0] * a[0][1]);
 		m *= T(1) / d;
 		return m;
+	}
+
+	T det() const
+	{
+		return a[0][0] * (a[1][1] * a[2][2] - a[2][1] * a[1][2]) + a[1][0] * (a[2][1] * a[0][2] - a[0][1] * a[2][2]) + a[2][0] * (a[0][1] * a[1][2] - a[1][1] * a[0][2]);
 	}
 private:
 	T a[3][3];
