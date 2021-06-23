@@ -125,6 +125,8 @@ bool SerialPort::waitInput(double timeout)
 {
 	bool incoming = true;
 	DWORD mask;
+	if (available() > 0)
+		return true;
 	SetCommMask(_handle, EV_RXCHAR);
 	OVERLAPPED overlapped;
 	memset(&overlapped, 0, sizeof(OVERLAPPED));
