@@ -206,8 +206,8 @@ String InetAddress::host() const
 		sockaddr_in6* addr = (sockaddr_in6*)_data.ptr();
 		unsigned short* ip = (unsigned short*)&addr->sin6_addr;
 		return String(40, "%x:%x:%x:%x:%x:%x:%x:%x",
-			bytesSwapped(ip[0]), bytesSwapped(ip[1]), bytesSwapped(ip[2]), bytesSwapped(ip[3]),
-			bytesSwapped(ip[4]), bytesSwapped(ip[5]), bytesSwapped(ip[6]), bytesSwapped(ip[7]));
+			ntohs(ip[0]), ntohs(ip[1]), ntohs(ip[2]), ntohs(ip[3]),
+			ntohs(ip[4]), ntohs(ip[5]), ntohs(ip[6]), ntohs(ip[7]));
 	}
 	else if (_type == IPv4)
 	{
