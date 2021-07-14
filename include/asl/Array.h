@@ -77,6 +77,7 @@ protected:
 	operator void*() { return NULL; }
 	Array(const String& s);
 	Array& operator=(int b) {}
+	bool operator==(int x) {}
 public:
 	/**
 	Creates an empty array
