@@ -426,10 +426,12 @@ public:
 	bool operator!=(char c) const {return _len!=1 || str()[0]!=c;}
 	bool operator<(const String& s) const {return strcmp(str(), s.str())<0;}
 	/**
-	Returns this string or s if this string is empty
+	Returns the left string if it is not empty, or the right otherwise
 	*/
 	const String& operator|(const String& s) const { return (_len == 0) ? s : *this; }
-
+	/**
+	Returns the left string if it is not empty, or the right otherwise
+	*/
 	template<class T>
 	String operator|(const T& s) const { return (*this) | String(s); }
 
