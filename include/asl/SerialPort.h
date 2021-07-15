@@ -89,6 +89,9 @@ public:
 	Reads n bytes from the port into buffer p
 	*/
 	int read(void* p, int n);
+
+	Array<byte> read(int n);
+
 	/**
 	Writes the given string to the port
 	*/

@@ -123,29 +123,13 @@ void SerialPort::setTimeout(double s)
 
 bool SerialPort::waitInput(double timeout)
 {
-	bool incoming = true;
-	DWORD mask;
-	if (available() > 0)
-		return true;
-	SetCommMask(_handle, EV_RXCHAR);
-	OVERLAPPED overlapped;
-	memset(&overlapped, 0, sizeof(OVERLAPPED));
-	overlapped.hEvent = CreateEvent(NULL, TRUE, TRUE, 0);
-	if (!WaitCommEvent(_handle, &mask, &overlapped))
-	{
-		if (GetLastError() == ERROR_IO_PENDING)
-		{
-			if (WaitForSingleObject(overlapped.hEvent, (DWORD)(timeout * 1000)) != WAIT_OBJECT_0)
-			{
-				incoming = false;
-			}
-		}
-	}
-	CloseHandle(overlapped.hEvent);
-
-	if ((mask & EV_RXCHAR) != EV_RXCHAR)
-		return false;
-	return incoming && available() > 0;
+	double t1 = now();
+	do {
+		if (available() > 0)
+			return true;
+		sleep(0.001);
+	} while (now() - t1 < timeout);
+	return false;
 }
 
 int SerialPort::available()
@@ -175,6 +159,14 @@ int SerialPort::read(void *p, int n)
 	ReadFile(_handle, p, n, NULL, &overlapped);
 	GetOverlappedResult(_handle, &overlapped, &bytes, TRUE);
 	return bytes;
+}
+
+Array<byte> SerialPort::read(int n)
+{
+	Array<byte> a(n);
+	n = read(a.ptr(), n);
+	a.resize(max(0, n));
+	return a;
 }
 
 void SerialPort::close()
