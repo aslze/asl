@@ -620,9 +620,9 @@ int Socket_::write(const void* data, int n)
 
 Array<byte> Socket_::read(int n)
 {
-	Array<byte> a((n < 0)? available() : n);
-	a.resize(read(&a[0], a.length()));
-	return a;
+	Array<byte> a((n < 0) ? available() : n);
+	n = read(&a[0], a.length());
+	return a.resize(max(0, n));
 }
 
 void Socket_::skip(int n)
