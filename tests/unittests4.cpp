@@ -73,18 +73,19 @@ ASL_TEST(StreamBuffer)
 	StreamBuffer b;
 	b.setEndian(ENDIAN_LITTLE);
 	b.setEndian(StreamBuffer::LITTLEENDIAN);
-	b << 'a' << 4 << 3.5;
+	b << 'a' << 4 << 3.5 << true;
 
-	ASL_ASSERT(b.length() == 13);
+	ASL_ASSERT(b.length() == 14);
 	ASL_ASSERT(b[0] == 'a' && b[1] == 0x04 && b[2] == 0 && b[3] == 0 && b[4] == 0)
 
 	StreamBufferReader c(b.ptr(), b.length());
 	signed char a;
 	int x;
 	double y;
-	c >> a >> x >> y;
+	bool f;
+	c >> a >> x >> y >> f;
 
-	ASL_ASSERT(a == 'a' && x == 4 && y == 3.5);
+	ASL_ASSERT(a == 'a' && x == 4 && y == 3.5 && f == true);
 
 	StreamBuffer b2;
 	b2.setEndian(ENDIAN_BIG);

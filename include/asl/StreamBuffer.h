@@ -108,6 +108,8 @@ public:
 		return *this;
 	}
 	
+	StreamBufferReader& operator>>(bool& x) { x = *_ptr != 0; _ptr++; return *this; }
+
 	StreamBufferReader& operator>>(signed char& x) { x = *(const char*)_ptr; _ptr++; return *this; }
 	/**
 	Read one value from the buffer
@@ -221,6 +223,12 @@ public:
 		return *this;
 	}
 
+	StreamBuffer& operator<<(const bool& x)
+	{
+		(Array<byte>&)(*this) << byte(x? 1 : 0);
+		return *this;
+	}
+
 	StreamBuffer& operator<<(const byte& x)
 	{
 		(Array<byte>&)(*this) << x;
@@ -229,13 +237,13 @@ public:
 
 	StreamBuffer& operator<<(const char& x)
 	{
-		(Array<byte>&)(*this) << x;
+		(Array<byte>&)(*this) << *(byte*)&x;
 		return *this;
 	}
 
 	StreamBuffer& operator<<(const signed char& x)
 	{
-		(Array<byte>&)(*this) << x;
+		(Array<byte>&)(*this) << *(byte*)&x;
 		return *this;
 	}
 
