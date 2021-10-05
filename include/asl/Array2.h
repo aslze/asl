@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2020 aslze
+// Copyright(c) 1999-2021 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_ARRAY2_H
@@ -28,6 +28,13 @@ public:
 	*/
 	Array2(int rows, int cols) :
 		_a(rows * cols), _rows(rows), _cols(cols)
+	{}
+
+	/**
+	Creates an array with size rows x cols and initializes all items with value
+	*/
+	Array2(int rows, int cols, const T& value) :
+		_a(rows * cols, value), _rows(rows), _cols(cols)
 	{}
 
 	/**
@@ -77,6 +84,12 @@ public:
 	const T& operator()(int i, int j) const
 	{
 		return _a[i * _cols + j];
+	}
+
+	void set(const T& x)
+	{
+		for (int i = 0; i < _a.length(); i++)
+			_a[i] = x;
 	}
 };
 
