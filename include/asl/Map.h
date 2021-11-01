@@ -78,8 +78,8 @@ public:
 	{
 		K key;
 		T value;
-		KeyVal() {}
-		KeyVal(const K& n): key(n) {}
+		KeyVal(): key(K()), value(T()) {}
+		KeyVal(const K& n): key(n), value(T()) {}
 		KeyVal(const K& n, const T& v): key(n), value(v) {}
 		KeyVal(const KeyVal& p): key(p.key), value(p.value) {}
 		//KeyVal(KeyVal&& p): key(p.key), value(p.value) {}
