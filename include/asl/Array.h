@@ -76,8 +76,8 @@ protected:
 	Array(T* p);
 	operator void*() { return NULL; }
 	Array(const String& s);
-	Array& operator=(int b) {}
-	bool operator==(int x) {}
+	Array& operator=(int b) { return *this; }
+	bool operator==(int x) const { return false; }
 public:
 	/**
 	Creates an empty array

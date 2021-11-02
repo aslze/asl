@@ -61,10 +61,12 @@ IniFile::IniFile(const String& name, bool shouldwrite)
 			}
 			if (!_indent)
 				for (int i = 0; i < line.length(); i++)
+				{
 					if (myisspace(line[i]))
 						_indent += line[i];
 					else
 						break;
+				}
 			String key = line.substring(0,i).trimmed();
 			String value = line.substring(i+1).trimmed();
 			for(char* p=key; *p; p++)

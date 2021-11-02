@@ -57,7 +57,7 @@ int y = d.year, month = d.month, day = d.day, hours = d.hours;
 class ASL_API Date
 {
 public:
-	enum Format {LONG, SHORT, DATE_ONLY, HTTP, FULL, FRACT = 8};
+	enum Format {LONG, SHORT, DATE_ONLY, HTTP, FULL};
 	enum Zone {UTC, LOCAL};
 	Date() {}
 	Date(double t) : _t(t) {}
