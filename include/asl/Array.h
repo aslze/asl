@@ -657,41 +657,26 @@ Array<T>& Array<T>::insert(int k, const T& x)
 	Data* h = &d();
 	int n = h->n;
 	int s = h->s;
-	if(k==-1)
+	if (k == -1)
 		k = n;
-	if(n < s) {}
+	if (n < s) {}
 	else
 	{
-		int s1 = 2*s;
-		/*if(s < 512/sizeof(T) || s > 200000/sizeof(T))
-		{
-			char* p = (char*) malloc( s1*sizeof(T) + sizeof(Data) );
-			if(!p)
-				ASL_BAD_ALLOC();
-			T* b = (T*) ( p + sizeof(Data) );
-			memcpy(b, _a, n*sizeof(T));//n was k
-			int rc=h->rc;
-			::free( (char*)_a - sizeof(Data) );
-			_a = b;
-			h = &d();
-			h->rc=rc;
-			h->s=s1;
-		}
-		else*/
-		{
-			char* p = (char*) realloc( (char*)_a-sizeof(Data), s1*sizeof(T)+sizeof(Data) );
-			if(!p)
-				ASL_BAD_ALLOC();
-			T* b = (T*) ( p + sizeof(Data) );
-			_a = b;
-			h = &d();
-			h->s=s1;
-		}
+		if (n == 2147483647)
+			ASL_BAD_ALLOC();
+		int s1 = s < 1073741823 ? 2 * s : 2147483647;
+		char* p = (char*)realloc((char*)_a - sizeof(Data), s1 * sizeof(T) + sizeof(Data));
+		if(!p)
+			ASL_BAD_ALLOC();
+		T* b = (T*) ( p + sizeof(Data) );
+		_a = b;
+		h = &d();
+		h->s=s1;
 	}
-	if(k<n) {
-		memmove((char*)_a+(k+1)*sizeof(T), (void*)(_a+k), (n-k)*sizeof(T));
+	if (k < n) {
+		memmove((char*)_a + (k + 1) * sizeof(T), (void*)(_a + k), (n - k) * sizeof(T));
 	}
-	asl_construct_copy(_a+k, x);
+	asl_construct_copy(_a + k, x);
 	h->n = n+1;
 	return *this;
 }
