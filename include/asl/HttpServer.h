@@ -66,7 +66,14 @@ class ASL_API HttpServer: public SocketServer
 {
 public:
 	HttpServer(int port = -1);
+
+	/**
+	* Sets the root directory from where files will be served by default
+	*/
 	void setRoot(const String& root);
+	/**
+	* Adds a mime type for a given extension for files served
+	*/
 	void addMimeType(const String& ext, const String& type);
 	/**
 	Implement this function in a subclass to create the server behavior.
