@@ -85,6 +85,10 @@ public:
 	Sets the maximum level of messages to be logged; By default this is 3, so messages up to *level DEBUG* are logged.
 	*/
 	static void setMaxLevel(int level);
+	/**
+	Gets the current maximum log level
+	*/
+	static int maxLevel();
 
 	/**
 	Writes a log message with the given category and log level.

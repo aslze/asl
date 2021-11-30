@@ -57,6 +57,12 @@ void Log::setMaxLevel(int level)
 	Log::instance()->storeState();
 }
 
+int Log::maxLevel()
+{
+	Log::instance()->updateState();
+	return Log::instance()->_maxLevel;
+}
+
 void Log::storeState()
 {
 #ifndef __ANDROID_API__
