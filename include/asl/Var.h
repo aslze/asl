@@ -670,7 +670,27 @@ void Var::operator=(const HDic<T>& x)
 template<class T>
 Array<T>& Array<T>::operator=(const Var& b)
 {
-	*this = Array<T>(b.array());
+	if (!b.is(Var::ARRAY))
+	{
+		clear();
+		return *this;
+	}
+	*this = Array<T>(b.array().with<T>());
+	return *this;
+}
+
+template<>
+inline Array<String>& Array<String>::operator=(const Var& b)
+{
+	if (!b.is(Var::ARRAY))
+	{
+		clear();
+		return *this;
+	}
+	resize(b.length());
+	for (int i = 0; i < b.length(); i++)
+		(*this)[i] = b[i].toString();
+
 	return *this;
 }
 
