@@ -326,13 +326,17 @@ public:
 	*/
 	operator Long() const {return toLong();}
 	/**
-	Returns true if this string is not empty
+	Returns true if this string is not empty (warning: this might change in the future to mean isTrue(), use `ok()`)
 	*/
 	operator bool() const {return _len > 0;}
 	/**
-	Returns true if this string is empty
+	Returns true if this string is empty (warning: this might change in the future to mean !isTrue(), use `!ok()`)
 	*/
 	bool operator!() const {return _len == 0;}
+	/**
+	Returns true if this string is not empty
+	*/
+	bool ok() const { return _len > 0; }
 	/**
 	Returns a const pointer to the beginning of the character data (suitable for functions
 	requiring C-style strings)
