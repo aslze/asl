@@ -170,6 +170,9 @@ ASL_TEST(Date)
 		Date d2(Date::UTC, p.year, p.month, p.day, p.hours, p.minutes, p.seconds);
 		ASL_ASSERT(fabs(d - d2) < 1);
 	}
+	
+	ASL_ASSERT(Date("2021-11-29T23:31:10Z").toUTCString() == "2021-11-29T23:31:10Z");
+	ASL_ASSERT(Date("2021-11-29T23:31:10.13+0130").toUTCString(Date::FULL) == "2021-11-29T22:31:10.130Z");
 }
 
 int add(int x, int y)
