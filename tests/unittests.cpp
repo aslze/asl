@@ -512,6 +512,7 @@ ASL_TEST(Var)
 
 #ifdef ASL_HAVE_RANGEFOR
 	Var list = array<Var>(1, 2, 3);
+	ASL_ASSERT(list.isArrayOf(3, Var::NUMBER));
 	int sum = 0;
 	for (auto e : list)
 	{

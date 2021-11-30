@@ -10,6 +10,7 @@ endmacro()
 
 set(TESTS
 	Array
+	Array2
 	String
 	Var
 	JSON

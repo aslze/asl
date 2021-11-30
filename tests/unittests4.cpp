@@ -2,6 +2,7 @@
 #include <asl/Matrix4.h>
 #include <asl/Quaternion.h>
 #include <asl/Uuid.h>
+#include <asl/Array2.h>
 #include <asl/StreamBuffer.h>
 #include <stdio.h>
 #include <asl/testing.h>
@@ -102,4 +103,32 @@ ASL_TEST(StreamBuffer)
 	c2 >> a >> x >> y;
 
 	ASL_ASSERT(a == 'a' && x == 4 && y == 3.5);
+}
+
+ASL_TEST(Array2)
+{
+	Array2<int> a(2, 3);
+	for (int i = 0; i < a.rows(); i++)
+		for (int j = 0; j < a.cols(); j++)
+			a(i, j) = i * 10 + j;
+
+	ASL_ASSERT(a(1, 2) == 12);
+
+#ifdef ASL_HAVE_INITLIST
+	Array2<int> a2(2, 3, {
+		1, 2, 3,
+		4, 5, 6
+	});
+
+	Array2<int> a3 = {
+		{ 1, 2, 3 },
+		{ 4, 5, 6 }
+	};
+
+	ASL_ASSERT(a2 == a3);
+#endif
+
+	Array2<int> a4 = a.slice(0, 2, 1, 2);
+
+	ASL_ASSERT(a4 == Array2<int>(2, 1, array(1, 11)));
 }
