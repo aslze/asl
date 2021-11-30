@@ -39,49 +39,79 @@ Date::Date(const String& t)
 		construct(UTC, y, mo, d, h, m, s);
 		return;
 	}
-	int i=0, j=0;
-	j=t.indexOf('-');
-	int y = t.substring(0,j);
-	i=t.indexOf('-', j+1);
-	int m = t.substring(j+1, i);
-	j=t.indexOf('_', i+1);
-	if(j==-1)
+	int i = 0, j = 0;
+	j = t.indexOf('-');
+	int y = t.substring(0, j);
+	i = t.indexOf('-', j + 1);
+	int m = t.substring(j + 1, i);
+	j = t.indexOf('_', i + 1);
+	if (j == -1)
 	{
-		j=t.indexOf('T', i+1);
-		if(j==-1) j=0;
+		j = t.indexOf('T', i + 1);
+		if (j == -1) j = 0;
 	}
 	int d = t.substring(i+1, j!=0? j : t.length());
 	int h = 0, mi = 0, s = 0;
 	double ms = 0;
-	if(j!=0)
+	int k = 0;
+	double tz = 0;
+	bool local = false;
+	if (j != 0)
 	{
-		i=t.indexOf(':', j+1);
-		if(i!=-1)
+		i = t.indexOf(':', j + 1);
+		if (i != -1)
 		{
-			h = t.substring(j+1, i);
-			j=t.indexOf(':', i+1);
-			if(j!=-1)
+			h = t.substring(j + 1, i);
+			j = t.indexOf(':', i + 1);
+			if (j != -1)
 			{
-				mi = t.substring(i+1, j);
+				mi = t.substring(i + 1, j);
 				i = t.indexOf('.', j + 1);
 				if (i > 0)
 				{
 					s = t.substring(j + 1, i);
 					ms = t.substring(i);
-					printf("%i %f\n", s, ms);
+					k = i;
 				}
 				else
+				{
 					s = t.substring(j + 1);
+					k = j + 1;
+				}
 			}
 			else
 			{
 				mi = t.substring(i + 1);
 				s = 0;
+				k = i + 1;
 			}
 		}
+		while (t[k] >= '0' && t[k] <= '9')
+			k++;
+
+		String tzs = "";
+		if (t[k] == 'Z')
+			tz = 0;
+		else if (t[k] == '+' || t[k] == '-')
+		{
+			tzs = t.substring(k + 1);
+			switch (tzs.length())
+			{
+			case 2: tz = double(tzs) * 3600.0; break;
+			case 4: tz = double(tzs.substr(0, 2)) * 3600.0 + double(tzs.substr(2, 2)) * 60.0; break;
+			case 5: tz = double(tzs.substr(0, 2)) * 3600.0 + double(tzs.substr(3, 2)) * 60.0; break;
+			default: _t = nan(); return;
+			}
+			if (t[k] == '-')
+				tz = -tz;
+		}
+		else
+			local = true;
 	}
-	construct(t.endsWith('Z')? UTC : LOCAL, y, m, d, h, mi, s);
-	_t += ms;
+
+	construct(local? LOCAL : UTC, y, m, d, h, mi, s);
+
+	_t += tz + ms;
 }
 
 static int parseSkipNumber(const char* &s)
@@ -267,6 +297,8 @@ DateData Date::calc(double t)
 
 String Date::toString(Date::Format fmt, bool utc) const
 {
+	if (_t != _t)
+		return "?";
 	DateData d = calc(_t + (utc? 0 : localOffset()));
 	String s;
 	switch(fmt)
