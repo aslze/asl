@@ -485,6 +485,33 @@ class ASL_API Var
 		return _type == t || (t==NUMBER && (_type == INT || _type == FLOAT)) ||
 			(t==STRING && _type == SSTRING) || (t==SSTRING && _type == STRING);
 	}
+
+	/**
+	 * Returns true if this var is an array and all its items have type `t`
+	*/
+	bool isArrayOf(Type t) const
+	{
+		if (_type != ARRAY)
+			return false;
+		for (int i = 0, n = length(); i < n; i++)
+			if (!(*a)[i].is(t))
+				return false;
+		return true;
+	}
+
+	/**
+	 * Returns true if this var is an array of n items and all its items have type `t`
+	*/
+	bool isArrayOf(int n, Type t) const
+	{
+		if (_type != ARRAY || a->length() != n)
+			return false;
+		for (int i = 0; i < n; i++)
+			if (!(*a)[i].is(t))
+				return false;
+		return true;
+	}
+
 	/** Checks if this var is an object of class `clas`. */
 	bool is(const char* clas) const {return _type == DIC && (*o)[ASL_XDLCLASS] == clas;}
 	/** Checks if this var is an object and has a property named `k`. */
