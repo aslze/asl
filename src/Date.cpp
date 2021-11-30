@@ -71,7 +71,7 @@ Date::Date(const String& t)
 				{
 					s = t.substring(j + 1, i);
 					ms = t.substring(i);
-					k = i;
+					k = i + 1;
 				}
 				else
 				{
@@ -102,7 +102,7 @@ Date::Date(const String& t)
 			case 5: tz = double(tzs.substr(0, 2)) * 3600.0 + double(tzs.substr(3, 2)) * 60.0; break;
 			default: _t = nan(); return;
 			}
-			if (t[k] == '-')
+			if (t[k] == '+')
 				tz = -tz;
 		}
 		else

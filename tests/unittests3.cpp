@@ -171,8 +171,9 @@ ASL_TEST(Date)
 		ASL_ASSERT(fabs(d - d2) < 1);
 	}
 	
-	ASL_ASSERT(Date("2021-11-29T23:31:10Z").toUTCString() == "2021-11-29T23:31:10Z");
-	ASL_ASSERT(Date("2021-11-29T23:31:10.13+0130").toUTCString(Date::FULL) == "2021-11-29T22:31:10.130Z");
+	ASL_CHECK(Date("2021-11-29T23:31:10.25+01:30").toUTCString(Date::FULL), ==, "2021-11-29T22:01:10.250Z");
+	ASL_CHECK(Date("2021-11-29T23:31:10.25Z").toUTCString(Date::FULL), ==, "2021-11-29T23:31:10.250Z");
+	ASL_CHECK(Date("2021-11-29T23:31:10-01:00").toUTCString(), == , "2021-11-30T00:31:10Z");
 }
 
 int add(int x, int y)
