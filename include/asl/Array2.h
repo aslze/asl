@@ -107,6 +107,22 @@ public:
 	const Array<T>& data() const { return _a; }
 
 	/**
+	Returns true if both arrays are equal
+	*/
+	bool operator==(const Array2& b) const
+	{
+		return _rows == b._rows && _cols == b._cols && _a == b._a;
+	}
+
+	/**
+	Returns true if both arrays are not equal
+	*/
+	bool operator!=(const Array2& b) const
+	{
+		return !(*this == b);
+	}
+
+	/**
 	Returns an independent copy of this array
 	*/
 	Array2 clone() const
