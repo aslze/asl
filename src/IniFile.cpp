@@ -107,7 +107,25 @@ String& IniFile::operator[](const String& name)
 	}
 }
 
-String IniFile::operator()(const String& name, const String& defaultVal)
+const String IniFile::operator[](const String& name) const
+{
+	int slash = name.indexOf('/');
+	if (slash < 0)
+	{
+		return _sections[_currentTitle].has(name) ? _sections[_currentTitle][name] : String();
+	}
+	else
+	{
+		String sec = name.substring(0, slash);
+		if (!_sections.has(sec))
+			return String();
+		Section& section = _sections[sec];
+		sec = name.substring(slash + 1);
+		return section.has(name) ? section[name] : String();
+	}
+}
+
+const String IniFile::operator()(const String& name, const String& defaultVal) const
 {
 	return has(name)? (*this)[name] : defaultVal;
 }
@@ -239,15 +257,15 @@ IniFile::~IniFile()
 		write(_filename);
 }
 
-int IniFile::arraysize(const String& name)
+int IniFile::arraysize(const String& name) const
 {
-	section(name);
+	_currentTitle = name;
 	return _sections[_currentTitle]["size"];
 }
 
-String IniFile::array(const String& name, int index)
+String IniFile::array(const String& name, int index) const
 {
-	String key = index+1;
+	String key = index + 1;
 	key << '\\' << name;
 	return _sections[_currentTitle][key];
 }

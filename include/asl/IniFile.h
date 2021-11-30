@@ -50,7 +50,7 @@ if(config.has("network/num_retries"))
 That last part can also be written as:
 
 ~~~
-int num_retries = config("network/num_retries", 5);
+int num_retries = config["network/num_retries"] | 5;
 ~~~
 */
 
@@ -68,6 +68,7 @@ public:
 		String& operator[](const String& k) {return _vars[k];}
 		const HashDic<String>& vars() const {return _vars;}
 		Section clone() const;
+		bool has(const String& k) const { return _vars.has(k); }
 		friend class IniFile;
 	};
 
@@ -95,11 +96,13 @@ public:
 	if the name is like `section/name` then the given section is used.
 	*/
 	String& operator[](const String& name);
+
+	const String operator[](const String& name) const;
 	
 	/**
 	Returns the value associated with the key `name` or `defaultVal` if it was not found. 
 	*/
-	String operator()(const String& name, const String& defaultVal);
+	const String operator()(const String& name, const String& defaultVal) const;
 	
 	/**
 	Writes the file with its modifications; this is done automatically on destruction, just call this if you need
@@ -123,17 +126,17 @@ public:
 	/**
 	Returns the length of an "array" named `name` as written by the Qt library and enables reading its values.
 	*/
-	int arraysize(const String& name);
+	int arraysize(const String& name) const;
 
 	/**
 	Returns the value associated with field `name` at the array position `index` of the array last specified
 	with `arraysize()`.
 	*/
-	String array(const String& name, int index);
+	String array(const String& name, int index) const;
 
 protected:
 	Dic<Section> _sections;
-	String _currentTitle;
+	mutable String _currentTitle;
 	String _filename;
 	String _indent;
 	Array<String> _lines;
