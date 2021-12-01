@@ -31,12 +31,12 @@ __Utilities__:
 - Base64, hex encoding/decoding
 - Binary buffer endian-aware reading/writing
 - %Random number generator
-- Simple testing support
+- Simple testing functionality
 
 __Basic data types__:
 
 - Strings with easy conversions and UTF8 support
-- Dynamic and static arrays
+- Dynamic and static arrays, including 2D arrays
 - Maps and hashmaps
 - Date/time
 - 2D, 3D, 4D vectors, 3x3, 4x4 matrices and quaternions
@@ -45,7 +45,7 @@ __Basic data types__:
 # Compilation and use #
 
 ASL can be used as a static or as a dynamic/shared library. The easiest way to 
-build and use it is via *CMake* (2.8.11 or later). By default both the dynamic 
+build and use it is via *CMake* (2.8.12 or later). By default both the dynamic 
 and static libraries will be built. You can enable the `ASL_USE_LOCAL8BIT` 
 option to disable interpretation of strings as UTF-8 and treat them as local 8-
 bit strings.
