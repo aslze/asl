@@ -193,7 +193,7 @@ namespace asl {
 
 bool SerialPort::open(const String& port)
 {
-	_handle = ::open(port, O_RDWR, S_IRUSR | S_IWUSR);
+	_handle = ::open(port, O_RDWR);
 
 	if(_handle <= 0)
 		return false;
@@ -209,10 +209,8 @@ void SerialPort::config(int bps, const String& mode)
 		return;
 	}
 
-	int bps0[20]={0, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400,
-		460800, 500000, 576000, 921600, 1000000};
-	int bps1[20]={B0, B300, B600, B1200, B2400, B4800, B9600, B19200, B38400, B57600, B115200,
-		0, 0, 0, 0, 0};
+	int bps0[20]={0, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 500000, 576000, 921600, 1000000};
+	int bps1[20]={B0, B300, B600, B1200, B2400, B4800, B9600, B19200, B38400, B57600, B115200, 0, 0, 0, 0, 0};
 #ifdef B230400
 	bps1[11] = B230400;
 #endif
