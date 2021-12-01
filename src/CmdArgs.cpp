@@ -135,7 +135,7 @@ Array<String> CmdArgs::operator()(const String& opt) const
 
 String CmdArgs::operator[](int i) const
 {
-	return _rest[i];
+	return i < _rest.length() ? _rest[i] : String();
 }
 
 int CmdArgs::length() const
