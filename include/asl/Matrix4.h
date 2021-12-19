@@ -197,12 +197,20 @@ class Matrix4_
 	Returns a rotation matrix of an angle in radians around a given axis.
 	*/
 	static Matrix4_ rotate(const Vec3_<T>& axis, T angle);
+
+	// New, unstable API
+	static Matrix4_ rotate(int axis, T angle);
+
 	/**
 	Returns a rotation matrix from a rotation vector (aligned with the axis and with the rotation angle as magnitude)
 	*/
 	static Matrix4_ rotate(const Vec3_<T>& axisAngle) { return rotate(axisAngle, axisAngle.length()); }
 
-	static Matrix4_ rotateAxis(const Vec3_<T>& axis, T angle) { return rotate(axis, angle); } // [deprecated]
+	// New, unstable API
+	static Matrix4_ fromEuler(const Vec3_<T>& r, int a0, int a1, int a2);
+
+	// New, unstable API
+	Vec3_<T> eulerAngles(int a0, int a1, int a2) const;
 	/**
 	Multipies this matrix by `B`
 	*/
@@ -287,12 +295,12 @@ Matrix4_<T> Matrix4_<T>::operator+(const Matrix4_<T>& B) const
 }
 
 template<class T>
-Matrix4_<T> Matrix4_<T>::operator*(const Matrix4_<T>& B) const
+inline Matrix4_<T> Matrix4_<T>::operator*(const Matrix4_<T>& B) const
 {
 	Matrix4_<T> C;
-	for(int i=0; i<4; i++)
-		for(int j=0; j<4; j++)
-			C(i,j) = a[i][0]*B(0,j)+ a[i][1]*B(1,j) + a[i][2]*B(2,j) + a[i][3]*B(3,j);
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 4; j++)
+			C(i, j) = a[i][0] * B(0, j) + a[i][1] * B(1, j) + a[i][2] * B(2, j) + a[i][3] * B(3, j);
 	return C;
 }
 
@@ -316,13 +324,13 @@ Matrix4_<T>& Matrix4_<T>::operator*=(T t)
 }
 
 template<class T>
-Matrix4_<T>& Matrix4_<T>::operator*=(const Matrix4_<T>& B)
+inline Matrix4_<T>& Matrix4_<T>::operator*=(const Matrix4_<T>& B)
 {
 	Matrix4_<T> C;
-	for(int i=0; i<4; i++)
-		for(int j=0; j<4; j++)
-			C(i,j) = a[i][0]*B(0,j)+ a[i][1]*B(1,j) + a[i][2]*B(2,j) + a[i][3]*B(3,j);
-	*this=C;
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 4; j++)
+			C(i, j) = a[i][0] * B(0, j) + a[i][1] * B(1, j) + a[i][2] * B(2, j) + a[i][3] * B(3, j);
+	*this = C;
 	return *this;
 }
 
@@ -387,18 +395,97 @@ Matrix4_<T> Matrix4_<T>::rotateZ(T phi)
 }
 
 template<class T>
-Matrix4_<T> Matrix4_<T>::rotate(const Vec3_<T>& axis, T angle)
+inline Matrix4_<T> Matrix4_<T>::rotate(const Vec3_<T>& axis, T angle)
 {
 	return Quaternion_<T>::fromAxisAngle(axis, angle).matrix();
 }
 
 template<class T>
-Vec3_<T> Matrix4_<T>::operator%(const Vec3_<T>& p) const
+Matrix4_<T> Matrix4_<T>::rotate(int axis, T angle)
+{
+	switch (axis)
+	{
+	case 0: case 'X': return rotateX(angle);
+	case 1: case 'Y': return rotateY(angle);
+	case 2: case 'Z': return rotateZ(angle);
+	}
+	return identity();
+}
+
+template<class T>
+Matrix4_<T> Matrix4_<T>::fromEuler(const Vec3_<T>& r, int a0, int a1, int a2)
+{
+	return rotate(a0, r.x) * rotate(a1, r.y) * rotate(a2, r.z);
+}
+
+template<class T>
+Vec3_<T> Matrix4_<T>::eulerAngles(int a0, int a1, int a2) const
+{
+	T r0, r1, r2;
+
+	if (a0 != a2)
+	{
+		T s = (a1 - a0 + 3) % 3 == 1 ? -1.0f : 1.0f;
+		if (at(a0, a2) < 1)
+		{
+			if (at(a0, a2) > -1)
+			{
+				r1 = asin(-s * at(a0, a2));
+				r2 = atan2(s * at(a1, a2), at(a2, a2));
+				r0 = atan2(s * at(a0, a1), at(a0, a0));
+			}
+			else
+			{
+				r1 = s * (T)PI / 2;
+				r2 = -atan2(-s * at(a1, a0), at(a1, a1));
+				r0 = 0;
+			}
+		}
+		else
+		{
+			r1 = -s * (T)PI / 2;
+			r2 = atan2(-s * at(a1, a0), at(a1, a1));
+			r0 = 0;
+		}
+		return Vec3_<T>(r2, r1, r0);
+	}
+	else
+	{
+		int k = 3 - a0 - a1;
+		T s = (a1 - a0 + 3) % 3 == 2 ? -1.0f : 1.0f;
+		if (at(a0, a0) < 1)
+		{
+			if (at(a0, a0) > -1)
+			{
+				r1 = acos(at(a0, a0));
+				r2 = atan2(at(a1, a0), -s * at(k, a0));
+				r0 = atan2(at(a0, a1), s * at(a0, k));
+			}
+			else
+			{
+				r1 = (T)PI;
+				r2 = -atan2(-s * at(a1, k), at(a1, a1));
+				r0 = 0;
+			}
+		}
+		else
+		{
+			r1 = 0;
+			r2 = atan2(-s * at(a1, k), at(a1, a1));
+			r0 = 0;
+		}
+	}
+	return Vec3_<T>(r2, r1, r0);
+}
+
+
+template<class T>
+inline Vec3_<T> Matrix4_<T>::operator%(const Vec3_<T>& p) const
 {
 	return Vec3_<T>(
-		a[0][0]*p.x+a[0][1]*p.y+a[0][2]*p.z,
-		a[1][0]*p.x+a[1][1]*p.y+a[1][2]*p.z,
-		a[2][0]*p.x+a[2][1]*p.y+a[2][2]*p.z );
+		a[0][0] * p.x + a[0][1] * p.y + a[0][2] * p.z,
+		a[1][0] * p.x + a[1][1] * p.y + a[1][2] * p.z,
+		a[2][0] * p.x + a[2][1] * p.y + a[2][2] * p.z);
 }
 
 template<class T>
