@@ -128,6 +128,10 @@ class Matrix4_
 	*/
 	Matrix4_ operator+(const Matrix4_& B) const;
 	/**
+	Returns this matrix minus `B`
+	*/
+	Matrix4_ operator-(const Matrix4_& B) const;
+	/**
 	Returns this matrix multiplied by `B`
 	*/
 	Matrix4_ operator*(const Matrix4_& B) const;
@@ -249,6 +253,8 @@ class Matrix4_
 	Returns the *determinant* of this matrix.
 	*/
 	T det() const;
+
+	T norm() const;
 };
 
 typedef Matrix4_<float> Matrix4;
@@ -291,6 +297,16 @@ Matrix4_<T> Matrix4_<T>::operator+(const Matrix4_<T>& B) const
 	for(int i=0; i<4; i++)
 		for(int j=0; j<4; j++)
 			C(i,j) = a[i][j] + B(i,j);
+	return C;
+}
+
+template<class T>
+Matrix4_<T> Matrix4_<T>::operator-(const Matrix4_<T>& B) const
+{
+	Matrix4_<T> C;
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 4; j++)
+			C(i, j) = a[i][j] - B(i, j);
 	return C;
 }
 
@@ -540,6 +556,12 @@ T Matrix4_<T>::det() const
 {
 	return a[0][0]*a[1][1]*a[2][2]-a[0][0]*a[2][1]*a[1][2]-a[1][0]*a[0][1]*a[2][2]+
 		a[1][0]*a[2][1]*a[0][2]+a[2][0]*a[0][1]*a[1][2]-a[2][0]*a[1][1]*a[0][2];
+}
+
+template<class T>
+T Matrix4_<T>::norm() const
+{
+	return sqrt(column(0).length2() + column(1).length2() + column(2).length2() + column(3).length2());
 }
 
 template class Matrix4_<float>;

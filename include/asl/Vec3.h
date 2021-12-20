@@ -43,6 +43,10 @@ class Vec3_
 	operator const T*() const {return (T*)this;}
 	/** Returns the *x* and *y* components as a Vec2 */
 	Vec2_<T> xy() const {return Vec2_<T>(x, y);}
+	/**
+	Returns this vector with components reversed (z,y,x)
+	*/
+	Vec3_<T> zyx() const { return Vec3_<T>(z, y, x); }
 	/** Returns the cartesian coordinates vector corresponding to this homogenous coordinates */
 	Vec2_<T> h2c() const {T iz=1/z; return Vec2_<T>(iz*x, iz*y);}
 
