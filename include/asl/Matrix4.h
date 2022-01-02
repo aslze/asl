@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2020 aslze
+// Copyright(c) 1999-2022 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_MATRIX4_H
@@ -11,6 +11,7 @@ namespace asl {
 
 template<class T> class Matrix4_;
 template<class T> class Quaternion_;
+class String;
 
 /**
 A Matrix4 is a 4x4 matrix useful for representing affine transformations in 3D space.
@@ -18,6 +19,9 @@ A Matrix4 is a 4x4 matrix useful for representing affine transformations in 3D s
 ~~~
 Matrix4 a = Matrix4::translate(10, 4, 0) * Matrix4::rotateX(PI/2);
 Vec3 v = a.inverse().t() * Vec3(1, 0, 0);
+
+Matrix4 r = Matrix4::fromEuler(Vec3(alpha, beta, gamma), "XYZ*");
+Vec3 angles = r.eulerAngles("ZYX");
 ~~~
 \ingroup Math3D
 */
@@ -210,11 +214,31 @@ class Matrix4_
 	*/
 	static Matrix4_ rotate(const Vec3_<T>& axisAngle) { return rotate(axisAngle, axisAngle.length()); }
 
-	// New, unstable API
+	/**
+	Returns a rotation matrix created from Euler angles rotating the components of r in axes a0, a1, a2 (each one of 0, 1 or 2), the result
+	is R[a0](r.x) * R[a1](r.y) * R[a2](r.z)
+	*/
 	static Matrix4_ fromEuler(const Vec3_<T>& r, int a0, int a1, int a2);
 
-	// New, unstable API
+	/**
+	Returns a rotation matrix created from Euler angles rotating the components of r in axes given as a string, such as "XYZ",
+	if an '*' is appended then the result is equivalent to rotations on fixed axes, while by default it is equivalent to rotations
+	on moving axes.
+	*/
+	static Matrix4_ fromEuler(const Vec3_<T>& r, const char* a);
+
+	/**
+	Computes the Euler angles corresponding to this rotation matrix (the top-left 3x3 submatrix) for the given axes rotation order
+	given as [0, 1, 2] indices, equivalent to the fromEuler function
+	*/
 	Vec3_<T> eulerAngles(int a0, int a1, int a2) const;
+
+	/**
+	Computes the Euler angles corresponding to this rotation matrix (the top-left 3x3 submatrix) for the given axes rotation order
+	given as a string, such as "XYZ" or "XYZ*", equivalent to the fromEuler function
+	*/
+	Vec3_<T> eulerAngles(const char* a) const;
+
 	/**
 	Multipies this matrix by `B`
 	*/
@@ -442,25 +466,16 @@ Vec3_<T> Matrix4_<T>::eulerAngles(int a0, int a1, int a2) const
 	if (a0 != a2)
 	{
 		T s = (a1 - a0 + 3) % 3 == 1 ? -1.0f : 1.0f;
-		if (at(a0, a2) < 1)
+		if (abs(at(a0, a2)) < 1)
 		{
-			if (at(a0, a2) > -1)
-			{
-				r1 = asin(-s * at(a0, a2));
-				r2 = atan2(s * at(a1, a2), at(a2, a2));
-				r0 = atan2(s * at(a0, a1), at(a0, a0));
-			}
-			else
-			{
-				r1 = s * (T)PI / 2;
-				r2 = -atan2(-s * at(a1, a0), at(a1, a1));
-				r0 = 0;
-			}
+			r1 = asin(-s * at(a0, a2));
+			r2 = atan2(s * at(a1, a2), at(a2, a2));
+			r0 = atan2(s * at(a0, a1), at(a0, a0));
 		}
 		else
 		{
-			r1 = -s * (T)PI / 2;
-			r2 = atan2(-s * at(a1, a0), at(a1, a1));
+			r1 = -at(a0, a2) * s * ((T)PI / 2);
+			r2 = at(a0, a2) * atan2(-s * at(a1, a0), at(a1, a1));
 			r0 = 0;
 		}
 		return Vec3_<T>(r2, r1, r0);
@@ -469,29 +484,36 @@ Vec3_<T> Matrix4_<T>::eulerAngles(int a0, int a1, int a2) const
 	{
 		int k = 3 - a0 - a1;
 		T s = (a1 - a0 + 3) % 3 == 2 ? -1.0f : 1.0f;
-		if (at(a0, a0) < 1)
+		if (abs(at(a0, a0)) < 1)
 		{
-			if (at(a0, a0) > -1)
-			{
-				r1 = acos(at(a0, a0));
-				r2 = atan2(at(a1, a0), -s * at(k, a0));
-				r0 = atan2(at(a0, a1), s * at(a0, k));
-			}
-			else
-			{
-				r1 = (T)PI;
-				r2 = -atan2(-s * at(a1, k), at(a1, a1));
-				r0 = 0;
-			}
+			r1 = acos(at(a0, a0));
+			r2 = atan2(at(a1, a0), -s * at(k, a0));
+			r0 = atan2(at(a0, a1), s * at(a0, k));
 		}
 		else
 		{
-			r1 = 0;
-			r2 = atan2(-s * at(a1, k), at(a1, a1));
+			r1 = at(a0, a0) < 0 ? (T)PI : 0;
+			r2 = at(a0, a0) * atan2(-s * at(a1, k), at(a1, a1));
 			r0 = 0;
 		}
 	}
 	return Vec3_<T>(r2, r1, r0);
+}
+
+template<class T>
+inline Matrix4_<T> Matrix4_<T>::fromEuler(const Vec3_<T>& r, const char* a)
+{
+	if (strlen(a) < 3)
+		return Matrix4_<T>::identity();
+	return (a[3] == '*') ? fromEuler(r.zyx(), a[2] - 'X', a[1] - 'X', a[0] - 'X') : fromEuler(r, a[0] - 'X', a[1] - 'X', a[2] - 'X');
+}
+
+template<class T>
+inline Vec3_<T> Matrix4_<T>::eulerAngles(const char* a) const
+{
+	if (strlen(a) < 3)
+		return Vec3_<T>(0, 0, 0);
+	return (a[3] == '*') ? eulerAngles(a[2] - 'X', a[1] - 'X', a[0] - 'X').zyx() : eulerAngles(a[0] - 'X', a[1] - 'X', a[2] - 'X');
 }
 
 
