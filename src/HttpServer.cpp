@@ -62,7 +62,7 @@ void HttpServer::serve(Socket client)
 			_wsserver->process(client, request.headers());
 			return;
 		}
-		HttpResponse response(request, _proto);
+		HttpResponse response(request);
 		response.put("");
 		if (_cors && request.hasHeader("Origin"))
 		{
@@ -116,7 +116,7 @@ void HttpServer::serve(Socket client)
 				response.write();
 		}
 		
-		if(_proto=="HTTP/1.0" || request.header("Connection") == "close")
+		if (request.protocol() == "HTTP/1.0" || request.header("Connection") == "close")
 			break;
 	}
 }

@@ -88,6 +88,11 @@ public:
 
 	const Dic<>& headers() const { return _headers; }
 
+	/**
+	Returns the HTTP protocol (e.g. "HTTP/1.1")
+	*/
+	const String& protocol() const { return _proto; }
+
 	Socket& socket() const
 	{
 		return *_socket;
@@ -166,6 +171,7 @@ protected:
 	void readHeaders();
 	void readBody();
 	String _command;
+	String _proto;
 	Dic<> _headers;
 	Array<byte> _body;
 	mutable Socket* _socket;
@@ -356,7 +362,7 @@ public:
 	};
 
 	HttpResponse();
-	HttpResponse(const HttpRequest& r, const String& proto="HTTP/1.0", int code=200);
+	HttpResponse(const HttpRequest& r);
 	/**
 	Sets the response status code (such as 200 [default] for OK)
 	*/
@@ -380,7 +386,6 @@ public:
 	int code() const { return _code; }
 
 protected:
-	String _proto;
 	int _code;
 };
 

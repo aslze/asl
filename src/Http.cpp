@@ -123,7 +123,7 @@ struct HttpSinkFile : public HttpSink
 	}
 };
 
-HttpMessage::HttpMessage() : _socket(NULL), _fileBody(false), _chunked(false)
+HttpMessage::HttpMessage() : _proto("HTTP/1.1"), _socket(NULL), _fileBody(false), _chunked(false)
 {
 	_sink = new HttpSinkArray(_body);
 	_headersSent = false;
@@ -393,13 +393,14 @@ void HttpRequest::read()
 	if (_socket->error() || ! _command)
 		return;
 	int i = _command.indexOf(' ');
-	if(i==-1)
+	if (i == -1)
 		return;
-	int j = _command.indexOf(' ', i+1);
-	if(j==-1)
+	int j = _command.indexOf(' ', i + 1);
+	if (j == -1)
 		return;
 	_method = _command.substring(0,i);
-	_res = _command.substring(i+1, j);
+	_res = _command.substring(i + 1, j);
+	_proto = _command.substring(j + 1).trim();
 
 	readHeaders();
 	readBody();
@@ -411,23 +412,23 @@ void HttpRequest::read()
 	*/
 	int pathend = _res.length();
 	int h = _res.indexOf('#');
-	if(h > 0)
+	if (h > 0)
 	{
 		pathend = h;
-		_fragment = _res.substring(h+1);
+		_fragment = _res.substring(h + 1);
 	}
 	int q = _res.indexOf('?');
-	if(q > 0)
+	if (q > 0)
 	{
-		_querystring = _res.substring(q+1, h>0? h : pathend);
+		_querystring = _res.substring(q + 1, h > 0 ? h : pathend);
 		pathend = q;
 	}
 	_path = _res.substring(0, pathend);
 	_parts = _path.split('/');
-	if(_parts.length() > 0) {
-		if(_parts.last() == "")
-			_parts.remove(_parts.length()-1);
-		if(_parts.length()>0 && _parts[0] == "")
+	if (_parts.length() > 0) {
+		if (_parts.last() == "")
+			_parts.remove(_parts.length() - 1);
+		if (_parts.length() > 0 && _parts[0] == "")
 			_parts.remove(0);
 	}
 }
@@ -472,18 +473,18 @@ bool HttpRequest::is(const String& pat)
 
 HttpResponse::HttpResponse()
 {
-	_proto = "HTTP/1.0";
 	_headersSent = true;
 	setCode(0);
 }
 
-HttpResponse::HttpResponse(const HttpRequest& r, const String& proto, int code)
+HttpResponse::HttpResponse(const HttpRequest& r)
 {
 	_socket = r._socket;
 	_status = r._status;
 	_status->sent = 0;
 	_status->received = 0;
-	_proto = proto;
+	if (r._proto == "HTTP/1.0")
+		_proto = r._proto;
 	_headersSent = false;
 	setCode(200);
 }
@@ -491,15 +492,17 @@ HttpResponse::HttpResponse(const HttpRequest& r, const String& proto, int code)
 void HttpResponse::setCode(int code)
 {
 	_code = code;
-	String msg = "OK";
-	if (code == 404)
+	String msg;
+	if (code == 200)
+		msg = "OK";
+	else if (code == 404)
 		msg = "Not Found";
 	else if (code == 206)
 		msg = "Partial Content";
 	else
 		msg = "Not found";
 
-	_command = String(0, "%s %i %s", *_proto, code, *msg);
+	_command = String(15, "%s %i %s", *_proto, code, *msg);
 }
 
 bool HttpResponse::is(HttpResponse::StatusType code) const
