@@ -56,6 +56,8 @@ void HttpServer::serve(Socket client)
 		if (client.error())
 			break;
 
+		String hconn = request.header("Connection").toLowerCase();
+
 		if (request.header("Upgrade") == "websocket" && _wsserver)
 		{
 			if(verbose) printf("handing over to ws\n");
@@ -89,6 +91,8 @@ void HttpServer::serve(Socket client)
 				String mime = _mimetypes.get(file.extension(), "text/plain");
 				response.setHeader("Date", Date::now().toString(Date::HTTP));
 				response.setHeader("Content-Type", mime);
+				if (hconn == "keep-alive")
+					response.setHeader("Connection", "keep-alive");
 				if (!response.hasHeader("Cache-Control"))
 					response.setHeader("Cache-Control", "max-age=60, public");
 				if (request.hasHeader("Range"))
@@ -116,7 +120,7 @@ void HttpServer::serve(Socket client)
 				response.write();
 		}
 		
-		if (request.protocol() == "HTTP/1.0" || request.header("Connection") == "close")
+		if (request.protocol() == "HTTP/1.0" && hconn != "keep-alive" || hconn == "close")
 			break;
 	}
 }
