@@ -341,7 +341,7 @@ HttpResponse Http::request(HttpRequest& request)
 		return response;
 	
 	String line = socket.readLine();
-	if (!line) {
+	if (!line.ok()) {
 		socket.close();
 		return response;
 	}
@@ -390,7 +390,7 @@ void HttpRequest::read()
 {
 	_addr = _socket->remoteAddress();
 	_command = _socket->readLine();
-	if (_socket->error() || ! _command)
+	if (_socket->error() || !_command.ok())
 		return;
 	int i = _command.indexOf(' ');
 	if (i == -1)

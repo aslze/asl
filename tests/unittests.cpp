@@ -364,11 +364,11 @@ ASL_TEST(String)
 	ASL_ASSERT(dic["x"] == "1" && dic["y"] == "2");
 
 	String empty = "";
-	ASL_ASSERT(!empty);
-	ASL_ASSERT(String("c"));
+	ASL_ASSERT(!empty.ok());
+	ASL_ASSERT(String("c").ok());
 	String full = "abc";
-	int valid1 = empty? 1 : 0;
-	int valid2 = full? 1 : 0;
+	int valid1 = empty.ok()? 1 : 0;
+	int valid2 = full.ok()? 1 : 0;
 	ASL_ASSERT(valid1 == 0 && valid2 == 1);
 
 	ASL_ASSERT(!empty.isTrue());

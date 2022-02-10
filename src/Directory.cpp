@@ -25,14 +25,14 @@ String Directory::directory() const
 
 bool Directory::create(const String& name)
 {
-	if (!name)
+	if (!name.ok())
 		return false;
 	if (createOne(name))
 		return true;
 	Path path = Path(name).absolute();
 	String parent = path.directory();
-	if (Directory(parent).directory())
-	if (parent && !Directory(parent).exists())
+	if (Directory(parent).directory().ok())
+	if (parent.ok() && !Directory(parent).exists())
 	{
 		create(parent);
 	}
@@ -65,7 +65,7 @@ String Directory::createTemp()
 
 bool Directory::removeRecursive(const String& path)
 {
-	if (!path)
+	if (!path.ok())
 		return false;
 	bool ok = true;
 	String abs = Path(path).absolute().string().toLowerCase().replace('\\', '/');

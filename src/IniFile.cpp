@@ -28,7 +28,7 @@ IniFile::IniFile(const String& name, bool shouldwrite)
 		String line=file.readLine();
 		if(shouldwrite)
 			_lines << line.trimmed();
-		if(!line)
+		if(!line.ok())
 			continue;
 		if(file.end())
 			break;
@@ -55,11 +55,11 @@ IniFile::IniFile(const String& name, bool shouldwrite)
 			int i=line.indexOf('=');
 			if (i < 1)
 			{
-				if (_lines.length() > 0 && _lines.last())
+				if (_lines.length() > 0 && _lines.last().ok())
 					_lines.resize(_lines.length() - 1);
 				continue;
 			}
-			if (!_indent)
+			if (!_indent.ok())
 				for (int i = 0; i < line.length(); i++)
 				{
 					if (myisspace(line[i]))

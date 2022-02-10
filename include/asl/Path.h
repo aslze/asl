@@ -54,9 +54,9 @@ public:
 
 	bool operator!=(const char* s) const { return !(*this == s); }
 
-	bool operator!() const { return !_path; }
+	bool operator!() const { return !_path.ok(); }
 
-	operator bool() const { return (bool)_path; }
+	operator bool() const { return _path.ok(); }
 	/**
 	Tests if this path refers to the same as p as absolute paths.
 	*/

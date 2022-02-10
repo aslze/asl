@@ -285,7 +285,7 @@ bool InetAddress::set(const String& host, int port)
 #ifdef _WIN32
 	if (!g_wsaStarted) startWSA();
 #endif
-	if(host)
+	if (host.ok())
 	{
 		addrinfo hints, *info;
 		memset(&hints, 0, sizeof(addrinfo));
@@ -373,7 +373,7 @@ bool InetAddress::set(const String& host)
 		thehost = '[' + host + ']';
 
 	HostPort hp = parseHostPort(thehost);
-	if(!hp.port && hp.host.contains('/'))
+	if(!hp.port.ok() && hp.host.contains('/'))
 	{
 #ifndef _WIN32
 		_data.resize(sizeof(sockaddr_un));

@@ -204,7 +204,7 @@ bool HttpServer::handleOptions(HttpRequest& request, HttpResponse& response)
 
 void HttpServer::handle(HttpRequest& request, HttpResponse& response)
 {
-	if (_webroot)
+	if (_webroot.ok())
 		serveFile(request, response);
 }
 

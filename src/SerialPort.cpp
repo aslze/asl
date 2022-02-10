@@ -23,7 +23,7 @@ String SerialPort::readLine()
 
 	while (read(&c, 1) > 0)
 	{
-		if (!_nl)
+		if (!_nl.ok())
 		{
 			if (c != '\r' && c != '\n')
 				s += c;
