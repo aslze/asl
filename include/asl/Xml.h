@@ -579,11 +579,11 @@ public:
 	/**
 	Parses the given string as XML and returns the equivalent DOM tree.
 	*/
-	static Xml decode(const String& xml) { return decodeXML(xml); }
+	static Xml decode(const String& xml);
 	/**
 	Encodes the given XML document as XML, with or without formatting.
 	*/
-	static String encode(const Xml& e, bool formatted = true) { return encodeXML(e, formatted); }
+	static String encode(const Xml& e, bool formatted = true);
 };
 
 #ifdef ASL_HAVE_RANGEFOR

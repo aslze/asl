@@ -9,12 +9,12 @@ namespace asl {
 
 Xml Xml::read(const String& file)
 {
-	return decodeXML(TextFile(file).text());
+	return Xml::decode(TextFile(file).text());
 }
 
 bool Xml::write(const String& file, const Xml& e)
 {
-	return TextFile(file).put(encodeXML(e, true));
+	return TextFile(file).put(Xml::encode(e, true));
 }
 
 Xml::Xml(const String& tag, const String& val) : NodeBase(new _Xml(tag))
@@ -110,7 +110,7 @@ Xml& Xml::operator<<(const String& t)
 	return *this;
 }
 
-Xml decodeXML(const String& x)
+Xml Xml::decode(const String& x)
 {
 	if (x == "")
 		return Xml(0);
@@ -489,12 +489,22 @@ void XmlCodec::encode(const Xml& e)
 	}
 }
 
-String encodeXML(const Xml& e, bool formatted)
+String Xml::encode(const Xml& e, bool formatted)
 {
 	XmlCodec c;
 	c.setFormatted(formatted);
 	c.encode(e);
 	return c.text();
+}
+
+Xml decodeXML(const String& xml)
+{
+	return Xml::decode(xml);
+}
+
+String encodeXML(const Xml& e, bool formatted)
+{
+	return Xml::encode(e, formatted);
 }
 
 }
