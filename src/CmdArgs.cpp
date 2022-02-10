@@ -66,27 +66,27 @@ CmdArgs::CmdArgs(int argc, char* argv[], const String& spec)
 	Array<String> parts = spec.split(',');
 	foreach(const String& s, parts)
 	{
-		if(s.contains(':'))
+		if (s.contains(':'))
 			options << s.substring(0, s.indexOf(':'));
 		else
 			flags << s;
 	}
-	for(int i=1; i< _args.length(); i++)
+	for (int i = 1; i < _args.length(); i++)
 	{
-		if(_args[i].startsWith('-'))
+		if (_args[i].startsWith('-') && _args[i] != '-')
 		{
 			bool isflag = _args[i].endsWith('!');
 			String opt = _args[i].substring(1, _args[i].length() - (isflag ? 1 : 0));
 			if (!_unused.contains(opt))
 				_unused << opt;
 			bool nextIsOption = i < _args.length() - 1 && (_args[i + 1].startsWith('-') && !asl_isdigit(_args[i + 1][1]));
-			if ((i<_args.length() - 1 && !nextIsOption) && !flags.contains(opt) && !isflag)
+			if ((i < _args.length() - 1 && !nextIsOption) && !flags.contains(opt) && !isflag)
 			{
-				_multi[opt] << _args[i+1];
-				_opts[opt] = _args[i+1];
+				_multi[opt] << _args[i + 1];
+				_opts[opt] = _args[i + 1];
 				i++;
 			}
-			else if(isflag || !options.contains(opt))
+			else if (isflag || !options.contains(opt))
 			{
 				_opts[opt] = "1";
 			}
@@ -94,7 +94,7 @@ CmdArgs::CmdArgs(int argc, char* argv[], const String& spec)
 				return;
 			_rest.clear();
 		}
-		else
+		else if (_args[i] != '-')
 			_rest << _args[i];
 	}
 }
