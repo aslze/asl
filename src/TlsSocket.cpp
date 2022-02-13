@@ -1,12 +1,13 @@
 #define TLSSOCKET_CPP
-#include <mbedtls/net.h>
+#include <mbedtls/net_sockets.h>
 #include <mbedtls/debug.h>
 #include <mbedtls/ssl.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/error.h>
-#include <mbedtls/certs.h>
 #include <asl/TlsSocket.h>
+
+//#define TLS_DEBUG 3
 
 #ifdef _WIN32
 #include <windows.h>
@@ -35,7 +36,70 @@
 #endif
 #endif
 
+// self-signed cert for testing (servers have this cert by default)
+
+static const char asl_test_srv_crt_rsa[] =
+"-----BEGIN CERTIFICATE-----\n"
+"MIIDLjCCAhagAwIBAgIBATANBgkqhkiG9w0BAQsFADAyMRIwEAYDVQQDDAlsb2Nh\n"
+"bGhvc3QxDjAMBgNVBAoMBWFzbHplMQwwCgYDVQQGEwNPUkcwIBcNMjAwMTAxMDAw\n"
+"MDAwWhgPMjA5OTEyMzEyMzU5NTlaMDIxEjAQBgNVBAMMCWxvY2FsaG9zdDEOMAwG\n"
+"A1UECgwFYXNsemUxDDAKBgNVBAYTA09SRzCCASIwDQYJKoZIhvcNAQEBBQADggEP\n"
+"ADCCAQoCggEBALMXONdv3yCCORcM8sfbFGN7bPsyDuiNrPBoSRiYD59XPJnk1LSV\n"
+"93lzFQmX+KeT9sq26CJjIrOrWzcnenRHVUzjLGsfuoRmtTJN9D95cbjF7MyzeK6S\n"
+"wEffegcQBBp6l6VR8Rb+EWboctBxiF0wKWYhX000NdJr1bycjRHIUmZEIiavi0FP\n"
+"289KuKxU0Wo2q9Ji+fztrr0l4uOHqbzQctcq5ivhVfPUupFURw/+f9aKngpCLFVE\n"
+"EXbplUH9mvvAlD21ZEcEmMhbjzN3AEp7dR1dbQv0rBd9Qv/ZBNGQLGvz9186oYs7\n"
+"aQSbY1fGwAGb71AhSODTviYbgOg4aX0uRDUCAwEAAaNNMEswCQYDVR0TBAIwADAd\n"
+"BgNVHQ4EFgQU4woSIBbbt8SnW6DSRi5Tl6QnvUgwHwYDVR0jBBgwFoAU4woSIBbb\n"
+"t8SnW6DSRi5Tl6QnvUgwDQYJKoZIhvcNAQELBQADggEBAK1C06NmU8KfhBhP5tL2\n"
+"q/2xr0qxXsGzhM9pU6q2j6itGRPQJlG1Ehvz2PU0Vu0Pqhqwolv9uu4nSdsIk5fI\n"
+"hAPPASTn4yuuWFG4gY06O/Nzgg5ayCysGjZEgEB/4i+Wf84WIAaPHtPaXMT3dSwL\n"
+"+kuFzv6T1YD44cvFJh4FTTWlhWu/kusvWOX7QOVhAp0Xbm2byowuOJ80wdgyuqHx\n"
+"kFSfcFGVLe0NpVu8GMKZ6pQwdB1C5+l4s/8XM6x5wAKWOFo+Gd64VDWxIrDtETID\n"
+"CknSPJDfJCxZcmi0d8HSEdlzDuSfENEPrL+hVdGM18EBQticz5ng6bvUZdv7k7Us\n"
+"Iok=\n"
+"-----END CERTIFICATE-----\n";
+
+static const char asl_test_srv_key_rsa[] =
+"-----BEGIN RSA PRIVATE KEY-----\n"
+"MIIEpAIBAAKCAQEAsxc412/fIII5Fwzyx9sUY3ts+zIO6I2s8GhJGJgPn1c8meTU\n"
+"tJX3eXMVCZf4p5P2yrboImMis6tbNyd6dEdVTOMsax+6hGa1Mk30P3lxuMXszLN4\n"
+"rpLAR996BxAEGnqXpVHxFv4RZuhy0HGIXTApZiFfTTQ10mvVvJyNEchSZkQiJq+L\n"
+"QU/bz0q4rFTRajar0mL5/O2uvSXi44epvNBy1yrmK+FV89S6kVRHD/5/1oqeCkIs\n"
+"VUQRdumVQf2a+8CUPbVkRwSYyFuPM3cASnt1HV1tC/SsF31C/9kE0ZAsa/P3Xzqh\n"
+"iztpBJtjV8bAAZvvUCFI4NO+JhuA6DhpfS5ENQIDAQABAoIBADFYsrbaAncoqqZp\n"
+"UPQ0r3eB6NOGRYlakE5lzc5TB+r11KLq5JklwVzbku5jy4YRRS0yHOBsxIERND8M\n"
+"R7eGeECJUBHsWi5lRoQn6qcaxXUORGNbCGPB1+117F/Jz/ej0+kfnPii5RSf9BLv\n"
+"VY2n2aBkjafuPO5P/ELOOCiwM9Qtd4TaukhZjovse+QOriQR8fXw+h6ZoHiaRAR4\n"
+"xDrc6TOOv0WWxJbFB1YthNvYZTf2vti3EN8RIIsRrOsuLuQ8cVGm/glYTSsULKK+\n"
+"N1/s6PJ5a6Iy+Ub0oHlxHxlDeHf5IoQ4nZ3ibses2fcdLtBvNyHtLW1UsZg8kEDo\n"
+"1AOeADkCgYEA58tiEN9/mJhqO6dkUPwSDJMQQQMKSXiKeUDrEhippXlOn51QXH6e\n"
+"KflphZySfI036HT5x2YJgeP+Fdp4YfnIXscrGQNyMHlMsf5gFkA4PhtGGVP+O60D\n"
+"7FhV5C40uwmlC/z1x47thTC/LcDZfKGQXWnjqwM+5iojjJ+sllIN+b8CgYEAxcrl\n"
+"msY+D7REmxDeNgyp91eNPhJNyh3dx0ZldskF06BDnGB98m7Pjnpq7N5S2TvT2Jta\n"
+"AeUxGK/Hvp6fiIg7GZ50+hWUErD4eB2Z4B1P0dMiGYPeksCj7tMKOOckL8Enq/7Y\n"
+"1BwAlwu/1T8LWMmErA2XIvKeIWCQJYpIGsgztwsCgYBUfP2xyMVpiaSvOcSHAFpT\n"
+"2wcBq2oEfbt7lv4YCoVLm3vdEipIjJ56Dj84RGngnFjUkk65L6gngEMNFCTtEW7H\n"
+"nTFIXMkyggRCnMXJVn8ppCdY9BSnC9lyPICSO4Vc55cRV5L+uko5UhtdQf4EP5+v\n"
+"bPlfTD+RBasPhuQRprcRYQKBgQCpY9ArMufnjxzKKDIF2+ab2zEtHYPdOqK6jMFM\n"
+"b3A8Ax6kB8cVHm1GufRkkyokvKX69WCqCtx3JeNMjpBV30Wt9RR9MIm1UDYauE8V\n"
+"rkSzj7u+Wj79M1mxqK8yeFF3TFZraD/Nt4WR1hAd0nYnPb4PkzwCRAHE1+vbGogR\n"
+"167ibQKBgQCAg1aqztbGtZ3/BjrxZACyHiHUV1q/VIHApYw32a0Np+63CJVxPD5z\n"
+"LdB+RXqfmLk37emEuiRjEC3akPpHQugI+Hhb6bxGA7kpg7i0X8IieGdAHbaXcn49\n"
+"Svk0j0PwEtSdW5qpDtSg4mJ3EJRB+4MgrKQ8tdDuQU7QN8gKYveC5w==\n"
+"-----END RSA PRIVATE KEY-----\n";
+
+
 namespace asl {
+
+static void my_debug(void* ctx, int level, const char* file, int line, const char* str)
+{
+	for (const char* p = file; *p != '\0'; p++)
+		if (*p == '/' || *p == '\\')
+			file = p + 1;
+
+	printf("%s:%04i: [%i] %s", file, line, level, str);
+}
 
 struct TlsCore
 {
@@ -53,14 +117,6 @@ struct TlsCore
 mbedtls_ssl_config config;
 bool inited = false;
 
-/*
-static void my_debug(void *ctx, int level, const char *file, int line, const char *str)
-{
-	level++;
-	printf("%s:%04d: %s", file, line, str);
-}
-*/
-
 TlsSocket_::TlsSocket_()
 {
 	_error = false;
@@ -74,6 +130,9 @@ TlsSocket_::TlsSocket_()
 	mbedtls_entropy_init(&_core->entropy);
 	mbedtls_ssl_conf_rng(&_core->conf, mbedtls_ctr_drbg_random, &_core->ctr_drbg);
 	mbedtls_ssl_set_bio(&_core->ssl, &_core->net, mbedtls_net_send, mbedtls_net_recv, NULL);
+	mbedtls_pk_init(&_core->pkey);
+	mbedtls_x509_crt_init(&_core->srvcert);
+	mbedtls_ssl_conf_read_timeout(&_core->conf, 0);
 
 	int ret;
 	if((ret = mbedtls_ctr_drbg_seed(&_core->ctr_drbg, mbedtls_entropy_func, &_core->entropy, NULL, 0)) != 0)
@@ -81,14 +140,19 @@ TlsSocket_::TlsSocket_()
 		_error = true;
 		return;
 	}
-	if((ret = mbedtls_x509_crt_parse(&_core->cacert, (const byte*)mbedtls_test_cas_pem, mbedtls_test_cas_pem_len)) < 0)
+#ifdef TLS_DEBUG
+	mbedtls_ssl_conf_dbg(&_core->conf, my_debug, stdout);
+	mbedtls_debug_set_threshold(TLS_DEBUG);
+#endif
+
+	/*if ((ret = mbedtls_x509_crt_parse(&_core->cacert, (const byte*)mbedtls_test_cas_pem, mbedtls_test_cas_pem_len)) < 0)
 	{
 		_error = true;
 		return;
 	}
 	
 	mbedtls_ssl_conf_ca_chain(&_core->conf, &_core->cacert, NULL);
-
+	*/
 	_type = TCP;
 	_blocking = true;
 }
@@ -128,21 +192,12 @@ bool TlsSocket_::bind(const String& ip, int port)
 	mbedtls_pk_init(&_core->pkey);
 	_core->bound = true;
 
-	int ret;
-	if ((ret = mbedtls_x509_crt_parse(&_core->srvcert, (const unsigned char *)mbedtls_test_srv_crt_rsa, mbedtls_test_srv_crt_rsa_len)) != 0)
-	{
-		printf("TlsSocket: cert parse error 0x%x\n", -ret);
-		return false;
-	}
-	if ((ret = mbedtls_pk_parse_key(&_core->pkey, (const unsigned char *)mbedtls_test_srv_key_rsa, mbedtls_test_srv_key_rsa_len, NULL, 0)) != 0)
-	{
-		printf("TlsSocket: key parse error 0x%x\n", -ret);
-		return false;
-	}
+	useCert(asl_test_srv_crt_rsa);
+	useKey(asl_test_srv_key_rsa);
 
 	InetAddress here(ip, port);
 	String host = here.host();
-	ret = mbedtls_net_bind(&_core->net, host, String(port), MBEDTLS_NET_PROTO_TCP);
+	int ret = mbedtls_net_bind(&_core->net, host, String(port), MBEDTLS_NET_PROTO_TCP);
 	if (ret != 0) {
 		printf("TlsSocket: bind failed 0x%x\n", -ret);
 		return false;
@@ -204,7 +259,7 @@ Socket_* TlsSocket_::accept()
 	mbedtls_ssl_set_bio(&cli->_core->ssl, &cli->_core->net, mbedtls_net_send, mbedtls_net_recv, mbedtls_net_recv_timeout);
 
 	do ret = mbedtls_ssl_handshake(&cli->_core->ssl);
-	while (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE);
+	while (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE || ret == MBEDTLS_ERR_SSL_ASYNC_IN_PROGRESS);
 
 	if (ret == MBEDTLS_ERR_SSL_HELLO_VERIFY_REQUIRED)
 	{
@@ -369,7 +424,11 @@ bool TlsSocket_::useKey(const String& key)
 {
 	mbedtls_pk_free(&_core->pkey);
 	mbedtls_pk_init(&_core->pkey);
-	int ret = mbedtls_pk_parse_key(&_core->pkey, (byte*)*key, key.length() + 1, 0, 0);
+#if MBEDTLS_VERSION_MAJOR < 3
+	int ret = mbedtls_pk_parse_key(&_core->pkey, (byte*)*key, key.length() + 1, NULL, 0);
+#else
+	int ret = mbedtls_pk_parse_key(&_core->pkey, (byte*)*key, key.length() + 1, NULL, 0, mbedtls_ctr_drbg_random, &_core->ctr_drbg);
+#endif
 	if (ret < 0) {
 		printf("TlsSocket: key parse error 0x%x\n", -ret);
 		return false;
