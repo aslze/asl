@@ -20,7 +20,7 @@ messages are written to a file named "log.txt" and to the console (with errors a
 These as well as the maximum level of messages logged can be configured.
 
 ~~~
-Log::setFile("app.log"); // write to this file (default is "log.txt")
+Log::setFile("app.log"); // write to this file (default is "log.log")
 Log::useConsole(false);  // do not write to the console
 ~~~
 
@@ -40,7 +40,7 @@ ASL_LOG_W("Ignored unknown mode %i", mode);
 On Android this class uses the system logger.
 
 Log files do not grow indefinitely. When reaching about 1 MB, they will be moved to a file with "-1" appended
-to its name (like "log-1.txt"), and a new empty file will be started. Any logs older than that will be lost.
+to its name (like "log-1.log"), and a new empty file will be started. Any logs older than that will be lost.
 \ingroup Logging
 */
 

@@ -326,7 +326,7 @@ class ASL_API Var
 	Returns the bool value of this var
 	\deprecated Use `bool` conversion
 	*/
-	bool isTrue() const;
+	ASL_DEPRECATED(bool isTrue() const, "Use bool conversion");
 	/**
 	Returns true if this var has a value (its type is not NONE)
 	*/

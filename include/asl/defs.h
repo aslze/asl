@@ -109,6 +109,12 @@ Check that the argument is true.
 */
 #define ASL_ASSERT(x) if(!(x)) { printf("\n%s: %i\n\n* Failed: '%s'\n\n", __FILE__, __LINE__, #x); exit(1); }
 
+#ifdef _MSC_VER
+#define ASL_DEPRECATED(x, m) __declspec(deprecated("Deprecated. " ## m)) x
+#else
+#define ASL_DEPRECATED(x, m) x __attribute__((deprecated))
+#endif
+
 typedef unsigned char byte;
 
 namespace asl {

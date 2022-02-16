@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2020 aslze
+// Copyright(c) 1999-2022 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_ARRAY_H
@@ -423,7 +423,7 @@ public:
 	/**
 	Same as slice() \deprecated
 	*/
-	Array sslice(int i1, int i2 = 0) const
+	ASL_DEPRECATED(Array sslice(int i1, int i2 = 0) const, "Use slice()")
 	{
 		return slice(i1, i2);
 	}
@@ -525,7 +525,7 @@ public:
 		append(b);
 		return *this;
 	}*/
-	/**
+	/*
 	Returns a string representation of the array, formed by joining its
 	elements with commas. The elements need to be convertible to String
 	*/
@@ -589,24 +589,9 @@ public:
 	Enumerator all() {return Enumerator(*this);}
 	Enumerator all() const {return Enumerator(*this);}
 	Enumerator slice_(int i, int j=0) {if(j==0) j=length();return Enumerator(*this, i, j);}
-	/*
-	template<class E>
-	Array(const E& e_) {
-		printf("Array<E>\n");
-		alloc(0);
-		E e(e_);
-		while(e) {*this << *e; ++e;}
-	}*/
-	/* // TODO: check compat
-	template<int N>
-	Array(const Array_<T,N> & b)
-	{
-		alloc(N);
-		for(int i=0; i<N; i++)
-			_a[i]=b[i];
-	}
-	*/
 };
+
+typedef Array<byte> ByteArray;
 
 template <class T>
 Array<T>& Array<T>::resize(int m)

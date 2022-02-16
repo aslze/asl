@@ -112,7 +112,7 @@ public:
 Parses the given string as XML and returns the equivalent DOM tree.
 \deprecated Use Xml::decode()
 */
-Xml ASL_API decodeXML(const String& xml);
+ASL_DEPRECATED(Xml ASL_API decodeXML(const String& xml), "Use Xml::decode()");
 
 /*
 Encodes the given XML document as XML, with or without formatting.
@@ -371,7 +371,7 @@ public:
 	}
 
 	/**
-	Returns all sub elements that satisfy a condition given as a predicate.
+	Searches recursively and returns all sub elements that satisfy a condition given as a predicate.
 	*/
 	template <class F>
 	Array<Xml> find(const F& pred) const
@@ -382,7 +382,7 @@ public:
 	}
 
 	/**
-	Returns the first sub element that satisfies a condition given as a predicate.
+	Searches recursively and returns the first sub element that satisfies a condition given as a predicate.
 	*/
 	template <class F>
 	Xml findOne(const F& pred) const
@@ -572,10 +572,17 @@ public:
 	Reads and decodes a file as XML and returns its root element
 	*/
 	static Xml read(const String& file);
+	
+	/**
+	Writes an XML document to a file
+	\deprecated Use write(xml, file)
+	*/
+	static bool write(const String& file, const Xml& e);
+
 	/**
 	Writes an XML document to a file
 	*/
-	static bool write(const String& file, const Xml& e);
+	static bool write(const Xml& e, const String& file) { return write(file, e); }
 	/**
 	Parses the given string as XML and returns the equivalent DOM tree.
 	*/

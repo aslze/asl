@@ -13,7 +13,7 @@ namespace asl {
 
 Log::Log()
 {
-	_logfile = "log.txt";
+	_logfile = "log.log";
 	_useconsole = true;
 	_usefile = true;
 	_maxLevel = 3;
