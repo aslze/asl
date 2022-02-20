@@ -466,7 +466,7 @@ Vec3_<T> Matrix4_<T>::eulerAngles(int a0, int a1, int a2) const
 	if (a0 != a2)
 	{
 		T s = (a1 - a0 + 3) % 3 == 1 ? -1.0f : 1.0f;
-		if (abs(at(a0, a2)) < 1)
+		if (fabs(at(a0, a2)) < 1)
 		{
 			r1 = asin(-s * at(a0, a2));
 			r2 = atan2(s * at(a1, a2), at(a2, a2));
@@ -484,7 +484,7 @@ Vec3_<T> Matrix4_<T>::eulerAngles(int a0, int a1, int a2) const
 	{
 		int k = 3 - a0 - a1;
 		T s = (a1 - a0 + 3) % 3 == 2 ? -1.0f : 1.0f;
-		if (abs(at(a0, a0)) < 1)
+		if (fabs(at(a0, a0)) < 1)
 		{
 			r1 = acos(at(a0, a0));
 			r2 = atan2(at(a1, a0), -s * at(k, a0));

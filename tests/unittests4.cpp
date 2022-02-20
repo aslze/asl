@@ -39,9 +39,9 @@ ASL_TEST(Matrix4)
 	ASL_APPROX(q1.matrix(), mrot, EPS);
 	ASL_APPROX(q1.matrix(), q2.matrix(), EPS);
 
-	for (double x = -1; x <= 1; x+=0.25)
-		for (double y = -1; y <= 1; y += 0.25)
-			for (double z = -1; z <= 1; z += 0.25)
+	for (double x = -1; x <= 1; x+=0.5)
+		for (double y = -1; y <= 1; y += 0.5)
+			for (double z = -1; z <= 1; z += 0.5)
 				for (double a = -2*PI; a <= 2*PI; a += PI / 8)
 				{
 					if (x == 0 && y == 0 && z == 0)

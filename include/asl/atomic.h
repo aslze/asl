@@ -7,13 +7,6 @@
  #define __has_builtin(X) 0
 #endif
 
-#ifdef __clang__
- #if __has_builtin(__sync_add_and_fetch)
-  #define ASL_BUILD_ATOMIC
- #endif
-#endif
-
-//#define ASL_THREAD_UNSAFE
 #if defined ASL_THREAD_UNSAFE
 
 inline int atomicInc(volatile int* x) { return ++*x; }

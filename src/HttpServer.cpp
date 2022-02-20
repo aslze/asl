@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2021 aslze
+// Copyright(c) 1999-2022 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #include <asl/Socket.h>
@@ -120,7 +120,7 @@ void HttpServer::serve(Socket client)
 				response.write();
 		}
 		
-		if (request.protocol() == "HTTP/1.0" && hconn != "keep-alive" || hconn == "close")
+		if ((request.protocol() == "HTTP/1.0" && hconn != "keep-alive") || hconn == "close")
 			break;
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2020 aslze
+// Copyright(c) 1999-2022 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_HTTP
@@ -401,7 +401,7 @@ This code would get local wheather information in JSON format from a web service
 our geographical location from another server. You need a registered user *key* to access this service.
 
 ~~~
-auto loc = Http::get("http://ipinfo.io/").data()["loc"].toString().split(",");
+auto loc = Http::get("http://ipinfo.io/").json()["loc"].toString().split(",");
 
 auto response = Http::get("http://api.openweathermap.org/data/2.5/weather?lat=" + loc[0] + "&lon=" + loc[1] + "&APPID=" + key);
 

@@ -76,7 +76,7 @@ void Server::serve(HttpRequest& request, HttpResponse& response)
 	}
 	else if (request.is("PUT", "/conf"))
 	{
-		Var data = request.data();
+		Var data = request.json();
 		_r = data["r"] | _r;
 		_v = data["v"] | _v;
 		response.put(Var("status", "OK"));
@@ -202,7 +202,7 @@ int main(int argc, char* argv[])
 		for (int i = 0; i < n; i++)
 		{
 			HttpResponse res = Http::get(host + "/pos");
-			Var data = res.data();
+			Var data = res.json();
 			if (print)
 				printf("[%i] %i  %s\n", i, res.code(), *Xdl::encode(data));
 			if (res.code() == 200)
@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
 		for (int i = 0; i < n; i++)
 		{
 			HttpResponse res = Http::post(host + "/blob?n=" + String(m), String('x', m));
-			Var data = res.data();
+			Var data = res.json();
 			if (print)
 				printf("[%i] %i  %s\n", i, res.code(), *Xdl::encode(data));
 			if (res.code() == 200)
