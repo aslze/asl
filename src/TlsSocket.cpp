@@ -1,5 +1,9 @@
 #define TLSSOCKET_CPP
+#if MBEDTLS_VERSION_MAJOR < 3
+#include <mbedtls/net.h>
+#else
 #include <mbedtls/net_sockets.h>
+#endif
 #include <mbedtls/debug.h>
 #include <mbedtls/ssl.h>
 #include <mbedtls/entropy.h>
@@ -259,7 +263,11 @@ Socket_* TlsSocket_::accept()
 	mbedtls_ssl_set_bio(&cli->_core->ssl, &cli->_core->net, mbedtls_net_send, mbedtls_net_recv, mbedtls_net_recv_timeout);
 
 	do ret = mbedtls_ssl_handshake(&cli->_core->ssl);
+#ifdef MBEDTLS_ERR_SSL_ASYNC_IN_PROGRESS
 	while (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE || ret == MBEDTLS_ERR_SSL_ASYNC_IN_PROGRESS);
+#else
+	while (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE);
+#endif
 
 	if (ret == MBEDTLS_ERR_SSL_HELLO_VERIFY_REQUIRED)
 	{
