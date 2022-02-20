@@ -1,5 +1,5 @@
 // ASL - All-purpose Simple Library
-// Copyright(c) 1999-2020 aslze
+// Copyright(c) 1999-2022 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_DEFS_H
@@ -10,7 +10,7 @@
 Main definitions.
 */
 
-#define ASL_VERSION 11002
+#define ASL_VERSION 11003
 
 #ifdef _WIN32
 #ifndef _CRT_SECURE_NO_DEPRECATE
@@ -111,13 +111,16 @@ Check that the argument is true.
 
 #ifdef _MSC_VER
 #define ASL_DEPRECATED(x, m) __declspec(deprecated("Deprecated. " ## m)) x
-#else
+#elif defined(__GNUC__) && ASL_C_VER < 40503
 #define ASL_DEPRECATED(x, m) x __attribute__((deprecated))
+#else
+#define ASL_DEPRECATED(x, m) x __attribute__((deprecated(m)))
 #endif
 
-typedef unsigned char byte;
 
 namespace asl {
+
+typedef unsigned char byte;
 
 struct Exception {};
 
@@ -400,6 +403,10 @@ struct IsMore {
 };
 
 }
+
+#ifndef ASL_NO_GLOBAL_BYTE
+using asl::byte;
+#endif
 
 #include "time.h"
 #include "atomic.h"
