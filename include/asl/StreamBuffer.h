@@ -6,6 +6,14 @@
 
 namespace asl {
 
+class File;
+class Socket;
+template<class T>
+File& operator<<(File&, const T& x);
+
+template<class T>
+Socket& operator<<(Socket&, const T& x);
+
 template <class T>
 struct AsBytes
 {
@@ -285,6 +293,16 @@ public:
 protected:
 	Endian _endian;
 };
+
+inline File& operator<<(File& s, const StreamBuffer& b)
+{
+	return s << *b;
+}
+
+inline Socket& operator<<(Socket& s, const StreamBuffer& b)
+{
+	return s << *b;
+}
 
 }
 
