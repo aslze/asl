@@ -17,13 +17,21 @@ Console::Console()
 	SetConsoleOutputCP(65001);
 #endif
 	_colorChanged = false;
+	_colorMode = 2;
 	_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+	_hinput = GetStdHandle(STD_INPUT_HANDLE);
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	GetConsoleScreenBufferInfo(_handle, &info);
 	_defaultAttrib = _attrib = info.wAttributes;
 	_fullh = info.dwSize.Y;
 	_h = info.srWindow.Bottom - info.srWindow.Top;
 	_w = info.dwMaximumWindowSize.X;
+#ifdef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+	DWORD mode;
+	GetConsoleMode(_handle, &mode);
+	mode = mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+	SetConsoleMode(_handle, mode);
+#endif
 }
 
 Console::~Console()
@@ -233,6 +241,29 @@ Console::Size Console::size()
 }
 
 #endif
+
+void Console::color(int r, int g, int b)
+{
+	printf("%s%s", *fg(), *rgb(r, g, b));
+}
+
+void Console::bgcolor(int r, int g, int b)
+{
+	printf("%s%s", *bg(), *rgb(r, g, b));
+}
+
+
+String Console::rgb(int r, int g, int b) const
+{
+	const int o = 20;
+	if (_colorMode == 2)
+		return String(15, "2;%i;%i;%im", clamp(r, 0, 255), clamp(g, 0, 255), clamp(b, 0, 255));
+	else
+	{
+		return String(15, "5;%im", 16 + 36 * (clamp(r + o, 0, 255) * 5 / 255) + 6 * (clamp(g + o, 0, 255) * 5 / 255) + (clamp(b + o, 0, 255) * 5 / 255));
+		// if (approx r==g==b) -> use 232 + r/11
+	}
+}
 
 }
 
