@@ -28,6 +28,7 @@ b(1, 1) = 7.25f;
 template <class T>
 class Array2
 {
+protected:
 	Array<T> _a;
 	int _rows, _cols;
 public:

@@ -35,6 +35,8 @@ public:
 
 	Matrix(int rows, int cols, const Array<T>& a) : Array2<T>(rows, cols, a) {}
 
+	Matrix(const Array<T>& a) : Array2<T>(a.length(), 1, a) {}
+
 #ifdef ASL_HAVE_INITLIST
 	/**
 	Creates an array with size rows x cols and the given elements
@@ -54,6 +56,10 @@ public:
 		this->resize(0, 0);
 		return *this;
 	}
+
+	T& operator[](int i) { return this->_a[i]; }
+
+	const T& operator[](int i) const { return this->_a[i]; }
 
 	static Matrix identity(int n)
 	{
@@ -233,7 +239,29 @@ public:
 		for (int i = 0; i < a.rows(); i++)
 			for (int j = 0; j < a.cols(); j++)
 				a(i, j) *= s;
+		return c;
 	}
+
+	Matrix operator-() const
+	{
+		const Matrix& a = *this;
+		Matrix c(a.rows(), a.cols());
+		for (int i = 0; i < c.rows(); i++)
+			for (int j = 0; j < c.cols(); j++)
+				c(i, j) = -a(i, j);
+		return c;
+	}
+
+	T norm() const
+	{
+		T s = 0;
+		for (int i = 0; i < c.rows(); i++)
+			for (int j = 0; j < c.cols(); j++)
+				s += sqr(*this(i, j));
+		return sqrt(s);
+	}
+
+	friend Matrix operator*(T s, const Matrix& b) { return b * s; }
 };
 
 template<class T>
