@@ -255,9 +255,10 @@ public:
 	T norm() const
 	{
 		T s = 0;
-		for (int i = 0; i < c.rows(); i++)
-			for (int j = 0; j < c.cols(); j++)
-				s += sqr(*this(i, j));
+		const Matrix& a = *this;
+		for (int i = 0; i < a.rows(); i++)
+			for (int j = 0; j < a.cols(); j++)
+				s += sqr(a(i, j));
 		return sqrt(s);
 	}
 
