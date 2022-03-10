@@ -61,6 +61,8 @@ public:
 
 	const T& operator[](int i) const { return this->_a[i]; }
 
+	int length() const { return this->_a.length(); }
+
 	static Matrix identity(int n)
 	{
 		Matrix I(n, n);
@@ -239,7 +241,6 @@ public:
 		for (int i = 0; i < a.rows(); i++)
 			for (int j = 0; j < a.cols(); j++)
 				a(i, j) *= s;
-		return c;
 	}
 
 	Matrix operator-() const
@@ -330,6 +331,47 @@ Matrix<T> solve_(Matrix<T>& A_, Matrix<T>& b_)
 	}
 	return x;
 }
+
+template <class T, class F>
+Matrix<T> solveZero(F f, const Matrix<T>& x0)
+{
+	T dx = sizeof(T) == sizeof(float) ? T(1e-5) : T(1e-6);
+	Matrix<T> x = x0.clone();
+	int nf = f(x).rows();
+	bool ls = nf > x.rows();
+	for (int it = 0; it < 60; it++)
+	{
+		Matrix<T> J(nf, x.rows());
+		Matrix<T> f1 = f(x);
+		if (f1.norm() < 0.0001f)
+			break;
+
+		for (int j = 0; j < J.cols(); j++)
+		{
+			T x0 = x[j];
+			x[j] += dx;
+			Matrix<T> f2 = f(x);
+			x[j] = x0;
+			for (int i = 0; i < J.rows(); i++)
+				J(i, j) = (f2[i] - f1[i]) / dx;
+		}
+		Matrix<T> h = ls ? J.pseudoinverse() * -f(x) : solve(J, -f(x));
+		if (h.norm() < 0.0001f)
+			break;
+
+		x += h;
+	}
+
+	return x;
+}
+
+#ifdef ASL_HAVE_INITLIST
+template <class T, class F>
+Matrix<T> solveZero(F f, const std::initializer_list<T>& x0)
+{
+	return solveZero(f, Matrix<T>(x0));
+}
+#endif
 
 }
 
