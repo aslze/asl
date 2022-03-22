@@ -327,7 +327,7 @@ WebSocketMsg WebSocket::receive()
 			break;
 		}
 		case 9: // ping
-			send(buffer, buffer.length(), FRAME_PONG);
+			send(buffer.ptr(), buffer.length(), FRAME_PONG);
 			break;
 		case 10: // pong
 			buffer.clear();

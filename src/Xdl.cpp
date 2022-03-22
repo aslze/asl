@@ -63,7 +63,7 @@ Var Xdl::read(const String& file)
 	{
 		int n = tfile.read(buffer.ptr(), buffer.length() - 1);
 		buffer[n] = '\0';
-		parser.parse(buffer);
+		parser.parse(buffer.ptr());
 		if (n < buffer.length() - 1)
 			break;
 	}
@@ -574,7 +574,7 @@ XdlParser::XdlParser()
 	_context << ROOT;
 	_state = WAIT_VALUE;
 	_inComment = false;
-	_lists << Var::ARRAY;
+	_lists << Var(Var::ARRAY);
 }
 
 XdlParser::~XdlParser()
@@ -616,7 +616,7 @@ void XdlParser::end_array()
 
 void XdlParser::begin_object(const char* _class)
 {
-	_lists << Var::DIC;
+	_lists << Var(Var::DIC);
 	if(_class[0] != '\0')
 		_lists.top()[ASL_XDLCLASS] = _class;
 }

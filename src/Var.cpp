@@ -17,7 +17,7 @@ namespace asl {
 #define NEW_DICC(d, x) (d).construct(x)
 #define DEL_DIC(d) (d).destroy()
 #define NEW_STRING(s) (s).construct()
-#define NEW_STRINGC(s, x) (s).construct(x)
+#define NEW_STRINGC(s, n) (s).construct(asl::Array<char>(n))
 #define DEL_STRING(s) (s).destroy()
 #endif
 
@@ -127,7 +127,7 @@ Var::operator double() const
 	case INT:
 		return i;
 	case STRING:
-		return atof((*s));
+		return atof(s->ptr());
 	case SSTRING:
 		return atof(ss);
 	case NUL:
@@ -147,7 +147,7 @@ Var::operator float() const
 	case INT:
 		return (float)i;
 	case STRING:
-		return (float)atof(*s);
+		return (float)atof(s->ptr());
 	case SSTRING:
 		return (float)atof(ss);
 	case NUL:
@@ -166,7 +166,7 @@ Var::operator int() const
 	case FLOAT:
 		return (int)d;
 	case STRING:
-		return atoi(*s);
+		return atoi(s->ptr());
 	case SSTRING:
 		return atoi(ss);
 	default: break;
@@ -183,7 +183,7 @@ Var::operator unsigned() const
 	case FLOAT:
 		return (unsigned)d;
 	case STRING:
-		return (unsigned)atoi(*s);
+		return (unsigned)atoi(s->ptr());
 	case SSTRING:
 		return (unsigned)atoi(ss);
 	default: break;
@@ -200,7 +200,7 @@ Var::operator Long() const
 	case FLOAT:
 		return (Long)d;
 	case STRING:
-		return (Long)atoi(*s);
+		return (Long)atoi(s->ptr());
 	case SSTRING:
 		return (Long)atoi(ss);
 	default: break;
@@ -251,7 +251,7 @@ Var::operator const char*() const
 	switch(_type)
 	{
 	case STRING:
-		return (*s); break;
+		return (s->ptr()); break;
 	case SSTRING:
 		return ss; break;
 	case ARRAY:

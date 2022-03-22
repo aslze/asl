@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2020 aslze
+// Copyright(c) 1999-2022 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_HASHMAP_H
@@ -26,7 +26,7 @@ inline int hash(const String& s)
 inline int hash(const Array<byte>& s)
 {
 	int h = 0, n = s.length();
-	const byte* p = s;
+	const byte* p = s.ptr();
 	for (int i = 0; i<n; i++)
 		h = 33 * h + p[i];
 	return h;
