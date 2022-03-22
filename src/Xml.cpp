@@ -12,9 +12,13 @@ Xml Xml::read(const String& file)
 	return Xml::decode(TextFile(file).text());
 }
 
-bool Xml::write(const String& file, const Xml& e)
+bool Xml::write(const String& path, const Xml& e)
 {
-	return TextFile(file).put(Xml::encode(e, true));
+	TextFile file(path, File::WRITE);
+	if (!file)
+		return false;
+	file << "<?xml version=\"1.0\"?>\n" << Xml::encode(e, true) << "\n";
+	return true;
 }
 
 Xml::Xml(const String& tag, const String& val) : NodeBase(new _Xml(tag))
