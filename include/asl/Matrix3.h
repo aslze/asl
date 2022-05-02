@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2020 aslze
+// Copyright(c) 1999-2022 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_MATRIX3_H
@@ -23,7 +23,22 @@ template<class T>
 class Matrix3_
 {
 public:
+	bool isRowMajor() const { return true; }
+	/**
+	Returns the nubmer of rows of this matrix (3)
+	*/
+	int rows() const { return 3; }
+	/**
+	Returns the nubmer of columns of this matrix (3)
+	*/
+	int cols() const { return 3; }
+	/**
+	Returns the trace of this matrix
+	*/
+	T trace() const { return a[0][0] + a[1][1] + a[2][2]; }
+
 	Matrix3_() {}
+
 	/**
 	Constructs a 3x3 matrix given its elements (by rows).
 	*/

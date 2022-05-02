@@ -29,8 +29,22 @@ template<class T>
 class Matrix4_
 {
 	T a[4][4]; // row-major
- public:
+ 
+public:
 	bool isRowMajor() const { return true; }
+	/**
+	Returns the nubmer of rows of this matrix (4)
+	*/
+	int rows() const { return 4; }
+	/**
+	Returns the nubmer of columns of this matrix (4)
+	*/
+	int cols() const { return 4; }
+
+	/**
+	Returns the trace of this matrix
+	*/
+	T trace() const { return a[0][0] + a[1][1] + a[2][2] + a[3][3]; }
 
 	Matrix4_() {}
 	/**
@@ -278,7 +292,9 @@ class Matrix4_
 	*/
 	T det() const;
 
-	T norm() const;
+	T normSq() const;
+
+	T norm() const { return sqrt(normSq()); }
 };
 
 typedef Matrix4_<float> Matrix4;
@@ -581,9 +597,13 @@ T Matrix4_<T>::det() const
 }
 
 template<class T>
-T Matrix4_<T>::norm() const
+T Matrix4_<T>::normSq() const
 {
-	return sqrt(column(0).length2() + column(1).length2() + column(2).length2() + column(3).length2());
+	T t = 0;
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 4; j++)
+			t += sqr(a[i][j]);
+	return t;
 }
 
 template class Matrix4_<float>;
