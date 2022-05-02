@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2020 aslze
+// Copyright(c) 1999-2022 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_STRING_H
@@ -135,7 +135,7 @@ public:
 	Constructs an uninitialized string with internal capacity `cap` and length `n`,
 	useful for writing to it externally.
 	*/
-	String(int cap, int n)
+	ASL_EXPLICIT String(int cap, int n)
 	{
 		init(cap);
 		_len=n;
@@ -160,7 +160,7 @@ public:
 	/**
 	Constructs a string from the first `n` characters of a character buffer pointed by `txt`
 	*/
-	String(const char* txt, int n)
+	ASL_EXPLICIT String(const char* txt, int n)
 	{
 		init(n);
 		memcpy(str(), txt, n);
@@ -203,7 +203,7 @@ public:
 	Constructs a string consisting of character `c` repeated `n` times.
 	@deprecated Use `repeat()` instead.
 	*/
-	String(char c, int n)
+	ASL_EXPLICIT String(char c, int n)
 	{
 		init(n);
 		memset(str(), c, n);
@@ -254,7 +254,7 @@ public:
 	The first argument can give an initial buffer size, but will be automatically calculated if it is 0. In
 	any case, the function will automatically allocate _space as needed.
 	*/
-	String(int n, const char* fmt, ...);
+	ASL_EXPLICIT String(int n, const char* fmt, ...);
 	/**
 	Constructs a string from a 64bit long integer number
 	*/

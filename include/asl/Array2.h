@@ -41,25 +41,25 @@ public:
 	/**
 	Creates an array with size rows x cols
 	*/
-	Array2(int rows, int cols) :
+	ASL_EXPLICIT Array2(int rows, int cols) :
 		_a(rows * cols), _rows(rows), _cols(cols)
 	{}
 
 	/**
 	Creates an array with size rows x cols and initializes all items with value
 	*/
-	Array2(int rows, int cols, const T& value) :
+	ASL_EXPLICIT Array2(int rows, int cols, const T& value) :
 		_a(rows * cols, value), _rows(rows), _cols(cols)
 	{}
 
 	/**
 	Creates an array of rows x cols elements and copies them from the pointer p (row-wise)
 	*/
-	Array2(int rows, int cols, const T* p) :
+	ASL_EXPLICIT Array2(int rows, int cols, const T* p) :
 		_a(rows * cols, p), _rows(rows), _cols(cols)
 	{}
 
-	Array2(int rows, int cols, const Array<T>& a) :
+	ASL_EXPLICIT Array2(int rows, int cols, const Array<T>& a) :
 		_a(a), _rows(rows), _cols(cols)
 	{}
 
@@ -67,7 +67,7 @@ public:
 	/**
 	Creates an array with size rows x cols and the given elements
 	*/
-	Array2(int rows, int cols, std::initializer_list<T> a) :
+	ASL_EXPLICIT Array2(int rows, int cols, std::initializer_list<T> a) :
 		_a(a), _rows(rows), _cols(cols)
 	{}
 

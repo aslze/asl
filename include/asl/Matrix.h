@@ -21,19 +21,19 @@ public:
 	/**
 	Creates an array with size rows x cols
 	*/
-	Matrix_(int rows, int cols) : Array2<T>(rows, cols) {}
+	ASL_EXPLICIT Matrix_(int rows, int cols = 1) : Array2<T>(rows, cols) {}
 
 	/**
 	Creates an array with size rows x cols and initializes all items with value
 	*/
-	Matrix_(int rows, int cols, const T& value) : Array2<T>(rows, cols, value) {}
+	ASL_EXPLICIT Matrix_(int rows, int cols, const T& value) : Array2<T>(rows, cols, value) {}
 
 	/**
 	Creates an array of rows x cols elements and copies them from the pointer p (row-wise)
 	*/
-	Matrix_(int rows, int cols, const T* p) : Array2<T>(rows, cols, p) {}
+	ASL_EXPLICIT Matrix_(int rows, int cols, const T* p) : Array2<T>(rows, cols, p) {}
 
-	Matrix_(int rows, int cols, const Array<T>& a) : Array2<T>(rows, cols, a) {}
+	ASL_EXPLICIT Matrix_(int rows, int cols, const Array<T>& a) : Array2<T>(rows, cols, a) {}
 
 	Matrix_(const Array<T>& a) : Array2<T>(a.length(), 1, a) {}
 
@@ -41,7 +41,7 @@ public:
 	/**
 	Creates an array with size rows x cols and the given elements
 	*/
-	Matrix_(int rows, int cols, std::initializer_list<T> a) : Array2<T>(rows, cols, a) {}
+	ASL_EXPLICIT Matrix_(int rows, int cols, std::initializer_list<T> a) : Array2<T>(rows, cols, a) {}
 
 	/**
 	Creates an array with given list of lists of elements
@@ -50,6 +50,11 @@ public:
 
 	Matrix_(std::initializer_list<T> a) : Array2<T>((int)a.size(), 1, a) {}
 #endif
+
+	/**
+	 * Returns the trace of this matrix
+	*/
+	T trace() const { if (this->_rows != this->_cols) return 0; T t = 0; for (int i = 0; i < this->rows(); i++) t += (*this)(i, i); return t; }
 
 	void copy(const Matrix_& b)
 	{
@@ -268,15 +273,17 @@ public:
 		return c;
 	}
 
-	T norm() const
+	T normSq() const
 	{
 		T s = 0;
 		const Matrix_& a = *this;
 		for (int i = 0; i < a.rows(); i++)
 			for (int j = 0; j < a.cols(); j++)
 				s += sqr(a(i, j));
-		return sqrt(s);
+		return s;
 	}
+
+	T norm() const { return sqrt(normSq()); }
 
 	friend Matrix_ operator*(T s, const Matrix_& b) { return b * s; }
 };

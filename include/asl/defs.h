@@ -10,7 +10,7 @@
 Main definitions.
 */
 
-#define ASL_VERSION 11003
+#define ASL_VERSION 11004
 
 #ifdef _WIN32
 #ifndef _CRT_SECURE_NO_DEPRECATE
@@ -83,8 +83,19 @@ namespace asl {
 #define ASL_HAVE_INITLIST
 #endif
 
+#if (!defined(_MSC_VER) && defined(ASL_HAVE_INITLIST)) || (defined(_MSC_VER) && _MSC_VER > 1800)
+#define ASL_HAVE_INITLIST2
+#endif
+
 #if __has_feature(cxx_range_for) || (defined( _MSC_VER ) && _MSC_VER >= 1700) || (defined(__GNUC__) && defined(ASL_GCC11)  && ASL_C_VER >= 40600)
 #define ASL_HAVE_RANGEFOR
+#endif
+
+#if __has_feature(cxx_generalized_initializers) || (defined( _MSC_VER ) && _MSC_VER >= 1800) || (defined(__GNUC__) && ASL_C_VER >= 40600) || (defined(__clang__) && ASL_C_VER >= 30000)
+#define ASL_HAVE_EXPLICIT
+#define ASL_EXPLICIT explicit
+#else
+#define ASL_EXPLICIT
 #endif
 
 #if !defined(_WIN32) || defined(ASL_STATIC)

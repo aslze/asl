@@ -73,9 +73,9 @@ protected:
 	Data& d() const {return *((Data*)_a-1);}
 	void alloc(int m);
 	void free();
-	Array(T* p);
-	operator void*() { return NULL; }
-	Array(const String& s);
+	ASL_EXPLICIT Array(T* p);
+	/*ASL_EXPLICIT*/ operator void* () { return NULL; }
+	ASL_EXPLICIT Array(const String& s);
 	Array& operator=(int b) { return *this; }
 	bool operator==(int x) const { return false; }
 public:
@@ -86,15 +86,15 @@ public:
 	/**
 	Creates an array of n elements
 	*/
-	Array(int n) {alloc(n);}
+	ASL_EXPLICIT Array(int n) {alloc(n);}
 	/**
 	Creates an array of n elements and copies them from the pointer p
 	*/
-	Array(const T* p, int n) {alloc(n); for(int i=0; i<n; i++) _a[i]=p[i];}
+	ASL_EXPLICIT Array(const T* p, int n) {alloc(n); for(int i=0; i<n; i++) _a[i]=p[i];}
 	/**
 	Creates an array of n elements and gives them the value x
 	*/
-	Array(int n, const T& x) { alloc(n); for (int i = 0; i<n; i++) _a[i] = x; }
+	ASL_EXPLICIT Array(int n, const T& x) { alloc(n); for (int i = 0; i<n; i++) _a[i] = x; }
 	template<class K>
 	Array(const Array<K>& b)
 	{
@@ -179,11 +179,11 @@ public:
 	/**
 	Returns a pointer to the base of the array
 	*/
-	operator const T*() const { return &_a[0]; }
+	ASL_DEPRECATED(operator const T*() const, "Use ptr()") { return &_a[0]; }
 	/**
 	Returns a pointer to the base of the array
 	*/
-	operator T*() { return &_a[0]; }
+	ASL_DEPRECATED(operator T*(), "Use ptr()") { return &_a[0]; }
 	/**
 	Returns a pointer to the first element
 	*/
@@ -192,7 +192,12 @@ public:
 	Returns a pointer to the first element
 	*/
 	T* ptr() {return &_a[0];}
+
 	bool operator!() const { return d().n == 0; }
+
+#ifdef ASL_HAVE_EXPLICIT
+	//ASL_EXPLICIT operator bool() const { return !!*this; }
+#endif
 	/**
 	Tests for equality of all elements of both arrays
 	*/
