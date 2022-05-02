@@ -143,6 +143,7 @@ static void sigint_handler(int sig)
 Console::Console()
 {
 	_colorChanged = false;
+	_colorMode = 2;
 #ifndef __ANDROID__
 	if (signal(SIGINT, sigint_handler) == SIG_ERR)
 		printf("Error\n");

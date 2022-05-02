@@ -73,7 +73,7 @@ bool Directory::removeRecursive(const String& path)
 		abs.resize(abs.length() - 1);
 	if (abs.length() == 2 && abs[1] == ':')
 		return false;
-	if (((abs.length() > 3 && abs.substr(3) == "windows") || abs.substr(3) == "program files") || abs == "" || abs == "/home")
+	if (((abs.length() > 3 && abs.substr(3) == "windows") || abs.substr(3) == "program files") || abs == "")
 		return false;
 	Directory dir(path);
 	foreach(File& file, dir.files())

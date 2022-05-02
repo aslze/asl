@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2020 aslze
+// Copyright(c) 1999-2022 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_VAR_H
@@ -31,7 +31,7 @@ namespace asl {
 #define NEW_DICC(d, x) (d).construct(x)
 #define DEL_DIC(d) (d).destroy()
 #define NEW_STRING(s) (s).construct()
-#define NEW_STRINGC(s, x) (s).construct(x)
+#define NEW_STRINGC(s, n) (s).construct(asl::Array<char>(n))
 #define DEL_STRING(s) (s).destroy()
 #endif
 

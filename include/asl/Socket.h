@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2020 aslze
+// Copyright(c) 1999-2022 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_SOCKET_H
@@ -479,7 +479,5 @@ public:
 };
 
 }
-
-#undef ASL_OTHERENDIAN
 
 #endif

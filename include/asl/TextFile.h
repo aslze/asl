@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2020 aslze
+// Copyright(c) 1999-2022 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_TEXTFILE_H
@@ -48,10 +48,10 @@ class ASL_API TextFile : public File
 {
 public:
 	TextFile() {}
-	TextFile(const String& name) : File(name) {}
-	TextFile(FILE* f) { _file = f; }
+	ASL_EXPLICIT TextFile(const String& name) : File(name) {}
+	ASL_EXPLICIT TextFile(FILE* f) { _file = f; }
 	TextFile(const File& f) : File(f) {}
-	TextFile(const String& name, OpenMode mode) { open(name, mode); }
+	ASL_EXPLICIT TextFile(const String& name, OpenMode mode) { open(name, mode); }
 	~TextFile() {}
 
 	bool open(const String& name, OpenMode mode = READ)

@@ -6,6 +6,7 @@
 #include <asl/Socket.h>
 #include <asl/Map.h>
 #include <asl/String.h>
+#include <asl/Pointer.h>
 #include <asl/Var.h>
 #include <asl/util.h>
 
@@ -408,7 +409,7 @@ auto response = Http::get("http://api.openweathermap.org/data/2.5/weather?lat=" 
 if (!response.ok())  // check if the request succeeded
 	return;
 
-Var data = response.data();
+Var data = response.json();
 String city = data["name"];
 float temperature = data["main"]["temp"];
 float pressure = data["main"]["pressure"];
