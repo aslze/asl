@@ -209,7 +209,7 @@ Generates uniformly distributed pseudo-random numbers, except in the `normal()` 
 
 ```
 Random random;
-int n = random(256);                // get an integer between 0 and 255
+int n = random(255);                // get an integer between 0 and 255
 double x = random(-1.5, 1.5);       // get a number between -1.5 and +1.5
 double y = random.normal(10, 0.75); // get a number from a normal distribution
 ```

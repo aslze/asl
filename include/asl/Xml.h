@@ -12,6 +12,8 @@ namespace asl {
 
 static String xnoStr = "";
 
+struct CSPair { const char* a; const char* b; };
+
 class Xml;
 
 class ASL_API NodeBase
@@ -250,7 +252,7 @@ protected:
 	_Xml* _() { return (_Xml*)_p; }
 	const _Xml* _() const { return (_Xml*)_p; }
 
-	operator int() const;
+	ASL_EXPLICIT operator int() const;
 public:
 	typedef _Xml NType;
 
@@ -266,14 +268,14 @@ public:
 	/**
 	Constructs an element with the given tag.
 	*/
-	Xml(const String& tag) : NodeBase(new _Xml(tag))
+	ASL_EXPLICIT Xml(const String& tag) : NodeBase(new _Xml(tag))
 	{
 	}
 
 	/**
 	Constructs an element with the given tag and attributes.
 	*/
-	Xml(const String& tag, const Map<>& attrs) : NodeBase(new _Xml(tag))
+	ASL_EXPLICIT Xml(const String& tag, const Map<>& attrs) : NodeBase(new _Xml(tag))
 	{
 		_()->attribs = attrs;
 	}
@@ -281,13 +283,31 @@ public:
 	/**
 	Constructs an element with the given tag and value (text subelement).
 	*/
-	Xml(const String& tag, const String& val);
+	ASL_EXPLICIT  Xml(const String& tag, const String& val);
+
+	ASL_EXPLICIT  Xml(const String& tag, const Array<Xml>& elems) : NodeBase(new _Xml(tag))
+	{
+		_()->children = elems;
+	}
+	
+	ASL_EXPLICIT  Xml(const String& tag, const Map<>& attrs, const Array<Xml>& elems) : NodeBase(new _Xml(tag))
+	{
+		_()->attribs = attrs;
+		_()->children = elems;
+	}
 
 	/**
 	Constructs an element with the given tag, attributes and value (text subelement).
 	*/
-	Xml(const String& tag, const Map<>& attrs, const String& val);
+	ASL_EXPLICIT Xml(const String& tag, const Map<>& attrs, const String& val);
 
+#ifdef ASL_HAVE_INITLIST
+	ASL_EXPLICIT Xml(const String& tag, const std::initializer_list<Map<>::KeyVal>& attrs) : NodeBase(new _Xml(tag))
+	{
+		_()->attribs = attrs;
+	}
+
+#endif
 	/**
 	Returns a separate copy of this element with its children, and no parent
 	*/
@@ -320,7 +340,7 @@ public:
 		return _p == 0 || _()->tag == "";
 	}
 
-	operator bool() const
+	ASL_EXPLICIT operator bool() const
 	{
 		return _p != 0 && _()->tag != "";
 	}

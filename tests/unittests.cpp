@@ -510,6 +510,16 @@ ASL_TEST(Var)
 	ASL_ASSERT(a3.is(Var::ARRAY) && a3.length() == 2 && a3[0] == 1 && a3[1] == "a");
 #endif
 
+#ifdef ASL_HAVE_INITLIST2
+	Var v3 = {
+		{ "i", 1 },
+		{ "ai", { 1, 2, 3 } },
+		{ "as", { "a", "b" } },
+		{ "s", "abc" }
+	};
+	ASL_CHECK(v3.toString(), == , "{ai=[1,2,3],as=[a,b],i=1,s=abc}");
+#endif
+
 #ifdef ASL_HAVE_RANGEFOR
 	Var list = array<Var>(1, 2, 3);
 	ASL_ASSERT(list.isArrayOf(3, Var::NUMBER));
@@ -549,7 +559,7 @@ ASL_TEST(Base64)
 	b64 = encodeBase64(data);
 	ASL_ASSERT(b64 == "BfB6RQ==");
 	ASL_ASSERT(decodeBase64(b64) == data);
-	String h = encodeHex(data, data.length());
+	String h = encodeHex(data);
 	ASL_ASSERT(h == "05f07a45");
 	Array<byte> data2 = decodeHex(h);
 	ASL_ASSERT(data == data2);

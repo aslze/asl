@@ -136,6 +136,26 @@ ASL_TEST(XML)
 	}
 	ASL_ASSERT(txt == "utf8authorJohn Doe");
 #endif
+
+
+#ifdef ASL_HAVE_INITLIST2
+	Xml html3 = Xml("html", {
+		Xml("head", {
+			Xml("meta", {{"charset", "utf8"}, {"lang", "es"}})
+		}),
+		Xml("body", {
+			Xml("h1", "Hello"),
+			Xml("p", {{"class", "main"}}, "world")
+		})
+	});
+
+	ASL_ASSERT(html3.tag() == "html");
+	ASL_CHECK(html3.child(1).child(1).tag(), ==, "p");
+	ASL_CHECK(html3.child(0).child(0).tag(), ==, "meta");
+	ASL_CHECK(html3.child(0).child(0)["charset"], == , "utf8");
+	ASL_CHECK(html3.child(1).child(1)["class"], ==, "main");
+	ASL_CHECK(html3.child(1).child(1).text(), ==, "world");
+#endif
 }
 
 class Animal
