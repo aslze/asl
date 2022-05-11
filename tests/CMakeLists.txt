@@ -35,6 +35,7 @@ set(TESTS
 	Uuid
 	StreamBuffer
 	Function
+	Matrix
 )
 
 foreach(T ${TESTS})

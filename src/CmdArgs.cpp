@@ -5,7 +5,7 @@
 #include <shellapi.h>
 #endif
 
-using namespace asl;
+namespace asl {
 
 inline bool asl_isdigit(char c)
 {
@@ -19,7 +19,7 @@ CmdArgs::CmdArgs(const String& spec)
 #ifdef _WIN32
 	int nArgs;
 	LPWSTR* arglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
-	if( NULL == arglist )
+	if (NULL == arglist)
 		return;
 	Array<String> a;
 	for (int i = 0; i < nArgs; i++)
@@ -29,25 +29,25 @@ CmdArgs::CmdArgs(const String& spec)
 	*this = CmdArgs(-nArgs, ((Array<char*>)a).ptr());
 #else
 	File file("/proc/self/cmdline", File::READ);
-	if(!file)
+	if (!file)
 		return;
 	char buffer[256];
 	Array<char> all;
 	int n;
-	while((n=file.read(buffer, sizeof(buffer))) > 0)
+	while ((n = file.read(buffer, sizeof(buffer))) > 0)
 	{
 		all.append(Array<char>((char*)buffer, n));
-		if( n <= sizeof(buffer))
+		if (n <= sizeof(buffer))
 			break;
 	}
-	if(all.length() == 0)
+	if (all.length() == 0)
 		return;
-	int i=0, j=0;
+	int i = 0, j = 0;
 	Array<String> a;
-	while((j = all.indexOf('\0', i)) != -1)
+	while ((j = all.indexOf('\0', i)) != -1)
 	{
 		a << String(&all[i]);
-		i = j+1;
+		i = j + 1;
 	}
 	*this = CmdArgs(a.length(), ((Array<char*>)a).ptr(), spec);
 #endif
@@ -57,14 +57,14 @@ CmdArgs::CmdArgs(const String& spec)
 CmdArgs::CmdArgs(int argc, char* argv[], const String& spec)
 {
 	int n = abs(argc);
-	for(int i=0; i < n; i++)
+	for (int i = 0; i < n; i++)
 	{
 		_args << ((argc < 0) ? String(argv[i]) : localToString(argv[i]));
 	}
 	Array<String> flags;
 	Array<String> options;
 	Array<String> parts = spec.split(',');
-	foreach(const String& s, parts)
+	foreach(const String & s, parts)
 	{
 		if (s.contains(':'))
 			options << s.substring(0, s.indexOf(':'));
@@ -124,7 +124,7 @@ String CmdArgs::operator[](const String& opt) const
 String CmdArgs::operator()(const String& opt, const String& def) const
 {
 	use(opt);
-	return _opts.has(opt)? _opts[opt] : def;
+	return _opts.has(opt) ? _opts[opt] : def;
 }
 
 Array<String> CmdArgs::operator()(const String& opt) const
@@ -151,4 +151,6 @@ Array<String> CmdArgs::rest() const
 Array<String> CmdArgs::all() const
 {
 	return _args;
+}
+
 }

@@ -3,6 +3,7 @@
 #include <asl/Quaternion.h>
 #include <asl/Uuid.h>
 #include <asl/Array2.h>
+#include <asl/Matrix.h>
 #include <asl/StreamBuffer.h>
 #include <stdio.h>
 #include <asl/testing.h>
@@ -73,6 +74,7 @@ ASL_TEST(StreamBuffer)
 {
 	StreamBuffer b;
 	b.setEndian(ENDIAN_LITTLE);
+	b.setEndian(StreamBuffer::LITTLEENDIAN);
 	b << 'a' << 4 << 3.5 << true;
 
 	ASL_ASSERT(b.length() == 14);
@@ -130,4 +132,25 @@ ASL_TEST(Array2)
 	Array2<int> a4 = a.slice(0, 2, 1, 2);
 
 	ASL_ASSERT(a4 == Array2<int>(2, 1, array(1, 11)));
+}
+
+ASL_TEST(Matrix)
+{
+	Matrix A(2, 2, array<float>(
+		1, -1,
+		2, 3
+	));
+
+	Matrix B = A.inverse() * A;
+
+	ASL_CHECK((B - Matrix::identity(2)).norm(), <, 1e-6f);
+
+#ifdef ASL_HAVE_INITLIST
+	Matrix C = {
+		{ 1, -1 },
+		{ 2, 3 }
+	};
+
+	ASL_ASSERT(C == A);
+#endif
 }
