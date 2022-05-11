@@ -101,7 +101,7 @@ ASL_SMART_CLASS(Socket, SmartObject)
 	Endian _endian;
 	InetAddress::Type _family;
 	String _hostname;
-	bool _error;
+	int _error;
 	bool _blocking;
 	virtual bool setOption(int level, int opt, const void* p, int n);
 	bool init(bool force = false);
@@ -130,7 +130,8 @@ ASL_SMART_CLASS(Socket, SmartObject)
 	Array<byte> read(int n = -1);
 	void skip(int n);
 	virtual bool waitInput(double timeout = 60);
-	bool error() const { return _error; }
+	int error() const { return _error; }
+	virtual String errorMsg() const;
 };
 
 /**
@@ -143,8 +144,8 @@ public:
 	enum { TCP, PACKET, LOCAL };
 
 	ASL_SMART_DEF(Socket, SmartObject);
-	Socket(int fd) : ASL_SMART_INIT(fd) {}
-	Socket(bool b) : ASL_SMART_INIT(b) {}
+	ASL_EXPLICIT Socket(int fd) : ASL_SMART_INIT(fd) {}
+	ASL_EXPLICIT Socket(bool b) : ASL_SMART_INIT(b) {}
 
 	bool operator==(const Socket& s) const { return ptr() == s.ptr(); }
 	
@@ -251,7 +252,9 @@ public:
 	/**
 	Returns true if there was some communication error in this socket
 	*/
-	bool error() const { return _()->_error; }
+	int error() const { return _()->_error; }
+
+	String errorMsg() const { return _()->errorMsg(); }
 
 	/**
 	Writes variable x to the socket respecting endianness in binary form
@@ -479,5 +482,7 @@ public:
 };
 
 }
+
+#undef ASL_OTHERENDIAN
 
 #endif

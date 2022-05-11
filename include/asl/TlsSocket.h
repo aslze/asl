@@ -30,6 +30,7 @@ ASL_SMART_CLASS(TlsSocket, Socket)
 	int read(void* data, int size);
 	int write(const void* data, int n);
 	bool waitInput(double timeout = 60);
+	String errorMsg() const;
 	bool useCert(const String& cert);
 	bool useKey(const String& key);
 };
