@@ -202,7 +202,7 @@ bool HttpServer::handleOptions(HttpRequest& request, HttpResponse& response)
 		return false;
 }
 
-void HttpServer::handle(HttpRequest& request, HttpResponse& response)
+void HttpServer::serve(HttpRequest& request, HttpResponse& response)
 {
 	if (_webroot.ok())
 		serveFile(request, response);

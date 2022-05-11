@@ -98,11 +98,12 @@ public:
 	*/
 	void useCert(const String& cert, const String& key);
 #endif
-	/** This function is called in a new thread with each new incoming client connection. Implement it
-	in a subclass to make a specific server. */
-	virtual void serve(Socket client) { service(client); } // call old deprecated name
-	/** Old service function \deprecated Use serve() */
-	virtual void service(Socket client) {}
+	/**
+	This function is called in a new thread with each new incoming client connection. Implement it
+	in a subclass to make a specific server.
+	*/
+	virtual void serve(Socket client) {}
+
 	void startLoop();
 	/**
 	Requests the server to stop receiving connections, and waits for all clients to exit if sync is true.

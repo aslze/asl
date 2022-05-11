@@ -96,6 +96,46 @@ static const char asl_test_srv_key_rsa[] =
 
 namespace asl {
 
+enum SocketError
+{
+	SOCKET_OK,
+	SOCKET_BAD_INIT,
+	SOCKET_BAD_DNS,
+	SOCKET_BAD_CONNECT,
+	SOCKET_BAD_LINE,
+	SOCKET_BAD_RECV,
+	SOCKET_BAD_DATA,
+	SOCKET_BAD_WAIT,
+
+	SOCKET_BAD_BIND,
+	SOCKET_BAD_CONFIG,
+	SOCKET_BAD_CERT,
+	SOCKET_BAD_SESSION,
+	SOCKET_BAD_ACCEPT,
+	SOCKET_BAD_HELLO,
+	SOCKET_BAD_HANDSHAKE,
+	SOCKET_BAD_TLS
+};
+
+static const char* messages[] = {
+	"OK",
+	"SOCKET_BAD_INIT",
+	"SOCKET_BAD_DNS",
+	"SOCKET_BAD_CONNECT",
+	"SOCKET_BAD_LINE",
+	"SOCKET_BAD_RECV",
+	"SOCKET_BAD_DATA",
+	"SOCKET_BAD_WAIT",
+	"SOCKET_BAD_BIND",
+	"SOCKET_BAD_CONFIG",
+	"SOCKET_BAD_CERT",
+	"SOCKET_BAD_SESSION",
+	"SOCKET_BAD_ACCEPT",
+	"SOCKET_BAD_HELLO",
+	"SOCKET_BAD_HANDSHAKE",
+	"SOCKET_BAD_TLS"
+};
+
 static void my_debug(void* ctx, int level, const char* file, int line, const char* str)
 {
 	for (const char* p = file; *p != '\0'; p++)
@@ -123,7 +163,7 @@ bool inited = false;
 
 TlsSocket_::TlsSocket_()
 {
-	_error = false;
+	_error = 0;
 	_core = new TlsCore;
 	_core->bound = false;
 	mbedtls_net_init(&_core->net);
@@ -141,7 +181,7 @@ TlsSocket_::TlsSocket_()
 	int ret;
 	if((ret = mbedtls_ctr_drbg_seed(&_core->ctr_drbg, mbedtls_entropy_func, &_core->entropy, NULL, 0)) != 0)
 	{
-		_error = true;
+		_error = SOCKET_BAD_INIT;
 		return;
 	}
 #ifdef TLS_DEBUG
@@ -204,22 +244,26 @@ bool TlsSocket_::bind(const String& ip, int port)
 	int ret = mbedtls_net_bind(&_core->net, host, String(port), MBEDTLS_NET_PROTO_TCP);
 	if (ret != 0) {
 		printf("TlsSocket: bind failed 0x%x\n", -ret);
+		_error = SOCKET_BAD_BIND;
 		return false;
 	}
 	if ((ret = mbedtls_ssl_config_defaults(&_core->conf, MBEDTLS_SSL_IS_SERVER, MBEDTLS_SSL_TRANSPORT_STREAM, MBEDTLS_SSL_PRESET_DEFAULT)) != 0)
 	{
 		printf("TlsSocket: config failed 0x%x\n", -ret);
+		_error = SOCKET_BAD_CONFIG;
 		return false;
 	}
 
 	if ((ret = mbedtls_ssl_conf_own_cert(&_core->conf, &_core->srvcert, &_core->pkey)) != 0)
 	{
 		printf("TlsSocket: setting certificate failed 0x%x\n", ret);
+		_error = SOCKET_BAD_CERT;
 		return false;
 	}
 	if ((ret = mbedtls_ssl_setup(&_core->ssl, &_core->conf)) != 0)
 	{
 		printf("TlsSocket: session setup failed 0x%x\n", -ret);
+		_error = SOCKET_BAD_SESSION;
 		return false;
 	}
 
@@ -241,6 +285,7 @@ Socket_* TlsSocket_::accept()
 	if ((ret = mbedtls_ssl_conf_own_cert(&cli->_core->conf, &_core->srvcert, &_core->pkey)) != 0)
 	{
 		printf("TlsSocket: setting certificate failed -0x%x\n", ret);
+		_error = SOCKET_BAD_CERT;
 		return cli;
 	}
 
@@ -250,6 +295,7 @@ Socket_* TlsSocket_::accept()
 	size_t ipsize = 0;
 	ret = mbedtls_net_accept(&_core->net, &cli->_core->net, ip, sizeof(ip), &ipsize);
 	if (ret != 0) {
+		_error = SOCKET_BAD_ACCEPT;
 		printf("TLS accept failed\n");
 		return cli;
 	}
@@ -257,6 +303,7 @@ Socket_* TlsSocket_::accept()
 
 	if (ret) {
 		printf("TLS ssl setup failed\n");
+		_error = SOCKET_BAD_SESSION;
 		return cli;
 	}
 
@@ -272,10 +319,12 @@ Socket_* TlsSocket_::accept()
 	if (ret == MBEDTLS_ERR_SSL_HELLO_VERIFY_REQUIRED)
 	{
 		printf("TlsSocket: hello verification requested\n");
+		_error = SOCKET_BAD_HELLO;
 		return cli;
 	}
 	else if (ret != 0)
 	{
+		_error = SOCKET_BAD_HANDSHAKE;
 		printf("TlsSocket: handshake error -0x%x\n", -ret);
 
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
@@ -310,6 +359,7 @@ bool TlsSocket_::connect(const InetAddress& addr)
 	if (ret)
 	{
 		(*this) = TlsSocket_();
+		_error = SOCKET_BAD_CONNECT;
 		return false;
 	}
 	ret = mbedtls_ssl_config_defaults(&_core->conf, MBEDTLS_SSL_IS_CLIENT, MBEDTLS_SSL_TRANSPORT_STREAM, MBEDTLS_SSL_PRESET_DEFAULT);
@@ -317,6 +367,7 @@ bool TlsSocket_::connect(const InetAddress& addr)
 	ret = mbedtls_ssl_setup(&_core->ssl, &_core->conf);
 	if (ret) {
 		(*this) = TlsSocket_();
+		_error = SOCKET_BAD_TLS;
 		return false;
 	}
 	ret = mbedtls_ssl_set_hostname(&_core->ssl, _hostname);
@@ -326,6 +377,7 @@ bool TlsSocket_::connect(const InetAddress& addr)
 		if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE && ret != -0x7000)
 		{
 			(*this) = TlsSocket_();
+			_error = SOCKET_BAD_TLS;
 			return false;
 		}
 	}
@@ -361,7 +413,7 @@ int TlsSocket_::read(void* data, int size)
 	{
 		if (n == MBEDTLS_ERR_SSL_WANT_READ || n == MBEDTLS_ERR_SSL_WANT_WRITE)
 			continue;
-		if (n < 0) {_error = true; break;}
+		if (n < 0) {_error = SOCKET_BAD_RECV; break;}
 		else if(n==0)
 			return s - size;
 		size -= n;
@@ -413,6 +465,11 @@ bool TlsSocket_::waitInput(double t)
 	return FD_ISSET(handle(), &rset) != 0;
 }
 
+String TlsSocket_::errorMsg() const
+{
+	return messages[_error];
+}
+
 bool TlsSocket_::useCert(const String& cert)
 {
 	mbedtls_x509_crt_free(&_core->srvcert);
@@ -420,6 +477,7 @@ bool TlsSocket_::useCert(const String& cert)
 	int ret = mbedtls_x509_crt_parse(&_core->srvcert, (byte*)*cert, cert.length() + 1);
 	if (ret < 0) {
 		printf("TlsSocket: cert parse error 0x%x\n", -ret);
+		_error = SOCKET_BAD_CERT;
 		return false;
 	}
 	char buf[500];
@@ -439,10 +497,15 @@ bool TlsSocket_::useKey(const String& key)
 #endif
 	if (ret < 0) {
 		printf("TlsSocket: key parse error 0x%x\n", -ret);
+		_error = SOCKET_BAD_CERT;
 		return false;
 	}
 	ret = mbedtls_ssl_conf_own_cert(&_core->conf, &_core->srvcert, &_core->pkey);
-	if (ret) printf("TlsSocket: setting certificate failed 0x%x\n", -ret);
+	if (ret)
+	{
+		printf("TlsSocket: setting certificate failed 0x%x\n", -ret);
+		_error = SOCKET_BAD_CERT;
+	}
 	return ret == 0;
 }
 

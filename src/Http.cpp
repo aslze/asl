@@ -289,7 +289,7 @@ void HttpMessage::readBody()
 				break;
 		}
 	}
-	printf("readbody end\n");
+	//printf("readbody end\n");
 }
 
 HttpRequest::~HttpRequest()
@@ -311,6 +311,7 @@ HttpResponse Http::request(HttpRequest& request)
 		socket = TlsSocket();
 		if (!hasPort) url.port = 443;
 #else
+		response.setSockError("SOCKET_NO_TLS_AVAILABLE");
 		return response;
 #endif
 	}
@@ -325,6 +326,7 @@ HttpResponse Http::request(HttpRequest& request)
 	if (!socket.connect(url.host, url.port)) {
 		//printf("Cannot connect to %s : %i\n", *url.host, url.port);
 		socket.close();
+		response.setSockError(socket.errorMsg());
 		return response;
 	}
 	
@@ -334,20 +336,26 @@ HttpResponse Http::request(HttpRequest& request)
 
 	String title;
 	title << request.method() << ' ' << url.path << " HTTP/1.1\r\nHost: " << url.host;
-	if (hasPort) title << ':' << url.port;
+	if (hasPort)
+		title << ':' << url.port;
 	request._command = title;
 
 	if (!request.write())
+	{
+		response.setSockError(socket.errorMsg());
 		return response;
+	}
 	
 	String line = socket.readLine();
 	if (!line.ok()) {
 		socket.close();
+		response.setSockError(socket.errorMsg());
 		return response;
 	}
 	Array<String> parts = line.split();
 	if (parts.length() < 2) {
 		socket.close();
+		response.setSockError(socket.errorMsg());
 		return response;
 	}
 
@@ -372,6 +380,7 @@ HttpResponse Http::request(HttpRequest& request)
 		}
 		else {
 			response.setCode(421);
+			response.setSockError("Too many redirects");
 			return response;
 		}
 	}
@@ -508,6 +517,11 @@ void HttpResponse::setCode(int code)
 bool HttpResponse::is(HttpResponse::StatusType code) const
 {
 	return _code / 100 == code;
+}
+
+String HttpResponse::socketError() const
+{
+	return _socketError;
 }
 
 

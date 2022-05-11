@@ -169,6 +169,8 @@ public:
 
 	void useSink(const Shared<HttpSink>& s) { _sink = s; _sink->use(this); }
 
+	void setSockError(const String& s) { _socketError = s; }
+
 protected:
 	void readHeaders();
 	void readBody();
@@ -183,6 +185,7 @@ protected:
 	bool _chunked;
 	bool _headersSent;
 	Shared<HttpStatus> _status;
+	String _socketError;
 };
 
 
@@ -386,6 +389,8 @@ public:
 	Returns the status code
 	*/
 	int code() const { return _code; }
+
+	String socketError() const;
 
 protected:
 	int _code;

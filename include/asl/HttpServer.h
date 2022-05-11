@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2020 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_HTTPSERVER
@@ -78,9 +78,7 @@ public:
 	/**
 	Implement this function in a subclass to create the server behavior.
 	*/
-	virtual void serve(HttpRequest& request, HttpResponse& response) { handle(request, response); }
-	/** Old service function \deprecated Use serve() */
-	virtual void handle(HttpRequest& request, HttpResponse& response);
+	virtual void serve(HttpRequest& request, HttpResponse& response);
 
 	virtual bool handleOptions(HttpRequest& request, HttpResponse& response);
 	/**

@@ -46,6 +46,29 @@ static void verbose_print(...) {}
 
 namespace asl {
 
+enum SocketError
+{
+	SOCKET_OK,
+	SOCKET_BAD_INIT,
+	SOCKET_BAD_DNS,
+	SOCKET_BAD_CONNECT,
+	SOCKET_BAD_LINE,
+	SOCKET_BAD_RECV,
+	SOCKET_BAD_DATA,
+	SOCKET_BAD_WAIT
+};
+
+static const char* messages[] = {
+	"OK",
+	"SOCKET_BAD_INIT",
+	"SOCKET_BAD_DNS",
+	"SOCKET_BAD_CONNECT",
+	"SOCKET_BAD_LINE",
+	"SOCKET_BAD_RECV",
+	"SOCKET_BAD_DATA",
+	"SOCKET_BAD_WAIT"
+};
+
 Sockets& Sockets::operator<<(Socket& s)
 {
 	set << s;
@@ -397,7 +420,7 @@ Socket_::Socket_()
 #endif
 	_handle = -1;
 	_family = InetAddress::IPv4;
-	_error = false;
+	_error = 0;
 	_type = TCP;
 	_blocking = true;
 	_endian = ENDIAN_NATIVE;
@@ -407,7 +430,7 @@ Socket_::Socket_(bool)
 {
 	_handle = -1;
 	_family = InetAddress::IPv4;
-	_error = false;
+	_error = 0;
 	_type = TCP;
 	_blocking = false;
 	_endian = ENDIAN_NATIVE;
@@ -417,7 +440,7 @@ Socket_::Socket_(int fd)
 {
 	_handle = fd;
 	_family = InetAddress::IPv4;
-	_error = false;
+	_error = 0;
 	_type = TCP;
 	_blocking = true;
 	_endian = ENDIAN_NATIVE;
@@ -435,7 +458,7 @@ bool Socket_::init(bool force)
 	if (_handle < 0) {
 		_handle = (int)socket(sockfamily(_family), _type == PACKET? SOCK_DGRAM : SOCK_STREAM, 0);
 	}
-	_error = _handle < 0;
+	_error = _handle < 0 ? SOCKET_BAD_INIT : 0;
 	return !_error;
 }
 
@@ -488,23 +511,35 @@ Socket_* Socket_::accept()
 bool Socket::connect(const String& host, int port)
 {
 	Array<InetAddress> addrs = InetAddress::lookup(host);
+	if (addrs.length() == 0)
+	{
+		_()->_error = SOCKET_BAD_DNS;
+		return false;
+	}
 	_()->_hostname = host;
 	for (int i = 0; i < addrs.length(); i++)
 	{
 		if (connect(addrs[i].setPort(port)))
 			return true;
 	}
+	_()->_error = SOCKET_BAD_CONNECT;
 	return false;
 }
 
 bool Socket_::connect(const InetAddress& addr)
 {
 	if (addr.length() == 0)
+	{
+		_error = SOCKET_BAD_CONNECT;
 		return false;
+	}
 	bool force = _family != addr.type();
 	_family = addr.type();
 	init(force);
-	return ::connect(_handle, (sockaddr*)addr.ptr(), addr.length()) == 0;
+	if (::connect(_handle, (sockaddr*)addr.ptr(), addr.length()) == 0)
+		return true;
+	_error = SOCKET_BAD_CONNECT;
+	return false;
 }
 
 InetAddress Socket_::remoteAddress() const
@@ -541,7 +576,7 @@ void Socket::enableBroadcast(bool on)
 
 int Socket_::available()
 {
-	if (_error || _handle < 0)
+	if (_error != 0 || _handle < 0)
 		return -1;
 #ifndef _WIN32
 	long n;
@@ -562,10 +597,10 @@ String Socket_::readLine()
 	if (available()>0 || waitInput()) {
 		while (1) {
 			int n = read(&c, 1);
-			if (n <= 0 || c == '\n' || _error)
+			if (n <= 0 || c == '\n' || _error != 0)
 				break;
 			if (s.length() > 8000) {
-				_error = true;
+				_error = SOCKET_BAD_LINE;
 				s = "";
 				break;
 			}
@@ -586,7 +621,7 @@ int Socket_::read(void* data, int size)
 		int n = ::read(_handle, (char*)data, size);
 #endif
 		if (n <= 0) {
-			_error = true;
+			_error = SOCKET_BAD_RECV;
 			break;
 		}
 		data = (char*)data + n;
@@ -633,7 +668,7 @@ void Socket_::skip(int n)
 
 bool Socket_::disconnected()
 {
-	return _error || (waitInput(0) && available() <= 0);
+	return _error != 0 || (waitInput(0) && available() <= 0);
 }
 
 bool Socket_::waitInput(double t)
@@ -645,7 +680,7 @@ bool Socket_::waitInput(double t)
 		return true;
 	if (a < 0)
 	{
-		_error = true;
+		_error = SOCKET_BAD_DATA;
 		return true;
 	}
 	fd_set rset;
@@ -656,9 +691,15 @@ bool Socket_::waitInput(double t)
 	FD_SET(handle(), &rset);
 	if(select(handle()+1, &rset, 0, 0, &to) >= 0)
 		return FD_ISSET(handle(), &rset)!=0;
-	_error = true;
+	_error = SOCKET_BAD_WAIT;
 	return true;
 }
+
+String Socket_::errorMsg() const
+{
+	return messages[_error];
+}
+
 
 // PacketSocket (UDP)
 
@@ -754,3 +795,4 @@ bool LocalSocket_::bind(const String& name)
 
 }
 
+//#include "MulticastSocket.cpp"
