@@ -330,7 +330,7 @@ public:
 class Condition
 {
 	pthread_cond_t _cond;
-	Mutex* _mut;
+	Mutex* _mutex;
 	Condition(const Condition& c) : _mutex(0) {}
 	void operator=(const Condition& c) { _mutex = 0; }
 public:
@@ -347,7 +347,7 @@ public:
 	}
 	void use(Mutex& m)
 	{
-		_mut = &m;
+		_mutex = &m;
 	}
 	void signal()
 	{
@@ -355,7 +355,7 @@ public:
 	}
 	void wait()
 	{
-		pthread_cond_wait(&_cond, &_mut->_mutex);
+		pthread_cond_wait(&_cond, &_mutex->_mutex);
 	}
 	bool wait(double timeout)
 	{
@@ -363,7 +363,7 @@ public:
 		struct timespec to;
 		to.tv_sec = (time_t)floor(t);
 		to.tv_nsec = (long)((t-floor(t))*1e9);
-		int r = pthread_cond_timedwait(&_cond, &_mut->_mutex, &to);
+		int r = pthread_cond_timedwait(&_cond, &_mutex->_mutex, &to);
 		return r == ETIMEDOUT;
 	}
 };
@@ -440,7 +440,7 @@ class Atomic
 public:
 	Atomic() {}
 
-	Atomic(const Atomic& x):
+	Atomic(const Atomic& x)
 	{
 		_x = x;
 	}
