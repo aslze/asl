@@ -53,6 +53,8 @@ class ASL_API Log : public Singleton<Log>
 	Mutex* _mutex;
 	void storeState();
 	void updateState();
+	Log(const Log& l) : _mutex(0) { _maxLevel = 0; _useconsole = _usefile = false; }
+	void operator=(const Log& l) { _mutex = 0; _maxLevel = 0; _useconsole = _usefile = false;}
 public:
 	Log();
 	~Log();

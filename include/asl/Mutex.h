@@ -72,6 +72,8 @@ on the same semaphore to signal that.
 class Semaphore
 {
 	HANDLE _semaphore;
+	Semaphore(const Semaphore& s): _semaphore(0) {}
+	void operator=(const Semaphore& s) { _semaphore = 0; }
 public:
 	Semaphore(int count=0)
 	{
@@ -142,8 +144,10 @@ class Condition
 {
 	HANDLE _cond;
 	Mutex* _mutex;
+	Condition(const Condition& c) : _cond(0), _mutex(0) {}
+	void operator=(const Condition& c) { _cond = 0; _mutex = 0; }
 public:
-	Condition()
+	Condition(): _mutex(0)
 	{
 		_cond = CreateEvent(0, TRUE, FALSE, 0);
 	}
@@ -229,6 +233,8 @@ public:
 class Semaphore
 {
 	sem_t _sem;
+	Semaphore(const Semaphore& s) {}
+	void operator=(const Semaphore& s) {}
 public:
 	Semaphore(int count=0)
 	{
@@ -282,6 +288,8 @@ namespace asl {
 class Semaphore
 {
 	dispatch_semaphore_t _sem;
+	Semaphore(const Semaphore& s) {}
+	void operator=(const Semaphore& s) {}
 public:
 	Semaphore(int count=0)
 	{
@@ -323,11 +331,13 @@ class Condition
 {
 	pthread_cond_t _cond;
 	Mutex* _mut;
+	Condition(const Condition& c) : _mutex(0) {}
+	void operator=(const Condition& c) { _mutex = 0; }
 public:
-	Condition(): _cond(cond_init)
+	Condition(): _cond(cond_init), _mutex(0)
 	{
 	}
-	Condition(Mutex& m): _cond(cond_init)
+	Condition(Mutex& m): _cond(cond_init), _mutex(0)
 	{
 		use(m);
 	}
@@ -430,14 +440,13 @@ class Atomic
 public:
 	Atomic() {}
 
-	Atomic(const Atomic& x)
+	Atomic(const Atomic& x):
 	{
 		_x = x;
 	}
 
-	Atomic(const T& x)
+	Atomic(const T& x): _x(x)
 	{
-		_x = x;
 	}
 
 	Atomic& operator=(const T& x)

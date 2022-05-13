@@ -133,20 +133,20 @@ private:
 template <class T>
 class Pointer
 {
-	Pointer(const Pointer& p)
+	Pointer(const Pointer& p): _p(0)
 	{
 	}
 	Pointer& operator=(const Pointer& r)
 	{
+		_p = 0;
+		return *this;
 	}
 public:
-	Pointer()
+	Pointer(): _p(0)
 	{
-		_p = 0;
 	}
-	Pointer(T* p)
+	Pointer(T* p): _p(p)
 	{
-		_p = p;
 	}
 	~Pointer()
 	{
@@ -204,20 +204,20 @@ private:
 template <class T>
 class Pointer<T[]>
 {
-	Pointer(const Pointer& p)
+	Pointer(const Pointer& p): _p(0)
 	{
 	}
 	Pointer& operator=(const Pointer& r)
 	{
+		_p = 0;
+		return *this;
 	}
 public:
-	Pointer()
+	Pointer(): _p(0)
 	{
-		_p = 0;
 	}
-	Pointer(T* p)
+	Pointer(T* p): _p(p)
 	{
-		_p = p;
 	}
 	~Pointer()
 	{

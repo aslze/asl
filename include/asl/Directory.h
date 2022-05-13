@@ -18,9 +18,9 @@ This example lists the files of the c:/windows directory modified in the last 10
 
 ~~~
 Directory dir("c:/windows");
-foreach(File& file, dir.files("*.dll"))
+for (File& file : dir.files("*.dll"))
 {
-	if(file.lastModified() > Date::now() - 10*Date::DAY)
+	if (file.lastModified() > Date::now() - 10*Date::DAY)
 		cout << *file.name() << " size: " file.size() << endl;
 }
 ~~~

@@ -1,10 +1,8 @@
 #include <asl/Socket.h>
 #ifndef _WIN32
 #include <netinet/in.h>
-#include <sys/param.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
-#include <sys/uio.h>
 #else
 #include <windows.h>
 #include <winsock2.h>

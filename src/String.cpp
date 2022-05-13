@@ -290,6 +290,7 @@ String::String(int n, const char* fmt, ...)
 	while (((n = vsnprintf(str(), space, fmt, arg)) == -1 || n >= space) && ++i < 10) {
 		resize((n >= space)? n : 2*space, false);
 		space = _size? _size : ASL_STR_SPACE;
+		va_end(arg);
 		va_start(arg, fmt);
 	}
 	va_end(arg);
@@ -306,6 +307,7 @@ String String::f(const char* fmt, ...)
 	while (((n = vsnprintf(s.str(), space, fmt, arg)) == -1 || n >= space) && ++i < 10) {
 		s.resize((n >= space) ? n : 2 * space, false);
 		space = s._size ? s._size : ASL_STR_SPACE;
+		va_end(arg);
 		va_start(arg, fmt);
 	}
 	va_end(arg);

@@ -21,7 +21,7 @@ struct FileInfo
 	Date lastModified;
 	Date creationDate;
 	unsigned flags;
-	FileInfo() {size=-1;}
+	FileInfo(): size(-1), flags(0) {}
 	bool operator!() const {return size==-1;}
 };
 
@@ -60,27 +60,23 @@ public:
 	/**
 	Constructs a File object with no associated file.
 	*/
-	File() { _file = 0; _endian = ENDIAN_NATIVE; }
-	File(const String& name, const FileInfo& inf) : _path(name) { _file = 0; _info = inf; _endian = ENDIAN_NATIVE; }
+	File():  _file(0), _endian(ENDIAN_NATIVE) {}
+	ASL_EXPLICIT File(const String& name, const FileInfo& inf) : _file(0), _path(name), _info(inf), _endian(ENDIAN_NATIVE) {}
 	/**
 	Constructs a File object with the given path name but does not open it
 	*/
-	File(const String& name) : _path(name) { _file = 0; _endian = ENDIAN_NATIVE; }
+	ASL_EXPLICIT File(const String& name) : _file(0), _path(name), _endian(ENDIAN_NATIVE) {}
 	/**
 	Constructs a File object with the given path name and opens it with the given access mode.
 	\param name File name optionally including path
 	\param mode Access mode: READ, WRITE, APPEND, RW (read+write)
 	*/
-	File(const String& name, OpenMode mode) : _path(name)
+	ASL_EXPLICIT File(const String& name, OpenMode mode) : _path(name), _endian(ENDIAN_NATIVE)
 	{
 		open(name, mode);
-		_endian = ENDIAN_NATIVE;
 	}
-	File(const File& f) : _path(f._path)
+	File(const File& f) : _file(0), _path(f._path), _info(f._info), _endian(f._endian)
 	{
-		_file = 0;
-		_info = f._info;
-		_endian = ENDIAN_NATIVE;
 	}
 	~File()
 	{
