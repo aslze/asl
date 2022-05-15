@@ -72,6 +72,7 @@ protected:
 	bool _sequential;
 	bool _running;
 	AtomicCount _numClients;
+	String _socketError;
 public:
 	SocketServer();
 	~SocketServer();
@@ -96,7 +97,7 @@ public:
 	/**
 	Sets the certificate and private key for the TLS server in PEM format.
 	*/
-	void useCert(const String& cert, const String& key);
+	bool useCert(const String& cert, const String& key);
 #endif
 	/**
 	This function is called in a new thread with each new incoming client connection. Implement it
@@ -119,6 +120,8 @@ public:
 	Returns true if this server started and has not yet stopped or still has clients running
 	*/
 	bool running() const { return _running || _numClients != 0; }
+
+	String socketError() const;
 };
 }
 

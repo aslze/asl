@@ -66,6 +66,7 @@ bool SocketServer::bind(const String& ip, int port)
 		_sockets << server;
 		return true;
 	}
+	_socketError = server.errorMsg();
 	return false;
 }
 
@@ -79,6 +80,7 @@ bool SocketServer::bindTLS(const String& ip, int port)
 		_sockets << server;
 		return true;
 	}
+	_socketError = server.errorMsg();
 	return false;
 }
 #endif
@@ -86,13 +88,14 @@ bool SocketServer::bindTLS(const String& ip, int port)
 bool SocketServer::bindPath(const String& sname)
 {
 #ifndef _WIN32
-	LocalSocket userver;
-	if(userver.bind(sname))
+	LocalSocket server;
+	if(server.bind(sname))
 	{
-		userver.listen(5);
-		_sockets << userver;
+		server.listen(5);
+		_sockets << server;
 		return true;
 	}
+	_socketError = server.errorMsg();
 #endif
 	return false;
 }
@@ -151,19 +154,26 @@ void SocketServer::stop(bool sync)
 	}
 }
 
+String SocketServer::socketError() const
+{
+	return _socketError;
+}
+
 #ifdef ASL_TLS
-void SocketServer::useCert(const String& cert, const String& key)
+bool SocketServer::useCert(const String& cert, const String& key)
 {
 	for (int i = 0; i < _sockets.length(); i++)
 	{
 		if (TlsSocket s = _sockets[i].as<TlsSocket>())
 		{
-			if (!s.useCert(cert))
-				printf("bad cert: %s\n", *cert);
-			if (!s.useKey(key))
-				printf("bad key: %s\n", *key);
+			if (!s.useCert(cert) || !s.useKey(key))
+			{
+				_socketError = s.errorMsg();
+				return false;
+			}
 		}
 	}
+	return true;
 }
 #endif
 

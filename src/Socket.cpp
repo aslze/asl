@@ -55,7 +55,8 @@ enum SocketError
 	SOCKET_BAD_LINE,
 	SOCKET_BAD_RECV,
 	SOCKET_BAD_DATA,
-	SOCKET_BAD_WAIT
+	SOCKET_BAD_WAIT,
+	SOCKET_BAD_BIND
 };
 
 static const char* messages[] = {
@@ -66,7 +67,8 @@ static const char* messages[] = {
 	"SOCKET_BAD_LINE",
 	"SOCKET_BAD_RECV",
 	"SOCKET_BAD_DATA",
-	"SOCKET_BAD_WAIT"
+	"SOCKET_BAD_WAIT",
+	"SOCKET_BAD_BIND"
 };
 
 Sockets& Sockets::operator<<(Socket& s)
@@ -477,11 +479,23 @@ void Socket_::close()
 bool Socket_::bind(const String& name)
 {
 	HostPort hp = parseHostPort(name);
-	return bind(hp.host, hp.port);
+	int port = hp.port;
+	if (port < 0 || port > 65535)
+	{
+		_error = SOCKET_BAD_BIND;
+		return false;
+	}
+	return bind(hp.host, port);
 }
 
 bool Socket_::bind(const String& ip, int port)
 {
+	if (port < 0 || port > 65535)
+	{
+		_error = SOCKET_BAD_BIND;
+		return false;
+	}
+
 	InetAddress here(ip, port);
 	if (here.length() == 0)
 		return false;
