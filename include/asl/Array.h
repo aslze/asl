@@ -90,7 +90,7 @@ public:
 	/**
 	Creates an array of n elements and copies them from the pointer p
 	*/
-	ASL_EXPLICIT Array(const T* p, int n) {alloc(n); for(int i=0; i<n; i++) _a[i]=p[i];}
+	ASL_EXPLICIT Array(const T* p, int n) { alloc(n); for (int i = 0; i < n; i++) _a[i] = p[i]; }
 	/**
 	Creates an array of n elements and gives them the value x
 	*/
@@ -155,7 +155,6 @@ public:
 		T& operator[](int k) {return a[i+k];}
 		const T& operator[](int k) const {return a[i+k];}
 		int length() const {return j-i;}
-		void operator=(const Enumerator& e) {for(int k=0; k<length(); k++) a[i+k] = e[k];}
 	};
 	int r() {return d().rc;}
 	/**
@@ -466,9 +465,7 @@ public:
 			_a[m + i] = p[i];
 		return *this;
 	}
-	// Array& operator<<(const std::initializer_list<T>& b) { append(b); return *this; }
 #endif
-	// Array& operator<<(const Array& b) { append(b); return *this; }
 
 	/**
 	Returns the concatenation of this array and b
@@ -524,17 +521,6 @@ public:
 		return *this;
 	}
 
-/*	/// Adds all elements from array b at the end of the array
-	Array& operator<<(const Array& b)
-	{
-		append(b);
-		return *this;
-	}*/
-	/*
-	Returns a string representation of the array, formed by joining its
-	elements with commas. The elements need to be convertible to String
-	*/
-	///operator String() const;
 	/**
 	Returns a string representation of the array, formed by joining its
 	elements with the given separator string sep; The elements need to be

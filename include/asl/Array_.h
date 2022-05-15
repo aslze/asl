@@ -90,7 +90,6 @@ public:
 		T& operator[](int k) {return a[i+k];}
 		const T& operator[](int k) const {return a[i+k];}
 		int length() const {return j-i;}
-		void operator=(const Enumerator& e) {for(int k=0; k<length(); k++) a[i+k] = e[k];}
 	};
 	/** Returns the number of elements in the array */
 	int length() const {return N;}
