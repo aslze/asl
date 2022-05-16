@@ -43,7 +43,7 @@ __Utilities__:
 __Basic data types__:
 
 - Strings with UTF8 support
-- Dynamic and static arrays
+- Dynamic and static arrays, plus 2D arrays and matrices
 - Maps and hashmaps
 - Date/time
 - 2D, 3D, 4D vectors, 3x3, 4x4 matrices and quaternions
@@ -222,7 +222,7 @@ or enumerate the contents of a directory:
 ```cpp
 Directory dir("some/dir");
 Array<File> files = dir.files("*.txt");
-foreach(File& file, files)
+for(File& file : files)
 {
     String path = file.path();
     Long size = file.size();
