@@ -254,6 +254,9 @@ public:
 	*/
 	int error() const { return _()->_error; }
 
+	/**
+	Returns a string representation of the last socket error
+	*/
 	String errorMsg() const { return _()->errorMsg(); }
 
 	/**

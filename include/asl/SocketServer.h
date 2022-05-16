@@ -121,6 +121,9 @@ public:
 	*/
 	bool running() const { return _running || _numClients != 0; }
 
+	/**
+	Returns a string representation of the last socket error (after a failed bind or use cert...)
+	*/
 	String socketError() const;
 };
 }

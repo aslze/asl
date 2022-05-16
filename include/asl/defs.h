@@ -10,7 +10,7 @@
 Main definitions.
 */
 
-#define ASL_VERSION 11004
+#define ASL_VERSION 11100
 
 #ifdef _WIN32
 #ifndef _CRT_SECURE_NO_DEPRECATE
@@ -257,6 +257,9 @@ public:
 
 	/** Returns a floating point random number with normal distribution with given mean and variance */
 	double normal(double m, double s2) { return m + s2 * normal(); }
+
+	/** Returns a floating point random number with normal distribution with given mean and variance */
+	float normal(float m, float s2) { return m + s2 * (float)normal(); }
 
 	/** Returns true or false given a probability (by default it is 0.5, like flipping a coin) */
 	bool coin(double p = 0.5) { return (*this)(1.0) < p; }

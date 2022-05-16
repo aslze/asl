@@ -123,6 +123,9 @@ public:
 		}
 	}
 
+	/**
+	Returns a copy of this matrix with elements converted to the given type
+	*/
 	template<class T2>
 	Matrix4_<T2> with() const
 	{
@@ -292,8 +295,14 @@ public:
 	*/
 	T det() const;
 
+	/**
+	Returns the matrix Frobenius norm squared
+	*/
 	T normSq() const;
 
+	/**
+	Returns the matrix Frobenius norm
+	*/
 	T norm() const { return sqrt(normSq()); }
 };
 

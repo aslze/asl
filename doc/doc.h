@@ -39,7 +39,7 @@ __Basic data types__:
 - Dynamic and static arrays, including 2D arrays
 - Maps and hashmaps
 - Date/time
-- 2D, 3D, 4D vectors, 3x3, 4x4 matrices and quaternions
+- 2D, 3D, 4D vectors, 3x3, 4x4, nxm matrices and quaternions
 - Variants (similar to JavaScript vars)
 
 # Compilation and use #

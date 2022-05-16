@@ -389,7 +389,9 @@ public:
 	Returns the status code
 	*/
 	int code() const { return _code; }
-
+	/**
+	Returns a string representation of the last socket error
+	*/
 	String socketError() const;
 
 protected:

@@ -9,7 +9,28 @@
 namespace asl {
 
 /**
- * A matrix supporting basic arithmetic operations.
+ * A matrix supporting basic arithmetic operations. With two predefined specializations: `Matrix` for doubles and `Matrixf` for floats.
+ * 
+ * ~~~
+ * Matrix A = {   // this makes a 2x2 matrix
+ *    { 1, -1 },
+ *    { 2, 3 }
+ * };
+ * 
+ * Matrix b = { 5, 1 }; // this makes a column matrix (a vector)
+ * ~~~
+ *
+ * You can operate with matrices:
+ *
+ * ~~~
+ * auto C = A.inverse() * A + b * b.transposed();
+ * ~~~
+ *
+ * And you can solve linear systems:
+ * 
+ * ~~~
+ * auto x = solve(A, b); // solution to linear system A * x = b
+ * ~~~
  */
 template <class T>
 class Matrix_ : public Array2<T>
@@ -19,17 +40,17 @@ public:
 	Matrix_() {}
 
 	/**
-	Creates an array with size rows x cols
+	Creates a matrix with size rows x cols
 	*/
 	ASL_EXPLICIT Matrix_(int rows, int cols = 1) : Array2<T>(rows, cols) {}
 
 	/**
-	Creates an array with size rows x cols and initializes all items with value
+	Creates a matrix with size rows x cols and initializes all items with value
 	*/
 	ASL_EXPLICIT Matrix_(int rows, int cols, const T& value) : Array2<T>(rows, cols, value) {}
 
 	/**
-	Creates an array of rows x cols elements and copies them from the pointer p (row-wise)
+	Creates a matrix of rows x cols elements and copies them from the pointer p (row-wise)
 	*/
 	ASL_EXPLICIT Matrix_(int rows, int cols, const T* p) : Array2<T>(rows, cols, p) {}
 
@@ -39,15 +60,18 @@ public:
 
 #ifdef ASL_HAVE_INITLIST
 	/**
-	Creates an array with size rows x cols and the given elements
+	Creates a matrix with size rows x cols and the given elements
 	*/
 	ASL_EXPLICIT Matrix_(int rows, int cols, std::initializer_list<T> a) : Array2<T>(rows, cols, a) {}
 
 	/**
-	Creates an array with given list of lists of elements
+	Creates a matrix with given list of lists of elements
 	*/
 	Matrix_(std::initializer_list<std::initializer_list<T> > a) : Array2<T>(a) {}
 
+	/**
+	Creates a column matrix with given list of elements
+	*/
 	Matrix_(std::initializer_list<T> a) : Array2<T>((int)a.size(), 1, a) {}
 #endif
 
@@ -75,6 +99,9 @@ public:
 
 	int length() const { return this->_a.length(); }
 
+	/**
+	Returns an identity matrix of the given size
+	*/
 	static Matrix_ identity(int n)
 	{
 		Matrix_ I(n, n);
@@ -90,9 +117,8 @@ public:
 			swap((*this)(i1, j), (*this)(i2, j));
 	}
 
-
 	/**
-	Creates a copy of this array with items converted to type K
+	Returns a copy of this matrix with elements converted to the given type
 	*/
 	template<class K>
 	Matrix_<K> with() const
@@ -101,7 +127,7 @@ public:
 	}
 
 	/**
-	Returns an independent copy of this array
+	Returns an independent copy of this matrix
 	*/
 	Matrix_ clone() const
 	{
@@ -227,6 +253,9 @@ public:
 		return c;
 	}
 
+	/**
+	 * Adds a matrix to this
+	 */
 	void operator+=(const Matrix_& b)
 	{
 		Matrix_& a = *this;
@@ -237,6 +266,9 @@ public:
 				a(i, j) += b(i, j);
 	}
 
+	/**
+	 * Subtracts a matrix from this
+	 */
 	void operator-=(const Matrix_& b)
 	{
 		Matrix_& a = *this;
@@ -247,6 +279,9 @@ public:
 				a(i, j) -= b(i, j);
 	}
 
+	/**
+	 * Multiplies this matrix by a scalar
+	 */
 	void operator*=(T s)
 	{
 		Matrix_& a = *this;
@@ -263,6 +298,9 @@ public:
 				a(i, j) = -a(i, j);
 	}
 
+	/**
+	 * Returns this matrix negated (multiplied by -1)
+	 */
 	Matrix_ operator-() const
 	{
 		const Matrix_& a = *this;
@@ -273,6 +311,9 @@ public:
 		return c;
 	}
 
+	/**
+	Returns the matrix Frobenius norm squared
+	*/
 	T normSq() const
 	{
 		T s = 0;
@@ -283,6 +324,9 @@ public:
 		return s;
 	}
 
+	/**
+	Returns the matrix Frobenius norm
+	*/
 	T norm() const { return sqrt(normSq()); }
 
 	friend Matrix_ operator*(T s, const Matrix_& b) { return b * s; }
