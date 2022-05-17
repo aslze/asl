@@ -445,9 +445,9 @@ TextFile("image.jpg.b64").put( encodeBase64(File("image.jpg").content()) );
 */
 
 /**
-\defgroup Math3D 3D Math
+\defgroup Math3D Math
 
-Types useful in 2D/3D geometric computations and graphics.
+Classes and functions for math, including types useful in 2D/3D geometric computations and graphics.
 
 These classes are templates that can be used with elements of any numeric type.
 
@@ -464,6 +464,7 @@ Vec3 v;   // Vec3_<float>
 Matrix4;  // Matrix4_<float>
 Vec3d v;  // Vec3_<double>
 Matrix3d; // Matrix3_<double>
+Matrixd;  // Matrix_<double>
 ~~~
 
 */
@@ -505,7 +506,7 @@ socket << *buffer;                                 // send it all at once
 ~~~
 
 ~~~
-Array<byte> data(12);
+ByteArray data(12);
 socket.read(data.ptr(), 12);                       // read 12 bytes into a buffer
 StreamBufferReader reader(ENDIAN_BIG);
 int32_t x, y;
@@ -555,13 +556,13 @@ class Cat : public Animal {...}; // implements virtual functions from class Anim
 ASL_EXPORT_CLASS_AS(Cat, Animal)
 ~~~
 
-And a program can load it at runtime and intantiate the exported class `Cat`, with the name `Animal`.
+And a program can load it at runtime and instantiate the exported class `Cat`, with the name `"Animal"`.
 
 ~~~
 #include "Animal.h"
 
 Library lib("plugins/cat"); // Loads "cat.dll" on Widows or "libcat.so" on Linux
-Animal* cat = lib.create("Animal");
+Animal* cat = (Animal*) lib.create("Animal");
 cat->speak();
 ~~~
 

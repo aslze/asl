@@ -31,6 +31,8 @@ namespace asl {
  * ~~~
  * auto x = solve(A, b); // solution to linear system A * x = b
  * ~~~
+ * 
+ * \ingroup Math3D
  */
 template <class T>
 class Matrix_ : public Array2<T>
@@ -342,6 +344,7 @@ Matrix_<T> solve_(Matrix_<T>& A, Matrix_<T>& b);
 /**
  * Solves the matrix equation A*x=b and returns x; if b is a matrix (not a column) then the equation is solved
  * for each of b's columns and solutions returned as the columns of the returned matrix.
+ * \ingroup Math3D
  */
 template<class T>
 Matrix_<T> solve(const Matrix_<T>& A, const Matrix_<T>& b)
@@ -413,6 +416,22 @@ Matrix_<T> solve_(Matrix_<T>& A_, Matrix_<T>& b_)
 * Solves a system of equations F(x)=[0], given by functor f, which returns a vector of function values for an input vector x;
 * and using x0 as initial guess. If there are more equations than unknowns (f larger than x0) then a least-squares solution is
 * attempted.
+* 
+* Example:
+* 
+* Solve for (x, y) in:
+* -   (x-1)<sup>2</sup> + (y-1)<sup>2</sup> - 1 = 0
+* -   sin(x) + sin(y) - x = 0
+* 
+* ~~~
+* auto x = solveZero([](const Matrixd& x) {  // unknowns are x[0], x[1]
+* 	return Matrixd{
+* 		sqr(x[0] - 1) + sqr(x[1] - 1) - 1,
+* 		sin(x[0]) + sin(x[1]) - x[0]
+* 	};
+* }, { 0.0, 0.0 });  // initial estimation
+* ~~~
+* \ingroup Math3D
 */
 template <class T, class F>
 Matrix_<T> solveZero(F f, const Matrix_<T>& x0)

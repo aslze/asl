@@ -171,6 +171,21 @@ Xml html = Xml("html")
 	);
 ~~~
 
+Or in newer compilers (with initializer lists):
+
+~~~
+Xml html = Xml("html", {
+	Xml("head", {
+		Xml("meta", {{"charset", "utf8"}}),
+		Xml("meta", {{"name", "author"}, {"content", "John Doe"}})
+	}),
+	Xml("body", {
+		Xml("h1", "Hello"),
+		Xml("p", {{"class", "main"}}, "world")
+	})
+});
+~~~
+
 And the original XML formatted document can be written with the Xml::encode() function:
 
 ~~~
