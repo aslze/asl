@@ -1,6 +1,4 @@
-#undef __STRICT_ANSI__
 #include <asl/TextFile.h>
-#include <asl/Directory.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -8,7 +6,6 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <io.h>
-#define fdopen _fdopen
 #define dup _dup
 #else
 #include <sys/stat.h>
@@ -28,13 +25,6 @@ namespace asl {
 #define fopenX fopen
 #define CHART char
 #endif
-
-bool TextFile::openfd(int fd)
-{
-	int fd2 = dup(fd);
-	_file = fdopen(fd2, "wt");
-	return _file != 0;
-}
 
 bool TextFile::printf(const char* fmt, ...)
 {

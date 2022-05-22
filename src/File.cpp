@@ -1,4 +1,3 @@
-#undef __STRICT_ANSI__
 #include <asl/File.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,7 +15,6 @@
 #define WIN32_FIND_DATA WIN32_FIND_DATAW
 #define FindFirstFile FindFirstFileW
 #endif
-#define fdopen _fdopen
 #define dup _dup
 #else
 #include <sys/stat.h>
@@ -133,13 +131,6 @@ bool File::open(const String& name, File::OpenMode mode)
 
 	_path = name;
 
-	return _file != 0;
-}
-
-bool File::openfd(int fd)
-{
-	int fd2 = dup(fd);
-	_file = fdopen(fd2, "wb");
 	return _file != 0;
 }
 

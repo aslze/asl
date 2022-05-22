@@ -20,7 +20,6 @@ set( ASL_SRC
 	Path.cpp
 	Date.cpp
 	Process.cpp
-	#Matrix4.cpp
 	Console.cpp
 	Log.cpp
 	TabularDataFile.cpp
@@ -42,6 +41,7 @@ set( ASL_SRC
 	../include/asl/Vec3.h
 	../include/asl/Vec4.h
 	../include/asl/Quaternion.h
+	../include/asl/Matrix.h
 	../include/asl/Matrix3.h
 	../include/asl/Matrix4.h
 	../include/asl/Pose.h

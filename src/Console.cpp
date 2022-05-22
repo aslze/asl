@@ -1,4 +1,3 @@
-#undef __STRICT_ANSI__
 #include <asl/Console.h>
 #include <asl/defs.h>
 

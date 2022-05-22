@@ -194,7 +194,6 @@ public:
 	{
 		return open(_path, mode);
 	}
-	bool openfd(int fd);
 	/**
 	Closes the file
 	*/

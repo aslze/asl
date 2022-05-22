@@ -62,7 +62,6 @@ public:
 	{
 		return open(_path, mode);
 	}
-	bool openfd(int fd);
 
 	/** Prints formatted text as with the regular printf. Returns false on failure */
 	bool printf(const char* fmt, ...);
