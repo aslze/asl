@@ -102,6 +102,7 @@ String& IniFile::operator[](const String& name)
 	{
 		String sec = name.substring(0, slash);
 		Section& section = _sections[sec];
+		if (!section._title.ok())
 		section._title = sec;
 		return section[name.substring(slash+1)];
 	}
@@ -121,7 +122,7 @@ const String IniFile::operator[](const String& name) const
 			return String();
 		Section& section = _sections[sec];
 		sec = name.substring(slash + 1);
-		return section.has(name) ? section[name] : String();
+		return section.has(sec) ? section[sec] : String();
 	}
 }
 

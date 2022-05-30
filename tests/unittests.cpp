@@ -72,6 +72,12 @@ ASL_TEST(IniFile)
 		ASL_ASSERT(file["sec1/field1"] == "value1");
 		ASL_ASSERT(file["sec1/field2"] == "value2");
 		ASL_ASSERT(file["sec2/field"] == "value3");
+		ASL_ASSERT(file.has("sec2/field"));
+		ASL_ASSERT(file("sec1/field1", "none") == "value1");
+		ASL_ASSERT(file("sec1/field9", "none") == "none");
+
+		file.section("sec2");
+		ASL_ASSERT(file["field"] == "value3");
 		
 		ASL_ASSERT(file.arraysize("list") == 2);
 		ASL_ASSERT(file.array("x", 0) == "7");
