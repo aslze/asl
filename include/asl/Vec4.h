@@ -64,6 +64,7 @@ class Vec4_
 	Vec4_ operator*(T r) const {return Vec4_(x*r, y*r, z*r, w*r);}
 	/** Returns this vector multiplied by scalar `r` */
 	friend Vec4_ operator*(T r, const Vec4_& b) {return b*r;}
+	/** Returns this vector divided by scalar `r` */
 	Vec4_ operator/(T r) const {T t=1/r; return Vec4_(t*x, t*y, t*z, t*w);}
 	/** Returns a vector that is a component-wise product of this vector and `b` */
 	Vec4_ operator%(const Vec4_& b) const {return Vec4_(x*b.x, y*b.y, z*b.z, w*b.w);}

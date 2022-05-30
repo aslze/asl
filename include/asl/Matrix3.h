@@ -54,7 +54,7 @@ public:
 	/**
 	Constructs a matrix from elements pointed by m, row-major (default) or column-major
 	*/
-	Matrix3_(const T* m, bool colmajor = false)
+	ASL_EXPLICIT Matrix3_(const T* m, bool colmajor = false)
 	{
 		if (colmajor)
 		{

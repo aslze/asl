@@ -75,6 +75,8 @@ class Vec2_
 	T operator^(const Vec2_& b) const {return x*b.y-y*b.x;}
 	/** Returns this vector divided by scalar `r` */
 	Vec2_ operator/(T r) const {T q=1/r; return Vec2_(x*q, y*q);}
+	/** Returns a vector that is a component-wise product of this vector and `b` */
+	Vec2_ operator%(const Vec2_& b) const { return Vec2_(x * b.x, y * b.y); }
 	/** Compares this vector and `b` (warning: test equality of floats with care) */
 	bool operator==(const Vec2_& b) const {return x==b.x && y==b.y;}
 	/** Compares this vector and `b` (warning: test equality of floats with care) */

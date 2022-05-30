@@ -36,6 +36,12 @@ ASL_TEST(Matrix4)
 	Matrix4d mrot = Matrix4d::rotate(Vec3d(1, 0.5f, -1.25f), 0.25f);
 	Quaterniond q2 = mrot.rotation();
 
+	Vec3d rv1 = mrot.axisAngle();
+	Vec3d rv2 = mrot.rotation().axisAngle();
+	ASL_APPROX(rv1, rv2, EPS);
+	Matrix4d mrot2 = Matrix4d::rotate(rv1);
+	ASL_APPROX(mrot, mrot2, EPS);
+
 	ASL_APPROX(q1, q2, EPS);
 	ASL_APPROX(q1.matrix(), mrot, EPS);
 	ASL_APPROX(q1.matrix(), q2.matrix(), EPS);

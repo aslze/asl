@@ -87,6 +87,7 @@ class Vec3_
 	Vec3_ operator*(T r) const {return Vec3_(x*r, y*r, z*r);}
 	/** Returns this vector multiplied by scalar `r` */
 	friend Vec3_ operator*(T r, const Vec3_& b) {return b*r;}
+	/** Returns this vector divided by scalar `r` */
 	Vec3_ operator/(T r) const {T t=(T)1/r; return Vec3_(t*x, t*y, t*z);}
 	/** Returns a vector that is a component-wise product of this vector and `b` */
 	Vec3_ operator%(const Vec3_& b) const {return Vec3_(x*b.x, y*b.y, z*b.z);}

@@ -105,7 +105,7 @@ public:
 	/**
 	Constructs a matrix from elements pointed by m, row-major (default) or column-major
 	*/
-	Matrix4_(const T* m, bool colmajor = false)
+	ASL_EXPLICIT Matrix4_(const T* m, bool colmajor = false)
 	{
 		if (colmajor)
 		{
@@ -272,6 +272,11 @@ public:
 	Returns the *rotation* part of this matrix as a Quaternion
 	*/
 	Quaternion_<T> rotation() const;
+
+	/**
+	Returns the *rotation* part of this matrix as a rotation vector (axis-angle representation)
+	*/
+	Vec3_<T> axisAngle() const;
 
 	/**
 	Returns the i-th column's top 3 elements as a Vec3
@@ -596,6 +601,12 @@ Quaternion_<T> Matrix4_<T>::rotation() const
 		s = (T)0.5 / r;
 		return Quaternion_<T>((at(2, 1) - at(1, 2)) * s, (T)0.5 * r, (at(0, 1) + at(1, 0)) * s, (at(2, 0) + at(0, 2)) * s);
 	}
+}
+
+template<class T>
+inline Vec3_<T> Matrix4_<T>::axisAngle() const
+{
+	return rotation().axisAngle();
 }
 
 template<class T>
