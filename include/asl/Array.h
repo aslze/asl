@@ -550,6 +550,19 @@ public:
 		return b;
 	}
 	/**
+	Returns an array containing the items in this array satisfying a condition
+	*/
+	template<class F>
+	Array filter(F f) const
+	{
+		Array b;
+		b.reserve(length());
+		for (int i = 0; i < length(); i++)
+			if(f(_a[i]))
+				b << _a[i];
+		return b;
+	}
+	/**
 	Removes items that meet a predicate
 	*/
 	template<class F>
