@@ -22,15 +22,14 @@
 
 #define ASL_STR_SPACE 16
 
-#ifdef QSTRING_H
- #if defined(ASL_ANSI)
-  #define QTFROM fromLocal8Bit
-  #define QTTO toLocal8Bit
+#ifdef ASL_ANSI
+ #define ASL_QTFROM fromLocal8Bit
+ #define ASL_QTTO toLocal8Bit
  #else
-  #define QTFROM fromUtf8
-  #define QTTO toUtf8
+ #define ASL_QTFROM fromUtf8
+ #define ASL_QTTO toUtf8
  #endif
-#else
+#ifndef QSTRING_H
 class QString;
 #endif
 
@@ -183,13 +182,6 @@ public:
 		memcpy(str(), txt.ptr(), n);
 		str()[n] = '\0';
 	}
-	template<class T>
-	String(const Array<T>& txt)
-	{
-		String s = txt.join(",");
-		init(s._len);
-		memcpy(str(), s.str(), _len + 1);
-	}
 	/**
 	Constructs a string from a character
 	*/
@@ -286,18 +278,18 @@ public:
 #if defined(QSTRING_H) && defined(ASL_STATIC)
 	String(const QString& s)
 	{
-		QByteArray a = s.QTTO();
+		QByteArray a = s.ASL_QTTO();
 		init(a.size());
 		memcpy(str(), a.data(), _len+1);
 	}
 	void operator=(const QString& s)
 	{
-		QByteArray a = s.QTTO();
+		QByteArray a = s.ASL_QTTO();
 		assign(a.data(), a.size());
 	}
 	operator QString() const
 	{
-		return QString::QTFROM(str());
+		return QString::ASL_QTFROM(str());
 	}
 #endif
 	/**
