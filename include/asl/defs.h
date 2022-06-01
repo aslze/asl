@@ -125,7 +125,9 @@ Check that the argument is true.
 #elif defined(__GNUC__) && ASL_C_VER < 40503
 #define ASL_DEPRECATED(x, m) x __attribute__((deprecated))
 #else
-#define ASL_DEPRECATED(x, m) x __attribute__((deprecated(m)))
+#define ASL_DEPRECATED(x, m) x 
+								//__attribute__((deprecated(m)))
+								// temporarily off due to issues on gcc
 #endif
 
 
