@@ -12,8 +12,16 @@ found in the LICENSE file of pybind11
 
 #pragma once
 
-NAMESPACE_BEGIN(PYBIND11_NAMESPACE)
-NAMESPACE_BEGIN(detail)
+#ifdef PYBIND11_NAMESPACE_BEGIN
+#define PY11_NAMESPACE_BEGIN PYBIND11_NAMESPACE_BEGIN
+#define PY11_NAMESPACE_END PYBIND11_NAMESPACE_END
+#else
+#define PY11_NAMESPACE_BEGIN NAMESPACE_BEGIN
+#define PY11_NAMESPACE_END NAMESPACE_END
+#endif
+
+PY11_NAMESPACE_BEGIN(PYBIND11_NAMESPACE)
+PY11_NAMESPACE_BEGIN(detail)
 
 template <typename Type, typename Key, typename Value>
 struct asl_map_caster
@@ -219,5 +227,5 @@ private:
 template<>
 struct type_caster<asl::String> : asl_string_caster {};
 
-NAMESPACE_END(detail)
-NAMESPACE_END(PYBIND11_NAMESPACE)
+PY11_NAMESPACE_END(detail)
+PY11_NAMESPACE_END(PYBIND11_NAMESPACE)
