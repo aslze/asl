@@ -70,6 +70,33 @@ public:
 		}
 	}
 
+	template<class T2>
+	Matrix3_(const Matrix3_<T2>& m)
+	{
+		a[0][0] = (T)m(0, 0); a[0][1] = (T)m(0, 1); a[0][2] = (T)m(0, 2);
+		a[1][0] = (T)m(1, 0); a[1][1] = (T)m(1, 1); a[1][2] = (T)m(1, 2);
+		a[2][0] = (T)m(2, 0); a[2][1] = (T)m(2, 1); a[2][2] = (T)m(2, 2);
+	}
+
+	/**
+	Returns a copy of this matrix with elements converted to the given type
+	*/
+	template<class T2>
+	Matrix3_<T2> with() const
+	{
+		return Matrix3_<T2>(*this);
+	}
+
+	/**
+	Returns this matrix transposed
+	*/
+	Matrix3_ t() const {
+		return Matrix3_(
+			a[0][0], a[1][0], a[2][0],
+			a[0][1], a[1][1], a[2][1],
+			a[0][2], a[1][2], a[2][2]);
+	}
+
 	/** Returns the element at row `i`, column `j`. */
 	T& operator()(int i, int j) {return a[i][j];}
 	T operator()(int i, int j) const {return a[i][j];}
