@@ -438,14 +438,24 @@ Matrix_<T> solveZero(F f, const Matrix_<T>& x0)
 {
 	T dx = sizeof(T) == sizeof(float) ? T(1e-5) : T(1e-6);
 	Matrix_<T> x = x0.clone();
-	int nf = f(x).rows();
+	int nf = f(x).rows(), nb = 0;
 	bool ls = nf > x.rows();
 	Matrix_<T> J(nf, x.rows());
+	T r = 0, r0 = (T)1e20;
 	for (int it = 0; it < 50; it++)
 	{
 		Matrix_<T> f1 = f(x);
-		if (f1.norm() < 0.0001f)
+		r = f1.norm();
+		if (r > r0)
+			nb++;
+		else
+			nb = 0;
+		if (r < 0.0001f || nb > 3)
+		{
+			//printf("exit %i\n", it);
 			break;
+		}
+		r0 = r;
 
 		for (int j = 0; j < J.cols(); j++)
 		{
