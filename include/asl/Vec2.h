@@ -17,12 +17,12 @@ This class allows operating with vectors as with primitive types via operators.
 ~~~
 Vec2 a (10, 10);
 Vec2 b (-5, 1.5);
-Vec2 c = -a.rotate(PI/4) + 2.0 * (b - a).normalized();
+Vec2 c = -a.rotate(PI/4) + 2.0f * (b - a).normalized();
 ~~~
 
 The angle between two vectors can be computed with:
 ~~~
-T angle = acos(a/!a * b/!b);
+T angle = acos(a.normalized() * b.normalized());
 ~~~
 \ingroup Math3D
 */
@@ -34,6 +34,7 @@ class Vec2_
 	/** Constructs a vector with the given (x, y) coordinates */
 	Vec2_(T x, T y): x(x), y(y) {}
 	Vec2_(const Vec2_& v): x(v.x), y(v.y) {}
+	static Vec2_ zeros() { return Vec2_(0, 0); }
 	template<class T2>
 	Vec2_<T2> with() const
 	{
@@ -89,6 +90,8 @@ class Vec2_
 	void operator*=(T r) {x *= r; y *= r;}
 	/** Divides this vector by scalar `r` */
 	void operator/=(T r) {x /= r; y /= r;}
+	/** Multiplies this vector by another, component-wise */
+	void operator%=(const Vec2_& b) { x *= b.x; y *= b.y; }
 	/** Returns this vector negated */
 	Vec2_ operator-() const {return Vec2_(-x, -y);}
  public:

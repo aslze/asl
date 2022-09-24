@@ -17,6 +17,7 @@ using namespace asl;
 ASL_TEST(Vec3)
 {
 	Vec3 a(1, 2.5f, 3), b(1, 0, 0);
+	a += Vec3::zeros();
 	ASL_APPROX(a*b, 1.0f, EPS);
 
 	Vec3d a2 = a, b2 = b;

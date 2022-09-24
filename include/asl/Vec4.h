@@ -30,6 +30,7 @@ class Vec4_
 	Vec4_(const Vec3_<T>& v, T w) : x(v.x), y(v.y), z(v.z), w(w) {}
 	Vec4_(const Vec4_& v): x(v.x), y(v.y), z(v.z), w(v.w) {}
 	Vec4_(const T* v) : x(v[0]), y(v[1]), z(v[2]), w(v[3]) {}
+	static Vec4_ zeros() { return Vec4_(0, 0, 0, 0); }
 	template<class T2>
 	Vec4_<T2> with() const
 	{
@@ -80,6 +81,8 @@ class Vec4_
 	void operator*=(T r) {x *= r; y *= r; z *= r; w *= r;}
 	/** Divides this vector by scalar `r` */
 	void operator/=(T r) {T t=1/r; x *= t; y *= t; z *= t; w *= t;}
+	/** Multiplies this vector by another, component-wise */
+	void operator%=(const Vec4_& b) { x *= b.x; y *= b.y; z *= b.z; w *= b.w; }
 	/** Returns this vector negated */
 	Vec4_ operator-() const {return Vec4_(-x,-y,-z, -w);}
 
