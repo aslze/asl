@@ -348,6 +348,10 @@ class ASL_API Var
 	void operator=(const Array<T>& x);
 	template<class T>
 	void operator=(const HDic<T>& x);
+#ifdef ASL_HAVE_INITLIST
+	template<class T>
+	void operator=(const std::initializer_list<T>& x) { *this = Var(x); }
+#endif
 	/** Appends `x` to this var if this var is an array (useful for Var construction) */
 	Var& operator,(const Var& x) {return (*this) << (Var)x;}
 	/** Appends `x` to this var if this var is an array */

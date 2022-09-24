@@ -530,6 +530,9 @@ ASL_TEST(Var)
 
 	ASL_ASSERT(v4a.isArrayOf(2, Var::STRING));
 	ASL_ASSERT(v4b.is(Var::OBJ) && v4b["x"] == "y");
+
+	v3["ab"] = { true, false, true };
+	ASL_ASSERT(v3["ab"].isArrayOf(3, Var::BOOL));
 #endif
 
 #ifdef ASL_HAVE_RANGEFOR
