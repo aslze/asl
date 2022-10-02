@@ -1,16 +1,21 @@
 /*
-Copyright (c) 1999-2020 aslze
-Transparent conversion for some ASL types to/from Python in pybind11
+Copyright (c) 1999-2022 aslze
+Transparent conversion for some ASL types to/from Python with pybind11
 Based on code from pybind11:
 Copyright (c) 2016 Wenzel Jakob <wenzel.jakob@epfl.ch>
 All rights reserved. Use of this source code is governed by a BSD-style license,
 found in the LICENSE file of pybind11
 */
 
-// Currently supported:
+
+// Currently supported classes:
 // String, Array<>, Map<>, Dic<>, Array_<>, Vec2, Vec3, Vec4
+// NOTE: String and Array are always supported. Bindings for the other types only added if they are included before this header!
+// Include <pyind11/pybind11.h> or <pyind11/embed.h> before including this file
 
 #pragma once
+
+#include <asl/String.h>
 
 #ifdef PYBIND11_NAMESPACE_BEGIN
 #define PY11_NAMESPACE_BEGIN PYBIND11_NAMESPACE_BEGIN
@@ -22,6 +27,14 @@ found in the LICENSE file of pybind11
 
 PY11_NAMESPACE_BEGIN(PYBIND11_NAMESPACE)
 PY11_NAMESPACE_BEGIN(detail)
+
+template <typename T, typename U>
+using aforwarded_type = conditional_t<std::is_lvalue_reference<T>::value, remove_reference_t<U>&, remove_reference_t<U>&&>;
+
+template <typename T, typename U>
+aforwarded_type<T, U> aforward_like(U&& u) {
+	return std::forward<detail::aforwarded_type<T, U>>(std::forward<U>(u));
+}
 
 template <typename Type, typename Key, typename Value>
 struct asl_map_caster
@@ -54,8 +67,8 @@ struct asl_map_caster
 			policy_value = return_value_policy_override<Value>::policy(policy_value);
 		}
 		for (auto && kv : src) {
-			auto key = reinterpret_steal<object>(key_conv::cast(forward_like<T>(kv.key), policy_key, parent));
-			auto value = reinterpret_steal<object>(value_conv::cast(forward_like<T>(kv.value), policy_value, parent));
+			auto key = reinterpret_steal<object>(key_conv::cast(aforward_like<T>(kv.key), policy_key, parent));
+			auto value = reinterpret_steal<object>(value_conv::cast(aforward_like<T>(kv.value), policy_value, parent));
 			if (!key || !value)
 				return handle();
 			d[key] = value;
@@ -101,7 +114,7 @@ template <typename Type, typename Value> struct asl_list_caster
 		list l(src.length());
 		size_t i = 0;
 		for(auto && value : src) {
-			auto value_ = reinterpret_steal<object>(value_conv::cast(forward_like<T>(value), policy, parent));
+			auto value_ = reinterpret_steal<object>(value_conv::cast(aforward_like<T>(value), policy, parent));
 			if (!value_)
 				return handle();
 			PyList_SET_ITEM(l.ptr(), (ssize_t) i++, value_.release().ptr());
@@ -140,7 +153,7 @@ struct asl_array_caster
 		list l(Size);
 		const Value* ptr = (const Value*)src;
 		for(int i = 0; i < Size; i++) {
-			auto value_ = reinterpret_steal<object>(value_conv::cast(forward_like<T>(ptr[i]), policy, parent));
+			auto value_ = reinterpret_steal<object>(value_conv::cast(aforward_like<T>(ptr[i]), policy, parent));
 			if (!value_)
 				return handle();
 			PyList_SET_ITEM(l.ptr(), (ssize_t) i, value_.release().ptr());
