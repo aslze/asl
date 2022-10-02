@@ -43,11 +43,12 @@ __Utilities__:
 __Basic data types__:
 
 - Strings with UTF8 support
-- Dynamic and static arrays, plus 2D arrays and matrices
+- Dynamic and static arrays, plus 2-D arrays
 - Maps and hashmaps
 - Date/time
-- 2D, 3D, 4D vectors, 3x3, 4x4 matrices and quaternions
+- 2D, 3D, 4D vectors, 3x3, 4x4 matrices, MxN matrices and quaternions
 - Variants (similar to JavaScript vars)
+- Python bindings of some of these via pybind11
 
 ## Features by example
 
@@ -58,7 +59,7 @@ Get command line options (suppose we run `program.exe -iterations 10`):
 
 ```cpp
 CmdArgs args(argc, argv);
-int iterations = args["iterations"];
+int iterations = args["iterations"] | 10;  // default to 10 if no parameter given
 ```
 
 Read or write a configuration INI file ("config.ini" contains this):
@@ -70,7 +71,7 @@ threshold=0.25
 
 ```cpp
 IniFile config("config.ini");
-float threshold = config["parameters/threshold"];
+float threshold = config["parameters/threshold"] | 0.2;
 config["parameters/threshold"] = 0.5;
 ```
 
@@ -93,11 +94,11 @@ struct TimeServer : public HttpServer
     {
         if(req.is("GET", "/time")
         {
-            resp.put(Var("time", Date::now().toString()));
+            resp.put(Var{{"time", Date::now().toString()}});
         }
         else
         {
-            resp.put(Var("status", "error"));
+            resp.put(Var{{"status", "error"}});
             resp.setCode(500);
         }
     }
@@ -141,7 +142,11 @@ int number = data["age"];
 Write JSON:
 
 ```cpp
-Var particle = Var("name", "proton")("mass", 1.67e-27)("position", array<Var>(x, y, z));
+Var particle = Var{
+    {"name", "proton"},
+    {"mass", 1.67e-27},
+    {"position", {x, y, z}}
+};
 String json = Json::encode(particle);
 ```
 
@@ -221,8 +226,7 @@ or enumerate the contents of a directory:
 
 ```cpp
 Directory dir("some/dir");
-Array<File> files = dir.files("*.txt");
-for(File& file : files)
+for(File& file : dir.files("*.txt"))
 {
     String path = file.path();
     Long size = file.size();
@@ -288,15 +292,24 @@ the imported targets, `asl` for the dynamic version or `asls` for the static ver
 as you don't need to copy or distribute a DLL at runtime.
 
 ```cmake
-find_package( ASL REQUIRED )
+find_package(ASL REQUIRED)
 
-target_link_libraries( my_application asls ) # for the static version, or
+target_link_libraries(my_application asls) # for the static version, or
 
-target_link_libraries( my_application asl )  # for the dynamic library
+target_link_libraries(my_application asl)  # for the dynamic library
 ```
 
 There is no need to provide the library directory or set *include_directories*. `find_package` will
 find the library compatible with the current project among the versions compiled.
+
+With CMmake 3.14+, instead of using `find_package()`, you can download and build the library automatically as a subproject (and then link with it as before):
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.1.zip)
+FetchContent_MakeAvailable(asl)
+```
+
 
 Remember that all header files have the `asl/` prefix directory and are named like the class they define
 (case-sensitively), and that all symbols are in the `asl` namespace. So, for example, to use the `Directory` class:
@@ -321,6 +334,5 @@ sudo apt-get install libmbedtls-dev
 
 On FreeBSD use:
 
-```
-pkg install mbedtls
-```
+``` pkg install mbedtls ```
+
