@@ -32,7 +32,7 @@ Main definitions.
 #include <cmath>
 namespace asl {
 	using std::cos; using std::sin; using std::tan; using std::floor; using std::sqrt; using std::pow; using std::acos;
-	using std::fmod; using std::exp;
+	using std::fmod; using std::exp; using std::log;
 }
 #else
 #include <math.h>
@@ -257,11 +257,11 @@ public:
 	/** Returns a floating point random number with standard normal distribution */
 	double normal() { double u = (*this)(1e-30, 1.0), v = (*this)(1e-30, 1.0); return sqrt(-2 * log(u))*cos(2 * PI * v); }
 
-	/** Returns a floating point random number with normal distribution with given mean and variance */
-	double normal(double m, double s2) { return m + s2 * normal(); }
+	/** Returns a floating point random number with normal distribution with given mean and standard deviation */
+	double normal(double m, double s) { return m + s * normal(); }
 
-	/** Returns a floating point random number with normal distribution with given mean and variance */
-	float normal(float m, float s2) { return m + s2 * (float)normal(); }
+	/** Returns a floating point random number with normal distribution with given mean and standard deviation */
+	float normal(float m, float s) { return m + s * (float)normal(); }
 
 	/** Returns true or false given a probability (by default it is 0.5, like flipping a coin) */
 	bool coin(double p = 0.5) { return (*this)(1.0) < p; }
