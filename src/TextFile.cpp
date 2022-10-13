@@ -28,7 +28,7 @@ namespace asl {
 
 bool TextFile::printf(const char* fmt, ...)
 {
-	if(!_file && !open(_path, APPEND))
+	if(!_file && !open(_path, WRITE))
 		return false;
 	va_list arg;
 	va_start(arg,fmt);
@@ -251,7 +251,7 @@ TextFile& TextFile::operator>>(String &x)
 
 TextFile& TextFile::operator<<(char x)
 {
-	if(!_file && !open(_path, APPEND))
+	if(!_file && !open(_path, WRITE))
 		return *this;
 	putc(x, _file);
 	return *this;
@@ -259,7 +259,7 @@ TextFile& TextFile::operator<<(char x)
 
 TextFile& TextFile::operator<<(byte x)
 {
-	if(!_file && !open(_path, APPEND))
+	if(!_file && !open(_path, WRITE))
 		return *this;
 	putc(x, _file);
 	return *this;
@@ -267,7 +267,7 @@ TextFile& TextFile::operator<<(byte x)
 
 TextFile& TextFile::operator<<(int x)
 {
-	if(!_file && !open(_path, APPEND))
+	if(!_file && !open(_path, WRITE))
 		return *this;
 	fprintf(_file, "%i", x);
 	return *this;
@@ -275,7 +275,7 @@ TextFile& TextFile::operator<<(int x)
 
 TextFile& TextFile::operator<<(unsigned x)
 {
-	if(!_file && !open(_path, APPEND))
+	if(!_file && !open(_path, WRITE))
 		return *this;
 	fprintf(_file, "%ui", x);
 	return *this;
@@ -283,7 +283,7 @@ TextFile& TextFile::operator<<(unsigned x)
 
 TextFile& TextFile::operator<<(float x)
 {
-	if(!_file && !open(_path, APPEND))
+	if(!_file && !open(_path, WRITE))
 		return *this;
 	fprintf(_file, "%.8g", x);
 	return *this;
@@ -291,7 +291,7 @@ TextFile& TextFile::operator<<(float x)
 
 TextFile& TextFile::operator<<(double x)
 {
-	if(!_file && !open(_path, APPEND))
+	if(!_file && !open(_path, WRITE))
 		return *this;
 	fprintf(_file, "%.16lg", x);
 	return *this;
@@ -299,7 +299,7 @@ TextFile& TextFile::operator<<(double x)
 
 TextFile& TextFile::operator<<(const String& x)
 {
-	if(!_file && !open(_path, APPEND))
+	if(!_file && !open(_path, WRITE))
 		return *this;
 	fprintf(_file, "%s", (const char*)x);
 	return *this;
