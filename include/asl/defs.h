@@ -185,6 +185,9 @@ inline T clamp(T x, C a, C b) { const T t = x < a ? a : x; return t > b ? b : t;
 template <class T>
 inline T deg2rad(T x) {return (T)(x*0.017453292519943295);}
 
+/** Exceptionally treat ints as doubles so you can *safely* use deg2rad(45) */
+inline double deg2rad(int x) { return deg2rad(double(x)); }
+
 /** Returns `x` radians converted to degrees */
 template <class T>
 inline T rad2deg(T x) {return (T)(x*57.29577951308232);}
