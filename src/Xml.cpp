@@ -80,18 +80,18 @@ void Xml::remove(const Xml& e)
 }
 
 
-Xml& Xml::set(const String& value)
+Xml& Xml::put(const String& value)
 {
 	_()->children.clear();
 	_()->children << XmlText(value);
 	return *this;
 }
 
-Xml& Xml::set(const String& name, const String& val)
+Xml& Xml::put(const String& name, const String& val)
 {
 	Xml e = (*this)(name);
 	if (e)
-		e.set(val);
+		e.put(val);
 	else
 		(*this) << Xml(name, val);
 	return *this;
@@ -117,7 +117,7 @@ Xml& Xml::operator<<(const String& t)
 Xml Xml::decode(const String& x)
 {
 	if (x == "")
-		return Xml(0);
+		return Xml();
 	Dic<char> entities;
 	entities["amp"] = '&';
 	entities["apos"] = '\'';
@@ -182,7 +182,7 @@ Xml Xml::decode(const String& x)
 			case '?':
 				state = TAG_QUES;
 				break;
-			default:
+			default: // TODO: allow only alphabetic char (no digit, no symbol)
 				state = TAG;
 				b = c;
 				break;
@@ -216,7 +216,7 @@ Xml Xml::decode(const String& x)
 			{
 			case '>':
 				if (b != elems.top().tag())
-					return Xml(0);
+					return Xml();
 				{
 					Xml e = elems.popget();
 					elems.top() << e;
@@ -424,7 +424,7 @@ Xml Xml::decode(const String& x)
 			break;
 		}
 	}
-	return (elems.top().numChildren() == 1)? elems.top().child(0) : Xml(0);
+	return (elems.top().numChildren() == 1)? elems.top().child(0) : Xml();
 }
 
 

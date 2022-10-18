@@ -211,7 +211,7 @@ String text = html("body")("h1").text();  // -> "Hello"
 That content can be written with:
 
 ~~~
-html("body").set("h1", "Bye");      // now it's <h1>Bye</h1>
+html("body").put("h1", "Bye");      // now it's <h1>Bye</h1>
 ~~~
 
 We can iterate the children of the `<body>` element like this:
@@ -352,17 +352,17 @@ public:
 
 	bool operator!() const
 	{
-		return _p == 0 || _()->tag == "";
+		return _p == 0 || !_()->tag.ok();
 	}
 
 	ASL_EXPLICIT operator bool() const
 	{
-		return _p != 0 && _()->tag != "";
+		return _p != 0 && _()->tag.ok();
 	}
 
 	bool isvalid() const
 	{
-		return  _p != 0 && tag() != "";
+		return  _p != 0 && tag().ok();
 	}
 
 	/**
@@ -506,12 +506,24 @@ public:
 	/**
 	Sets the content of this element to the given text value.
 	*/
-	Xml& set(const String& value);
+	Xml& put(const String& value);
+
+	/**
+	Sets the content of this element to the given text value.
+	\deprecated Use put()
+	*/
+	ASL_DEPRECATED(Xml& set(const String& value), "Use put()") { return put(value); }
 
 	/**
 	Sets the content of a named subelement creating it if it does not exist
 	*/
-	Xml& set(const String& name, const String& val);
+	Xml& put(const String& name, const String& val);
+
+	/**
+	Sets the content of a named subelement creating it if it does not exist
+	\deprecated Use put(), set will probably set an attribute in the future
+	*/
+	ASL_DEPRECATED(Xml& set(const String& name, const String& val), "Use put(), set will probably set an attribute in the future") { return put(name, val); }
 
 	/**
 	Appends an element as a child.
