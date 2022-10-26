@@ -200,7 +200,7 @@ String charset = html("head")("meta")["charset"];  // -> "utf8"
 ~~~
 
 That is, `element("tag")` returns the first child of `element` that has the given tag (`element("tag", 3)` would return
-the 3rd child with that tag). And `element["attr"]` returns the value of the attribute `attr`.
+the 4th child with that tag). And `element["attr"]` returns the value of the attribute `attr`.
 
 The text content of the `<h1>` element would be retrieved like this:
 
@@ -524,6 +524,11 @@ public:
 	\deprecated Use put(), set will probably set an attribute in the future
 	*/
 	ASL_DEPRECATED(Xml& set(const String& name, const String& val), "Use put(), set will probably set an attribute in the future") { return put(name, val); }
+
+	/**
+	Removes all children
+	*/
+	void clear() { _()->children.clear(); }
 
 	/**
 	Appends an element as a child.
