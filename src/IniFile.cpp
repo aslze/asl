@@ -27,21 +27,17 @@ IniFile::IniFile(const String& name, bool shouldwrite)
 	{
 		String line=file.readLine();
 		if(shouldwrite)
-			_lines << line.trimmed();
+			_lines << line;
 		if(!line.ok())
 			continue;
 		if(file.end())
 			break;
 
-		char firstchar = line[0];
-		for(int i=0; i<line.length(); i++)
-			if (!myisspace(line[i]))
-			{
-				firstchar = line[i];
-				break;
-			}
+		int i0 = 0;
+		while (myisspace(line[i0]) && line[i0] != '\0')
+			i0++;
 
-		if(firstchar=='[')
+		if (line[0] == '[')
 		{
 			int end = line.indexOf(']', 1);
 			if(end < 0)
@@ -50,7 +46,7 @@ IniFile::IniFile(const String& name, bool shouldwrite)
 			_currentTitle = name;
 			_sections[_currentTitle] = Section(_currentTitle);
 		}
-		else if(firstchar!='#' && firstchar>=32 && firstchar!=';')
+		else if(line[i0] != '#' && line[i0] > 47 && line[i0] != ';')
 		{
 			int i=line.indexOf('=');
 			if (i < 1)
@@ -159,6 +155,9 @@ void IniFile::write(const String& fname)
 
 	foreach(String& line, _lines)
 	{
+		int i0 = 0;
+		while (myisspace(line[i0]) && line[i0] != '\0')
+			i0++;
 		if(line[0]=='[')
 		{
 			int end = line.indexOf(']');
@@ -168,7 +167,7 @@ void IniFile::write(const String& fname)
 			_currentTitle = name;
 			section = &_sections[name];
 		}
-		else if(line[0]!='#' && line[0]>31 && line[0]!=';')
+		else if (line[i0] != '#' && line[i0] > 47 && line[i0] != ';')
 		{
 			int i=line.indexOf('=');
 			if (i < 0)
@@ -239,7 +238,7 @@ void IniFile::write(const String& fname)
 	
 	if(_modified)
 	{
-		TextFile file ((fname!="")? fname: _filename, File::WRITE);
+		TextFile file ((fname.ok())? fname: _filename, File::WRITE);
 		if(!file)
 			return;
 		foreach(String& line, _lines)
