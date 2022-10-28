@@ -1,3 +1,6 @@
+// Copyright(c) 1999-2022 aslze
+// Licensed under the MIT License (http://opensource.org/licenses/MIT)
+
 #ifndef ASL_SET_H
 #define ASL_SET_H
 
@@ -65,6 +68,7 @@ public:
 	Array<T> array() const
 	{
 		Array<T> a;
+		a.reserve(this->length());
 		foreach(const T& x, *this)
 			a << x;
 		return a;
@@ -73,6 +77,7 @@ public:
 	{
 		return array();
 	}
+
 	/**
 	Adds an item to the set
 	*/
@@ -83,7 +88,6 @@ public:
 	}
 	Set& operator>>(T& x)
 	{
-		//Map<T,T>::remove(x);
 		this->remove(x);
 		return *this;
 	}
@@ -180,12 +184,38 @@ public:
 	{
 		Enumerator(){}
 		Enumerator(Set& s) : MAP<T, int>::Enumerator(s) {}
+		Enumerator(const Set& s) : MAP<T, int>::Enumerator((Set&)s) {}
 		T& operator*() { return (T&)~(*this); }
 		T* operator->() { return &(~(*this)); }
 	};
 
 	Enumerator all() { return Enumerator(*this); }
+	Enumerator all() const { return Enumerator(*this); }
 };
 #undef MAP
+
+
+#ifdef ASL_HAVE_RANGEFOR
+
+template<class T>
+typename Set<T>::Enumerator begin(const Set<T>& a)
+{
+	return a.all();
+}
+
+template<class T>
+typename Set<T>::Enumerator end(const Set<T>& a)
+{
+	return a.all();
+}
+
+template<class T>
+Array<T> array(const Set<T>& s)
+{
+	return s.array();
+}
+
+#endif
+
 }
 #endif

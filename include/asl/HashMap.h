@@ -48,6 +48,13 @@ inline int hash(const T& x)
 	return h;
 }
 
+#ifdef ASL_FILE_H
+inline int hash(const File& f)
+{
+	return hash(f.path());
+}
+#endif
+
 #define ASL_HMAP_SKIP (2 + (sizeof(AtomicCount)-1)/sizeof(void*))
 
 inline int nextPoT(int n)
