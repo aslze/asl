@@ -25,10 +25,10 @@
 #ifdef ASL_ANSI
  #define ASL_QTFROM fromLocal8Bit
  #define ASL_QTTO toLocal8Bit
- #else
+#else
  #define ASL_QTFROM fromUtf8
  #define ASL_QTTO toUtf8
- #endif
+#endif
 #ifndef QSTRING_H
 class QString;
 #endif
@@ -197,6 +197,7 @@ public:
 	*/
 	ASL_EXPLICIT String(char c, int n)
 	{
+		if (n < 0) n = 0;
 		init(n);
 		memset(str(), c, n);
 		str()[n] = '\0';
@@ -206,6 +207,7 @@ public:
 	*/
 	inline static String repeat(char c, int n)
 	{
+		if (n < 0) n = 0;
 		String s(n, n);
 		memset(s.str(), c, n);
 		s.str()[n] = '\0';
