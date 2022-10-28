@@ -104,6 +104,7 @@ public:
 	Returns true if this object does not refer to an *open* file
 	*/
 	bool operator==(const File& f) const { return _path == f._path; }
+	bool operator!=(const File& f) const { return _path != f._path; }
 	bool operator<(const File& f) const { return _path < f._path; }
 	bool operator!() const {return _file==0;}
 	/**
@@ -311,6 +312,13 @@ public:
 
 template<> template<>
 Array<String> Array<File>::with<String>() const;
+
+#ifdef ASL_HASHMAP_H
+inline int hash(const File& f)
+{
+	return hash(f.path());
+}
+#endif
 
 }
 #endif
