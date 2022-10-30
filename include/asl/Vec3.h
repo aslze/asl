@@ -157,6 +157,12 @@ inline Vec3_<T> max(const Vec3_<T>& a, const Vec3_<T>& b, const Vec3_<T>& c)
 	return max(max(a,b), c);
 }
 
+template <class T>
+inline Vec3_<T> deg2rad(const Vec3_<T>& v) { return Vec3_<T>(deg2rad(v.x), deg2rad(v.y), deg2rad(v.z)); }
+
+template <class T>
+inline Vec3_<T> rad2deg(const Vec3_<T>& v) { return Vec3_<T>(rad2deg(v.x), rad2deg(v.y), rad2deg(v.z)); }
+
 typedef Vec3_<float> Vec3;
 typedef Vec3_<double> Vec3d;
 

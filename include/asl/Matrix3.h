@@ -222,6 +222,32 @@ public:
 		return Matrix3_(x, 0, 0,
 		                0, y, 0);
 	}
+
+	/**
+	Returns the i-th column's top 2 elements as a Vec2
+	*/
+	Vec2_<T> column2(int i) const { return Vec2_<T>(a[0][i], a[1][i]); }
+
+	/**
+	Returns the i-th column as a Vec3
+	*/
+	Vec3_<T> column(int i) const { return Vec3_<T>(a[0][i], a[1][i], a[2][i]); }
+
+	/**
+	Returns the *translation* part of this matrix (the last column) as a Vec2
+	*/
+	Vec2_<T> translation() const { return Vec2_<T>(a[0][2], a[1][2]); }
+
+	/**
+	Sets the *translation* part of this matrix (the last column)
+	*/
+	Matrix3_& setTranslation(const Vec2_<T>& t) { a[0][2] = t.x; a[1][2] = t.y; return *this; }
+
+	/**
+	Returns the *rotation* part of this matrix (assuming there is no skew)
+	*/
+	T rotation() const { return atan2(a[1][0], a[1][1]); }
+
 	/**
 	Returns the inverse of this matrix
 	*/
