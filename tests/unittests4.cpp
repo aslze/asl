@@ -27,6 +27,9 @@ ASL_TEST(Vec3)
 
 ASL_TEST(Matrix4)
 {
+	double angle = deg2rad(90);
+	ASL_APPROX(rad2deg(angle), 90.0, 0.01);
+
 	Matrix4d m1 = Matrix4d::rotate(Vec3d(1, 0, 0), PI / 2);
 	Matrix4d m2 = Matrix4d::rotateX(PI / 2);
 	Vec3d a(0, 1, 0);

@@ -73,8 +73,8 @@ ASL_TEST(XML)
 
 	ASL_ASSERT(html.tag() == "html");
 
-	html("head").set("link", "css1");
-	html("head").set("meta", "css2");
+	html("head").put("link", "css1");
+	html("head").put("meta", "css2");
 
 	ASL_ASSERT(html("head").count("meta") == 1);
 	ASL_ASSERT(html("head")("meta").text() == "css2");
@@ -232,7 +232,20 @@ ASL_TEST(HashMap)
 	for(int i=0; i<10; i++)
 		ASL_ASSERT(dic[10-i] == i);
 	dic.clear();
+
 	ASL_ASSERT(dic.length() == 0);
+
+	HashMap<int, float> m;
+	m[100] = 125.0f;
+	m[2000] = -128.5f;
+
+	HashMap<int, float> m2 = m.clone();
+
+	ASL_ASSERT(m2 == m);
+
+	m2[100] = 5.5f;
+
+	ASL_ASSERT(m2 != m);
 }
 
 String join1(const Dic<String>& a)

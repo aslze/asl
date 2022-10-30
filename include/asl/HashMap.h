@@ -388,6 +388,24 @@ public:
 		return _n();
 	}
 
+	/**
+	Returns true if both maps are equal (equal keys and values)
+	*/
+	bool operator==(const HashMap& b) const
+	{
+		if (length() != b.length())
+			return false;
+		Enumerator e1(this->all()), e2(b.all());
+		for (; e1; ++e1, ++e2)
+			if (~e1 != ~e2 || *e1 != *e2) return false;
+		return true;
+	}
+
+	bool operator!=(const HashMap& b) const
+	{
+		return !(*this == b);
+	}
+
 	struct Enumerator
 	{
 		typedef typename HashMap<K,T>::KeyVal KeyVal;
@@ -422,9 +440,10 @@ public:
 		const K& operator~() {return p->key;}
 		operator bool() const {return p!=0 || e;}
 		bool operator!=(const Enumerator& e) const { return (bool)*this; }
-		Enumerator all() {return *this;}
+		Enumerator all() const { return *this; }
 	};
-	Enumerator all() {return Enumerator(*this);}
+	
+	Enumerator all() const { return Enumerator(*this); }
 
 	struct FEnumerator : public Enumerator
 	{
