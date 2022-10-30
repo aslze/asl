@@ -12,21 +12,26 @@ inline bool asl_isdigit(char c)
 	return c >= '0' && c <= '9';
 }
 
+inline bool myisalpha(char c)
+{
+	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
 #if defined _WIN32 || defined __linux__
 
 CmdArgs::CmdArgs(const String& spec)
 {
 #ifdef _WIN32
 	int nArgs;
-	LPWSTR* arglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
-	if (NULL == arglist)
+	LPWSTR* wargs = CommandLineToArgvW(GetCommandLineW(), &nArgs);
+	if (wargs == NULL)
 		return;
 	Array<String> a;
 	for (int i = 0; i < nArgs; i++)
-		a << arglist[i];
+		a << wargs[i];
 
-	LocalFree(arglist);
-	*this = CmdArgs(-nArgs, ((Array<char*>)a).ptr());
+	LocalFree(wargs);
+	parse(-nArgs, ((Array<char*>)a).ptr(), spec);
 #else
 	File file("/proc/self/cmdline", File::READ);
 	if (!file)
@@ -49,12 +54,14 @@ CmdArgs::CmdArgs(const String& spec)
 		a << String(&all[i]);
 		i = j + 1;
 	}
-	*this = CmdArgs(a.length(), ((Array<char*>)a).ptr(), spec);
+
+	parse(a.length(), ((Array<char*>)a).ptr(), spec);
 #endif
 }
 #endif
 
-CmdArgs::CmdArgs(int argc, char* argv[], const String& spec)
+
+void CmdArgs::parse(int argc, char* argv[], const String& spec)
 {
 	int n = abs(argc);
 	for (int i = 0; i < n; i++)
@@ -73,13 +80,13 @@ CmdArgs::CmdArgs(int argc, char* argv[], const String& spec)
 	}
 	for (int i = 1; i < _args.length(); i++)
 	{
-		if (_args[i].startsWith('-') && _args[i] != '-')
+		if (_args[i].startsWith('-') && myisalnum(_args[i][1]))
 		{
 			bool isflag = _args[i].endsWith('!');
 			String opt = _args[i].substring(1, _args[i].length() - (isflag ? 1 : 0));
 			if (!_unused.contains(opt))
 				_unused << opt;
-			bool nextIsOption = i < _args.length() - 1 && (_args[i + 1].startsWith('-') && !asl_isdigit(_args[i + 1][1]));
+			bool nextIsOption = i < _args.length() - 1 && (_args[i + 1].startsWith('-') && myisalpha(_args[i + 1][1]));
 			if ((i < _args.length() - 1 && !nextIsOption) && !flags.contains(opt) && !isflag)
 			{
 				_multi[opt] << _args[i + 1];
@@ -92,7 +99,6 @@ CmdArgs::CmdArgs(int argc, char* argv[], const String& spec)
 			}
 			else // option without value!
 				return;
-			_rest.clear();
 		}
 		else if (_args[i] != '-')
 			_rest << _args[i];
@@ -107,7 +113,7 @@ void CmdArgs::use(const String& opt) const
 bool CmdArgs::is(const String& opt) const
 {
 	use(opt);
-	return _opts.has(opt) && String("1|true|yes|y|on").contains(*_opts[opt].toLowerCase());
+	return _opts.has(opt) && _opts[opt].isTrue();
 }
 
 bool CmdArgs::has(const String& opt) const
