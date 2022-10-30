@@ -77,17 +77,18 @@ public:
 		return File(_path).isDirectory();
 	}
 	/**
-	Returns the contents of a directory
+	Returns the contents of a directory, optionally matching a wildcard
 	*/
 	const Array<File> items(const String& which="*", ItemType t=ALL);
 	/**
-	Returns the files in a directory
+	Returns the files in a directory, optionally matching a wildcard
 	*/
 	const Array<File> files(const String& which="*") {return items(which, FILE);}
 	/**
-	Returns the subdirectories of a directory
+	Returns the subdirectories of a directory, optionally matching a wildcard
 	*/
 	const Array<File> subdirs(const String& which="*") {return items(which, DIRE);}
+
 	static FileInfo getInfo(const String& path);
 	/**
 	Returns the current working directory
