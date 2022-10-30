@@ -80,13 +80,13 @@ void CmdArgs::parse(int argc, char* argv[], const String& spec)
 	}
 	for (int i = 1; i < _args.length(); i++)
 	{
-		if (_args[i].startsWith('-') && myisalnum(_args[i][1]))
+		if ((_args[i].startsWith('-') && myisalnum(_args[i][1])) || (_args[i].startsWith("--") && myisalnum(_args[i][2])))
 		{
 			bool isflag = _args[i].endsWith('!');
 			String opt = _args[i].substring(1, _args[i].length() - (isflag ? 1 : 0));
 			if (!_unused.contains(opt))
 				_unused << opt;
-			bool nextIsOption = i < _args.length() - 1 && (_args[i + 1].startsWith('-') && myisalpha(_args[i + 1][1]));
+			bool nextIsOption = i < _args.length() - 1 && ((_args[i + 1].startsWith('-') && myisalpha(_args[i + 1][1])) || (_args[i + 1].startsWith("--") && myisalpha(_args[i + 1][2])));
 			if ((i < _args.length() - 1 && !nextIsOption) && !flags.contains(opt) && !isflag)
 			{
 				_multi[opt] << _args[i + 1];
