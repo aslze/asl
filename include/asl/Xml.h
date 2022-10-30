@@ -219,7 +219,7 @@ We can iterate the children of the `<body>` element like this:
 ~~~
 Xml body = html("body");
 
-foreach(auto& e, body.children())
+for(auto& e : body.children())
 {
 	e.setAttr("tag", e.tag());     // add an attribute with the tag name
 }

@@ -147,7 +147,7 @@ public:
 	{
 		a.clear();
 	}
-	/** Frees all values (with `delete`, so `T` must be a pointer type) and clears the dictionary. */
+	
 	void destroy()
 	{
 		for(int i=0; i<length(); i++)
