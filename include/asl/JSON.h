@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2021 aslze
+// Copyright(c) 1999-2022 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_JSON_H
@@ -53,6 +53,7 @@ struct ASL_API Json
 		COMPACT = 4,
 		JSON = 8,
 		EXACT = 16,
+		SHORTF = 32, //!< Format doubles as short as floats
 		NICE = 3     //!< Same as PRETTY and SIMPLE
 	};
 

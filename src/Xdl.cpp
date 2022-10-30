@@ -667,6 +667,8 @@ String XdlEncoder::encode(const Var& v, Json::Mode mode)
 	_simple = (mode & Json::SIMPLE) != 0;
 	_fmtF = _simple ? "%.7g" : "%.9g";
 	_fmtD = _simple ? "%.15g" : "%.17g";
+	if (mode & Json::SHORTF)
+		_fmtD = _fmtF;
 	if (_pretty)
 		_sep1 = ", ";
 	if (!_json && _pretty)
