@@ -71,7 +71,7 @@ public:
 	Configures the port with a bitrate and a string encoded as "BPS":
 	B=data bits, P=parity (N/E/O), S=stop bits, plus an optional X for Xon/Xoff flow control
 	*/
-	void config(int bps, const String& mode="8N1");
+	bool config(int bps, const String& mode="8N1");
 	/**
 	Waits until there is data to read for a maximum time of `timeout` seconds (or the device disconnected),
 	and return true if something happened before the timeout

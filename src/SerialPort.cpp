@@ -61,12 +61,11 @@ bool SerialPort::open(const String& port)
 	return true;
 }
 
-void SerialPort::config(int bps, const String& mode)
+bool  SerialPort::config(int bps, const String& mode)
 {
 	if(mode.length() < 3)
 	{
-		config(bps, "8N1");
-		return;
+		return config(bps, "8N1");
 	}
 	DCB serialConfig;
 	serialConfig.DCBlength = sizeof(DCB);
@@ -98,7 +97,7 @@ void SerialPort::config(int bps, const String& mode)
 	if(!SetCommState(_handle, &serialConfig))
 	{
 		CloseHandle(_handle);
-		return;
+		return false;
 	}
 
 	COMMTIMEOUTS timeouts;
@@ -109,6 +108,8 @@ void SerialPort::config(int bps, const String& mode)
 	SetCommTimeouts(_handle, &timeouts);
 
 	SetupComm(_handle, 4096, 1024);
+
+	return true;
 }
 
 void SerialPort::setTimeout(double s)
@@ -201,14 +202,13 @@ bool SerialPort::open(const String& port)
 	return true;
 }
 
-void SerialPort::config(int bps, const String& mode)
+bool SerialPort::config(int bps, const String& mode)
 {
 	if(mode.length() < 3)
 	{
-		config(bps, "8N1");
-		return;
+		return config(bps, "8N1");
 	}
-
+	int b = -1;
 	int bps0[20]={0, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 500000, 576000, 921600, 1000000};
 	int bps1[20]={B0, B300, B600, B1200, B2400, B4800, B9600, B19200, B38400, B57600, B115200, 0, 0, 0, 0, 0};
 #ifdef B230400
@@ -233,16 +233,22 @@ void SerialPort::config(int bps, const String& mode)
 	{
 		if(bps==bps0[i])
 		{
-			bps=bps1[i];
+			b = bps1[i];
 			break;
 		}
 	}
 	
+	if (b < 0)
+	{
+		printf("SerialPort: Wrong bitrate %i\n", bps);
+		return false;
+	}
+
 	struct termios tty;
 	tcgetattr(_handle, &tty);
 
-	cfsetospeed(&tty, (speed_t)bps);
-	cfsetispeed(&tty, (speed_t)bps);
+	cfsetospeed(&tty, (speed_t)b);
+	cfsetispeed(&tty, (speed_t)b);
 	
 	unsigned bits = CS8;
 	switch (mode[0]) // bits
@@ -282,7 +288,7 @@ void SerialPort::config(int bps, const String& mode)
 	else if (mode[1] == 'O')
 		tty.c_cflag |= PARODD;
 
-	tcsetattr(_handle, TCSANOW, &tty);
+	return tcsetattr(_handle, TCSANOW, &tty) == 0;
 }
 
 void SerialPort::setTimeout(double s)
@@ -312,13 +318,12 @@ int SerialPort::available()
 	long n;
 	if (ioctl(_handle, FIONREAD, &n) == 0)
 	{
-		if(n<0)
-			printf("ioctl n < 0\n");
+		//if(n<0)
+		//	printf("SerialPort: ioctl n < 0\n");
 		return (int)n;
 	}
 	else {
 		_error = true;
-		printf("ioctl != 0\n");
 		return -1;
 	}
 }
