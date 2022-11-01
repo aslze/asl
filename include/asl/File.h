@@ -80,6 +80,7 @@ public:
 	}
 	~File()
 	{
+		if (_file && _path.ok())
 		close();
 	}
 	File& operator=(const File& f)

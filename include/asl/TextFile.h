@@ -49,7 +49,7 @@ class ASL_API TextFile : public File
 public:
 	TextFile() {}
 	ASL_EXPLICIT TextFile(const String& name) : File(name) {}
-	ASL_EXPLICIT TextFile(FILE* f) { _file = f; }
+	ASL_DEPRECATED(ASL_EXPLICIT TextFile(FILE* f), "Use File::use(FILE*)") { _file = f; }
 	TextFile(const File& f) : File(f) {}
 	ASL_EXPLICIT TextFile(const String& name, OpenMode mode) { open(name, mode); }
 	~TextFile() {}
