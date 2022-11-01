@@ -39,7 +39,7 @@ const T* ref2nulp(const T& x) { return 0; } // avoid warning with temporary Enum
 /**
 A for loop for containers resembling the `foreach` keyword of D. In each iteration, `variable` takes 
 the value of *each* element in `set`. Variable can have a type declaration (equaling the type of elements
-of `set`) and an even be a reference.
+of `set`) and an even be a reference. In newer compilers just use `for(auto& x : a)`
 
 ~~~.cpp
 foreach(int& x, array)
@@ -56,7 +56,7 @@ This will not work for temporary containers (i.e. returned by functions).
 /**
 A for loop for associative containers resembling the `foreach` keyword of D. Similar to `foreach` but 
 using two variables: the first will take the value of each *key* and the second will take its associated
-value.
+value. In newer compilers just use `for(auto& x : a)`, or `for(auto& [name, value] : a)` [C++17]
 ~~~.cpp
 foreach2(String& name, float value, variables)
 {
@@ -112,20 +112,8 @@ void quicksort(T* a, int n, const Less& less)
 }
 
 /**
-Shuffles an array of elements in place.
-*/
-template <typename E>
-void shuffle(E& a, Random& rnd = random)
-{
-	int n = a.length();
-	while (n) {
-		int i = int(rnd(1.0) * n--);
-		swap(a[n], a[i]);
-	}
-}
-
-/**
 Shuffles an array of elements in place (n items starting at a).
+\deprecated Use Random::shuffle()
 */
 template <typename T>
 void shuffle(T* a, int n, Random& rnd = random)
@@ -134,6 +122,17 @@ void shuffle(T* a, int n, Random& rnd = random)
 		int i = int(rnd(1.0) * n--);
 		swap(a[n], a[i]);
 	}
+}
+
+
+/**
+Shuffles an array of elements in place.
+\deprecated Use Random::shuffle()
+*/
+template <typename E>
+void shuffle(E& a, Random& rnd = random)
+{
+	shuffle(&a[0], a.length(), rnd);
 }
 
 /**@}*/

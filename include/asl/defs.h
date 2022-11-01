@@ -10,7 +10,7 @@
 Main definitions.
 */
 
-#define ASL_VERSION 11100
+#define ASL_VERSION 11103
 
 #ifdef _WIN32
 #ifndef _CRT_SECURE_NO_DEPRECATE
@@ -277,6 +277,24 @@ public:
 
 	/** Fills a buffer with OS-provided random bytes or pseudo-random if that fails */
 	static void getBytes(void* buffer, int n);
+
+	/**
+	Shuffles an array of elements in place (n items starting at a).
+	*/
+	template <typename T>
+	void shuffle(T* a, int n)
+	{
+		while (n) {
+			int i = int((*this)(1.0) * n--);
+			swap(a[n], a[i]);
+		}
+	}
+
+	/**
+	Shuffles an array of elements in place.
+	*/
+	template <typename E>
+	void shuffle(E& a) { shuffle(&a[0], a.length()); }
 };
 
 extern ASL_API Random random; //!< A global random number generator

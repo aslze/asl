@@ -6,7 +6,7 @@ ASL is a collection of multiplatform general purpose classes and utilities focus
 
 - Crossplatform (**Windows**, **Linux**, **macOS**, **Android**), 32/64 bit
 - Works on older compilers (e.g. VisualStudio 2005, gcc 3.4) but can use some C++11 features if available (e.g. lambdas, range-based for, initializer lists)
-- Almost no dependencies. Optionally the **mbedTLS** library for TLS sockets (e.g. HTTPS)
+- Almost no dependencies. Optionally the **mbedTLS** library for TLS sockets (e.g. for HTTPS)
 - [Online API documentation](https://aslze.github.io/asl-doc/)
 
 
@@ -21,14 +21,14 @@ __OS-related functionalities__:
 - Directory enumeration and file system operations (copy, move, delete)
 - Sockets TCP, UDP and Unix (where available), IPv4 and IPv6, with optional SSL/TLS
 - Runtime dynamically loadable libraries (DLLs or shared libraries)
-- Console: text and background color and cursor position
+- Console: text and background color, cursor position, etc.
 - Serial ports
 - Shared memory
 
 __Utilities__:
 
 - JSON, XML and XDL parsing/encoding
-- HTTP/HTTPS server and client
+- HTTP/HTTPS 1.1 server and client
 - WebSocket server and client
 - Configuration INI files reading/writing
 - CSV file reading/writing, ARFF writing
@@ -38,7 +38,8 @@ __Utilities__:
 - Base64 and hex encoding/decoding
 - Binary buffer reading/writing (endian-aware)
 - Random number generator
-- Simple testing support
+- Basic testing functionality
+- Linear and nonlinear systems solving
 
 __Basic data types__:
 
@@ -306,7 +307,7 @@ With CMmake 3.14+, instead of using `find_package()`, you can download and build
 
 ```cmake
 include(FetchContent)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.1.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.3.zip)
 FetchContent_MakeAvailable(asl)
 ```
 
@@ -334,5 +335,7 @@ sudo apt-get install libmbedtls-dev
 
 On FreeBSD use:
 
-``` pkg install mbedtls ```
+```
+pkg install mbedtls
+```
 

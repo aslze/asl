@@ -404,6 +404,7 @@ public:
 /**
 Parses a string and creates a `Dic` using `sep1` as pair separator, and `sep2` as key/value separator.
 It is the opposite of `join()`.
+\deprecated Use String::split(s1, s2)
 */
 inline Dic<String> split(const String& s, const String& sep1, const String& sep2)
 {

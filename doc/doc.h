@@ -21,7 +21,7 @@ __Operating system functionalities__:
 __Utilities__:
 
 - JSON, XML and XDL parsing/encoding
-- HTTP/HTTPS server and client
+- HTTP/HTTPS 1.1 server and client
 - %WebSocket server and client
 - Configuration INI files reading/writing
 - CSV file reading/writing, ARFF write
@@ -32,14 +32,15 @@ __Utilities__:
 - Binary buffer endian-aware reading/writing
 - %Random number generator
 - Simple testing functionality
+- Linear and non-linear systems solving (with the Matrix class)
 
 __Basic data types__:
 
-- Strings with easy conversions and UTF8 support
+- Strings with UTF8 support
 - Dynamic and static arrays, including 2D arrays
 - Maps and hashmaps
 - Date/time
-- 2D, 3D, 4D vectors, 3x3, 4x4, nxm matrices and quaternions
+- 2D, 3D, 4D vectors, 3x3, 4x4, NxM matrices and quaternions
 - Variants (similar to JavaScript vars)
 
 # Compilation and use #
@@ -254,6 +255,9 @@ auto cat = Factory<Animal>::create("Cat");
 \defgroup Sockets Socket communication
 
 These classes enable network communication with TCP (plain or TLS encrypted) and UDP sockets.
+
+The `SocketServer` class implements a multithreaded socket server and is easier to use than using
+`Socket` objects directly for serving.
 
 This example would get a web page from an HTTP server (just an example, you should use the
 `Http` class for that).
