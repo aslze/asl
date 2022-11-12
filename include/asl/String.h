@@ -85,7 +85,7 @@ String euros = "3€";
 euros.length() // returns 4 (bytes)
 euros.count()  // returns 2 (characters)
 euros.chars()  // returns the array [51, 8364] (the codes of '3' and '€')
-foreach(int c, euros)
+for(int c : euros)
 	printf("%i ", c); // prints "51 8364"
 ~~~
 

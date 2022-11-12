@@ -97,15 +97,15 @@ class Thread
 #ifdef _WIN32
 	#define ASL_THREADFUNC_API __stdcall
 	#define ASL_THREADFUNC_RET unsigned int
-	typedef unsigned(__stdcall *Function)(void*);
-	typedef HANDLE Handle;
+	typedef unsigned(__stdcall *Function_)(void*);
+	typedef HANDLE Handle_;
 #else
 	#define ASL_THREADFUNC_API
 	#define ASL_THREADFUNC_RET void*
-	typedef void* (*Function)(void*);
-	typedef pthread_t Handle;
+	typedef void* (*Function_)(void*);
+	typedef pthread_t Handle_;
 #endif
-	Handle _thread;
+	Handle_ _thread;
 	volatile bool _threadFinished;
 private:
 	template<class F>
@@ -116,7 +116,7 @@ private:
 		int i0, i1, s;
 	};
 
-	void run(Function f, void* arg)
+	void run(Function_ f, void* arg)
 	{
 #ifdef _WIN32
 		if (_thread != 0)
@@ -134,7 +134,7 @@ private:
 			ASL_BAD_ALLOC();
 		}
 	}
-	void run(Function f, ThreadAttrib& a , void* arg=0)
+	void run(Function_ f, ThreadAttrib& a , void* arg=0)
 	{
 		int n;
 		if((n = pthread_create(&_thread, *a, f, arg)))
@@ -259,7 +259,7 @@ public:
 	static Thread start(const Func& f, Thread* t)
 	{
 		Context<Func> s = { f, t, false, 0, 0, 0 };
-		t->run((Function)Thread::beginf<Func>, (void*)&s);
+		t->run((Function_)Thread::beginf<Func>, (void*)&s);
 		while (!s.ready) {}
 		return *t;
 	}
@@ -292,7 +292,7 @@ public:
 		{
 			threads << new Thread;
 			Context<F> s = { f, threads.last(), false, i0 + i, i1, n };
-			threads.last()->run((Function)Thread::beginfN<F>, (void*)&s);
+			threads.last()->run((Function_)Thread::beginfN<F>, (void*)&s);
 			while (!s.ready) {}
 		}
 		foreach(Thread* t, threads)

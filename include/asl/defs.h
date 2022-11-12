@@ -415,6 +415,7 @@ inline void asl_construct_copy(T* p, const T& x) {*p = x;} \
 inline void bswap(T& a, T& b) {swap(a, b);}
 
 ASL_POD_CONSTRUCT(byte)
+ASL_POD_CONSTRUCT(signed char)
 ASL_POD_CONSTRUCT(char)
 ASL_POD_CONSTRUCT(int)
 ASL_POD_CONSTRUCT(unsigned int)

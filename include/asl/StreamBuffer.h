@@ -68,7 +68,11 @@ public:
 	/**
 	Skips a number of bytes
 	*/
-	void skip(int n) { _ptr += n; }
+	StreamBufferReader& skip(int n)
+	{
+		_ptr += n;
+		return *this;
+	}
 
 	template <class T>
 	StreamBufferReader& read2(T& x)
@@ -176,6 +180,7 @@ protected:
 	Endian _endian;
 };
 
+typedef StreamBufferReader BufferReader;
 
 /**
 This class is a buffer that can be written to as a binary stream. The buffer is initially
@@ -198,7 +203,7 @@ socket << *buffer;
 class StreamBuffer : public Array<byte>
 {
 public:
-	StreamBuffer(Endian e = ENDIAN_LITTLE) : _endian(e) {}
+	ASL_EXPLICIT StreamBuffer(Endian e = ENDIAN_LITTLE) : _endian(e) {}
 
 	Array<byte>& operator*() { return (Array<byte>&)*this; }
 	const Array<byte>& operator*() const { return (const Array<byte>&)*this; }
