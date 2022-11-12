@@ -300,6 +300,16 @@ public:
 			_a[i] = b._a[i];
 	}
 
+	/**
+	Copies n elements pointed to by p (the array is resized to n)
+	*/
+	void copy(const T* p, int n)
+	{
+		resize(n);
+		for (int i = 0; i < n; i++)
+			_a[i] = p[i];
+	}
+
 #ifdef ASL_HAVE_INITLIST
 
 	Array& operator=(std::initializer_list<T> b)

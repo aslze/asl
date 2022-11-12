@@ -4,8 +4,6 @@
 #ifndef ASL_ARRAYX_H
 #define ASL_ARRAYX_H
 
-// Define ASL_DEBUG_ARRAY to emit an exception if array bounds exceeded (useful for debugging)
-
 #include <asl/defs.h>
 #include <asl/Array.h>
 #include <asl/String.h>
@@ -21,7 +19,7 @@ and must be known at compile time. It is much faster to create and copy than a d
 ~~~
 Array_<int,2> getMinMax()
 {
-	return array_(min, max);
+	return array_(min, max); // or C++11: return {min, max};
 }
 ~~~
 \ingroup Containers
@@ -34,12 +32,12 @@ protected:
 	T _a[N];
 	operator void* () { return NULL; }
 public:
-	Array_()
-	{}
+	Array_() {}
+
 	template<class K>
 	Array_(const Array_<K, N>& b)
 	{
-		for(int i=0; i<length(); i++)
+		for(int i = 0; i < N; i++)
 			_a[i]=(T)b[i];
 	}
 	Array_(const Array_& b)
@@ -50,11 +48,9 @@ public:
 #ifdef ASL_HAVE_INITLIST
 	Array_(std::initializer_list<T> b)
 	{
-		int m = (int)b.size();
-		if (m > N)
-			m = N;
+		ASL_ASSERT(b.size() == N);
 		const T* p = b.begin();
-		for (int i = 0; i<m; i++)
+		for (int i = 0; i < N; i++)
 			_a[i] = p[i];
 	}
 #endif
@@ -64,24 +60,25 @@ public:
 	template<class T2>
 	Array_<T2, N> with() const
 	{
-		return Array_<T2, N>(*this);
+		Array_<T2, N> b;
+		for (int i = 0; i < N; i++)
+			b[i] = (T)_a[i];
+		return b;
 	}
 
 	Array<T> array() const
 	{
-		Array<T> a(N);
-		for(int i=0; i<N; i++)
-			a[i] = _a[i];
-		return a;
+		return Array<T>(&_a[0], N);
 	}
 
 	struct Enumerator
 	{
 		Array_<T,N>& a;
 		int i, j;
-		Enumerator(Array_& a_): a(a_), i(0), j(a.length()) {}
+		Enumerator(Array_& a_): a(a_), i(0), j(N) {}
 		Enumerator(Array_& a_, int i_, int j_): a(a_), i(i_), j(j_) {}
-		Enumerator(const Array_& a_): a((Array_&)a_), i(0), j(a_.length()) {}
+		Enumerator(const Array_& a_): a((Array_&)a_), i(0), j(N) {}
+		bool operator!=(const Enumerator& e) const { return (bool)*this; }
 		void operator++() {i++;}
 		T& operator*() {return a[i];}
 		int operator~() {return i;}
@@ -93,11 +90,13 @@ public:
 	};
 	/** Returns the number of elements in the array */
 	int length() const {return N;}
-	/** Frees all elements (with delete). Elements must be pointers */
-	void destroy() {for(int i=0; i<length(); i++) delete _a[i];}
+
 	/** Returns a pointer to the base of the array */
 	operator const T*() const {return &_a[0];}
 	operator T*() {return &_a[0];}
+
+	const T* ptr() const { return &_a[0]; }
+	T* ptr() { return &_a[0]; }
 
 	/** Tests for equality of all elements of both arrays*/
 	bool operator==(const Array_& b) const
@@ -121,17 +120,11 @@ public:
 	/** Returns the element at index i */
 	const T& operator[](int i) const
 	{
-#ifdef ASL_DEBUG_ARRAY
-		if(i>=length()) {_a[i]=_a[0];return *(const T*)0;}
-#endif
 		return _a[i];
 	}
 	/** Returns the element at index i */
 	T& operator[](int i)
 	{
-#ifdef ASL_DEBUG_ARRAY
-		if(i>=length()) {_a[i]=_a[0]; return *(T*)0;}
-#endif
 		return _a[i];
 	}
 
@@ -150,55 +143,54 @@ public:
 	The value -1 is returned if no such element is found*/
 	int indexOf(const T& x, int j=0) const
 	{
-		for(int i=j; i<length(); i++) {if(_a[i]==x) return i;}
+		for(int i = j; i < N; i++) {if(_a[i]==x) return i;}
 		return -1;
 	}
 	/** Returns true if the array contains an element equal to x */
 	bool contains(const T& x) const {return indexOf(x) >= 0;}
+
 	/** Assigns array b into this array by reference. */
 	Array_& operator=(const Array_& b)
 	{
 		if(this==&b) return *this;
-		for(int i=0; i<length(); i++)
+		for(int i = 0; i < N; i++)
 			_a[i]=b[i];
 		return *this;
 	}
 	Array_ reversed() const
 	{
 		Array_ b;
-		for (int i=0; i<length(); i++)
-			b[i] = _a[length()-i-1];
+		for (int i = 0; i < N; i++)
+			b[i] = _a[N - i - 1];
 		return b;
 	}
-	/* Returns a section of the array, from element i1 up to but not including element i2.
-	If i2 is omitted the subarray will take elements up te the last*/
-	/*Array_ sslice(int i1, int i2=0) const
+	/* Returns a section of the array, M elements from element i1 */
+	template<int M>
+	Array_<T, M> slice(int i1) const
 	{
-		if(i2==0)
-			i2=length();
-		Array_ b(i2-i1);
-		for (int i=i1; i<i2; i++)
-			b[i-i1] = _a[i];
+		Array_<T, M> b;
+		for (int i = 0; i < M; i++)
+			b[i] = _a[i + i1];
 		return b;
-	}*/
+	}
 	/** Sorts the array using the elements' < operator "in place" */
 	Array_& sort()
 	{
-		quicksort(_a, length());
+		quicksort(_a, N);
 		return *this;
 	}
 	/** Sorts the array using the elements' < operator "in place" */
 	template<class Less>
 	Array_& sort(Less f)
 	{
-		quicksort(_a, length(), f);
+		quicksort(_a, N, f);
 		return *this;
 	}
 	/**
 	Returns a string representation of the array, formed by joining its
 	elements with commas. The elements need to be convertible to String
 	*/
-	operator String() const;
+	ASL_DEPRECATED(operator String() const, "Use join()");
 	/**
 	Returns a string representation of the array, formed by joining its
 	elements with the given separator string sep. The elements need to be
@@ -213,9 +205,7 @@ public:
 template<class T, int N>
 Array_<T, N>::operator String() const
 {
-	String s = '[';
-	s << join(',') << ']';
-	return s;
+	return String('[') << join(',') << ']';
 }
 
 template<class T, int N>
@@ -225,6 +215,23 @@ String Array_<T, N>::join(const String& sep) const
 	for(int i=1; i<N; i++) {s += sep; String v=_a[i]; s += (v);}
 	return s;
 }
+
+#ifdef ASL_HAVE_RANGEFOR
+
+template<class T, int N>
+typename Array_<T, N>::Enumerator begin(const Array_<T, N>& a)
+{
+	return a.all();
+}
+
+template<class T, int N>
+typename Array_<T, N>::Enumerator end(const Array_<T, N>& a)
+{
+	return a.all();
+}
+
+#endif
+
 
 /**
 Creates an array with the 2 elements given as arguments (there are overloads from 1 to 6 elements)
@@ -253,6 +260,7 @@ Array_<T,3> array_(const T& a0, const T& a1, const T& a2) {
 
 /*
 Creates an array with the 4 elements given as arguments
+\deprecated
 */
 template <class T>
 Array_<T,4> array_(const T& a0, const T& a1, const T& a2, const T& a3) {
@@ -266,6 +274,7 @@ Array_<T,4> array_(const T& a0, const T& a1, const T& a2, const T& a3) {
 
 /*
 Creates an array with the 5 elements given as arguments
+\deprecated
 */
 template <class T>
 Array_<T,5> array_(const T& a0, const T& a1, const T& a2, const T& a3, const T& a4) {
