@@ -151,20 +151,6 @@ InetAddress::InetAddress()
 	_type = IPv4;
 }
 
-InetAddress::~InetAddress()
-{
-}
-
-InetAddress::InetAddress(const String& host, int port)
-{
-	set(host, port);
-}
-
-InetAddress::InetAddress(const String& host)
-{
-	set(host);
-}
-
 InetAddress::InetAddress(InetAddress::Type t)
 {
 	_type = t;
@@ -180,22 +166,6 @@ InetAddress::InetAddress(InetAddress::Type t)
 	}
 	_data.resize(n);
 	memset(_data.ptr(), 0, n);
-}
-
-InetAddress::InetAddress(int port)
-{
-	set("", port);
-}
-
-InetAddress::InetAddress(const InetAddress& a):
-	_data(a._data), _type(a._type)
-{
-}
-
-void InetAddress::operator=(const InetAddress& a)
-{
-	_data = a._data;
-	_type = a._type;
 }
 
 int InetAddress::port() const
@@ -259,7 +229,7 @@ String InetAddress::toString() const
 		return (String) '[' << host() << "]:" << p;
 }
 
-bool InetAddress::operator==(const InetAddress& a)
+bool InetAddress::operator==(const InetAddress& a) const
 {
 	return _type == a._type && _data == a._data;
 }
@@ -425,16 +395,6 @@ Socket_::Socket_()
 	_error = 0;
 	_type = TCP;
 	_blocking = true;
-	_endian = ENDIAN_NATIVE;
-}
-
-Socket_::Socket_(bool)
-{
-	_handle = -1;
-	_family = InetAddress::IPv4;
-	_error = 0;
-	_type = TCP;
-	_blocking = false;
 	_endian = ENDIAN_NATIVE;
 }
 
@@ -717,22 +677,16 @@ String Socket_::errorMsg() const
 
 // PacketSocket (UDP)
 
-PacketSocket_::PacketSocket_() : Socket_(false)
+PacketSocket_::PacketSocket_()
 {
 	_type = PACKET;
-	_family = InetAddress::IPv4;
-#ifdef _WIN32
-	if(!g_wsaStarted) startWSA();
-#endif
+	_blocking = false;
 }
 
 PacketSocket_::PacketSocket_(int fd) : Socket_(fd)
 {
 	_type = PACKET;
-}
-
-PacketSocket_::~PacketSocket_()
-{
+	_blocking = false;
 }
 
 String PacketSocket_::readLine()
@@ -768,10 +722,11 @@ void PacketSocket_::sendTo(const InetAddress& to, const void* data, int n)
 
 // LocalSocket (UNIX)
 
-LocalSocket_::LocalSocket_() : Socket_(false)
+LocalSocket_::LocalSocket_()
 {
 	_type = LOCAL;
 	_family = InetAddress::LOCAL;
+	_blocking = false;
 }
 
 LocalSocket_::LocalSocket_(int fd) : Socket_(fd)

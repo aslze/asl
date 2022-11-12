@@ -47,25 +47,24 @@ class ASL_API InetAddress
 public:
 	enum Type { ANY, IPv4, IPv6, LOCAL };
 	InetAddress();
-	~InetAddress();
 	InetAddress(Type t);
-	InetAddress(int port);
+	InetAddress(int port) { set("", port); }
 	/**
 	Creates an address with a name (to be looked up) and a port
 	*/
-	InetAddress(const String& host, int port);
-	InetAddress(const String& host_port);
-	InetAddress(const InetAddress& a);
+	InetAddress(const String& host, int port) { set(host, port); }
+	InetAddress(const String& host_port) { set(host_port); }
+
 	void resize(int n) { _data.resize(n); }
+
 	bool set(const String& host, int port);
 	bool set(const String& host);
 	/**
 	Returns a string representation of this address
 	*/
 	String toString() const;
-	void operator=(const InetAddress& a);
-	bool operator==(const InetAddress& a);
-	bool operator!=(const InetAddress& a) {return !(*this==a);}
+	bool operator==(const InetAddress& a) const;
+	bool operator!=(const InetAddress& a) const {return !(*this==a);}
 	/**
 	Returns the port
 	*/
@@ -107,7 +106,6 @@ ASL_SMART_CLASS(Socket, SmartObject)
 	bool init(bool force = false);
 	Socket_();
 	Socket_(int fd);
-	Socket_(bool);
 	virtual ~Socket_();
 	template <class T>
 	bool setOption(int level, int opt, const T& val) { return setOption(level, opt, &val, sizeof(T)); }
@@ -145,7 +143,6 @@ public:
 
 	ASL_SMART_DEF(Socket, SmartObject);
 	ASL_EXPLICIT Socket(int fd) : ASL_SMART_INIT(fd) {}
-	ASL_EXPLICIT Socket(bool b) : ASL_SMART_INIT(b) {}
 
 	bool operator==(const Socket& s) const { return ptr() == s.ptr(); }
 	
@@ -348,7 +345,6 @@ ASL_SMART_CLASS(PacketSocket, Socket)
 	ASL_SMART_INNER_DEF(PacketSocket);
 	PacketSocket_();
 	PacketSocket_(int fd);
-	~PacketSocket_();
 	String readLine();
 	void sendTo(const InetAddress& addr, const void* data, int n);
 	int readFrom(InetAddress& addr, void* data, int n);
