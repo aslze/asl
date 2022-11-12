@@ -21,10 +21,6 @@ template <class T>
 class Stack: public Array<T>
 {
 public:
-	Stack()
-	{}
-	Stack(const Stack& s): Array<T>((Array<T>&)s)
-	{}
 	Stack& operator>>(T& x)
 	{
 		int lenMinusOne = this->length()-1;
@@ -32,15 +28,32 @@ public:
 		Array<T>::resize(lenMinusOne);
 		return *this;
 	}
-	/** Pushes an item on top of the stack */
+	/**
+	Pushes an item on top of the stack
+	*/
 	void push(const T& x) {(*this)<< x;}
-	/** Removes the topmost item of the stack */
+	/**
+	Removes the topmost item of the stack
+	*/
 	void pop() {Array<T>::resize(this->length()-1);}
-	/** Removes the topmost item and returns it */
+	/**
+	Removes the topmost n items of the stack
+	*/
+	void pop(int n) { Array<T>::resize(this->length() - n); }
+	/**
+	Removes the topmost item and returns it
+	*/
 	T popget() {T y; (*this)>> y; return y;}
-	/** Returns a reference to the topmost item in the stack. */
-	T& top() const {return (T&)(*this)[this->length()-1];}
-	T& top() {return (T&)(*this)[this->length()-1];}
+	/**
+	Returns a reference to the topmost item in the stack.
+	*/
+	T& top() { return (*this)[this->length()-1]; }
+	/**
+	Returns the i-th topmost item (0=top, 1=one below top...)
+	*/
+	T& top(int i) { return (*this)[this->length() - 1 - i]; }
+	const T& top() const { return (*this)[this->length() - 1]; }
+	const T& top(int i) const { return (*this)[this->length() - 1 - i]; }
 };
 
 }
