@@ -196,6 +196,24 @@ inline T rad2deg(T x) {return (T)(x*57.29577951308232);}
 
 static const double PI = 3.14159265358979323;
 
+template<class T>
+inline void vswap(T& a, T& b)
+{
+	T A = a;
+	a = b;
+	b = A;
+}
+
+template<class T>
+inline void swap(T& a, T& b)
+{
+	char t[sizeof(T)];
+	memcpy(t, &a, sizeof(T));
+	memcpy(&a, &b, sizeof(T));
+	memcpy(&b, t, sizeof(T));
+}
+
+
 /**
 Endianness types for binary parsing/writing
 */
@@ -295,6 +313,12 @@ public:
 	*/
 	template <typename E>
 	void shuffle(E& a) { shuffle(&a[0], a.length()); }
+
+	/**
+	Shuffles an array of elements in place.
+	*/
+	template<typename E>
+	void shuffle(const E& a) { shuffle(&a[0], a.length()); }
 };
 
 extern ASL_API Random random; //!< A global random number generator
@@ -353,18 +377,6 @@ inline T max(T a, T b) {if(a>b) return a; else return b;}
 
 template <class T>
 inline T min(T a, T b) {if(a<b) return a; else return b;}
-
-template <class T>
-inline void vswap(T& a, T& b) {T A=a; a=b; b=A;}
-
-template <class T>
-inline void swap(T& a, T& b)
-{
-	char t[sizeof(T)];
-	memcpy(t, &a, sizeof(T));
-	memcpy(&a, &b, sizeof(T));
-	memcpy(&b, t, sizeof(T));
-}
 
 }
 

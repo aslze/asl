@@ -153,7 +153,7 @@ public:
 		T* operator->() {return &(a[i]);}
 		operator bool() const {return i < j;}
 		T& operator[](int k) {return a[i+k];}
-		const T& operator[](int k) const {return a[i+k];}
+		T& operator[](int k) const {return a[i+k];}
 		int length() const {return j-i;}
 	};
 	int r() {return d().rc;}
@@ -603,6 +603,7 @@ public:
 	Enumerator all() {return Enumerator(*this);}
 	Enumerator all() const {return Enumerator(*this);}
 	Enumerator slice_(int i, int j=0) {if(j==0) j=length();return Enumerator(*this, i, j);}
+	Enumerator slice_(int i, int j = 0) const {if(j==0) j=length();return Enumerator(*this, i, j);}
 };
 
 typedef Array<byte> ByteArray;
