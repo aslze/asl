@@ -332,6 +332,7 @@ class ASL_API Var
 	*/
 	bool ok() const { return _type != NONE; }
 
+	void operator=(Type x) { *this = Var(x); }
 	void operator=(const Var& x);
 	void operator=(double x);
 	void operator=(int x);
