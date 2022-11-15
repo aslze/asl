@@ -1,15 +1,16 @@
 #define TLSSOCKET_CPP
+#include <mbedtls/version.h>
+#include <mbedtls/ssl.h>
+#include <mbedtls/debug.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/ctr_drbg.h>
+#include <mbedtls/error.h>
+#include <asl/TlsSocket.h>
 #if MBEDTLS_VERSION_MAJOR < 3
 #include <mbedtls/net.h>
 #else
 #include <mbedtls/net_sockets.h>
 #endif
-#include <mbedtls/debug.h>
-#include <mbedtls/ssl.h>
-#include <mbedtls/entropy.h>
-#include <mbedtls/ctr_drbg.h>
-#include <mbedtls/error.h>
-#include <asl/TlsSocket.h>
 
 //#define TLS_DEBUG 3
 

@@ -153,6 +153,10 @@ if(ASL_BUILD_SHARED)
 	list(APPEND TARGETS asl)
 endif()
 
+if(ASL_TLS AND TARGET mbedtls)
+	list(APPEND TARGETS mbedtls mbedx509 mbedcrypto)
+endif()
+
 install( TARGETS ${TARGETS} EXPORT asl RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib )
 install( DIRECTORY ../include/ DESTINATION include )
 
