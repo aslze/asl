@@ -112,16 +112,20 @@ protected:
 	{
 		K key;
 		T value;
-		KeyVal* next;
-		KeyVal() {next=0;}
-		KeyVal(const K& n): key(n) {}
-		KeyVal(const K& n, const T& v): key(n), value(v) {}
-		KeyVal(const KeyVal& p): key(p.key), value(p.value) {}
-		void operator=(const KeyVal& p) {key=p.key; value=p.value;}
+		KeyVal(const K& k): key(k) {}
+		KeyVal(const K& k, const T& v): key(k), value(v) {}
 	};
 
-	public:
-	Array< KeyVal* > a;
+	struct KeyValN : public KeyVal
+	{
+		KeyValN* next;
+		KeyValN(): next(0) {}
+		KeyValN(const K& k): KeyVal(k), next(0) {}
+		KeyValN(const K& k, const T& v) : KeyVal(k, v), next(0) {}
+	};
+
+public:
+	Array<KeyValN*> a;
 	int& _n() { return *(int*)&a[0]; }
 	int _n() const { return *(const int*)&a[0]; }
 	AtomicCount& _rc() { return *(AtomicCount*)&a[1]; }
@@ -198,8 +202,8 @@ public:
 		{
 			if(a[i])
 			{
-				KeyVal* p = a[i];
-				KeyVal* next;
+				KeyValN* p = a[i];
+				KeyValN* next;
 				do {
 					next = p->next;
 					delete p;
@@ -232,7 +236,7 @@ public:
 		{
 			if(a[i] != 0)
 			{
-				KeyVal* p = a[i];
+				KeyValN* p = a[i];
 				int count = 1;
 				while (p = p->next)
 					count++;
@@ -250,7 +254,7 @@ public:
 		if (_n() < a.length() * 7 / 8 || a.length() > 280000)
 			return;
 
-		Array<KeyVal*> b((a.length() - ASL_HMAP_SKIP) * 8 + ASL_HMAP_SKIP);
+		Array<KeyValN*> b((a.length() - ASL_HMAP_SKIP) * 8 + ASL_HMAP_SKIP);
 		for (int i = 0; i<ASL_HMAP_SKIP; i++)
 			b[i] = a[i];
 		for (int i = ASL_HMAP_SKIP; i<b.length(); i++)
@@ -261,13 +265,13 @@ public:
 		{
 			if (a[i])
 			{
-				KeyVal* p = a[i];
-				KeyVal* next;
+				KeyValN* p = a[i];
+				KeyValN* next;
 				do {
 					next = p->next;
 					int bin = (hash(p->key) & (b.length() - ASL_HMAP_SKIP - 1)) + ASL_HMAP_SKIP;
 
-					KeyVal* p2 = b[bin], *q2 = p2;
+					KeyValN* p2 = b[bin], *q2 = p2;
 					while (p2) {
 						q2 = p2;
 						p2 = p2->next;
@@ -288,35 +292,24 @@ public:
 
 	/**
 	Returns a reference to the value associated to the given key,
-	creating one if the key does not exist.
+	the key has to exist
 	*/
 	const T& operator[](const K& key) const
 	{
-		const_cast<HashMap*>(this)->rehash();
-		int bin = binOf(key);
-		KeyVal* p = a[bin], *q = p;
-		while(p)
-		{
-			if(p->key == key)
-				return p->value;
-			q = p;
-			p = p->next;
-		}
-		p = new KeyVal(key);
-		p->next = 0;
-		if(!q)
-			a[bin] = p;
-		else
-			q->next = p;
-		++const_cast<HashMap*>(this)->_n();
-		return p->value;
+		const T* p = find(key);
+		static T def;
+		return p ? *p : def;
 	}
 
+	/**
+	Returns a reference to the value associated to the given key,
+	creating one if the key does not exist.
+	*/
 	T& operator[](const K& key)
 	{
 		rehash();
 		int bin = binOf(key);
-		KeyVal* p = a[bin], *q = p;
+		KeyValN* p = a[bin], *q = p;
 		while(p)
 		{
 			if(p->key == key)
@@ -324,7 +317,7 @@ public:
 			q = p;
 			p = p->next;
 		}
-		p = new KeyVal(key);
+		p = new KeyValN(key);
 		p->next = 0;
 		if(!q)
 			a[bin] = p;
@@ -335,11 +328,38 @@ public:
 	}
 	
 	/**
+	Returns a pointer to the element with key `key` or a null pointer if it is not found
+	*/
+	T* find(const K& key)
+	{
+		KeyValN* p = a[binOf(key)];
+		while (p)
+		{
+			if (p->key == key)
+				return &p->value;
+			p = p->next;
+		}
+		return NULL;
+	}
+
+	const T* find(const K& key) const
+	{
+		return const_cast<HashMap*>(this)->find(key);
+	}
+
+	/**
 	Returns the value for the given key or the value `def` if it is not found
 	*/
 	const T& get(const K& key, const T& def) const
 	{
-		return has(key)? (*this)[key] : def;
+		const T* p = find(key);
+		return p ? *p : def;
+	}
+
+	HashMap& set(const K& key, const T& value)
+	{
+		(*this)[key] = value;
+		return *this;
 	}
 	
 	/**
@@ -348,12 +368,12 @@ public:
 	void remove(const K& key)
 	{
 		int bin = binOf(key);
-		KeyVal* p = a[bin], *q = p;
+		KeyValN* p = a[bin], *q = p;
 		while(p)
 		{
 			if(p->key == key)
 			{
-				KeyVal* n = p->next;
+				KeyValN* n = p->next;
 				delete p;
 				if(q!=p)
 					q->next = n;
@@ -371,7 +391,7 @@ public:
 	*/
 	bool has(const K& key) const
 	{
-		KeyVal* p = a[binOf(key)];
+		KeyValN* p = a[binOf(key)];
 		while(p)
 		{
 			if(p->key == key)
@@ -408,9 +428,9 @@ public:
 
 	struct Enumerator
 	{
-		typedef typename HashMap<K,T>::KeyVal KeyVal;
-		typename Array<KeyVal*>::Enumerator e;
-		KeyVal* p;
+		typedef typename HashMap<K,T>::KeyValN KeyValN;
+		typename Array<KeyValN*>::Enumerator e;
+		KeyValN* p;
 		///Enumerator() {}
 		Enumerator(const HashMap& m): e(m.a)
 		{
@@ -440,7 +460,7 @@ public:
 		const K& operator~() {return p->key;}
 		operator bool() const {return p!=0 || e;}
 		bool operator!=(const Enumerator& e) const { return (bool)*this; }
-		Enumerator all() const { return *this; }
+		Enumerator all() const { return Enumerator(*(HashMap*)this); }
 	};
 	
 	Enumerator all() const { return Enumerator(*this); }
@@ -449,7 +469,7 @@ public:
 	{
 		FEnumerator() {}
 		FEnumerator(const HashMap& m) : Enumerator(m) {}
-		typename Enumerator::KeyVal& operator*() { return *this->p; }
+		typename HashMap<K, T>::KeyVal& operator*() { return *(this->p); }
 	};
 
 	FEnumerator _all() const { return FEnumerator(*this); }

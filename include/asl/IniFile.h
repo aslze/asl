@@ -66,6 +66,7 @@ public:
 		Section(const String& t) : _title(t) {}
 		const String& title() const {return _title;}
 		String& operator[](const String& k) {return _vars[k];}
+		const String& operator[](const String& k) const { return _vars[k]; }
 		const HashDic<String>& vars() const {return _vars;}
 		Section clone() const;
 		bool has(const String& k) const { return _vars.has(k); }

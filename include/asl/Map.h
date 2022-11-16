@@ -36,10 +36,16 @@ morse['S'] = "---";
 String sos = morse['S'] + morse['O'] + morse['S'];
 ~~~
 
-Maps can be initialized with short hand syntax (this is useful in Http::get() to specify HTTP request headers):
+Maps can be initialized with shorthand syntax (this is useful in Http::get() to specify HTTP request headers):
 
 ~~~
 Map<> headers = Map<>("Content-Type", "text/html")("Content-Lenth", length);
+~~~
+
+of with braces, in C++11:
+
+~~~
+Map<> headers = {{ "Content-Type", "text/html" }, { "Content-Lenth", length }};
 ~~~
 
 And iterated with the `foreach2` macro:
@@ -81,9 +87,6 @@ public:
 		KeyVal(): key(K()), value(T()) {}
 		KeyVal(const K& n): key(n), value(T()) {}
 		KeyVal(const K& n, const T& v): key(n), value(v) {}
-		KeyVal(const KeyVal& p): key(p.key), value(p.value) {}
-		//KeyVal(KeyVal&& p): key(p.key), value(p.value) {}
-		void operator=(const KeyVal& p) {key=p.key; value=p.value;}
 	};
 protected:
 	Array<KeyVal> a;
@@ -214,8 +217,14 @@ public:
 			k[i] = a[i].key;
 		return k;
 	}
-	/** Returns a reference to the element with key key */
-	T& operator[](const K& key) const {return (*(Map*)this)[key];}
+	/** Returns a reference to the element with key key, or a static default constructed item if not found */
+	const T& operator[](const K& key) const
+	{
+		const T* p = find(key);
+		static T def;
+		return p ? *p : def;
+	}
+
 	T& operator[](const K& key);
 	
 	/** Returns the element with key `key` or the value `def` if key is not found */
@@ -297,9 +306,7 @@ public:
 		String out;
 		foreach2(String& k, const String& v, *this)
 		{
-			out << k;
-			out << s2;
-			out << v;
+			out << k << s2 << v;
 			if (i++ < n - 1)
 				out << s1;
 		}

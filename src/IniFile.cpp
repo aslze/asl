@@ -26,7 +26,7 @@ IniFile::IniFile(const String& name, bool shouldwrite)
 	while(!file.end())
 	{
 		String line=file.readLine();
-		if(shouldwrite)
+		if (shouldwrite)
 			_lines << line;
 		if(!line.ok())
 			continue;
@@ -48,7 +48,7 @@ IniFile::IniFile(const String& name, bool shouldwrite)
 		}
 		else if(line[i0] != '#' && line[i0] > 47 && line[i0] != ';')
 		{
-			int i=line.indexOf('=');
+			int i = line.indexOf('=');
 			if (i < 1)
 			{
 				if (_lines.length() > 0 && _lines.last().ok())
@@ -99,8 +99,8 @@ String& IniFile::operator[](const String& name)
 		String sec = name.substring(0, slash);
 		Section& section = _sections[sec];
 		if (!section._title.ok())
-		section._title = sec;
-		return section[name.substring(slash+1)];
+			section._title = sec;
+		return section[name.substring(slash + 1)];
 	}
 }
 
@@ -116,7 +116,7 @@ const String IniFile::operator[](const String& name) const
 		String sec = name.substring(0, slash);
 		if (!_sections.has(sec))
 			return String();
-		Section& section = _sections[sec];
+		const Section& section = _sections[sec];
 		sec = name.substring(slash + 1);
 		return section.has(sec) ? section[sec] : String();
 	}
@@ -158,7 +158,7 @@ void IniFile::write(const String& fname)
 		int i0 = 0;
 		while (myisspace(line[i0]) && line[i0] != '\0')
 			i0++;
-		if(line[0]=='[')
+		if (line[0] == '[')
 		{
 			int end = line.indexOf(']');
 			if (end < 0)
@@ -169,7 +169,7 @@ void IniFile::write(const String& fname)
 		}
 		else if (line[i0] != '#' && line[i0] > 47 && line[i0] != ';')
 		{
-			int i=line.indexOf('=');
+			int i = line.indexOf('=');
 			if (i < 0)
 				continue;
 			String key = line.substring(0,i).trimmed();
