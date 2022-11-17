@@ -279,7 +279,7 @@ public:
 		Map<K,T>* d;
 		int i;
 		Enumerator(){}
-		Enumerator(Map& _d): d(&_d), i(0) {}
+		Enumerator(const Map& _d): d((Map<K,T>*)&_d), i(0) {}
 		//Enumerator(const Enumerator& e) : d(e.d), i(e.i) {}
 		//void operator=(const Enumerator& e) {memcpy(this, &e, sizeof(e));}
 		void operator++() {i++;}

@@ -297,8 +297,13 @@ public:
 	const T& operator[](const K& key) const
 	{
 		const T* p = find(key);
-		static T def;
-		return p ? *p : def;
+		if (p)
+			return *p;
+		else
+		{
+			static const T def = T();
+			return def;
+		}
 	}
 
 	/**

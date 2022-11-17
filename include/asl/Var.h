@@ -186,6 +186,7 @@ class ASL_API Var
 	// avoid these operators
 	void operator+(const Var& v) {}
 	void operator-(const Var& v) {}
+	static const Var none;
   public:
 	enum Type {NONE, NUL, NUMBER, BOOL, INT, SSTRING, FLOAT, STRING=8, ARRAY, DIC, OBJ=10};
 	bool isPod() const {return (_type & 8)==0;}
@@ -547,6 +548,7 @@ class ASL_API Var
 	Returns an independent copy of this Var (for arrays and objects)
 	*/
 	Var clone() const;
+
 	struct Enumerator
 	{
 		Var& v;
@@ -581,7 +583,8 @@ class ASL_API Var
 		bool operator!=(const Enumerator& e) const { return (bool)*this; }
 	};
 	/** Returns an enumerator for this var's contents */
-	Enumerator all() const {return Enumerator(*this);}
+	const Enumerator all() const {return Enumerator(*this);}
+	Enumerator all() { return Enumerator(*this); }
 
 	friend struct Enumerator;
 

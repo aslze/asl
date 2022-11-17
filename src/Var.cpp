@@ -21,7 +21,7 @@ namespace asl {
 #define DEL_STRING(s) (s).destroy()
 #endif
 
-//#define SHORT_FLOATS
+const Var Var::none;
 
 Var::Var(Type t)
 {
@@ -85,10 +85,6 @@ Var::Var(bool y)
 Var::Var(double x)
 	: _type(NUMBER), d(x)
 {
-#ifdef SHORT_FLOATS
-	if ((*(ULong*)&d & 0x7ff0000000000000) != 0x7ff0000000000000)
-		(*(ULong*)&d) |= 1;
-#endif
 }
 
 Var::Var(const char* y)
@@ -359,10 +355,6 @@ void Var::operator=(double x)
 		free();
 	_type=NUMBER;
 	d=x;
-#ifdef SHORT_FLOATS
-	if ((*(ULong*)&d & 0x7ff0000000000000) != 0x7ff0000000000000)
-		(*(ULong*)&d) |= 1;
-#endif
 }
 
 void Var::operator=(int x)
@@ -478,16 +470,17 @@ void Var::operator=(const String& x)
 const Var& Var::operator[](int i) const
 {
 	if(_type==ARRAY)
-	{
 		return (*a)[i];
-	}
-	else if(_type==NONE) {
+
+	return none;
+	/*else if (_type == NONE)
+	{
 		((Var*)this)->_type=ARRAY;
 		NEW_ARRAY( ((Var*)this)->a );
 		((Var*)this)->a->resize(i+1);
 		return (*a)[i];
 	}
-	return *(Var*)this;
+	return *(Var*)this;*/
 }
 
 Var& Var::operator[](int i)
@@ -498,13 +491,18 @@ Var& Var::operator[](int i)
 			a->resize(i+1);
 		return (*a)[i];
 	}
-	else if(_type==NONE) {
+	else if (_type == OBJ)
+	{
+		return (*o)[String(i)];
+	}
+	else if (_type == NONE)
+	{
 		_type=ARRAY;
 		NEW_ARRAY(a);
 		a->resize(i+1);
 		return (*a)[i];
 	}
-	return *(Var*)this;
+	return *this;
 }
 
 Var& Var::operator[](const String& k)
@@ -517,8 +515,10 @@ Var& Var::operator[](const String& k)
 	}
 	else if(_type==DIC)
 		return (*o)[k];
-	asl_error("Var[String]");
-	return *(Var*)this;
+	else if (_type == ARRAY)
+		return (*a)[k];
+	asl_error("Var[String] on non object");
+	return *this;
 }
 
 const Var& Var::operator[](const String& k) const
@@ -526,8 +526,7 @@ const Var& Var::operator[](const String& k) const
 	if(_type==DIC)
 		return (*o)[k];
 
-	asl_error("Var[String]");
-	return *(Var*)this;
+	return none;
 }
 
 /*

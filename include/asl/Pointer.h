@@ -275,26 +275,23 @@ private:
 template <class T>
 struct StaticSpace
 {
-	void construct()
+	void construct() const
 	{
 		asl_construct((T*)_space);
 	}
-	void construct(const T& x)
+	void construct(const T& x) const
 	{
 		asl_construct_copy((T*)_space, x);
 	}
-	void destroy()
+	void destroy() const
 	{
 		asl_destroy((T*)_space);
 	}
-	T& operator*() const
-	{
-		return *(T*)(_space);
-	}
-	T* operator->() const
-	{
-		return (T*)(_space);
-	}
+
+	T& operator*() { return *(T*)(_space); }
+	T* operator->() { return (T*)(_space); }
+	const T& operator*() const { return *(const T*)(_space); }
+	const T* operator->() const { return (const T*)(_space); }
 private:
 	byte _space[sizeof(T)];
 };
