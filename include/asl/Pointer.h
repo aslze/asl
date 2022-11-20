@@ -11,7 +11,25 @@ namespace asl {
 template <class T>
 class Shared
 {
+	struct Core {
+		T* p;
+		AtomicCount rc;
+		Core() : p(0), rc(1) {}
+		Core(T* r) : p(r), rc(1) {}
+		void ref() {
+			++rc;
+		}
+		void unref() {
+			if (--rc <= 0) {
+				delete p;
+				p = 0;
+				delete this;
+			}
+		}
+	};
+
 public:
+	template<class T2> friend class Shared;
 	Shared()
 	{
 		_p = 0;
@@ -50,6 +68,10 @@ public:
 		}
 		return *this;
 	}
+	Shared clone() const
+	{
+		return Shared(_p->p->clone());
+	}
 	T& operator*() const
 	{
 		return *_p->p;
@@ -62,6 +84,20 @@ public:
 	{
 		return _p->p;
 	}
+	
+	template<class T2>
+	Shared<T2> as() const
+	{
+		Shared<T2> sp;
+		const T2* p = dynamic_cast<const T2*>(_p->p);
+		if (p)
+		{
+			sp._p = (typename Shared<T2>::Core*)_p;
+			sp.ref();
+		}
+		return sp;
+	}
+
 	operator void*() const
 	{
 		return _p->p;
@@ -97,23 +133,6 @@ public:
 		return _p < r._p;
 	}
 private:
-
-	struct Core {
-		T* p;
-		AtomicCount rc;
-		Core() : p(0), rc(1) {}
-		Core(T* r) : p(r), rc(1) {}
-		void ref(){
-			++rc;
-		}
-		void unref(){
-			if(--rc<=0){
-				delete p;
-				p=0;
-				delete this;
-			}
-		}
-	};
 
 	Core* _p;
 
