@@ -63,6 +63,8 @@ public:
 		return open(_path, mode);
 	}
 
+	bool end() { return (_file || open(_path, READ)) ? feof(_file) != 0 : true; }
+	
 	/** Prints formatted text as with the regular printf. Returns false on failure */
 	bool printf(const char* fmt, ...);
 	/** Reads formatted text as with the regular scanf up to 4 items only! */

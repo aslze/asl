@@ -104,6 +104,7 @@ public:
 	Array<String> operator()(const String& opt) const;
 	/** Returns the free arguments, arguments excluding options */
 	Array<String> rest() const;
+	/** Returns all options and their values as a Map (only the last value if an option appears more than once) */
 	Dic<String> options() const { return _opts; }
 	/** Returns all the arguments, as received at main() */
 	Array<String> all() const;

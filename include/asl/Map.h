@@ -278,10 +278,7 @@ public:
 	{
 		Map<K,T>* d;
 		int i;
-		Enumerator(){}
 		Enumerator(const Map& _d): d((Map<K,T>*)&_d), i(0) {}
-		//Enumerator(const Enumerator& e) : d(e.d), i(e.i) {}
-		//void operator=(const Enumerator& e) {memcpy(this, &e, sizeof(e));}
 		void operator++() {i++;}
 		T& operator*() {return (*d)(i);}
 		T* operator->() {return &((*d)(i));}
@@ -289,7 +286,6 @@ public:
 		operator bool() const {return i < d->length();}
 	};
 	/** Returns an enumerator for this map */
-	Enumerator all() {return Enumerator(*this);}
 	Enumerator all() const { return Enumerator(*(Map*)this); }
 
 	// for internal use
