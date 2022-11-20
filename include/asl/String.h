@@ -531,6 +531,9 @@ public:
 	Returns an uppercase version of this string
 	*/
 	String toUpperCase() const;
+
+	void split(Array<String>& out) const;
+
 	/**
 	Returns a list of strings obtained by cutting this string by whitespace.
 
@@ -538,7 +541,13 @@ public:
 	String("  a  \t\n b  c   ").split() -> ["a", "b", "c"]
 	~~~
 	*/
-	Array<String> split() const;
+	Array<String> split() const
+	{
+		Array<String> a;
+		split(a);
+		return a;
+	}
+
 	template <class T>
 	Array<T> split_() const
 	{
@@ -560,6 +569,9 @@ public:
 		}
 		return a;
 	}
+
+	void split(const String& sep, Array<String>& out) const;
+
 	/**
 	Returns a list of strings obtained by cutting this string by occurences of the separator `sep`.
 
@@ -574,7 +586,6 @@ public:
 		return a;
 	}
 
-	void split(const String& sep, Array<String>& out) const;
 	/**
 	Parses a string and creates a `Dic` using `sep1` as pair separator (e.g.\ ','), and `sep2` as key/value separator (e.g.\ '=').
 	
@@ -635,13 +646,6 @@ inline String operator+(const String& a, const T& b)
 	return a+String(b);
 }
 #endif
-
-template<class T>
-Array<T>::Array(const String& s)
-{
-	alloc(0);
-	*this = s.split();
-}
 
 template<class T>
 String Array<T>::join(const String& sep) const

@@ -687,17 +687,17 @@ void String::split(const String& sep, Array<String>& out) const
 	}
 }
 
-Array<String> String::split() const
+void String::split(Array<String>& a) const
 {
-	Array<String> a;
+	a.clear();
 	char* s = str();
 	for(int i=0; i<=length(); i++)
 	{
-		if(isspace(s[i]))
+		if(myisspace(s[i]))
 			continue;
 		for(int j=i+1; j<length()+1; j++)
 		{
-			if(isspace(s[j]) || s[j]=='\0')
+			if(myisspace(s[j]) || s[j]=='\0')
 			{
 				a << substring(i, j);
 				i=j;
@@ -705,7 +705,6 @@ Array<String> String::split() const
 			}
 		}
 	}
-	return a;
 }
 
 Dic<String> String::split(const String& sep1, const String& sep2) const
