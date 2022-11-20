@@ -35,10 +35,10 @@ class Vec3_
  public:
 	Vec3_() {}
 	Vec3_(T x, T y, T z) : x(x), y(y), z(z) {}
-	Vec3_(const Vec3_& v): x(v.x), y(v.y), z(v.z) {}
 	Vec3_(const Vec2_<T>& v, T z) : x(v.x), y(v.y), z(z) {}
 	template<class T2>
-	Vec3_(const Vec3_<T2>& v) : x((T)v.x), y((T)v.y), z((T)v.z) {}
+	Vec3_(const Vec3_<T2>& v) : x(v.x), y(v.y), z(v.z) {}
+	
 	Vec3_(const T* v): x(v[0]), y(v[1]), z(v[2]) {}
 	static Vec3_ zeros() { return Vec3_(0, 0, 0); }
 	operator const T*() const {return (T*)this;}
@@ -56,8 +56,8 @@ class Vec3_
 	{
 		return Vec3_<T2>(T2(x), T2(y), T2(z));
 	}
-	static Vec3_ fromCylindrical( T r, T a, T z) {return Vec3_(r*cos(a), r*sin(a), z);}
-	static Vec3_ fromSpherical( T r, T a, T b) {float R=r*cos(b); return Vec3_(R*cos(a), R*sin(b), r*sin(b));}
+	static ASL_DEPRECATED(Vec3_ fromCylindrical(T r, T a, T z), "Use your own axes") { return Vec3_(r * cos(a), r * sin(a), z); }
+	static ASL_DEPRECATED(Vec3_ fromSpherical( T r, T a, T b), "Use your own axes") {float R=r*cos(b); return Vec3_(R*cos(a), R*sin(b), r*sin(b));}
 
 	void set( T X, T Y, T Z) {x=X; y=Y; z=Z;}
 

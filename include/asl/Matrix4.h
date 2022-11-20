@@ -143,7 +143,8 @@ public:
 		a[0][3], a[1][3], a[2][3], a[3][3]);
 	}
 
-	bool isColmajor() const { return false; }
+	ASL_DEPRECATED(bool isColmajor() const, "Use isRowMajor()") { return !isRowMajor(); }
+
 	/**
 	Returns this matrix plus `B`
 	*/

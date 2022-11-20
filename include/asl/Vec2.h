@@ -33,7 +33,6 @@ class Vec2_
 	Vec2_() {}
 	/** Constructs a vector with the given (x, y) coordinates */
 	Vec2_(T x, T y): x(x), y(y) {}
-	Vec2_(const Vec2_& v): x(v.x), y(v.y) {}
 	static Vec2_ zeros() { return Vec2_(0, 0); }
 	template<class T2>
 	Vec2_<T2> with() const
@@ -60,8 +59,6 @@ class Vec2_
 	T norm1()     const {return (T)(fabs(x)+fabs(y));}
 	T normInf()   const {return (T)max(fabs((T)x), fabs((T)y));}
 
-	/** Assings `b` to this vector */
-	void operator=(const Vec2_& b) {x=b.x; y=b.y;}
 	/** Returns this vector plus `b` */
 	Vec2_ operator+(const Vec2_& b) const {return Vec2_(x+b.x, y+b.y);}
 	/** Returns this vector minus `b` */

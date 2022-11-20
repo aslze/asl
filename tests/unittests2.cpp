@@ -158,46 +158,70 @@ ASL_TEST(XML)
 #endif
 }
 
-class Animal
+struct Animal
 {
-public:
-	virtual String speak()=0;
-	virtual ~Animal() {}
+	static int count;
+	Animal() { count++; }
+	Animal(const Animal& a) { count++; }
+	virtual ~Animal() { count--; }
+	virtual Animal* clone() const = 0;
+	virtual String speak() = 0;
 };
 
-class Cat : public Animal
+int Animal::count = 0;
+
+struct Cat : public Animal
 {
-public:
-	String speak()
-	{
-		return "Miau!";
-	}
+	Animal* clone() const { return new Cat(*this); }
+	String speak() { return "Meow!"; }
 };
 
 ASL_FACTORY_REGISTER(Animal, Cat)
 
-class Dog : public Animal
+struct Dog : public Animal
 {
-public:
-	String speak()
-	{
-		return "Guau!";
-	}
+	Animal* clone() const { return new Dog(*this); }
+	String bark() { return "Woof!"; }
+	String speak() { return bark(); }
 };
 
 ASL_FACTORY_REGISTER(Animal, Dog)
 
+struct Device
+{
+	virtual bool enable() { return false; }
+};
+
+struct Motor: public Device
+{
+	bool enable() { return move(); }
+	bool move() { return true; }
+};
 
 ASL_TEST(Factory)
 {
-	Array<String> catalog = Factory<Animal>::catalog();
-	ASL_ASSERT(catalog.length() == 2);
-	ASL_ASSERT(catalog.contains("Cat"));
-	ASL_ASSERT(catalog.contains("Dog"));
-	
-	Shared<Animal> animal = Factory<Animal>::create("Cat");
-	
-	ASL_ASSERT( animal->speak() == "Miau!" );
+	{
+		Array<String> catalog = Factory<Animal>::catalog();
+		ASL_ASSERT(catalog.length() == 2);
+		ASL_ASSERT(catalog.contains("Cat"));
+		ASL_ASSERT(catalog.contains("Dog"));
+
+		Shared<Animal> animal = Factory<Animal>::create("Dog");
+
+		ASL_ASSERT(animal->speak() == "Woof!");
+
+		ASL_ASSERT(!animal.as<Cat>());
+		ASL_ASSERT(animal.as<Dog>()->bark() == "Woof!");
+
+		Shared<Animal> another = animal;
+		Shared<Animal> dolly = animal.clone();
+		ASL_ASSERT(dolly->speak() == "Woof!");
+
+		Shared<Device> dev = new Motor();
+		ASL_ASSERT(dev->enable());
+		ASL_ASSERT(dev.as<Motor>() && dev.as<Motor>()->move());
+	}
+	ASL_ASSERT(Animal::count == 0);
 }
 
 ASL_TEST(Path)

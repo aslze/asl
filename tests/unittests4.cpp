@@ -21,7 +21,7 @@ ASL_TEST(Vec3)
 	ASL_APPROX(a*b, 1.0f, EPS);
 
 	Vec3d a2 = a, b2 = b;
-	Vec3 a3 = a2;
+	Vec3 a3 = a2.with<float>();
 	ASL_APPROX(a2 + b2, Vec3d(2, 2.5, 3), EPS);
 }
 
