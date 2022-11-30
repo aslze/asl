@@ -112,7 +112,7 @@ TabularDataFile& TabularDataFile::operator<<(const Var& x)
 			if(i>0)
 				row << _separator;
 			Var& item = _row[i];
-			String value = item.toString();
+			String value = item.ok() ? item.toString() : String();
 			if (_decimal != '.' && item.is(Var::NUMBER))
 				value.replaceme('.', _decimal);
 			else if (_quoteStrings && item.is(Var::STRING))
