@@ -62,10 +62,7 @@ public:
 		a[2][0] = (T)m(2, 0); a[2][1] = (T)m(2, 1); a[2][2] = (T)m(2, 2); a[2][3] = (T)m(2, 3);
 		a[3][0] = (T)m(3, 0); a[3][1] = (T)m(3, 1); a[3][2] = (T)m(3, 2); a[3][3] = (T)m(3, 3);
 	}
-	Matrix4_(const Matrix4_& m)
-	{
-		memcpy(this, &m, sizeof(m));
-	}
+
 	/**
 	Constructs a matrix with the given elements (by rows) with last row [0 0 0 1] by default.
 	*/

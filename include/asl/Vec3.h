@@ -39,7 +39,7 @@ class Vec3_
 	template<class T2>
 	Vec3_(const Vec3_<T2>& v) : x(v.x), y(v.y), z(v.z) {}
 	
-	Vec3_(const T* v): x(v[0]), y(v[1]), z(v[2]) {}
+	Vec3_(const T* v) : x(v[0]), y(v[1]), z(v[2]) {}
 	static Vec3_ zeros() { return Vec3_(0, 0, 0); }
 	operator const T*() const {return (T*)this;}
 	/** Returns the *x* and *y* components as a Vec2 */
@@ -59,7 +59,7 @@ class Vec3_
 	static ASL_DEPRECATED(Vec3_ fromCylindrical(T r, T a, T z), "Use your own axes") { return Vec3_(r * cos(a), r * sin(a), z); }
 	static ASL_DEPRECATED(Vec3_ fromSpherical( T r, T a, T b), "Use your own axes") {float R=r*cos(b); return Vec3_(R*cos(a), R*sin(b), r*sin(b));}
 
-	void set( T X, T Y, T Z) {x=X; y=Y; z=Z;}
+	void set(T X, T Y, T Z) {x=X; y=Y; z=Z;}
 
 	/** Returns a normalized version of this vector */
 	Vec3_ normalized() const {
@@ -75,7 +75,6 @@ class Vec3_
 	/** Returns the angle between this vector and `b` */
 	T angle(const Vec3_& b) const {return acos(clamp((*this) * b / (!(*this)*!b), -1.0f, 1.0f) );}
 
-	void operator=(const Vec3_& b) {x=b.x; y=b.y; z=b.z;}
 	/** Returns this plus `b` */
 	Vec3_ operator+(const Vec3_& b) const {return Vec3_(x+b.x, y+b.y, z+b.z);}
 	/** Returns this minus `b` */

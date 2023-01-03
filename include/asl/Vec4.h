@@ -28,7 +28,6 @@ class Vec4_
 	Vec4_() {}
 	Vec4_(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
 	Vec4_(const Vec3_<T>& v, T w) : x(v.x), y(v.y), z(v.z), w(w) {}
-	Vec4_(const Vec4_& v): x(v.x), y(v.y), z(v.z), w(v.w) {}
 	Vec4_(const T* v) : x(v[0]), y(v[1]), z(v[2]), w(v[3]) {}
 	static Vec4_ zeros() { return Vec4_(0, 0, 0, 0); }
 	template<class T2>
@@ -54,7 +53,6 @@ class Vec4_
 	T operator!() const {return length();}
 	Vec4_ abs() const {return Vec4_(fabs(x), fabs(y), fabs(z), fabs(w));}
 
-	void operator=(const Vec4_& b) {x = b.x; y = b.y; z = b.z; w = b.w;}
 	/** Returns this plus `b` */
 	Vec4_ operator+(const Vec4_& b) const {return Vec4_(x+b.x, y+b.y, z+b.z, w+b.w);}
 	/** Returns this minus `b` */
