@@ -20,18 +20,10 @@ Var data = Json::decode("{\"a\":\"abc\", \"b\":[1.5, 3]}"); // decode JSON from 
 data["c"] = true;                                           // add a property
 String json = Json::encode(data);                           // encode to string
 
-Json::write("data.json", data);                             // write to file
+Json::write(data, "data.json");                             // write to file
 ~~~
 
-The same `data` object can be built in one statement:
-
-~~~ 
-Var data = Var("a", "abc")
-              ("b", array<Var>(1.5, 3.0))
-              ("c", true);
-~~~
-
-Or in C++11 compilers, also like this:
+The same `data` object can be built in one statement, in C++11 compilers:
 
 ~~~
 Var data {
@@ -39,6 +31,14 @@ Var data {
     {"b", {1.5, 3.0}},
     {"c", true}
 };
+~~~
+
+Or in older compilers:
+
+~~~
+Var data = Var("a", "abc")
+              ("b", array<Var>(1.5, 3.0))
+              ("c", true);
 ~~~
 */
 struct ASL_API Json

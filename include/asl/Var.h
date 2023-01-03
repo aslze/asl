@@ -373,13 +373,14 @@ class ASL_API Var
 	}
 	/** Returns the element at index `i` if this var is an array */
 	const Var& operator[](int i) const;
-	/** Returns the element at index `i` if this var is an array */
+	/** Returns the element at index `i` if this var is an array, resizing the array if i is out of bounds */
 	Var& operator[](int i);
-	/** Returns the property named `key` if this var is an object */
+	/** Returns the property named `key` if this var is an object, creating it if it does not exist */
 	Var& operator[](const String& key);
 	/** Returns the property named `key` if this var is an object */
 	const Var& operator[](const String& key) const;
 	
+	/** Returns a copy of the property named `key` if this var is an object, and never modifies the object */
 	Var operator()(const String& key) const { return has(key) ? (*this)[key] : Var(); }
 
 	/**
@@ -401,6 +402,7 @@ class ASL_API Var
 
 	/** Returns the length of this var if it is an array or a dic */
 	int length() const;
+	/** Evaluates equality of type and value of two vars */
 	bool operator==(const Var& other) const
 	{
 		if(_type == STRING && other._type == SSTRING)
