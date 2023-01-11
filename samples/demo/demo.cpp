@@ -58,7 +58,7 @@ int main(int narg, char* argv[])
 
 	// HTTP client request to a Web Service to get your IP info including geographic location:
 
-	Var info = Http::get("http://ipinfo.io/").data();
+	Var info = Http::get("http://ipinfo.io/").json();
 	Array<double> location = info["loc"].string().split(",");
 	printf("IP info:\n%s\n", *Xdl::encode(info, true));
 	printf("You are at latitude %f longitude %f\n", location[0], location[1]);
