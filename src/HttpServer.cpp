@@ -12,11 +12,11 @@ namespace asl {
 
 bool verbose = false;
 
-HttpServer::HttpServer(int port)
+HttpServer::HttpServer(int port):
+	_proto("HTTP/1.1"),
+	_methods("GET, POST, OPTIONS, PUT, DELETE, PATCH, HEAD")
 {
 	_requestStop = false;
-	_proto = "HTTP/1.1";
-	_methods = "GET, POST, OPTIONS, PUT, DELETE, PATCH, HEAD";
 	if (port >= 0)
 		bind(port);
 	_wsserver = NULL;

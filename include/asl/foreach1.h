@@ -14,7 +14,7 @@ template <class C>
 struct EnumWrapper : public EnumWrapper_ {
 	typename C::Enumerator e;
 	//const C c; // for temporaries. add only if very little performance impact
-	EnumWrapper(const C& a) : e(((C&)a).all()) { more = 1; }
+	ASL_EXPLICIT EnumWrapper(const C& a) : e(((C&)a).all()) { more = 1; }
 	operator bool() const { return e; }
 };
 

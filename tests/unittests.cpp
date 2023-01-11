@@ -526,7 +526,7 @@ ASL_TEST(Var)
 	ASL_CHECK(v3.toString(), == , "{ai=[1,2,3],as=[a,b],i=1,s=abc}");
 
 	Var v4a = { "x", "y" };
-	Var v4b = { "x", String("y") };
+	Var v4b = { { "x", String("y") } };
 
 	ASL_ASSERT(v4a.isArrayOf(2, Var::STRING));
 	ASL_ASSERT(v4b.is(Var::OBJ) && v4b["x"] == "y");

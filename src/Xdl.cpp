@@ -575,6 +575,9 @@ XdlParser::XdlParser()
 	_state = WAIT_VALUE;
 	_inComment = false;
 	_lists << Var(Var::ARRAY);
+	_prevState = _state;
+	_unicode[0] = '\0';
+	_unicodeCount = 0;
 }
 
 XdlParser::~XdlParser()
@@ -658,6 +661,9 @@ XdlEncoder::XdlEncoder()
 	_out.resize(512);
 	_sep1 = ',';
 	_sep2 = ',';
+	_simple = false;
+	_fmtF = "%.9g";
+	_fmtD = "%.17g";
 }
 
 String XdlEncoder::encode(const Var& v, Json::Mode mode)

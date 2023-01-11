@@ -76,7 +76,6 @@ protected:
 	bool _pretty;
 	bool _json;
 	bool _simple;
-	Json::Mode _mode;
 	const char* _fmtF;
 	const char* _fmtD;
 	String _indent;

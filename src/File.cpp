@@ -67,7 +67,6 @@ static FileInfo getFileInfo(const String& path)
 	if (hdir == INVALID_HANDLE_VALUE)
 	{
 		FileInfo info;
-		memset(&info, 0, sizeof(FileInfo));
 		return info;
 	}
 	FindClose(hdir);
@@ -99,7 +98,6 @@ FileInfo getFileInfo(const String& path)
 	if (stat(path, &data))
 	{
 		FileInfo info;
-		memset(&info, 0, sizeof(FileInfo));
 		return info;
 	}
 	return infoFor(data);

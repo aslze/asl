@@ -21,7 +21,7 @@ struct FileInfo
 	Date lastModified;
 	Date creationDate;
 	unsigned flags;
-	FileInfo(): size(-1), flags(0) {}
+	FileInfo() : size(-1), lastModified(0), creationDate(0), flags(0) {}
 	bool operator!() const {return size==-1;}
 };
 

@@ -195,6 +195,7 @@ inline T rad2deg(T x) {return (T)(x*57.29577951308232);}
 /**@}*/
 
 static const double PI = 3.14159265358979323;
+static const float  PIf = 3.1415926536f;
 
 template<class T>
 inline void vswap(T& a, T& b)
@@ -388,13 +389,13 @@ namespace asl {
 // Placement constructors
 
 template <class T>
-inline void asl_construct(T* p) {new ((int*)p) T;}
+inline void asl_construct(T* p) {new (p) T;}
 
 template <class T>
-inline void asl_construct_copy(T* p, const T& x) {new ((int*)p) T(x);}
+inline void asl_construct_copy(T* p, const T& x) {new (p) T(x);}
 
 template <class T>
-inline void asl_construct(T* p, int n) {T* q=p+n; while(p!=q) {new ((int*)p) T; p++;}}
+inline void asl_construct(T* p, int n) {T* q=p+n; while(p!=q) {new (p) T; p++;}}
 
 template <class T>
 inline void asl_destroy(T* p) {p->~T();}

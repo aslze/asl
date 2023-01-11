@@ -48,12 +48,12 @@ public:
 	enum Type { ANY, IPv4, IPv6, LOCAL };
 	InetAddress();
 	InetAddress(Type t);
-	InetAddress(int port) { set("", port); }
+	InetAddress(int port): _type(IPv4) { set("", port); }
 	/**
 	Creates an address with a name (to be looked up) and a port
 	*/
-	InetAddress(const String& host, int port) { set(host, port); }
-	InetAddress(const String& host_port) { set(host_port); }
+	InetAddress(const String& host, int port): _type(IPv4) { set(host, port); }
+	InetAddress(const String& host_port): _type(IPv4) { set(host_port); }
 
 	void resize(int n) { _data.resize(n); }
 

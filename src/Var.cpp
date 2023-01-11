@@ -6,8 +6,8 @@ namespace asl {
 #define NEW_ARRAY(a) (a) = new Array<Var>
 #define NEW_ARRAYC(a, x) (a) = new Array<Var>(x)
 #define DEL_ARRAY(a) delete (a)
-#define NEW_DIC(d) (d) = new HDic<Var>
-#define NEW_DICC(d, x) (d) = new HDic<Var>(x)
+#define NEW_DIC(d) (d) = new VDic<Var>
+#define NEW_DICC(d, x) (d) = new VDic<Var>(x)
 #define DEL_DIC(d) delete (d)
 #else
 #define NEW_ARRAY(a) (a).construct()
@@ -485,10 +485,10 @@ const Var& Var::operator[](int i) const
 
 Var& Var::operator[](int i)
 {
-	if(_type==ARRAY)
+	if (_type == ARRAY)
 	{
-		if(i >= a->length())
-			a->resize(i+1);
+		if (i >= a->length())
+			a->resize(i + 1);
 		return (*a)[i];
 	}
 	else if (_type == OBJ)
@@ -497,9 +497,9 @@ Var& Var::operator[](int i)
 	}
 	else if (_type == NONE)
 	{
-		_type=ARRAY;
+		_type = ARRAY;
 		NEW_ARRAY(a);
-		a->resize(i+1);
+		a->resize(i + 1);
 		return (*a)[i];
 	}
 	return *this;
@@ -507,13 +507,13 @@ Var& Var::operator[](int i)
 
 Var& Var::operator[](const String& k)
 {
-	if(_type==NONE)
+	if (_type == NONE)
 	{
 		NEW_DIC(o);
-		_type=DIC;
+		_type = DIC;
 		return (*o)[k];
 	}
-	else if(_type==DIC)
+	else if (_type == DIC)
 		return (*o)[k];
 	else if (_type == ARRAY)
 		return (*a)[k];

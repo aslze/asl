@@ -440,9 +440,8 @@ class Atomic
 public:
 	Atomic() {}
 
-	Atomic(const Atomic& x)
+	Atomic(const Atomic& x): _x(x)
 	{
-		_x = x;
 	}
 
 	Atomic(const T& x): _x(x)

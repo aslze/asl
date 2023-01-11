@@ -330,7 +330,7 @@ String encodeHex(const byte* data, int n)
 {
 	String h(2*n, 2*n);
 	for (int i = 0; i < n; i++)
-		sprintf(&h[2*i], "%02x", data[i]);
+		snprintf(&h[2*i], 3, "%02x", data[i]);
 	return h;
 }
 

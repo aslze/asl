@@ -5,7 +5,6 @@ namespace asl {
 
 void TabularDataFile::init()
 {
-	_currCol = 0;
 	_dataStarted = false;
 	_separator = ',';
 	_decimal = '.';

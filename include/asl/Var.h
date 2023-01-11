@@ -9,8 +9,8 @@
 #include <asl/Map.h>
 #include <asl/Pointer.h>
 //#include <asl/HashMap.h>
-//#define HDic HashDic
-#define HDic Dic
+//#define VDic HashDic
+#define VDic Dic
 #define ASL_VAR_STATIC
 #define ASL_XDLCLASS "$type"
 
@@ -20,8 +20,8 @@ namespace asl {
 #define NEW_ARRAY(a) (a) = new Array<Var>
 #define NEW_ARRAYC(a, x) (a) = new Array<Var>(x)
 #define DEL_ARRAY(a) delete (a)
-#define NEW_DIC(d) (d) = new HDic<Var>
-#define NEW_DICC(d, x) (d) = new HDic<Var>(x)
+#define NEW_DIC(d) (d) = new VDic<Var>
+#define NEW_DICC(d, x) (d) = new VDic<Var>(x)
 #define DEL_DIC(d) delete (d)
 #else
 #define NEW_ARRAY(a) (a).construct()
@@ -262,9 +262,9 @@ class ASL_API Var
 	template<class T>
 	Var(const Array<T>& v);
 	template<class T>
-	Var(const HDic<T>& v);
+	Var(const VDic<T>& v);
 	Var(const Array<Var>& v) {_type=ARRAY; NEW_ARRAYC(a, v);}
-	Var(const HDic<Var>& v) {_type=DIC; NEW_DICC(o, v);}
+	Var(const VDic<Var>& v) {_type=DIC; NEW_DICC(o, v);}
 	Var(double x); // : _type(NUMBER), d(x){}
 	Var(int x): _type(INT), i(x){}
 	Var(float x): _type(FLOAT) {d=x;}
@@ -276,7 +276,7 @@ class ASL_API Var
 	Var(bool x);
 	Var(char x);
 	Var(const char* x);
-	Var(const String& x0, const Var& x1);
+	ASL_EXPLICIT Var(const String& x0, const Var& x1);
 	~Var()
 	{
 		//if(_type != NONE)
@@ -299,7 +299,7 @@ class ASL_API Var
 	template<class T>
 	operator Array<T>() const;
 	template<class T>
-	operator HDic<T>() const;
+	operator VDic<T>() const;
 
 	/**
 	Returns the internal Dic if this var is an object
@@ -349,7 +349,7 @@ class ASL_API Var
 	template<class T>
 	void operator=(const Array<T>& x);
 	template<class T>
-	void operator=(const HDic<T>& x);
+	void operator=(const VDic<T>& x);
 #ifdef ASL_HAVE_INITLIST
 	template<class T>
 	void operator=(const std::initializer_list<T>& x) { *this = Var(x); }
@@ -555,16 +555,16 @@ class ASL_API Var
 	{
 		Var& v;
 #ifndef ASL_VAR_STATIC
-		HDic<Var>::Enumerator* e;
+		VDic<Var>::Enumerator* e;
 #else
-		StaticSpace< HDic<Var>::Enumerator > e;
+		StaticSpace< VDic<Var>::Enumerator > e;
 #endif
 		int i;
 		Enumerator(const Var& x) : v(*(Var*)&x), i(0)
 		{
 			if(x._type==DIC)
 #ifndef ASL_VAR_STATIC
-				e=new HDic<Var>::Enumerator(*x.o);
+				e=new VDic<Var>::Enumerator(*x.o);
 #else
 				e.construct(*x.o);
 #endif
@@ -599,11 +599,11 @@ class ASL_API Var
 		Long ll;
 #ifndef ASL_VAR_STATIC
 		Array<Var>* a;
-		HDic<Var>* o;
+		VDic<Var>* o;
 		Array<char>* s;
 #else
 		StaticSpace< Array<Var> > a;
-		StaticSpace< HDic<Var> > o;
+		StaticSpace< VDic<Var> > o;
 		StaticSpace< Array<char> > s;
 #endif
 		char ss[VAR_SSPACE];
@@ -636,9 +636,9 @@ Var::operator Array<T>() const
 }
 
 template<class T>
-Var::operator HDic<T>() const
+Var::operator VDic<T>() const
 {
-	HDic<T> a2;
+	VDic<T> a2;
 	if (_type == DIC)
 	{
 		foreach2(String& k, Var& v, *o)
@@ -648,7 +648,7 @@ Var::operator HDic<T>() const
 }
 
 template<class T>
-Var::Var(const HDic<T>& x)
+Var::Var(const VDic<T>& x)
 {
 	_type=DIC;
 	NEW_DIC(o);
@@ -668,7 +668,7 @@ void Var::operator=(const Array<T>& x)
 }
 
 template<class T>
-void Var::operator=(const HDic<T>& x)
+void Var::operator=(const VDic<T>& x)
 {
 	free();
 	_type=DIC;

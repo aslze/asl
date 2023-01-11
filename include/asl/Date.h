@@ -180,7 +180,7 @@ public:
 	static const double MINUTE;
 private:
 	double _t;
-	void construct(Zone z, int y, int m, int d, int h = 0, int mn = 0, int s = 0);
+	void construct(Zone z, int year, int month, int day, int h = 0, int m = 0, int s = 0);
 	static DateData calc(double t);
 };
 
