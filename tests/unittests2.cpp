@@ -189,6 +189,7 @@ ASL_FACTORY_REGISTER(Animal, Dog)
 
 struct Device
 {
+	virtual ~Device() {}
 	virtual bool enable() { return false; }
 };
 

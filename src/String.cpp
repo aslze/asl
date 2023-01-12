@@ -414,7 +414,7 @@ String::String(Long x)
 String::String(ULong x)
 {
 	alloc(x < 1000000000000000ll ? ASL_STR_SPACE - 1 : 21);
-	_len = sprintf(str(), "%llu", x);
+	_len = snprintf(str(), cap(), "%llu", x);
 }
 
 String::String(int x)
@@ -426,19 +426,19 @@ String::String(int x)
 String::String(unsigned x)
 {
 	alloc(10);
-	_len = sprintf(str(), "%u", x);
+	_len = snprintf(str(), cap(), "%u", x);
 }
 
 String::String(float x)
 {
 	alloc(15);
-	_len = sprintf(str(), "%.7g", x);
+	_len = snprintf(str(), cap(), "%.7g", x);
 }
 
 String::String(double x)
 {
 	char s[32];
-	_len = sprintf(s, "%.15g", x);
+	_len = snprintf(s, cap(), "%.15g", x);
 	alloc(_len);
 	strcpy(str(), s);
 }

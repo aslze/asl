@@ -120,7 +120,7 @@ Check that the argument is true.
 */
 #define ASL_ASSERT(x) if(!(x)) { printf("\n%s: %i\n\n* Failed: '%s'\n\n", __FILE__, __LINE__, #x); exit(1); }
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__clang__)
 #define ASL_DEPRECATED(x, m) __declspec(deprecated("Deprecated. " ## m)) x
 #elif defined(__GNUC__) && ASL_C_VER < 40503
 #define ASL_DEPRECATED(x, m) x __attribute__((deprecated))

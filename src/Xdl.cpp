@@ -813,8 +813,8 @@ void XdlEncoder::new_number(double x)
 			_out << ((x < 0)? "-1e400" : "1e400");
 		return;
 	}
-	_out.resize(n+26);
-	_out.fix(n + sprintf(&_out[n], _fmtD, x));
+	_out.resize(n + 26);
+	_out.fix(n + snprintf(&_out[n], 27, _fmtD, x));
 
 	// Fix decimal comma of some locales
 #ifndef ASL_NO_FIX_DOT
@@ -846,7 +846,7 @@ void XdlEncoder::new_number(float x)
 		return;
 	}
 	_out.resize(n + 16);
-	_out.fix(n + sprintf(&_out[n], _fmtF, x));
+	_out.fix(n + snprintf(&_out[n], 17, _fmtF, x));
 
 	// Fix decimal comma of some locales
 #ifndef ASL_NO_FIX_DOT
