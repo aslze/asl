@@ -195,7 +195,7 @@ public:
 	Constructs a string consisting of character `c` repeated `n` times.
 	@deprecated Use `repeat()` instead.
 	*/
-	ASL_EXPLICIT String(char c, int n)
+	ASL_DEPRECATED(ASL_EXPLICIT String(char c, int n), "Use String::repeat()")
 	{
 		if (n < 0) n = 0;
 		init(n);
@@ -205,10 +205,11 @@ public:
 	/**
 	Constructs a string consisting of character `c` repeated `n` times
 	*/
-	inline static String repeat(char c, int n)
+	static String repeat(char c, int n)
 	{
 		if (n < 0) n = 0;
-		String s(n, n);
+		String s;
+		s.init(n);
 		memset(s.str(), c, n);
 		s.str()[n] = '\0';
 		return s;

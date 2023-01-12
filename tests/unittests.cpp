@@ -41,7 +41,7 @@ ASL_TEST(File)
 	
 	TextFile tfile("lines.txt", File::WRITE);
 	String line1 = "123";
-	String line2 = String('x', 4000);
+	String line2 = String::repeat('x', 4000);
 	tfile << line1 << '\n';
 	tfile << line2 << '\n';
 	tfile.close();
