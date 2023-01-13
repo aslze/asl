@@ -117,7 +117,18 @@ protected:
 		char _space[ASL_STR_SPACE];
 		char* _str;
 	};
-	void alloc(int n);
+	void alloc(int n)
+	{
+		if (n < ASL_STR_SPACE)
+			_size = 0;
+		else
+		{
+			_size = max(++n, 20);
+			_str = (char*)malloc(_size);
+			if (!_str)
+				ASL_BAD_ALLOC();
+		}
+	}
 	void free();
 	void init(int n) {alloc(n); _len=n;}
 	char* str() const {return (_size==0)? (char*)_space : (char*)_str;}
@@ -136,9 +147,9 @@ public:
 	*/
 	ASL_EXPLICIT String(int cap, int n)
 	{
-		init(cap);
+		init(max(cap, n));
 		_len=n;
-		str()[_len] = '\0';
+		str()[n] = '\0';
 	}
 	/**
 	Constructs a string from a C string (pointer to null-terminated string)
@@ -199,8 +210,9 @@ public:
 	{
 		if (n < 0) n = 0;
 		init(n);
-		memset(str(), c, n);
-		str()[n] = '\0';
+		char* p = str();
+		memset(p, c, n);
+		p[n] = '\0';
 	}
 	/**
 	Constructs a string consisting of character `c` repeated `n` times
@@ -208,10 +220,10 @@ public:
 	static String repeat(char c, int n)
 	{
 		if (n < 0) n = 0;
-		String s;
-		s.init(n);
-		memset(s.str(), c, n);
-		s.str()[n] = '\0';
+		String s(n, n);
+		char* p = s.str();
+		memset(p, c, n);
+		p[n] = '\0';
 		return s;
 	}
 	/**

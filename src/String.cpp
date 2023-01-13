@@ -333,21 +333,6 @@ void String::free()
 		::free(_str);
 }
 
-
-void String::alloc(int n)
-{
-	if(n < ASL_STR_SPACE)
-	{
-		_size = 0;
-	}
-	else
-	{
-		_size = max(++n, 20);
-		_str = (char*) malloc(_size);
-		if (!_str) ASL_BAD_ALLOC();
-	}
-}
-
 String& String::resize(int n, bool keep, bool newlen)
 {
 	if(_size==0)
