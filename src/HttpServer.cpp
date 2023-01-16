@@ -79,7 +79,7 @@ void HttpServer::serve(Socket client)
 
 			if (response.containsFile())
 			{
-				File file((String)response.body());
+				File file(response.text());
 				if (!file.exists())
 				{
 					response.setCode(404);
