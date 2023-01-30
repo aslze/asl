@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_HTTP
@@ -217,12 +217,12 @@ public:
 		_headers = headers; init();
 	}
 	/**
-	Constructs an HttpRequest with the given method and body
+	Constructs an HttpRequest with the given method and body (a String, a #ByteArray, a Var (sent as JSON) or a File)
 	*/
 	template<class T>
 	HttpRequest(const String& method, const String& url, const T& data) : _method(method), _url(url) { put(data); init(); }
 	/**
-	Constructs an HttpRequest with the given method, headers and body
+	Constructs an HttpRequest with the given method, headers and body (a String, a #ByteArray, a Var (sent as JSON) or a File)
 	*/
 	template<class T>
 	HttpRequest(const String& method, const String& url, const T& data, const Dic<>& headers) : _method(method), _url(url)
@@ -432,6 +432,23 @@ String content = "My New File!\n";
 auto res = Http::post("https://content.dropboxapi.com/1/files_put/auto/myfile.txt", content, Dic<>("Authorization", "Bearer ..."));
 ~~~
 
+In methods like `post()`, `put()` , `patch()`, that expect a body to be sent, this **body** can be:
+
+- A String, for text
+- A #ByteArray, for binary data
+- A Var, which will be serialized as JSON, or as URL-encoded if the content type is set to `application/x-www-form-urlencoded`
+- A File, like `File("/some/path.ext")`, whose content will be sent
+
+This would send a new profile photo by serializing a Var as JSON:
+
+~~~
+auto res = Http::post("https://api.dropboxapi.com/2/account/set_profile_photo", Var{
+           {"photo", {
+               {".tag", "base64_data"},
+               {"base64_data", encodeBase64(File("pic.jpg").content())}
+           }}}, Dic<>("Authorization", "Bearer ..."));
+~~~
+
 To download larger files you can use the download function, which saves directly to a file, instead of loading into a large memory buffer.
 
 ~~~
@@ -469,7 +486,7 @@ public:
 		return request(req);
 	}
 
-	/** Sends an HTTP POST request for the given url with the given data and returns the response. If body is a
+	/** Sends an HTTP POST request for the given url with the given body and returns the response; The body can be a String, a #ByteArray, a Var (sent as JSON) or a File; If body is a
 	File and headers contain `Content-Type` `multipart/form-data`, the file will be uploaded as an HTML form's file item
 	*/
 	template<class T>

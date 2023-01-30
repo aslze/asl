@@ -84,21 +84,21 @@ if(constants.has("pi"))
 {...}
 ~~~
 
-The contents can be iterated with a `foreach2` loop just like a Map:
+The contents can be iterated with range-based for in C++11:
+
+~~~
+for(auto& e : constants)
+{
+    cout << "Contstant " << *e.key << " has value: " << e.value << endl;
+}
+~~~
+
+Or with the `foreach2` macro loop in older compilers:
 
 ~~~
 foreach2(String& name, float value, constants)
 {
     cout << "Contstant " << *name << " has value: " << value << endl;
-}
-~~~
-
-Or with range-based for, in C++11:
-
-~~~
-for(auto& e : constants)
-{
-	cout << "Contstant " << *e.key << " has value: " << e.value << endl;
 }
 ~~~
 

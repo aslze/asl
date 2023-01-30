@@ -121,18 +121,18 @@ __Iteration__
 
 When a Var contains an array or an object, its elements or properties can be iterated.
 
-__Arrays__ can be iterated with `foreach` loops (or `for(item : array)` in C++11), or using array
+__Arrays__ can be iterated with `foreach` loops, or `for(item : array)` in C++11, or using array
 indexing and the `length()` method:
 
 ~~~
 Var numbers = array<Var>(10.1, 25, -1, 3.4);
 
-foreach(Var& x, numbers)
+foreach(Var& x, numbers) // old way
 {
     do_something_with(x);
 }
 
-for(auto& x : numbers)  // C++11
+for(auto& x : numbers)  // since C++11
 {
 	do_something_with(x);
 }
@@ -147,12 +147,12 @@ __Object__ properties (keys and values) can be iterated with a `foreach2` loop, 
 in this case don't forget to add `.object()`):
 
 ~~~
-foreach2(String& key, Var& value, particle)   // the particle from above
+foreach2(String& key, Var& value, particle)   // old way
 {
 	printf("%s : %s\n", *key, *value.toString());
 }
 
-for(auto& e : particle.object())   // C++11
+for(auto& e : particle.object())   // since C++11
 {
 	printf("%s : %s\n", *e.key, *e.value.toString());
 }

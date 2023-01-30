@@ -606,6 +606,10 @@ public:
 	Enumerator slice_(int i, int j = 0) const {if(j==0) j=length();return Enumerator(*this, i, j);}
 };
 
+/**
+An alias for Array<byte>
+\ingroup Containers
+*/
 typedef Array<byte> ByteArray;
 
 template <class T>

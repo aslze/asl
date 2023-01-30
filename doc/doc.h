@@ -177,7 +177,7 @@ bool open = garage["open"];
 float height = (garage.has("dimensions", Var::ARRAY) && garage["dimensions"].length() == 3) ?
 	garage["dimensions"][2] : 0;
 
-foreach(Var& vehicle, garage["vehicles"])
+for(auto& vehicle : garage["vehicles"])
 {
 	double length = vehicle.has("length", Var::NUMBER) ? vehicle["length"] : 0.0;
 	String brand = vehicle["brand"];
@@ -317,7 +317,16 @@ for(Array<T>::Enumerator e = container.all(); e; ++e)
 
 That way, if container was a Dic, it would be printing the names and values of all elements.
 
-But there is a shorthand notation for iterating, inspired by other languages, `foreach` and `foreach2` loops. The
+In C++11 compilers you can also use *range-based for* loops:
+
+~~~
+for(float x: numbers)
+{
+    sum += x;
+}
+~~~
+
+And for older compilers there is a shorthand notation for iterating, `foreach` and `foreach2` loops. The
 first iterates on the values of elements. And the second on both the keys and values of elements.
 
 ~~~
@@ -338,14 +347,6 @@ foreach2(String& name, int age, ages)
 }
 ~~~
 
-In C++11 compilers you can also use *range-based for* loops:
-
-~~~
-for(float x: numbers)
-{
-	sum += x;
-}
-~~~
 */
 
 /**
