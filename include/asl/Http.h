@@ -23,6 +23,9 @@ struct Url
 	String protocol, host, path;
 	int port;
 	Url() : port(0) {}
+	/**
+	Builds a query string from a Dic (as key1=value1&key2=value2, with URL encoding of chars)
+	*/
 	static String params(const Dic<>& p);
 };
 
