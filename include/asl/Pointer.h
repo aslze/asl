@@ -29,6 +29,7 @@ class Shared
 	};
 
 public:
+	int refcount() const { return _p->rc; }
 	template<class T2> friend class Shared;
 	Shared()
 	{
