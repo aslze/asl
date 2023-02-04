@@ -427,6 +427,8 @@ Xml Xml::decode(const String& x)
 			else
 				b << c;
 			break;
+		case ERR:
+			break;
 		}
 
 		if (state == ERR)
