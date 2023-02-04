@@ -156,6 +156,8 @@ ASL_TEST(XML)
 	ASL_CHECK(html3.child(1).child(1)["class"], ==, "main");
 	ASL_CHECK(html3.child(1).child(1).text(), ==, "world");
 #endif
+
+	ASL_ASSERT(!Xml::decode("<3a>a</3a").text());
 }
 
 struct Animal
@@ -213,6 +215,11 @@ ASL_TEST(Factory)
 
 		ASL_ASSERT(!animal.as<Cat>());
 		ASL_ASSERT(animal.as<Dog>()->bark() == "Woof!");
+
+		if (animal.as<Dog>()) {
+			Shared<Dog> dog = animal.as<Dog>();
+			ASL_CHECK(animal.refcount(), ==, 2);
+		}
 
 		Shared<Animal> another = animal;
 		Shared<Animal> dolly = animal.clone();

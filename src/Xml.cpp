@@ -131,11 +131,11 @@ Xml Xml::decode(const String& x)
 	enum State {
 		FREE, TAG_START, TAG_END, TAG, WAIT_ATT, ATT_NAME, WAIT_EQUAL, WAIT_ATTVAL,
 		ATT_VAL, ATT_VALSQ, SLASH, TAG_EXCLAM, COMMENT_START2, COMMENT, COMMENT_END1, COMMENT_END2,
-		REF_START, CHAR_REF, DEF, TAG_QUES
+		REF_START, CHAR_REF, DEF, TAG_QUES, ERR
 	};
 	State state = FREE;
 	State lastState = FREE;
-	char* p = x;
+	const char* p = x;
 	int anglecount = 0;
 	
 	if (x.startsWith("<?xml"))
@@ -182,7 +182,12 @@ Xml Xml::decode(const String& x)
 			case '?':
 				state = TAG_QUES;
 				break;
-			default: // TODO: allow only alphabetic char (no digit, no symbol)
+			default:
+				if ((c < 'a' || c > 'z') && (c < 'A' || c > 'Z')) // tag only starts with letter
+				{
+					state = ERR;
+					break;
+				}
 				state = TAG;
 				b = c;
 				break;
@@ -423,6 +428,9 @@ Xml Xml::decode(const String& x)
 				b << c;
 			break;
 		}
+
+		if (state == ERR)
+			return Xml();
 	}
 	return (elems.top().numChildren() == 1)? elems.top().child(0) : Xml();
 }
@@ -430,7 +438,7 @@ Xml Xml::decode(const String& x)
 
 void XmlCodec::escape(const String& s)
 {
-	char* p = s;
+	const char* p = s;
 	while (char c = *p++)
 	{
 		switch (c)
