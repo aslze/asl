@@ -46,6 +46,14 @@ String encodeUrl(const String& q0)
 	return q;
 }
 
+String Url::params(const Dic<>& q)
+{
+	Dic<> d;
+	foreach2(String& k, const String& v, q)
+		d[encodeUrl(k)] = encodeUrl(v);
+	return d.join('&', '=');
+}
+
 Dic<> decodeUrlParams(const String& querystring)
 {
 	Dic<> query;

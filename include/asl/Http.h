@@ -23,6 +23,7 @@ struct Url
 	String protocol, host, path;
 	int port;
 	Url() : port(0) {}
+	static String params(const Dic<>& p);
 };
 
 Url ASL_API parseUrl(const String& url);
