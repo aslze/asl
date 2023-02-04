@@ -217,12 +217,12 @@ public:
 		_headers = headers; init();
 	}
 	/**
-	Constructs an HttpRequest with the given method and body (a String, a #ByteArray, a Var (sent as JSON) or a File)
+	Constructs an HttpRequest with the given method and body (a String, a ::ByteArray, a Var (sent as JSON) or a File)
 	*/
 	template<class T>
 	HttpRequest(const String& method, const String& url, const T& data) : _method(method), _url(url) { put(data); init(); }
 	/**
-	Constructs an HttpRequest with the given method, headers and body (a String, a #ByteArray, a Var (sent as JSON) or a File)
+	Constructs an HttpRequest with the given method, headers and body (a String, a ::ByteArray, a Var (sent as JSON) or a File)
 	*/
 	template<class T>
 	HttpRequest(const String& method, const String& url, const T& data, const Dic<>& headers) : _method(method), _url(url)
@@ -435,7 +435,7 @@ auto res = Http::post("https://content.dropboxapi.com/1/files_put/auto/myfile.tx
 In methods like `post()`, `put()` , `patch()`, that expect a body to be sent, this **body** can be:
 
 - A String, for text
-- A #ByteArray, for binary data
+- A ::ByteArray, for binary data
 - A Var, which will be serialized as JSON, or as URL-encoded if the content type is set to `application/x-www-form-urlencoded`
 - A File, like `File("/some/path.ext")`, whose content will be sent
 
@@ -486,7 +486,7 @@ public:
 		return request(req);
 	}
 
-	/** Sends an HTTP POST request for the given url with the given body and returns the response; The body can be a String, a #ByteArray, a Var (sent as JSON) or a File; If body is a
+	/** Sends an HTTP POST request for the given url with the given body and returns the response; The body can be a String, a ::ByteArray, a Var (sent as JSON) or a File; If body is a
 	File and headers contain `Content-Type` `multipart/form-data`, the file will be uploaded as an HTML form's file item
 	*/
 	template<class T>
