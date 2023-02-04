@@ -423,7 +423,7 @@ String::String(float x)
 String::String(double x)
 {
 	char s[32];
-	_len = snprintf(s, cap(), "%.15g", x);
+	_len = snprintf(s, 32, "%.15g", x);
 	alloc(_len);
 	strcpy(str(), s);
 }

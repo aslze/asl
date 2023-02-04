@@ -10,7 +10,7 @@
 Main definitions.
 */
 
-#define ASL_VERSION 11104
+#define ASL_VERSION 11105
 
 #ifdef _WIN32
 #ifndef _CRT_SECURE_NO_DEPRECATE
@@ -75,7 +75,7 @@ namespace asl {
 #define ASL_HAVE_AUTO
 #endif
 
-#if __has_feature(cxx_lambdas) || (defined( _MSC_VER ) && _MSC_VER >= 1600) || (defined(__GNUC__) && defined(ASL_GCC11) && ASL_C_VER >= 40500)
+#if __has_feature(cxx_lambdas) || (defined( _MSC_VER ) && _MSC_VER  >= 1600) || (defined(__GNUC__) && defined(ASL_GCC11) && ASL_C_VER >= 40500)
 #define ASL_HAVE_LAMBDA
 #endif
 
@@ -96,6 +96,10 @@ namespace asl {
 #define ASL_EXPLICIT explicit
 #else
 #define ASL_EXPLICIT
+#endif
+
+#if defined(_MSC_VER) && _MSC_VER < 1910 && !defined(snprintf)
+#define snprintf _snprintf
 #endif
 
 #if !defined(_WIN32) || defined(ASL_STATIC)
@@ -125,8 +129,7 @@ Check that the argument is true.
 #elif defined(__GNUC__) && ASL_C_VER < 40503
 #define ASL_DEPRECATED(x, m) x __attribute__((deprecated))
 #else
-#define ASL_DEPRECATED(x, m) x 
-								//__attribute__((deprecated(m)))
+#define ASL_DEPRECATED(x, m) x  __attribute__((deprecated(m)))
 								// temporarily off due to issues on gcc
 #endif
 
@@ -314,12 +317,6 @@ public:
 	*/
 	template <typename E>
 	void shuffle(E& a) { shuffle(&a[0], a.length()); }
-
-	/**
-	Shuffles an array of elements in place.
-	*/
-	template<typename E>
-	void shuffle(const E& a) { shuffle(&a[0], a.length()); }
 };
 
 extern ASL_API Random random; //!< A global random number generator
