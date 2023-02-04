@@ -507,15 +507,15 @@ String String::substr(int i, int n) const
 
 int String::indexOf(char c, int i0) const
 {
-	char* p = str();
-	char* ch = strchr(p+i0,c);
+	const char* p = str();
+	const char* ch = strchr(p+i0,c);
 	return (!ch)? -1 : int(ch - p);
 }
 
 int String::indexOf(const char* s, int i0) const
 {
-	char* p = str();
-	char* c = strstr(p+i0,s);
+	const char* p = str();
+	const char* c = strstr(p+i0,s);
 	return (!c)? -1 : int(c - p);
 }
 
@@ -608,7 +608,7 @@ String String::toLowerCase() const
 String String::trimmed() const
 {
 	int i,j, n=_len;
-	char* s = str();
+	const char* s = str();
 	for(i=0; i<n; i++)
 		if(!myisspace(s[i])) break;
 	for(j=n-1; j>=i; j--)
@@ -675,7 +675,7 @@ void String::split(const String& sep, Array<String>& out) const
 void String::split(Array<String>& a) const
 {
 	a.clear();
-	char* s = str();
+	const char* s = str();
 	for(int i=0; i<=length(); i++)
 	{
 		if(myisspace(s[i]))

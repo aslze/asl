@@ -131,7 +131,8 @@ protected:
 	}
 	void free();
 	void init(int n) {alloc(n); _len=n;}
-	char* str() const {return (_size==0)? (char*)_space : (char*)_str;}
+	char* str() { return (_size == 0) ? (char*)_space : (char*)_str; }
+	const char* str() const {return (_size==0)? (const char*)_space : (const char*)_str;}
 	String(void*) {} // avoid accidental construction from arbitrary pointers
 public:
 	/**
@@ -353,7 +354,7 @@ public:
 	Returns a pointer to the beginning of the character data (suitable for functions
 	requiring C-style strings)
 	*/
-	operator char*() const {return str();}
+	operator char*() {return str();}
 	/**
 	Returns a const pointer to a Unicode UCS2 representation of this string by expanding from the internal
 	byte representation (suitable for functions requiring C-style wide strings (LPWSTR))
@@ -475,7 +476,7 @@ public:
 	/**
 	Returns the last index where character `c` appears in this string, or -1 if it is not found.
 	*/
-	int lastIndexOf(char c) const {char* p=strrchr(str(), c); return p?int(p-str()):-1;}
+	int lastIndexOf(char c) const {const char* p=strrchr(str(), c); return p?int(p-str()):-1;}
 	/**
 	Returns the last index where string `s` appears in this string, or -1 if it is not found.
 	*/
@@ -565,7 +566,7 @@ public:
 	Array<T> split_() const
 	{
 		Array<T> a;
-		char* s = str();
+		const char* s = str();
 		for (int i = 0; i <= length(); i++)
 		{
 			if (myisspace(s[i]))
