@@ -57,7 +57,7 @@ ASL_TEST(XML)
 
 	String xml2 = Xml::encode(dom, false);
 	
-	ASL_ASSERT(xml2 == "<a x=\"1\"><b y=\"2&amp;3\"><br/><c>x &gt; 0 _y</c><d g=\"3\"/></b></a>");
+	ASL_CHECK(xml2, ==, "<a x=\"1\"><b y=\"2&amp;3\"><br/><c>x &gt; 0 _y</c><d g=\"3\"/></b></a>");
 
 	dom.removeAttr("x");
 	ASL_ASSERT(!dom.has("x"));
@@ -157,7 +157,12 @@ ASL_TEST(XML)
 	ASL_CHECK(html3.child(1).child(1).text(), ==, "world");
 #endif
 
-	ASL_ASSERT(!Xml::decode("<3a>a</3a").text());
+	ASL_ASSERT(!Xml::decode("<3a>a</3a>"));
+	ASL_ASSERT(!Xml::decode("<a<>..</a<>"));
+	ASL_ASSERT(!Xml::decode("<x a$='4'>..</x>"));
+	ASL_ASSERT(Xml::decode("<_x:y a_z:t='4' z-z='5'>..</_x:y>"));
+	ASL_ASSERT(Xml::decode("<A9  Z0='4'>..</A9>"));
+	ASL_ASSERT(Xml::decode("<Πριν アス='4'>..</Πριν>"));
 }
 
 struct Animal

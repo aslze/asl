@@ -183,7 +183,7 @@ Xml Xml::decode(const String& x)
 				state = TAG_QUES;
 				break;
 			default:
-				if ((c < 'a' || c > 'z') && (c < 'A' || c > 'Z')) // tag only starts with letter
+				if ((c >= 0 && c < 'A' && c != ':') || (c > 'Z' && c < '_') || (c == '`') || (c > 'z' && c <= '~'))
 				{
 					state = ERR;
 					break;
@@ -212,6 +212,12 @@ Xml Xml::decode(const String& x)
 				state = WAIT_ATT;
 				break;
 			default:
+				if ((c >= 0 && c < '-') || (c == '/') || (c > ':' && c < 'A') || (c > 'Z' && c < '_') || (c == '`') ||
+				    (c > 'z' && c <= '~'))
+				{
+					state = ERR;
+					break;
+				}
 				b << c;
 				break;
 			}
@@ -244,19 +250,14 @@ Xml Xml::decode(const String& x)
 			case '/':
 				state = SLASH;
 				break;
-			case '\"': // sure??
-				state = ATT_VAL;
-				lastState = ATT_VAL;
-				b = "";
-				break;
-			case '\'':
-				state = ATT_VALSQ;
-				lastState = ATT_VALSQ;
-				b = "";
-				break;
 			case ' ': case '\t': case '\n': case '\r':
 				break;
 			default:
+				if ((c >= 0 && c < 'A' && c != ':') || (c > 'Z' && c < '_') || (c == '`') || (c > 'z' && c <= '~'))
+				{
+					state = ERR;
+					break;
+				}
 				state = ATT_NAME;
 				b = c;
 				break;
@@ -276,6 +277,12 @@ Xml Xml::decode(const String& x)
 				state = WAIT_ATTVAL;
 				break;
 			default:
+				if ((c >= 0 && c < '-') || (c == '/') || (c > ':' && c < 'A') || (c > 'Z' && c < '_') || (c == '`') ||
+				    (c > 'z' && c <= '~'))
+				{
+					state = ERR;
+					break;
+				}
 				b << c;
 			}
 			break;
@@ -457,7 +464,7 @@ void XmlCodec::escape(const String& s)
 
 void XmlCodec::encode(const Xml& e)
 {
-	if (e.isnull())
+	if (e.isnull() || (!e && !e.isText()))
 		return;
 	if (e.isText()) {
 		escape(e.text());
