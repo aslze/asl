@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_STRING_H
@@ -95,7 +95,7 @@ characters transparently.
 
 ~~~
 String dirName = "Mis imágenes"  // this is UTF-8
-CreateDirectoryW( dirName );     // this gets converted to UTF-16 LPWSTRING
+CreateDirectoryW( dirName );     // this gets converted to UTF-16 LPCWSTR
 ~~~
 
 There are automatic conversions to/from many basic types, but please use with care!
@@ -336,7 +336,8 @@ public:
 	/**
 	Returns true if this string is not empty (warning: this might change in the future to mean isTrue(), use `ok()`)
 	*/
-	operator bool() const {return _len > 0;}
+	ASL_EXPLICIT operator bool() const { return _len > 0; }
+
 	/**
 	Returns true if this string is empty (warning: this might change in the future to mean !isTrue(), use `!ok()`)
 	*/
@@ -354,14 +355,21 @@ public:
 	Returns a pointer to the beginning of the character data (suitable for functions
 	requiring C-style strings)
 	*/
-	operator char*() {return str();}
+	char* data() { return str(); }
+	const char* data() const { return str(); }
+	
 	/**
-	Returns a const pointer to a Unicode UCS2 representation of this string by expanding from the internal
-	byte representation (suitable for functions requiring C-style wide strings (LPWSTR))
+	Returns a const pointer to a Unicode UTF16 representation of this string by expanding from the internal
+	byte representation (suitable for functions requiring C-style wide strings (LPCWSTR))
 	*/
 	operator const wchar_t*() const;
 
-	operator wchar_t*() const {return (wchar_t*)(const wchar_t*)*this;}
+	/**
+	Returns a pointer to a Unicode UTF16 representation of this string by expanding from the internal
+	byte representation (suitable for functions requiring C-style wide strings (LPWSTR))
+	*/
+	wchar_t* dataw() { return (wchar_t*)(const wchar_t*)*this; }
+	const wchar_t* dataw() const { return (const wchar_t*)*this; }
 	
 	/**
 	Returns a const pointer to the beginning of the character data (suitable for functions
@@ -711,8 +719,8 @@ public:
 	SafeString(String& s, int n) : _s(s), _wide(false) { _s.resize(3 * n); }
 	~SafeString() { if (_wide) _s.fixW(); else _s.fix(); }
 	operator const char*() const {return _s;}
-	operator char*() const {return _s;}
-	operator const wchar_t*() { _wide = true; return (wchar_t*)_s; }
+	operator char*() const {return _s.data();}
+	operator const wchar_t*() { _wide = true; return _s.dataw(); }
 	operator const wchar_t*() const { _wide = true; return(const wchar_t*)(String*)&_s; }
 	operator wchar_t*() { _wide = true; return(wchar_t*)(const wchar_t*)_s; }
 };

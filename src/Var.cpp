@@ -265,15 +265,15 @@ String Var::toString() const
 	r[0]='\0';
 	switch(_type) {
 	case INT:
-		r.fix(snprintf(r, r.cap(), "%i", i));
+		r.fix(snprintf(r.data(), r.cap(), "%i", i));
 		break;
 	case FLOAT:
 		r.resize(16);
-		r.fix(snprintf(r, r.cap(), "%.7g", d));
+		r.fix(snprintf(r.data(), r.cap(), "%.7g", d));
 		break;
 	case NUMBER:
 		r.resize(29);
-		r.fix(snprintf(r, r.cap(), "%.15g", d));
+		r.fix(snprintf(r.data(), r.cap(), "%.15g", d));
 		break;
 	case BOOL:
 		r=b?"true":"false";

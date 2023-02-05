@@ -289,7 +289,6 @@ ASL_TEST(String)
 	ASL_ASSERT(f1 == xxx);
 
 	String u1(L"1");
-
 	ASL_ASSERT(u1 == "1");
 
 	String sf = String::f("a%i", 2);
@@ -369,13 +368,23 @@ ASL_TEST(String)
 	Dic<> dic = String("x=1,y=2").split(',', '=');
 	ASL_ASSERT(dic["x"] == "1" && dic["y"] == "2");
 
-	String empty = "";
+	String empty;
 	ASL_ASSERT(!empty.ok());
 	ASL_ASSERT(String("c").ok());
 	String full = "abc";
 	int valid1 = empty.ok()? 1 : 0;
 	int valid2 = full.ok()? 1 : 0;
 	ASL_ASSERT(valid1 == 0 && valid2 == 1);
+
+	// bool conversion means not empty (might change in the future)
+	ASL_ASSERT(!empty);
+	int valid1b = empty ? 1 : 0;
+	int valid2b = full ? 1 : 0;
+	ASL_ASSERT(valid1b == 0 && valid2b == 1);
+
+	String five = "5";
+	int    intfive = five;
+	ASL_CHECK(intfive, ==, 5);
 
 	ASL_ASSERT(!empty.isTrue());
 	ASL_ASSERT(!String("false").isTrue());

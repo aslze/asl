@@ -270,7 +270,7 @@ void XdlParser::parse(const char* s)
 			else if (c == ',' || myisspace(c) || c == ']' || c == '}')
 			{
 #ifndef ASL_FAST_JSON
-				for (char* p = _buffer; *p; p++)
+				for (char* p = _buffer.data(); *p; p++)
 					if (*p == '.')
 					{
 						*p = _ldp;
@@ -300,7 +300,7 @@ void XdlParser::parse(const char* s)
 			else if(c == ',' || myisspace(c) || c == ']' || c == '}')
 			{
 #ifndef ASL_FAST_JSON
-				for(char* p = _buffer; *p; p++)
+				for(char* p = _buffer.data(); *p; p++)
 					if (*p == '.')
 					{
 						*p = _ldp;

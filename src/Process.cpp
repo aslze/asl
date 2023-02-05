@@ -122,7 +122,7 @@ namespace asl {
 		DWORD len = 15;
 		do {
 			value.resize(len, false);
-			len = GetEnvironmentVariableA(var, value, value.length() + 1);
+			len = GetEnvironmentVariableA(var, value.data(), value.length() + 1);
 			if (!len)
 				value = "";
 		} while ((int)len > value.length() + 1);
@@ -230,7 +230,7 @@ namespace asl {
 
 		PROCESS_INFORMATION procInfo;
 		_ok = CreateProcessW(NULL,
-			commandline,            // application name
+			commandline.dataw(),    // application name
 			NULL,                   // process security attributes
 			NULL,                   // primary thread security attributes
 			TRUE,                   // handles are inherited
