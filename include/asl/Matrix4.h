@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_MATRIX4_H
@@ -80,7 +80,7 @@ public:
 	/**
 	Constructs a matrix from 4 3D vectors used as columns, setting the last row as [0 0 0 1]
 	*/
-	Matrix4_(const Vec3& v1, const Vec3& v2, const Vec3& v3, const Vec3& v4=Vec3(0,0,0))
+	Matrix4_(const Vec3_<T>& v1, const Vec3_<T>& v2, const Vec3_<T>& v3, const Vec3_<T>& v4 = Vec3_<T>(0, 0, 0))
 	{
 		a[0][0] = v1.x; a[0][1] = v2.x; a[0][2] = v3.x; a[0][3] = v4.x;
 		a[1][0] = v1.y; a[1][1] = v2.y; a[1][2] = v3.y; a[1][3] = v4.y;
@@ -91,7 +91,7 @@ public:
 	/**
 	Constructs a matrix from 4 4D vectors used as columns
 	*/
-	Matrix4_(const Vec4& v1, const Vec4& v2, const Vec4& v3, const Vec4& v4)
+	Matrix4_(const Vec4_<T>& v1, const Vec4_<T>& v2, const Vec4_<T>& v3, const Vec4_<T>& v4)
 	{
 		a[0][0] = v1.x; a[0][1] = v2.x; a[0][2] = v3.x; a[0][3] = v4.x;
 		a[1][0] = v1.y; a[1][1] = v2.y; a[1][2] = v3.y; a[1][3] = v4.y;
