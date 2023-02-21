@@ -1,3 +1,6 @@
+// Copyright(c) 1999-2023 aslze
+// Licensed under the MIT License (http://opensource.org/licenses/MIT)
+
 /*! \file */ 
 
 #ifndef ASL_FOREACH_H
@@ -37,7 +40,7 @@ const T* ref2nulp(const T& x) { return 0; } // avoid warning with temporary Enum
 */
 
 /**
-A for loop for containers resembling the `foreach` keyword of D. In each iteration, `variable` takes 
+A for loop for containers resembling C++11 range-based `for` supporting old compilers. In each iteration, `variable` takes 
 the value of *each* element in `set`. Variable can have a type declaration (equaling the type of elements
 of `set`) and an even be a reference. In newer compilers just use `for(auto& x : a)`
 
@@ -54,7 +57,7 @@ This will not work for temporary containers (i.e. returned by functions).
 	for (variable = *asl::enumData(ASL_TY(set), _b_).e; _b_.more; _b_.more=0)
 
 /**
-A for loop for associative containers resembling the `foreach` keyword of D. Similar to `foreach` but 
+A for loop for associative containers resembling C++17 range-based `for` with structured binding. Similar to `foreach` but 
 using two variables: the first will take the value of each *key* and the second will take its associated
 value. In newer compilers just use `for(auto& x : a)`, or `for(auto& [name, value] : a)` [C++17]
 ~~~.cpp
