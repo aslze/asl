@@ -231,7 +231,7 @@ int main(int argc, char* argv[])
 		bool print = args.has("print");
 		for (int i = 0; i < n; i++)
 		{
-			HttpResponse res = Http::post(host + "/blob?n=" + String(m), String('x', m));
+			HttpResponse res = Http::post(host + "/blob?n=" + String(m), String::repeat('x', m));
 			Var data = res.json();
 			if (print)
 				printf("[%i] %i  %s\n", i, res.code(), *Xdl::encode(data));
