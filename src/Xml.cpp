@@ -12,7 +12,7 @@ Xml Xml::read(const String& file)
 	return Xml::decode(TextFile(file).text());
 }
 
-bool Xml::write(const String& path, const Xml& e)
+bool Xml::write(const Xml& e, const String& path)
 {
 	TextFile file(path, File::WRITE);
 	if (!file)
@@ -470,8 +470,7 @@ void XmlCodec::encode(const Xml& e)
 		escape(e.text());
 		return;
 	}
-	// write prolog?
-	// if (!e.parent()) _xml << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+
 	if(_formatted)
 		for (int i = 0; i < _level; i++) _xml << INDENT_CHAR;
 	_level++;

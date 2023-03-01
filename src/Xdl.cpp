@@ -69,10 +69,9 @@ Var Xdl::read(const String& file)
 	}
 	parser.parse(" ");
 	return parser.value();
-	//return Xdl::decode(TextFile(file).text());
 }
 
-bool Xdl::write(const String& file, const Var& v, int mode)
+bool Xdl::write(const Var& v, const String& file, int mode)
 {
 	return TextFile(file).put(Xdl::encode(v, mode));
 }
@@ -80,10 +79,9 @@ bool Xdl::write(const String& file, const Var& v, int mode)
 Var Json::read(const String& file)
 {
 	return Xdl::read(file);
-	//return Json::decode(TextFile(file).text());
 }
 
-bool Json::write(const String& file, const Var& v, Json::Mode mode)
+bool Json::write(const Var& v, const String& file, Json::Mode mode)
 {
 	return TextFile(file).put(Json::encode(v, mode));
 }

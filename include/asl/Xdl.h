@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_XDL_H
@@ -123,11 +123,11 @@ struct ASL_API Xdl
 	/**
 	Writes a var to a file in XDL format
 	*/
-	static bool write(const String& file, const Var& v, int mode = Json::NICE);
+	static bool write(const Var& v, const String& file, int mode = Json::NICE);
 
-	static bool write(const Var& v, const String& file, int mode = Json::NICE)
+	static ASL_DEPRECATED(bool write(const String& file, const Var& v, int mode = Json::NICE), "Use Xdl::write(v, file)")
 	{
-		return write(file, v, mode);
+		return write(v, file, mode);
 	}
 
 	/**

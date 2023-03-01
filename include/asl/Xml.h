@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_XML_H
@@ -120,7 +120,7 @@ ASL_DEPRECATED(Xml ASL_API decodeXML(const String& xml), "Use Xml::decode()");
 Encodes the given XML document as XML, with or without formatting.
 \deprecated Use Xml::encode()
 */
-String ASL_API encodeXML(const Xml& e, bool formatted = true);
+ASL_DEPRECATED(String ASL_API encodeXML(const Xml& e, bool formatted = true), "Use Xml::encode()");
 
 
 class XmlText;
@@ -189,7 +189,8 @@ Xml html = Xml("html", {
 And the original XML formatted document can be written with the Xml::encode() function:
 
 ~~~
-String xml = Xml::encode(html);
+String xml = Xml::encode(html);  // to a string
+Xml::write(xml, "file.xml");     // to a file
 ~~~
 
 The content can be accessed easily with as **shorthand syntax** using operators `()` for tags and `[]` for attributes.
@@ -627,14 +628,18 @@ public:
 	
 	/**
 	Writes an XML document to a file
-	\deprecated Use write(xml, file)
 	*/
-	static bool write(const String& file, const Xml& e);
+	static bool write(const Xml& e, const String& file);
 
 	/**
 	Writes an XML document to a file
+	\deprecated Use write(xml, file)
 	*/
-	static bool write(const Xml& e, const String& file) { return write(file, e); }
+	static ASL_DEPRECATED(bool write(const String& file, const Xml& e), "Use Xml::write(xml, file)")
+	{
+		return write(e, file);
+	}
+
 	/**
 	Parses the given string as XML and returns the equivalent DOM tree.
 	*/

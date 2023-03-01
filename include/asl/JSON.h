@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_JSON_H
@@ -61,15 +61,17 @@ struct ASL_API Json
 	Reads and decodes data from a file in JSON format
 	*/
 	static Var read(const String& file);
+	
 	/**
 	Writes a var to a file in JSON format
 	*/
-	static bool write(const String& file, const Var& v, Mode mode = PRETTY);
+	static bool write(const Var& v, const String& file, Mode mode = PRETTY);
 
-	static bool write(const Var& v, const String& file, Mode mode = PRETTY)
+	static ASL_DEPRECATED(bool write(const String& file, const Var& v, Mode mode = PRETTY), "Use Json::write(var, file)")
 	{
-		return write(file, v, mode);
+		return write(v, file, mode);
 	}
+
 	/**
 	Decodes the JSON-encoded string into a Var that will contain all the structure. It is similar to JavaScript's
 	`JSON.parse()`. If there are format parsing errors, the result will be a `Var::NONE` typed variable.
