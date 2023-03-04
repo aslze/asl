@@ -632,19 +632,17 @@ String& String::trim()
 
 String String::replace(const String& a, const String& b) const
 {
-	String out;
-	int j=0, m=a.length();
-	j = indexOf(a);
-	if(j==-1) {
-		out = *this;
-		return out;
-	}
+	int j = indexOf(a), m = a.length();
+	if(j==-1)
+		return *this;
+	String out(length(), 0);
 	out << substring(0, j);
 	for(int i=j+m; i<=length(); i=j+m)
 	{
 		j = indexOf(a, i);
 		if(j==-1) j=length();
-		out << b << substring(i, j);
+		out << b;
+		out.append(str() + i, j - i);
 	}
 	return out;
 }
