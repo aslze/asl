@@ -132,9 +132,9 @@ if(!xml) {...} // incorrect format
 And the recommended way to encode and write data in these formats to a file is:
 
 ~~~
-Json::write("file.json", data );
-Xdl::write("file.xdl", data );
-Xml::write("file.xml", xml );
+Json::write(data, "file.json");
+Xdl::write(data, "file.xdl");
+Xml::write(xml, "file.xml");
 ~~~
 
 __XDL__, *eXtensible Data Language*, is a format for describing structured data 
