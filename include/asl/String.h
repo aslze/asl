@@ -205,7 +205,7 @@ public:
 	}
 	/**
 	Constructs a string consisting of character `c` repeated `n` times.
-	@deprecated Use `repeat()` instead.
+	\deprecated Use `String::repeat()` instead.
 	*/
 	ASL_DEPRECATED(ASL_EXPLICIT String(char c, int n), "Use String::repeat()")
 	{
@@ -494,7 +494,7 @@ public:
 	*/
 	int length() const {return _len;}
 	/**
-	Returns the number of full characters in the string (may be different from `length()` )
+	Returns the number of full characters (code points) in the string (may be different from `length()` )
 	*/
 	int count() const {const wchar_t* w(*(String*)this); return (int)wcslen(w);} // to improve
 	/**

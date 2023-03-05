@@ -320,6 +320,8 @@ ASL_TEST(String)
 	ASL_ASSERT(d.substr(-4, 3) == "ric");
 	ASL_ASSERT(d.substr(0, 30) == d);
 	
+	ASL_ASSERT((" " + d + " ").replace(" ", "--") == "--My--taylor--is--rich--");
+
 	Array<String> w = d.split(' ');
 	ASL_ASSERT(w.length() == 4);
 	ASL_ASSERT(w.last() == "rich");

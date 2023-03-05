@@ -4,7 +4,7 @@
 #include <asl/TextFile.h>
 #include <asl/Path.h>
 #include <asl/Directory.h>
-#include <asl/Thread.h>
+#include <asl/Mutex.h>
 #include <asl/Process.h>
 
 #define ASL_LOG_MAX_SIZE 1000000

@@ -1,3 +1,6 @@
+// Copyright(c) 1999-2023 aslze
+// Licensed under the MIT License (http://opensource.org/licenses/MIT)
+
 #ifndef ASL_SHAREDMEM
 #define ASL_SHAREDMEM
 
@@ -5,10 +8,6 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#else
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #endif
 
 namespace asl {
@@ -39,6 +38,8 @@ if(memo.ptr())
 
 To read from the memory written by the first process.
 
+\deprecated This class was an experiment and might be removed sometime.
+
 */
 class ASL_API SharedMem
 {
@@ -54,7 +55,7 @@ public:
 	*/
 	byte* ptr();
 protected:
-	SharedMem(const SharedMem& m);
+	SharedMem(const SharedMem& m) {}
 
 #ifdef _WIN32
 	HANDLE _handle;

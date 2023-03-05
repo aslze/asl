@@ -150,11 +150,12 @@ public:
 	/**
 	Resizes the matrix to r x c
 	*/
-	void resize(int r, int c)
+	Array2& resize(int r, int c)
 	{
 		_a.resize(r * c);
 		_rows = r;
 		_cols = c;
+		return *this;
 	}
 
 	/**

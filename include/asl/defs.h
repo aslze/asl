@@ -1,5 +1,5 @@
 // ASL - All-purpose Simple Library
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_DEFS_H
@@ -10,7 +10,7 @@
 Main definitions.
 */
 
-#define ASL_VERSION 11105
+#define ASL_VERSION 11106
 
 #ifdef _WIN32
 #ifndef _CRT_SECURE_NO_DEPRECATE
@@ -136,14 +136,19 @@ Check that the argument is true.
 
 namespace asl {
 
-typedef unsigned char byte;
-
-struct Exception {};
-
 /**
 \defgroup Global Global functions
 @{
 */
+
+/**
+An unsigned byte. This is also included in the global scope (`using asl::byte;`) for compatibility with old code, unless `ASL_NO_GLOBAL_BYTE` is defined.
+\ingroup Global
+\deprecated This type will not be added to the global scope anymore; code should use `asl::byte`
+*/
+typedef unsigned char byte;
+
+struct Exception {};
 
 #if defined _WIN32 && !defined GCC
 	typedef __int64 Long;

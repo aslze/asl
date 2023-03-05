@@ -2,6 +2,9 @@
 
 #ifndef _WIN32
 #include <sys/types.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
 #endif
 
@@ -9,6 +12,7 @@ namespace asl {
 
 SharedMem::SharedMem(const String& name, int size)
 {
+	_size = 0;
 #ifdef _WIN32
 
 	_handle = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, name);

@@ -522,9 +522,9 @@ public:
 
 	/**
 	Sets the content of a named subelement creating it if it does not exist
-	\deprecated Use put(), set will probably set an attribute in the future
+	\deprecated Use put(), set() will probably set an attribute in the future
 	*/
-	ASL_DEPRECATED(Xml& set(const String& name, const String& val), "Use put(), set will probably set an attribute in the future") { return put(name, val); }
+	ASL_DEPRECATED(Xml& set(const String& name, const String& val), "Use put(), set() will probably set an attribute in the future") { return put(name, val); }
 
 	/**
 	Removes all children
@@ -633,7 +633,7 @@ public:
 
 	/**
 	Writes an XML document to a file
-	\deprecated Use write(xml, file)
+	\deprecated Use Xml::write(xml, file)
 	*/
 	static ASL_DEPRECATED(bool write(const String& file, const Xml& e), "Use Xml::write(xml, file)")
 	{

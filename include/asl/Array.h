@@ -177,10 +177,12 @@ public:
 	void destroy() { for(int i=0; i<length(); i++) delete _a[i]; clear(); }
 	/**
 	Returns a pointer to the base of the array
+	\deprecated this conversion will not be implicit! Use .ptr()
 	*/
 	ASL_DEPRECATED(operator const T*() const, "Use ptr()") { return &_a[0]; }
 	/**
 	Returns a pointer to the base of the array
+	\deprecated this conversion will not be implicit! Use .ptr()
 	*/
 	ASL_DEPRECATED(operator T*(), "Use ptr()") { return &_a[0]; }
 	/**
@@ -435,7 +437,8 @@ public:
 		return b;
 	}
 	/**
-	Same as slice() \deprecated
+	Same as slice()
+	\deprecated Use .slice()
 	*/
 	ASL_DEPRECATED(Array sslice(int i1, int i2 = 0) const, "Use slice()")
 	{

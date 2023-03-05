@@ -165,9 +165,9 @@ public:
 	*/
 	bool putFile(const String& path, int begin = 0, int end = 0);
 
-	ASL_DEPRECATED(operator String() const, "") { return text(); }
+	ASL_DEPRECATED(operator String() const, "Use .text()") { return text(); }
 	
-	ASL_DEPRECATED(operator Var() const, "") { return json(); }
+	ASL_DEPRECATED(operator Var() const, "Use .json()") { return json(); }
 
 	HttpMessage& onProgress(const Function<void, const HttpStatus&>& f) { _progress = f; return *this; }
 

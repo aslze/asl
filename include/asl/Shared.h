@@ -1,5 +1,10 @@
+// Copyright(c) 1999-2023 aslze
+// Licensed under the MIT License (http://opensource.org/licenses/MIT)
+
 #ifndef ASL_SHARED_H
 #define ASL_SHARED_H
+
+#include "Pointer.h"
 
 namespace asl {
 
@@ -76,7 +81,7 @@ public:
 		return _p == 0;
 	}
 
-	operator bool() const
+	ASL_EXPLICIT operator bool() const
 	{
 		return _p != 0;
 	}

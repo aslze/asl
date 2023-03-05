@@ -237,14 +237,13 @@ static int yearFromTime(double t)
 }
 
 
-static int month_days[][13]={
-	{0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365},
-	{0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366}
+static int month_days[][14]={
+	{0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365},
+	{0, 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366}
 };
 
 void Date::construct(Zone z, int year, int month, int day, int h, int m, int s)
 {
-	month--; // 1 = january
 	bool leap = (daysInYear(year) == 366);
 	double yearday = floor(timeFromYearAsDays(year));
 	double monthday = month_days[leap][month];
@@ -273,16 +272,17 @@ DateData Date::calc(double t)
 	date.year = yearFromTime(t);
 	int leap = isLeapYear(t)? 1 : 0;
 	int yd = (int)dayWithinYear(t, date.year);
+	date.month = 1;
 
 	for (int i = yd / 32; i < 13; i++)
 	{
-		if(yd < month_days[leap][i])
+		if(yd < month_days[leap][i + 1])
 		{
 			date.month = i;
 			break;
 		}
     }
-	date.day = yd - month_days[leap][date.month - 1] + 1;
+	date.day = yd - month_days[leap][date.month] + 1;
 
 	double dt = ((t / 86400.0) - floor(t / 86400.0));
 	int h = (int)floor(24*dt);
