@@ -9,11 +9,11 @@ set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib )
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
 set( CMAKE_MACOSX_RPATH ON )
 
+set(ASL_VERSION 1.11.6)
+
 if(POLICY CMP0077)
 	cmake_policy(SET CMP0077 NEW)
 endif()
-
-option( ASL_USE_LOCAL8BIT "Treat char strings as local 8 bit instead of UTF8 when converting wchar_t strings" OFF)
 
 if(NOT MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
@@ -26,7 +26,20 @@ endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+if(CMAKE_SOURCE_DIR STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} AND NOT ANDROID)
+	set(ASL_BUILD_SHARED_HINT ON)
+else()
+	set(ASL_BUILD_SHARED_HINT OFF)
+endif()
+
+option(ASL_USE_LOCAL8BIT "Treat char strings as local 8 bit instead of UTF8 when converting wchar_t strings")
 option(ASL_TLS "TLS Sockets")
+option(ASL_BUILD_STATIC "Build static library" ON)
+option(ASL_BUILD_SHARED "Build shared library" ${ASL_BUILD_SHARED_HINT})
+option(ASL_IPV6 "Expect also IPv6 when looking up DNS names")
+option(ASL_SAMPLES "Build samples")
+option(ASL_TESTS "Build tests")
+
 
 if(ASL_TLS)
 	if(TARGET MbedTLS::mbedtls)
@@ -45,28 +58,13 @@ if(ASL_TLS)
 	endif()
 endif()
 
-
 set(TARGETS "")
 
-if(CMAKE_SOURCE_DIR STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} AND NOT ANDROID)
-	set(ASL_BUILD_SHARED_HINT ON)
-else()
-	set(ASL_BUILD_SHARED_HINT OFF)
-endif()
-
-option(ASL_BUILD_STATIC "Build static library" ON)
-option(ASL_BUILD_SHARED "Build shared library" ${ASL_BUILD_SHARED_HINT})
-option(ASL_IPV6 "Expect also IPv6 when looking up DNS names")
-
 add_subdirectory( src )
-
-option(ASL_SAMPLES "Build samples")
 
 if(ASL_SAMPLES)
 	add_subdirectory(samples)
 endif()
-
-option(ASL_TESTS "Build tests")
 
 if( ASL_TESTS )
 	enable_testing()
@@ -74,9 +72,11 @@ if( ASL_TESTS )
 endif()
 
 file( WRITE "${PROJECT_BINARY_DIR}/ASLConfigVersion.cmake"
+	"set(PACKAGE_VERSION ${ASL_VERSION})\n"
 	"if(NOT CMAKE_GENERATOR STREQUAL \"${CMAKE_GENERATOR}\" OR (DEFINED CMAKE_GENERATOR_PLATFORM AND NOT CMAKE_GENERATOR_PLATFORM STREQUAL \"${CMAKE_GENERATOR_PLATFORM}\"))\n"
-	"message(\"Skipping incompatible ASL build\")\n"
-	"set(PACKAGE_VERSION_UNSUITABLE TRUE)\nendif()\n" )
+	"set(PACKAGE_VERSION_UNSUITABLE TRUE)\nendif()\n"
+	"if(PACKAGE_FIND_VERSION VERSION_LESS PACKAGE_VERSION OR PACKAGE_FIND_VERSION VERSION_EQUAL PACKAGE_VERSION)\nset(PACKAGE_VERSION_COMPATIBLE TRUE)\nendif()\n"
+)
 
 export( TARGETS ${TARGETS} FILE ASLConfig.cmake )
 install( EXPORT asl DESTINATION cmake FILE ASLConfig.cmake )
