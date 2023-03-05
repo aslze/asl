@@ -149,59 +149,28 @@ Consider the following XML fragment.
 </html>
 ~~~
 
+
+__Parsing/reading__
+
 This can be parsed from a string or read from a file:
 
 ~~~{.cpp}
 Xml html = Xml::decode(xml);    // from a string
 
-Xml html = Xml::read(xmlfile);  // from a file
+Xml html = Xml::read("document.xml");  // from a file
 ~~~
 
-The same XML document DOM can be built in code:
 
-~~~
-Xml html = Xml("html")
-	<< (Xml("head")
-		<< Xml("meta", Map<>("charset", "utf8"))
-		<< Xml("meta", Map<>("name", "author")("content", "John Doe"))
-	)
-	<< (Xml("body")
-		<< Xml("h1", "Hello")
-		<< Xml("p", Map<>("class", "main"), "world")
-	);
-~~~
-
-Or in newer compilers (with initializer lists):
-
-~~~
-Xml html = Xml("html", {
-	Xml("head", {
-		Xml("meta", {{"charset", "utf8"}}),
-		Xml("meta", {{"name", "author"}, {"content", "John Doe"}})
-	}),
-	Xml("body", {
-		Xml("h1", "Hello"),
-		Xml("p", {{"class", "main"}}, "world")
-	})
-});
-~~~
-
-And the original XML formatted document can be written with the Xml::encode() function:
-
-~~~
-String xml = Xml::encode(html);  // to a string
-Xml::write(xml, "file.xml");     // to a file
-~~~
-
-The content can be accessed easily with as **shorthand syntax** using operators `()` for tags and `[]` for attributes.
+The content can be accessed easily using operator `()` for tags and `[]` for attributes.
 For example, the charset attribute in the `<meta>` element can be read with:
 
 ~~~
 String charset = html("head")("meta")["charset"];  // -> "utf8"
 ~~~
 
-That is, `element("tag")` returns the first child of `element` that has the given tag (`element("tag", 3)` would return
-the 4th child with that tag). And `element["attr"]` returns the value of the attribute `attr`.
+- `element("tag")` returns the first child of `element` that has the given tag
+- `element("tag", 3)` would return the 4th child with that tag
+- `element["attr"]` returns the value of the attribute `attr`.
 
 The text content of the `<h1>` element would be retrieved like this:
 
@@ -209,7 +178,7 @@ The text content of the `<h1>` element would be retrieved like this:
 String text = html("body")("h1").text();  // -> "Hello"
 ~~~
 
-That content can be written with:
+That text content of an element can be written with `.pu()`:
 
 ~~~
 html("body").put("h1", "Bye");      // now it's <h1>Bye</h1>
@@ -226,7 +195,7 @@ for(auto& e : body.children())
 }
 ~~~
 
-Or only the children with a given tag (you can also use C++11 range-based for):
+Or only the children with a given tag:
 
 ~~~
 for(auto& meta : html("head").children("meta"))
@@ -246,6 +215,46 @@ auto elems = html.find([](const Xml& e) {
     return e.tag() == "img" && e["src"].endsWith(".png");
 });
 ~~~
+
+
+__Creating/writing__
+
+The same example XML document DOM can be built in code:
+
+~~~
+Xml html = Xml("html")
+    << (Xml("head")
+        << Xml("meta", Map<>("charset", "utf8"))
+        << Xml("meta", Map<>("name", "author")("content", "John Doe"))
+    )
+    << (Xml("body")
+        << Xml("h1", "Hello")
+        << Xml("p", Map<>("class", "main"), "world")
+    );
+~~~
+
+Or in newer compilers (with initializer lists):
+
+~~~
+Xml html("html", {
+    Xml("head", {
+        Xml("meta", {{"charset", "utf8"}}),
+        Xml("meta", {{"name", "author"}, {"content", "John Doe"}})
+    }),
+    Xml("body", {
+        Xml("h1", "Hello"),
+        Xml("p", {{"class", "main"}}, "world")
+    })
+});
+~~~
+
+And the original XML formatted document can be written like this:
+
+~~~
+String xml = Xml::encode(html);    // to a string
+Xml::write(html, "document.xml");  // to a file
+~~~
+
 */
 
 class ASL_API Xml : public NodeBase
