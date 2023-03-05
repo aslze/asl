@@ -71,11 +71,11 @@ find the library compatible with the current project among the versions compiled
 With CMmake 3.14+, instead of using `find_package()`, you can download and build the library automatically as a subproject
 (and then link with it as before):
 
-```cmake
+~~~
 include(FetchContent)
 FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.6.zip)
 FetchContent_MakeAvailable(asl)
-```
+~~~
 
 Remember that all header files have the `asl/` prefix directory and are named like the class they define
 (case-sensitively), and that all symbols are in the `asl` namespace. So, for example, to use the Directory class:
