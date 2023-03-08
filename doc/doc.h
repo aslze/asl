@@ -58,17 +58,17 @@ the imported targets, `asl` for the dynamic version or `asls` for the static ver
 as you don't need to copy or distribute a DLL at runtime.
 
 ~~~
-find_package( ASL REQUIRED )
+find_package(ASL REQUIRED)
 
-target_link_libraries( my_application asls ) # for the static version (recommended), or
+target_link_libraries(my_application asls) # for the static version (recommended), or
 
-target_link_libraries( my_application asl ) # for the dynamic library
+target_link_libraries(my_application asl) # for the dynamic library
 ~~~
 
 There is no need to provide the library directory or set *include_directories*. `find_package` will
 find the library compatible with the current project among the versions compiled.
 
-With CMmake 3.14+, instead of using `find_package()`, you can download and build the library automatically as a subproject
+With CMake 3.14+, instead of using `find_package()`, you can download and build the library automatically as a subproject
 (and then link with it as before):
 
 ~~~
