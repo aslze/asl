@@ -8,26 +8,38 @@
 
 namespace asl {
 
+template<class T>
+struct SharedCore
+{
+	T*          p;
+	AtomicCount rc;
+
+	SharedCore() : p(0), rc(1) {}
+	SharedCore(T* r) : p(r), rc(1) {}
+	void ref() { ++rc; }
+	void unref()
+	{
+		if (--rc <= 0)
+		{
+			delete p;
+			p = 0;
+			delete this;
+		}
+	}
+};
+
+template<class T2, class T>
+const SharedCore<T2>* cast_(const SharedCore<T>* c)
+{
+	SharedCore<T2>* c2 = (SharedCore<T2>*)c;
+	c2->p = c->p;
+	return c2;
+}
+
+
 template <class T>
 class Shared
 {
-	struct Core {
-		T* p;
-		AtomicCount rc;
-		Core() : p(0), rc(1) {}
-		Core(T* r) : p(r), rc(1) {}
-		void ref() {
-			++rc;
-		}
-		void unref() {
-			if (--rc <= 0) {
-				delete p;
-				p = 0;
-				delete this;
-			}
-		}
-	};
-
 public:
 	int refcount() const { return _p->rc; }
 	template<class T2> friend class Shared;
@@ -39,9 +51,14 @@ public:
 	{
 		ref();
 	}
+	template<class T2>
+	Shared(const Shared<T2>& p) : _p((SharedCore<T>*)cast_<T>(p._p)) 
+	{
+		ref();
+	}
 	Shared(T* p)
 	{
-		_p = new Core(p);
+		_p = new SharedCore<T>(p);
 	}
 	~Shared()
 	{
@@ -51,7 +68,7 @@ public:
 	{
 		if (_p != r._p)
 		{
-			Core* t = _p;
+			SharedCore<T>* t = _p;
 			_p = r._p;
 			ref();
 			if (t)
@@ -59,11 +76,17 @@ public:
 		}
 		return *this;
 	}
+	template<class T2>
+	Shared& operator=(const Shared<T2>& r)
+	{
+		*this = Shared(r);
+		return *this;
+	}
 	Shared& operator=(T* r)
 	{
 		{
-			Core* t = _p;
-			_p = new Core(r);
+			SharedCore<T>* t = _p;
+			_p = new SharedCore<T>(r);
 			if (t)
 				t->unref();
 		}
@@ -85,6 +108,8 @@ public:
 	{
 		return _p->p;
 	}
+
+	T* get() const { return _p->p; }
 	
 	template<class T2>
 	Shared<T2> as() const
@@ -93,7 +118,7 @@ public:
 		const T2* p = dynamic_cast<const T2*>(_p->p);
 		if (p)
 		{
-			sp._p = (typename Shared<T2>::Core*)_p;
+			sp._p = (SharedCore<T2>*)_p;
 			sp.ref();
 		}
 		return sp;
@@ -135,7 +160,7 @@ public:
 	}
 private:
 
-	Core* _p;
+	SharedCore<T>* _p;
 
 	void ref()
 	{

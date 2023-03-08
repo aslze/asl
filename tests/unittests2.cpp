@@ -206,6 +206,11 @@ struct Motor: public Device
 	bool move() { return true; }
 };
 
+int len(const Shared<Animal>& a)
+{
+	return a ? a->speak().length() : 0;
+}
+
 ASL_TEST(Factory)
 {
 	{
@@ -229,6 +234,15 @@ ASL_TEST(Factory)
 		Shared<Animal> another = animal;
 		Shared<Animal> dolly = animal.clone();
 		ASL_ASSERT(dolly->speak() == "Woof!");
+
+		Shared<Dog> dog = Shared<Animal>(Factory<Animal>::create("Dog")).as<Dog>();
+		animal = dog;
+		int l = len(dog);
+
+		Array<Shared<Animal> > zoo;
+		zoo << new Dog() << new Cat();
+
+		ASL_ASSERT(Animal::count > 0)
 
 		Shared<Device> dev = new Motor();
 		ASL_ASSERT(dev->enable());
