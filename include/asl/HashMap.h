@@ -35,7 +35,7 @@ inline int hash(const Array<byte>& s)
 template<typename T>
 inline int hash(T* p)
 {
-	return ((int)p) >> 2;
+	return ((int)(size_t(p) & 0xffffffff)) >> 2;
 }
 
 template<typename T>
