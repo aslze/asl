@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_VAR_H
@@ -351,8 +351,11 @@ class ASL_API Var
 	template<class T>
 	void operator=(const VDic<T>& x);
 #ifdef ASL_HAVE_INITLIST
+	void operator=(const std::initializer_list<Obj> b) { *this = Var(b); }
 	template<class T>
-	void operator=(const std::initializer_list<T>& x) { *this = Var(x); }
+	void operator=(const std::initializer_list<T> b) { *this = Var(b); }
+	template<class T>
+	void operator=(const std::initializer_list<std::initializer_list<T>> b) { *this = Var(b); }
 #endif
 	/** Appends `x` to this var if this var is an array (useful for Var construction) */
 	Var& operator,(const Var& x) {return (*this) << (Var)x;}
