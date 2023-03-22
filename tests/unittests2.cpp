@@ -9,6 +9,12 @@
 #include <asl/testing.h>
 #include <stdio.h>
 
+#ifdef __CODEGEARC__
+#define U8(x) u8##x
+#else
+#define U8(x) x
+#endif
+
 using namespace asl;
 
 struct hasTag {
@@ -162,7 +168,7 @@ ASL_TEST(XML)
 	ASL_ASSERT(!Xml::decode("<x a$='4'>..</x>"));
 	ASL_ASSERT(Xml::decode("<_x:y a_z:t='4' z-z='5'>..</_x:y>"));
 	ASL_ASSERT(Xml::decode("<A9  Z0='4'>..</A9>"));
-	ASL_ASSERT(Xml::decode("<Πριν アス='4'>..</Πριν>"));
+	ASL_ASSERT(Xml::decode(U8("<Πριν アス='4'>..</Πριν>")));
 }
 
 struct Animal

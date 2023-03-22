@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_HASHMAP_H

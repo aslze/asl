@@ -57,7 +57,7 @@ String Url::params(const Dic<>& q)
 Dic<> decodeUrlParams(const String& querystring)
 {
 	Dic<> query;
-	Dic<> q = split(querystring.replace('+', ' '), '&', '=');
+	Dic<> q = querystring.replace('+', ' ').split('&', '=');
 	foreach2(String& k, const String& v, q)
 		query[decodeUrl(k)] = decodeUrl(v);
 	return query;

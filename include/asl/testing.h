@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2020 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_TESTING_H
@@ -33,7 +33,7 @@ struct TestInfo { const char* name; void (*func)(); };
 extern TestInfo tests[255];
 extern int numTests;
 extern bool testFailed;
-extern bool testsFailed;
+extern int failedTests;
 
 #ifndef __ANDROID__
 #define ASL_PRINT_TEST_RESULT(name, result)
@@ -50,7 +50,7 @@ namespace asl { \
 asl::String testResult; \
 TestInfo tests[255]; \
 int numTests = 0; \
-bool testsFailed = false;\
+int failedTests = 0;\
 bool testFailed = false;\
 int addTest(const char* name, void (*func)()) \
 { \
@@ -66,7 +66,7 @@ bool runTest(const char* name)\
 		if (strcmp(tests[i].name, name) == 0)\
 		{\
 			tests[i].func();\
-			if(testFailed) testsFailed = true;\
+			if(testFailed) failedTests++;\
 			return !testFailed;\
 		}\
 	}\
@@ -80,14 +80,16 @@ bool runAllTests()\
 		printf("Test %s:\n----------------> %s\n\n", name, result? "OK" : "FAILED"); \
 		ASL_PRINT_TEST_RESULT(name, result); \
 	}\
-	return !asl::testsFailed;\
+	return asl::failedTests == 0;\
 }\
 }
 
 #define ASL_TEST_MAIN() \
 int main() \
 { \
-	return runAllTests() ? 0 : 1; \
+	bool ok = asl::runAllTests(); \
+	printf("\n%s: %i tests failed of %i\n", ok ? "OK" : "Error", asl::failedTests, asl::numTests); \
+	return asl::failedTests; \
 }
 
 /** 

@@ -376,13 +376,6 @@ public:
 	struct KV { const char* key; const T& value; };
 	Dic(std::initializer_list< KeyVal > b) :
 		Map < String, T>(b) {}
-	/*{
-		for (int i = 0; i < (int)b.size(); i++)
-		{
-			const KV& kv = b.begin()[i];
-			(*this)[kv.key] = kv.value;
-		}
-	}*/
 	void operator=(std::initializer_list< KV > b)
 	{
 		this->clear();

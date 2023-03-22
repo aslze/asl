@@ -78,7 +78,7 @@ bool Directory::removeRecursive(const String& path)
 	Directory dir(path);
 	foreach(File& file, dir.files())
 		ok = ok && file.remove();
- 	foreach(File& d, dir.subdirs())
+	foreach(File& d, dir.subdirs())
 		ok = ok && removeRecursive(d.path());
 	
 	ok = ok && remove(path);

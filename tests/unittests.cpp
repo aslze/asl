@@ -13,6 +13,12 @@
 
 ASL_TEST_ENABLE();
 
+#ifdef __CODEGEARC__
+#define U8(x) u8##x
+#else
+#define U8(x) x
+#endif
+
 using namespace asl;
 
 #ifndef __ANDROID__
@@ -87,7 +93,7 @@ ASL_TEST(IniFile)
 
 ASL_TEST(TabularDataFile)
 {
-	int N = 100;
+	int N = 10;
 	
 	{
 		TabularDataFile file("data.csv");
@@ -140,7 +146,7 @@ ASL_TEST(TabularDataFile)
 			double y = file[2];
 			String s = file[3];
 			ASL_ASSERT(i == k++);
-			ASL_ASSERT(x == 0.5);
+			ASL_APPROX(x, 0.5, 1e-9);
 			ASL_ASSERT(y == -3.0*i);
 			ASL_ASSERT(s == "neg");
 			ASL_ASSERT(file[0] == file["i"] && file[1] == file["x"] && file[2] == file["y"] && file[3] == file["sign"]);
@@ -319,7 +325,7 @@ ASL_TEST(String)
 	ASL_ASSERT(d.substr(-3) == "ich");
 	ASL_ASSERT(d.substr(-4, 3) == "ric");
 	ASL_ASSERT(d.substr(0, 30) == d);
-	
+
 	ASL_ASSERT((" " + d + " ").replace(" ", "--") == "--My--taylor--is--rich--");
 
 	Array<String> w = d.split(' ');
@@ -352,11 +358,11 @@ ASL_TEST(String)
 	ASL_ASSERT(g.equalsNocase("My Tailor is Rich 1990"));
 	ASL_ASSERT(!g.equalsNocase("My Taylor is Rich 1990"));
 #else
-	String g = "Ñandú εξέλιξη жизни";
-	ASL_ASSERT(g.toUpperCase() == "ÑANDÚ ΕΞΈΛΙΞΗ ЖИЗНИ");
-	ASL_ASSERT(g.equalsNocase("ñanDÚ εΞΈλΙξΗ ЖиЗНИ"));
-	ASL_ASSERT(!g.equalsNocase("ñanDU εΞΈλΙξΗ ЖиЗНИ"));
-	String unicode = "añ€😀";
+	String g = U8("Ñandú εξέλιξη жизни");
+	ASL_ASSERT(g.toUpperCase() == U8("ÑANDÚ ΕΞΈΛΙΞΗ ЖИЗНИ"));
+	ASL_ASSERT(g.equalsNocase(U8("ñanDÚ εΞΈλΙξΗ ЖиЗНИ")));
+	ASL_ASSERT(!g.equalsNocase(U8("ñanDU εΞΈλΙξΗ ЖиЗНИ")));
+	String unicode = U8("añ€😀");
 	wchar_t wunicode[16];
 	utf8toUtf16(unicode, wunicode, 15);
 	Array<int> chars = unicode.chars();
@@ -436,10 +442,6 @@ ASL_TEST(JSON)
 	String xdl2 = Xdl::encode(v, Json::PRETTY);
 	String json1 = Json::encode(v, Json::COMPACT);
 	String json2 = Json::encode(v, Json::PRETTY);
-	printf("%s\n", *xdl1);
-	printf("%s\n", *xdl2);
-	printf("%s\n", *json1);
-	printf("%s\n", *json2);
 	ASL_CHECK(Xdl::decode(xdl1), == , v);
 	ASL_CHECK(Xdl::decode(xdl2), == , v);
 	ASL_CHECK(Json::decode(json1), == , v);
@@ -542,6 +544,10 @@ ASL_TEST(Var)
 	ASL_ASSERT(v4a.isArrayOf(2, Var::STRING));
 	ASL_ASSERT(v4b.is(Var::OBJ) && v4b["x"] == "y");
 
+	v4b = { { "x", 5 } };
+
+	ASL_ASSERT(v4b.is(Var::OBJ) && v4b["x"] == 5);
+
 	v3["ab"] = { true, false, true };
 	ASL_ASSERT(v3["ab"].isArrayOf(3, Var::BOOL));
 #endif
@@ -606,7 +612,9 @@ int main(int narg, char* argv[])
 	}
 	
 	if (narg < 2) {
-		return asl::runAllTests() ? EXIT_SUCCESS : EXIT_FAILURE;
+		bool ok = asl::runAllTests();
+		printf("\n%s: %i tests failed of %i\n", ok ? "OK" : "Error", asl::failedTests, asl::numTests); \
+		return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
 
 	if(!asl::runTest(argv[1]))

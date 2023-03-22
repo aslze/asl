@@ -8,8 +8,6 @@
 #include <asl/Array.h>
 #include <asl/Map.h>
 #include <asl/Pointer.h>
-//#include <asl/HashMap.h>
-//#define VDic HashDic
 #define VDic Dic
 #define ASL_VAR_STATIC
 #define ASL_XDLCLASS "$type"
@@ -23,6 +21,9 @@ namespace asl {
 #define NEW_DIC(d) (d) = new VDic<Var>
 #define NEW_DICC(d, x) (d) = new VDic<Var>(x)
 #define DEL_DIC(d) delete (d)
+#define NEW_STRING(s) (s) = new asl::Array<char>()
+#define NEW_STRINGC(s, n) (s) = new asl::Array<char>(n)
+#define DEL_STRING(s) delete (s)
 #else
 #define NEW_ARRAY(a) (a).construct()
 #define NEW_ARRAYC(a, x) (a).construct(x)

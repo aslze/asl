@@ -4,7 +4,7 @@
 #ifndef ASL_Pointer_H
 #define ASL_Pointer_H
 
-#include "atomic.h"
+#include <asl/atomic.h>
 
 namespace asl {
 
