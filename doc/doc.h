@@ -461,9 +461,9 @@ TextFile("image.jpg.b64").put( encodeBase64(File("image.jpg").content()) );
 /**
 \defgroup Math3D Math
 
-Classes and functions for math, including types useful in 2D/3D geometric computations and graphics.
+Classes and functions for math, including vector and matrix types useful in 2D/3D geometric computations and graphics.
 
-These classes are templates that can be used with elements of any numeric type.
+These classes are templates that can be used with elements of any numeric type, but some functions oly make sense with floating point types.
 
 ~~~
 Vec3_<int> ivec(1, 2, 3);
@@ -471,15 +471,27 @@ Matrix4_<float> m;
 ~~~
 
 They all have two predefined specializations, for `float` and `double` elements. The
-type for doubles has a `d` suffix.
+type for double has a `d` suffix, and the type for float has no suffix:
 
 ~~~
-Vec3 v;   // Vec3_<float>
-Matrix4;  // Matrix4_<float>
-Vec3d v;  // Vec3_<double>
-Matrix3d; // Matrix3_<double>
-Matrixd;  // Matrix_<double>
+Vec3 v;   // -> Vec3_<float>
+Vec3d w;  // -> Vec3_<double>
 ~~~
+
+Classes Vec2_, Vec3_ and Vec4_ represent 2D, 3D and 4D vectors. Classes Matrix3_ and Matrix4_ represent 3x3 and 4x4 matrices, useful to work
+with spatial transformations. A Matrix4_ can multiply a 3D vector to apply an affine transform (the vector will be assumed to have a 4th
+component with value 1). Additionally, class Quaternion_ represent a quaternion and is useful to work with rotations in 3D.
+
+~~~
+Matrix4 transform = Matrix4::translate(position) * Matrix4::rotateX(angleX);
+Vec3 worldPos = transform * position;
+~~~
+
+Class Matrix_ represents a matrix of any size. It uses dynamic memory and is less efficient than the fixed size types above. Matrix_ can be
+used to represent systems of linear equations or arbitrary vectors.
+
+Functions solve() and solveZero() can be used to solve linear or non-linear systems with equal number of equations and unknowns, or more
+equations (least-squares).
 
 */
 

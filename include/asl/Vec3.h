@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_VECTOR3_H
@@ -20,12 +20,13 @@ together with class Matrix4 to transform vectors in space.
 ~~~
 Vec3 a (10, 10, 0.1);
 Vec3 b (-5, 1.5, 50);
-Vec3 c = -a + 2.0 * (b - a).normalized();
+Vec3 c = -a + 2.f * (b - a).normalized();
 ~~~
 
-The angle between two vectors can be computed with:
+There are operators for dot product (`*`), cross product (`^`) and multiplication by a scalar (`*`).
 ~~~
-float angle = acos(a/!a * b/!b);
+float angle = acos((a * b) / (a.length() * b.length()));
+Vec3 trinormal = ((b - a) ^ (c - a)).normalized();
 ~~~
 \ingroup Math3D
 */

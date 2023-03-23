@@ -18,6 +18,10 @@ class HttpRequest;
 class Http;
 class File;
 
+
+/**
+The components of a URL, as split by parseUrl().
+*/
 struct Url
 {
 	String protocol, host, path;
@@ -415,7 +419,8 @@ our geographical location from another server. You need a registered user *key* 
 ~~~
 auto loc = Http::get("http://ipinfo.io/").json()["loc"].toString().split(",");
 
-auto response = Http::get("http://api.openweathermap.org/data/2.5/weather?lat=" + loc[0] + "&lon=" + loc[1] + "&APPID=" + key);
+auto response = Http::get("http://api.openweathermap.org/data/2.5/weather?lat=" + loc[0] + "&lon=" + loc[1] + "&APPID=" +
+key);
 
 if (!response.ok())  // check if the request succeeded
 	return;
@@ -424,6 +429,12 @@ Var data = response.json();
 String city = data["name"];
 float temperature = data["main"]["temp"];
 float pressure = data["main"]["pressure"];
+~~~
+
+The query parameters can be formatted with the Url::params() function, which makes sure they are URL encoded:
+
+~~~
+Http::get("http://api.openweathermap.org/data/2.5/weather?" + Url::params({{"lat", loc[0]}, {"lon", loc[1]}, {"APPID", key}}));
 ~~~
 
 HTTPS client functionality currently does not check the server's certificate but the communication
