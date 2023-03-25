@@ -551,6 +551,23 @@ class ASL_API Var
 	}
 
 	/**
+	Removes the property named k, if this var is an object
+	*/
+	void remove(const String& k)
+	{
+		if (_type == DIC)
+			o->remove(k);
+	}
+
+	/**
+	Removes one or more items, starting at the given index, if this is an array
+	*/
+	void removeAt(int i, int n = 1)
+	{if (_type == ARRAY && i >= 0 && n > 0 && i < a->length() && i + n <= a->length())
+			a->remove(i, n);
+	}
+
+	/**
 	Returns an independent copy of this Var (for arrays and objects)
 	*/
 	Var clone() const;

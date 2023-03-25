@@ -476,9 +476,9 @@ ASL_TEST(Var)
 	a2["z"] = c;
 	ASL_ASSERT(a2 != a);
 	ASL_ASSERT(a.has("y"));
-	a.object().remove("y");
+	a.remove("y");
 	ASL_ASSERT(!a.has("y"));
-	c.array().remove(0);
+	c.removeAt(0);
 	ASL_ASSERT(c.length() == 3);
 
 	String s = "hello";

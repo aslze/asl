@@ -84,7 +84,6 @@ ASL_TEST(StreamBuffer)
 {
 	StreamBuffer b;
 	b.setEndian(ENDIAN_LITTLE);
-	b.setEndian(StreamBuffer::LITTLEENDIAN);
 	b << 'a' << 4 << 3.5 << true;
 
 	ASL_ASSERT(b.length() == 14);
