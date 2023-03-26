@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_SOCKET_H
@@ -377,7 +377,9 @@ class ASL_API PacketSocket : public Socket
 public:
 	ASL_SMART_DEF(PacketSocket, Socket);
 	PacketSocket(int fd) : ASL_SMART_INIT(fd) {}
-	String readLine() { return _()->readLine(); }
+
+	ASL_DEPRECATED(String readLine(), "") { return _()->readLine(); }
+
 	/**
 	Sends `n` bytes from `data` as a packet to the address `addr`.
 	*/
@@ -385,6 +387,14 @@ public:
 	{
 		_()->sendTo(addr, data, n);
 	}
+
+	/**
+	Sends a data packet to the address `addr`.
+	*/
+	void sendTo(const InetAddress& addr, const ByteArray& data) { sendTo(addr, data.ptr(), data.length()); }
+
+	void sendTo(const InetAddress& addr, const String& data) { sendTo(addr, data.data(), data.length()); }
+
 	/**
 	Reads an incoming packet into the buffer `data` of size `n`, writes the address
 	of the sending peer and returns the actual packet size.
@@ -392,6 +402,17 @@ public:
 	int readFrom(InetAddress& addr, void* data, int n)
 	{
 		return _()->readFrom(addr, data, n);
+	}
+
+	/**
+	Reads an incoming packet of at most n bytes and returns it, and gets the address
+	of the sending peer.
+	*/
+	ByteArray readFrom(InetAddress& addr, int n = 1000)
+	{
+		ByteArray data(n);
+		n = _()->readFrom(addr, data.ptr(), n);
+		return n > 0? data.resize(n) : data.resize(0);
 	}
 };
 
