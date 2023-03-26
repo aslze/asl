@@ -1,6 +1,8 @@
 body {
 	color: black;
 	margin: 0;
+	font-family: sans-serif;
+	--font-family-normal: sans-serif;
 }
 
 div.contents {
