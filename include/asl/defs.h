@@ -10,7 +10,7 @@
 Main definitions.
 */
 
-#define ASL_VERSION 11106
+#define ASL_VERSION 11107
 
 #ifdef _WIN32
 #ifndef _CRT_SECURE_NO_DEPRECATE
@@ -105,9 +105,9 @@ namespace asl {
 #if !defined(_WIN32) || defined(ASL_STATIC)
  #define ASL_API
 #elif defined(asl_EXPORTS)
-  #define ASL_API __declspec(dllexport)
+ #define ASL_API __declspec(dllexport)
 #else
-  #define ASL_API __declspec(dllimport)
+ #define ASL_API __declspec(dllimport)
 #endif
 
 #ifdef _WIN32
@@ -128,9 +128,10 @@ Check that the argument is true.
 #define ASL_DEPRECATED(x, m) __declspec(deprecated("Deprecated. " ## m)) x
 #elif defined(__GNUC__) && ASL_C_VER < 40503
 #define ASL_DEPRECATED(x, m) x __attribute__((deprecated))
+#elif defined(__clang__) // || defined(__GNUC__) // disable on gcc atm
+#define ASL_DEPRECATED(x, m) x __attribute__((deprecated(m)))
 #else
-#define ASL_DEPRECATED(x, m) x  __attribute__((deprecated(m)))
-								// temporarily off due to issues on gcc
+#define ASL_DEPRECATED(x, m) x
 #endif
 
 

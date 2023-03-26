@@ -295,7 +295,7 @@ while(true)
 /**
 \defgroup Containers Containers
 
-There are several container classes that can hold elements of any type (Array, 
+There are several container classes that can hold elements of any type (Array, Array_, Array2, 
 Map, Dic, Stack, HashMap). These classes are reference-counted, so they 
 are copied by reference. If a separate copy is required, use the `clone()` method:
 
@@ -305,28 +305,7 @@ Array<int> b = a;               // b is the same as a
 Array<int> c = a.clone();       // c is a separate copy of a
 ~~~
 
-In order to support iterating the elements contained, they implement an 
-_Enumerator_. These are similar to *iterators* but don't have to come in pairs 
-(*begin* and *end*). Just one Enumerator knows how to go to the next element and 
-when to stop iterating.
-
-All containers have an `all()` enumerator that represents all its elements. All enumerators must implement
-operator `*` to dereference the currently pointed element, and may implement operator `~` to get their associated
-_key_, if any. For example, in an Array, they key is the integer index associated to each element. And in a
-Dic, the key is the element's name, a string.
-
-This way, enumerating is done like this: (the keyword `auto` is useful if your compiler supports it)
-
-~~~
-for(Array<T>::Enumerator e = container.all(); e; ++e)
-{
-	cout << ~e << ':' << *e << endl;
-}
-~~~
-
-That way, if container was a Dic, it would be printing the names and values of all elements.
-
-In C++11 compilers you can also use *range-based for* loops:
+In C++11 compilers you can use *range-based for* loops to iterate over their items:
 
 ~~~
 for(float x: numbers)
@@ -335,7 +314,26 @@ for(float x: numbers)
 }
 ~~~
 
-And for older compilers there is a shorthand notation for iterating, `foreach` and `foreach2` loops. The
+Maps (Map, Dic, HashMap), can be iterated like this in C++11:
+
+~~~
+for(auto& e : constants)
+{
+    file << e.key << " = " e.value << '\n';
+}
+~~~
+
+Or this way in C++17:
+
+~~~
+for(auto& [name, value] : constants)
+{
+    file << name << " = " value << '\n';
+}
+~~~
+
+
+For older compilers there are special macros for iterating, `foreach` and `foreach2` loops. The
 first iterates on the values of elements. And the second on both the keys and values of elements.
 
 ~~~
@@ -355,6 +353,28 @@ foreach2(String& name, int age, ages)
 	cout << name << " is " << age << " years old" << endl;
 }
 ~~~
+
+
+In order to support iterating the elements contained, these classes implement an _Enumerator_. These are similar to
+_iterators_ but don't have to come in pairs (*begin* and *end*). Just one Enumerator knows how to go to the
+next element and when to stop iterating.
+
+All containers have an `all()` enumerator that represents all its elements. All enumerators must implement
+operator `*` to dereference the currently pointed element, and may implement operator `~` to get their associated
+_key_, if any. For example, in an Array, they key is the integer index associated to each element. And in a
+Dic, the key is the element's name, a string.
+
+This way, enumerating is done like this: (the keyword `auto` is useful if your compiler supports it)
+
+~~~
+for(Array<T>::Enumerator e = container.all(); e; ++e)
+{
+    cout << ~e << ':' << *e << endl;
+}
+~~~
+
+That way, if container was a Dic, it would be printing the names and values of all elements.
+
 
 */
 

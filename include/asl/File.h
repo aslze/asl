@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_FILE_H
@@ -33,7 +33,7 @@ automatically closed on object destruction. For text files you should use class 
 
 ~~~
 Date lasttime = File("access.log").lastModified();
-Array<byte> data = File("data.bin").content();
+ByteArray data = File("data.bin").content();
 long long size = File("video.mp4").size();
 ~~~
 
@@ -81,7 +81,7 @@ public:
 	~File()
 	{
 		if (_file && _path.ok())
-		close();
+			close();
 	}
 	File& operator=(const File& f)
 	{
@@ -94,7 +94,7 @@ public:
 
 	void setEndian(Endian e) { _endian = e; }
 
-	void use(FILE* f) {_file=f;}
+	void use(FILE* f) { _file = f; }
 
 	FILE* stdio() { return _file; }
 	/**
@@ -175,15 +175,15 @@ public:
 	/**
 	Returns the first n bytes in the file
 	*/
-	Array<byte> firstBytes(int n);
+	ByteArray firstBytes(int n);
 	/**
 	Returns the binary content of the file as an array of bytes
 	*/
-	Array<byte> content();
+	ByteArray content();
 	/**
 	Writes the binary content of the file from an array of bytes. Returns false on failure
 	*/
-	bool put(const Array<byte>& data);
+	bool put(const ByteArray& data);
 
 	/**
 	Opens the file with the specified access mode

@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2021 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_ARRAY2_H
@@ -24,6 +24,9 @@ Array2<float> b = {
 b(1, 1) = 7.25f;
 ~~~
 
+For mathematical *matrices* use class Matrix_ which support arithmetic operations and other functions.
+
+\ingroup Containers
 */
 template <class T>
 class Array2
