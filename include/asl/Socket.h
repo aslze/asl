@@ -223,9 +223,13 @@ public:
 	*/
 	int read(void* data, int size) { return _()->read(data, size); }
 	/**
-	Writes `size` bytes from the bufffer pointed to by `data` to the socket.
+	Writes `n` bytes from the bufffer pointed to by `data` to the socket.
 	*/
 	int write(const void* data, int n) { return _()->write(data, n); }
+	/**
+	Writes the byte array to the socket and returns the number of bytes actually sent.
+	*/
+	int write(const ByteArray& data) { return _()->write(data.ptr(), data.length()); }
 	/**
 	Reads n bytes and returns them as an array of bytes, or reads all available bytes if no argument is given.
 	*/
@@ -361,15 +365,15 @@ identifies the sender so you can reply.
 PacketSocket socket;
 socket.bind(port);
 InetAddress sender;
-socket.readFrom(sender, data, sizeof(data));
-socket.sendTo(sender, "hi", 3);
+auto data = socket.readFrom(sender);
+socket.sendTo(sender, String("hi"));
 ```
 
 The sender just sends packets to an endpoint:
 
 ```
 PacketSocket socket;
-socket.sendTo(InetAddress("localhost", port), data, sizeof(data));
+socket.sendTo(InetAddress("localhost", port), data);
 ```
 */
 class ASL_API PacketSocket : public Socket
@@ -462,7 +466,7 @@ A listening side would join the group, receive packets and then leave:
 MulticastSocket socket;
 socket.join(group);
 InetAddress sender;
-socket.readFrom(sender, data, sizeof(data));
+socket.readFrom(sender, data);
 socket.leave(group);
 ```
 
@@ -471,7 +475,7 @@ And a sending side would start a multicast session to the same group and send pa
 ```
 MulticastSocket socket;
 socket.multicast(group);
-socket.write(data, sizeof(data));
+socket.write(data);
 ```
 */
 class ASL_API MulticastSocket : public PacketSocket

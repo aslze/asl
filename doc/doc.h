@@ -73,7 +73,7 @@ With CMake 3.14+, instead of using `find_package()`, you can download and build 
 
 ~~~
 include(FetchContent)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.6.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.7.zip)
 FetchContent_MakeAvailable(asl)
 ~~~
 
