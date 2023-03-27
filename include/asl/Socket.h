@@ -376,7 +376,7 @@ class ASL_API PacketSocket : public Socket
 {
 public:
 	ASL_SMART_DEF(PacketSocket, Socket);
-	PacketSocket(int fd) : ASL_SMART_INIT(fd) {}
+	ASL_EXPLICIT PacketSocket(int fd) : ASL_SMART_INIT(fd) {}
 
 	ASL_DEPRECATED(String readLine(), "") { return _()->readLine(); }
 
@@ -432,7 +432,7 @@ class ASL_API LocalSocket : public Socket
 {
 public:
 	ASL_SMART_DEF(LocalSocket, Socket);
-	LocalSocket(int fd) : ASL_SMART_INIT(fd) {}
+	ASL_EXPLICIT LocalSocket(int fd) : ASL_SMART_INIT(fd) {}
 };
 
 #endif
