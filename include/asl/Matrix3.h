@@ -90,12 +90,15 @@ public:
 	/**
 	Returns this matrix transposed
 	*/
-	Matrix3_ t() const {
+	Matrix3_ transposed() const
+	{
 		return Matrix3_(
 			a[0][0], a[1][0], a[2][0],
 			a[0][1], a[1][1], a[2][1],
 			a[0][2], a[1][2], a[2][2]);
 	}
+
+	Matrix3_ t() const { return transposed(); }
 
 	/** Returns the element at row `i`, column `j`. */
 	T& operator()(int i, int j) {return a[i][j];}

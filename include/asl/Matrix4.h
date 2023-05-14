@@ -18,7 +18,7 @@ A Matrix4 is a 4x4 matrix useful for representing affine transformations in 3D s
 
 ~~~
 Matrix4 a = Matrix4::translate(10, 4, 0) * Matrix4::rotateX(PI/2);
-Vec3 v = a.inverse().t() * Vec3(1, 0, 0);
+Vec3 v = a.inverse().transposed() * Vec3(1, 0, 0);
 
 Matrix4 r = Matrix4::fromEuler(Vec3(alpha, beta, gamma), "XYZ*");
 Vec3 angles = r.eulerAngles("ZYX");
@@ -132,13 +132,15 @@ public:
 	/**
 	Returns this matrix transposed
 	*/
-	Matrix4_ t() const {
+	Matrix4_ transposed() const {
 		return Matrix4_(
-		a[0][0], a[1][0], a[2][0], a[3][0],
-		a[0][1], a[1][1], a[2][1], a[3][1],
-		a[0][2], a[1][2], a[2][2], a[3][2],
-		a[0][3], a[1][3], a[2][3], a[3][3]);
+			a[0][0], a[1][0], a[2][0], a[3][0],
+			a[0][1], a[1][1], a[2][1], a[3][1],
+			a[0][2], a[1][2], a[2][2], a[3][2],
+			a[0][3], a[1][3], a[2][3], a[3][3]);
 	}
+
+	Matrix4_ t() const { return transposed(); }
 
 	ASL_DEPRECATED(bool isColmajor() const, "Use isRowMajor()") { return !isRowMajor(); }
 
@@ -235,12 +237,16 @@ public:
 	*/
 	static Matrix4_ fromEuler(const Vec3_<T>& r, int a0, int a1, int a2);
 
+	static Matrix4_ rotateE(const Vec3_<T>& r, int a0, int a1, int a2) { return fromEuler(r, a0, a1, a2); }
+
 	/**
 	Returns a rotation matrix created from Euler angles rotating the components of r in axes given as a string, such as "XYZ",
 	if an '*' is appended then the result is equivalent to rotations on fixed axes, while by default it is equivalent to rotations
 	on moving axes.
 	*/
 	static Matrix4_ fromEuler(const Vec3_<T>& r, const char* a);
+
+	static Matrix4_ rotateE(const Vec3_<T>& r, const char* a) { return fromEuler(r, a); }
 
 	/**
 	Computes the Euler angles corresponding to this rotation matrix (the top-left 3x3 submatrix) for the given axes rotation order
