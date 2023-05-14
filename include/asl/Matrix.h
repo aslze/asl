@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_MATRIX_H
@@ -211,7 +211,25 @@ public:
 			}
 		return c;
 	}
-	
+	/**
+	 * Computes the product of this matrix *transposed* and b (same as `A.transposed() * B` but a bit faster)
+	 */
+	Matrix_ transposed(const Matrix_& b) const
+	{
+		const Matrix_& a = *this;
+		Matrix_        c(a.cols(), b.cols());
+		if (a.rows() != b.rows())
+			return c.clear();
+		for (int i = 0; i < c.rows(); i++)
+			for (int j = 0; j < c.cols(); j++)
+			{
+				c(i, j) = 0;
+				for (int k = 0; k < a.rows(); k++)
+					c(i, j) += a(k, i) * b(k, j);
+			}
+		return c;
+	}
+
 	/**
 	 * Computes the sum of this matrix and b
 	 */
@@ -338,6 +356,14 @@ public:
 typedef Matrix_<double> Matrixd;
 typedef Matrix_<float> Matrix;
 
+struct SolveParams
+{
+	int maxiter;
+	double maxerr;
+	SolveParams(int mi = 50, double me = 0.0001) : maxiter(mi), maxerr(me) {}
+};
+
+
 template<class T>
 Matrix_<T> solve_(Matrix_<T>& A, Matrix_<T>& b);
 
@@ -349,6 +375,12 @@ Matrix_<T> solve_(Matrix_<T>& A, Matrix_<T>& b);
 template<class T>
 Matrix_<T> solve(const Matrix_<T>& A, const Matrix_<T>& b)
 {
+	if (A.rows() != A.cols())
+	{
+		Matrix_<T> A2 = A.transposed(A), b2 = A.transposed(b);
+		return solve_(A2, b2);
+	}
+
 	Matrix_<T> A2 = A.clone();
 	Matrix_<T> b2 = b.clone();
 	return solve_(A2, b2);
@@ -364,6 +396,11 @@ Matrix_<T> Matrix_<T>::inverse() const
 template<class T>
 Matrix_<T> solve_(Matrix_<T>& A_, Matrix_<T>& b_)
 {
+	if (A_.rows() != A_.cols())
+	{
+		Matrix_<T> A2 = A_.transposed(A_), b2 = A_.transposed(b_);
+		return solve_(A2, b2);
+	}
 	Matrix_<T> x(b_.rows(), b_.cols());
 	int n = A_.rows();
 	Array<int> _(n);
@@ -415,7 +452,7 @@ Matrix_<T> solve_(Matrix_<T>& A_, Matrix_<T>& b_)
 /**
 * Solves a system of equations F(x)=[0], given by functor f, which returns a vector of function values for an input vector x;
 * and using x0 as initial guess. If there are more equations than unknowns (f larger than x0) then a least-squares solution is
-* attempted.
+* sought.
 * 
 * Example:
 * 
@@ -434,27 +471,21 @@ Matrix_<T> solve_(Matrix_<T>& A_, Matrix_<T>& b_)
 * \ingroup Math3D
 */
 template <class T, class F>
-Matrix_<T> solveZero(F f, const Matrix_<T>& x0)
+Matrix_<T> solveZero(F f, const Matrix_<T>& x0, const SolveParams& p = SolveParams())
 {
 	T dx = sizeof(T) == sizeof(float) ? T(1e-5) : T(1e-6);
 	Matrix_<T> x = x0.clone();
 	int nf = f(x).rows(), nb = 0;
-	bool ls = nf > x.rows();
+	T me = T(p.maxerr);
 	Matrix_<T> J(nf, x.rows());
-	T r = 0, r0 = (T)1e20;
-	for (int it = 0; it < 50; it++)
+	T r = 0, r0 = (T)1e30;
+	for (int it = 0; it < p.maxiter; it++)
 	{
 		Matrix_<T> f1 = f(x);
 		r = f1.norm();
-		if (r > r0)
-			nb++;
-		else
-			nb = 0;
-		if (r < 0.0001f || nb > 3)
-		{
-			//printf("exit %i\n", it);
+		nb = (r > r0) ? nb + 1 : 0;
+		if (r < me || nb > 3)
 			break;
-		}
 		r0 = r;
 
 		for (int j = 0; j < J.cols(); j++)
@@ -466,9 +497,10 @@ Matrix_<T> solveZero(F f, const Matrix_<T>& x0)
 			for (int i = 0; i < J.rows(); i++)
 				J(i, j) = (f2[i] - f1[i]) / dx;
 		}
+
 		f1.negate();
-		Matrix_<T> h = ls ? J.pseudoinverse() * f1 : solve_(J, f1);
-		if (h.norm() < 0.0001f)
+		Matrix_<T> h = solve_(J, f1);
+		if (h.norm() < T(0.0001))
 			break;
 
 		x += h;
@@ -479,12 +511,34 @@ Matrix_<T> solveZero(F f, const Matrix_<T>& x0)
 
 #ifdef ASL_HAVE_INITLIST
 template <class T, class F>
-Matrix_<T> solveZero(F f, const std::initializer_list<T>& x0)
+Matrix_<T> solveZero(F f, const std::initializer_list<T>& x0, const SolveParams& p = SolveParams())
 {
 	return solveZero(f, Matrix_<T>(x0));
 }
 #endif
 
+/**
+ * Solves the equation f(x)=0 given by functor f using an iterative method starting at x0 as initial estimate.
+ */
+template<class T, class F>
+T solveZero(F f, T x0, const SolveParams& p = SolveParams())
+{
+	T x1 = x0 + T(1e-3), x2 = x0;
+	T y0 = f(x0);
+	for (int i = 0; i < p.maxiter; i++)
+	{
+		T y1 = f(x1);
+		if (fabs(y1) < T(0.01 * p.maxerr))
+			break;
+		x2 = x1 - y1 * (x1 - x0) / (y1 - y0);
+		x0 = x1;
+		y0 = y1;
+		x1 = x2;
+		if (fabs(x1 - x0) < T(0.01 * p.maxerr))
+			break;
+	}
+	return x2;
+}
 }
 
 #endif
