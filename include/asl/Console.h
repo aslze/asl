@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2020 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_CONSOLE_H
@@ -129,6 +129,12 @@ public:
 	Reverses text and background colors
 	*/
 	void inverse(bool on = true);
+
+	/**
+	Shows or hides the cursor
+	*/
+	void showCursor(bool on);
+
 	/**
 	Resets attributes to defaults
 	*/

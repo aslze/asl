@@ -103,10 +103,19 @@ void Console::inverse(bool on)
 	_colorChanged = true;
 }
 
+void Console::showCursor(bool on)
+{
+	CONSOLE_CURSOR_INFO info;
+	GetConsoleCursorInfo(_handle, &info);
+	info.bVisible = on ? TRUE : FALSE;
+	SetConsoleCursorInfo(_handle, &info);
+}
+
 void Console::reset()
 {
 	_attrib = _defaultAttrib;
 	SetConsoleTextAttribute(_handle, _attrib);
+	showCursor(true);
 }
 
 Console::Size Console::size()
@@ -209,8 +218,14 @@ void Console::bgcolor(Color color)
 
 void Console::inverse(bool on)
 {
-	printf(on? "\033[7m" : "\033[0m");
+	printf(on ? "\033[7m" : "\033[0m");
 	_colorChanged = true;
+}
+
+void Console::showCursor(bool on)
+{
+	printf(on ? "\033[?25h" : "\033[?25l");
+	fflush(stdout);
 }
 
 void Console::reset()
