@@ -73,7 +73,7 @@ Var Xdl::read(const String& file)
 
 bool Xdl::write(const Var& v, const String& file, int mode)
 {
-	return TextFile(file).put(Xdl::encode(v, mode));
+	return TextFile(file).put(Xdl::encode(v, mode) << '\n');
 }
 
 Var Json::read(const String& file)
@@ -83,7 +83,7 @@ Var Json::read(const String& file)
 
 bool Json::write(const Var& v, const String& file, Json::Mode mode)
 {
-	return TextFile(file).put(Json::encode(v, mode));
+	return TextFile(file).put(Json::encode(v, mode) << '\n');
 }
 
 
