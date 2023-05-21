@@ -89,8 +89,7 @@ asl::Directory dir;
 ## SSL/TLS sockets and HTTPS support
 
 This requires the *mbedTLS* library ( https://tls.mbed.org ). Download and compile the library, enable `ASL_TLS` in CMake
-and provide the *mbedTLS* install directory (and library locations, which should
-normally be automatically found).
+and provide the *mbedTLS* install directory (and library locations, which should normally be automatically found).
 
 In Ubuntu Linux you can just install package **libmbedtls-dev** with:
 
@@ -98,6 +97,17 @@ In Ubuntu Linux you can just install package **libmbedtls-dev** with:
 sudo apt-get install libmbedtls-dev
 ```
 
+With a recent CMake you can also build mbedTLS together with ASL as subprojects (e.g. using `FetchContent`):
+
+```
+set(ASL_TLS ON)
+set(ENABLE_PROGRAMS OFF CACHE BOOL "") # skip samples
+FetchContent_Declare(mbedtls URL https://github.com/Mbed-TLS/mbedtls/archive/v3.4.0.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.8.zip)
+FetchContent_MakeAvailable(asl mbedtls)
+```
+
+Then just link your project to `asls` after that block.
 */
 
 /**
@@ -198,7 +208,7 @@ for(auto& vehicle : garage["vehicles"])
 We may construct a new Var or modify the one just parsed, and rewrite it as an XDL string.
 
 ~~~~
-garage["vehicles"] << Var(ASL_XDLCLASS, "Car")("brand", "Limo")("length", 8.34);
+garage["vehicles"] << Var{{ASL_XDLCLASS, "Car"}, {"brand", "Limo"}, {"length", 8.34}};
 garage["open"] = false;
 
 garagex = Xdl::encode(garage, true);

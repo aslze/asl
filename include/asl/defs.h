@@ -10,7 +10,7 @@
 Main definitions.
 */
 
-#define ASL_VERSION 11107
+#define ASL_VERSION 11108
 
 #ifdef _WIN32
 #ifndef _CRT_SECURE_NO_DEPRECATE
@@ -124,16 +124,21 @@ Check that the argument is true.
 */
 #define ASL_ASSERT(x) if(!(x)) { printf("\n%s: %i\n\n* Failed: '%s'\n\n", __FILE__, __LINE__, #x); exit(1); }
 
+#ifndef ASL_NO_DEPRECATE
+
 #if defined(_MSC_VER) && !defined(__clang__)
 #define ASL_DEPRECATED(x, m) __declspec(deprecated("Deprecated. " ## m)) x
 #elif defined(__GNUC__) && ASL_C_VER < 40503
 #define ASL_DEPRECATED(x, m) x __attribute__((deprecated))
-#elif defined(__clang__) // || defined(__GNUC__) // disable on gcc atm
+#elif defined(__clang__) || defined(__GNUC__)
 #define ASL_DEPRECATED(x, m) x __attribute__((deprecated(m)))
 #else
 #define ASL_DEPRECATED(x, m) x
 #endif
 
+#else
+#define ASL_DEPRECATED(x, m) x
+#endif
 
 namespace asl {
 
@@ -454,6 +459,13 @@ struct IsMore {
 	IsMore(const F& f) : f(f) {}
 	bool operator()(const T& a, const T& b) const { return f(b) < f(a); }
 	F f;
+};
+
+template<class T1, class T2=T1>
+struct Pair
+{
+	T1 first;
+	T2 second;
 };
 
 }
