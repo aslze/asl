@@ -3,12 +3,32 @@
 
 namespace asl {
 
+inline bool myisdigit(char c)
+{
+	return c >= '0' && c <= '9';
+}
+
+inline bool isnumber(const String& s, char dec)
+{
+	const char* p = s.data();
+	int n = s.length();
+	if (!myisdigit(p[0]) && p[0] != '-' && p[0] != dec)
+		return false;
+	for (int i = 1; i < n; i++) {
+		char c = p[i];
+		if (!myisdigit(c) && c != '-' && c != '+' && c != dec && c != 'e' && c != 'E')
+			return false;
+	}
+	return true;
+}
+
 void TabularDataFile::init()
 {
 	_dataStarted = false;
 	_separator = ',';
 	_decimal = '.';
 	_quote = '\"';
+	_equote = String::repeat(_quote, 2);
 	_flushEvery = 0;
 	_rowIndex = 0;
 	_quoteStrings = false;
@@ -53,6 +73,7 @@ TabularDataFile& TabularDataFile::columns(const Array<String>& cols)
 	if(_name.toLowerCase().endsWith(".arff"))
 	{
 		_quote = '\'';
+		_equote = String::repeat(_quote, 2);
 		int i1 = max(max(_name.lastIndexOf('/')+1, _name.lastIndexOf('\\')+1), 0);
 		int i2 = _name.lastIndexOf('.');
 		String rel = _name.substring(i1, i2);
@@ -113,15 +134,19 @@ TabularDataFile& TabularDataFile::operator<<(const Var& x)
 			Var& item = _row[i];
 			String value = item.ok() ? item.toString() : String();
 			if (_decimal != '.' && item.is(Var::NUMBER))
-				value.replaceme('.', _decimal);
-			else if (_quoteStrings && item.is(Var::STRING))
 			{
-				quote = true;
-				row << _quote;
+				value.replaceme('.', _decimal);
+				row << value;
 			}
-			row << value;
-			if(quote)
-				row << _quote;
+			else if (item.is(Var::STRING))
+			{
+				if (value.contains(_quote) || value.contains(_separator))
+					row << _quote << value.replace(_quote, _equote) << _quote;
+				else
+					row << value;
+			}
+			else
+				row << value;
 		}
 		row << '\n';
 		_file << *row;
@@ -146,10 +171,6 @@ Array<Array<Var> > TabularDataFile::data()
 	return data;
 }
 
-inline bool myisdigit(char c)
-{
-	return c >= '0' && c <= '9';
-}
 
 /*
 void mysplit(const String& s, char sep, Array<String>& out)
@@ -197,6 +218,11 @@ bool TabularDataFile::readHeader()
 	return true;
 }
 
+enum State
+{
+	BASE, QUOTE, QUOTE2
+};
+
 bool TabularDataFile::nextRow()
 {
 	String& line = _currentLine;
@@ -210,19 +236,63 @@ bool TabularDataFile::nextRow()
 	if(!_file.readLine(line)) 
 		return false;
 	Array<String>& row = _currentRowParts;
-	line.split(_separator, row);
+
+	row.clear();
+	const char* p = line.data();
+	char        c = ' ';
+	State       state = BASE;
+	String      value;
+	while ((c = *p++))
+	{
+		switch (state)
+		{
+		case BASE:
+			if (c == '"')
+				state = QUOTE;
+			else if (c == _separator)
+			{
+				row << value;
+				value = "";
+			}
+			else
+				value << c;
+			break;
+		case QUOTE:
+			if (c != '"')
+			{
+				value << c;
+			}
+			else
+				state = QUOTE2;
+			break;
+		case QUOTE2:
+			if (c == '"')
+			{
+				value << c;
+				state = QUOTE;
+			}
+			else if (c == _separator)
+			{
+				row << value;
+				value = "";
+				state = BASE;
+			}
+			else
+				state = QUOTE;
+			break;
+		default:
+			value << c;
+		}
+	}
+
+	row << value;
+
 	_row.clear();
 	char decimal = _decimal;
 	int ntypes = _types.length();
 	
 	foreach2(int i, String& v, row)
 	{
-		bool isstring = false;
-		if(v[0] == '\"' && v[v.length()-1] == '\"')
-		{
-			v=v.substring(1, v.length()-1);
-			isstring = true;
-		}
 		if(ntypes > i)
 		{
 			switch(_types[i])
@@ -234,14 +304,10 @@ bool TabularDataFile::nextRow()
 			}
 		}
 		else {
-			bool isnum = !isstring && (myisdigit(v[0]) || (v[0] == '-' && myisdigit(v[1])));
-			if(isnum)
+			if (isnumber(v, decimal))
 			{
 				if(decimal!='.') v.replaceme(decimal, '.');
-				//if(v.contains('.') || v.contains('e'))
 					_row << myatof(*v);
-				/*else
-					_row << myatoi(*v);*/
 			}
 			else
 				_row << v;
@@ -260,7 +326,8 @@ Var TabularDataFile::operator[](int i) const
 
 Var TabularDataFile::operator[](const String& col) const
 {
-	return (*this)[_columnNames.indexOf(col)];
+	int i = _columnNames.indexOf(col);
+	return i < 0? Var() : (*this)[i];
 }
 
 }

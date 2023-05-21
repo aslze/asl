@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_TABDATAFILE_H
@@ -186,6 +186,7 @@ protected:
 	String _name;
 	String _types;
 	char _separator, _decimal, _quote;
+	String _equote;
 	bool _quoteStrings;
 	bool _dataStarted;
 	int _numCols, _currCol;

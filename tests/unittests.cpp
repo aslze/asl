@@ -98,11 +98,8 @@ ASL_TEST(TabularDataFile)
 	{
 		TabularDataFile file("data.csv");
 		file.flushEvery(1);
-		file.useQuotes();
-		//file.setSeparator(';');
-		//file.setDecimal(',');
 
-		file.columns("i,x,y,sign:neg|pos");
+		file.columns("i,x,y,sign:neg|pos,name");
 
 		if(!file.ok())
 		{
@@ -112,7 +109,7 @@ ASL_TEST(TabularDataFile)
 
 		for(int i=0; i<N; i++)
 		{
-			file << i << 0.5 << -3.0*i << "neg";
+			file << i << 0.5 << -3.0 * i << "neg" << "is, \"quoted\"";
 		}
 	}
 
@@ -135,7 +132,6 @@ ASL_TEST(TabularDataFile)
 	}
 
 	{
-		//double t1 = now();
 		TabularDataFile file("data.csv");
 		int k = 0;
 		while(file.nextRow())
@@ -150,8 +146,8 @@ ASL_TEST(TabularDataFile)
 			ASL_ASSERT(y == -3.0*i);
 			ASL_ASSERT(s == "neg");
 			ASL_ASSERT(file[0] == file["i"] && file[1] == file["x"] && file[2] == file["y"] && file[3] == file["sign"]);
+			ASL_ASSERT(file["name"] == "is, \"quoted\"");
 		}
-		//double t2 = now();
 	}
 }
 
