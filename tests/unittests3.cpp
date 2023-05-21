@@ -163,17 +163,20 @@ ASL_TEST(SmartObject)
 
 ASL_TEST(Date)
 {
-	for (double t = -2214380800.0; t < 3102441200.0; t += Date::DAY/2)
+	for (double t = -2000000000.0; t < 3000000000.0; t += 3 * Date::DAY + 777)
 	{
 		Date d(t);
 		DateData p = d.splitUTC();
-		Date d2(Date::UTC, p.year, p.month, p.day, p.hours, p.minutes, p.seconds);
-		ASL_ASSERT(fabs(d - d2) < 1);
+		ASL_ASSERT(fabs(d - Date(Date::UTC, p.year, p.month, p.day, p.hours, p.minutes, p.seconds)) < 0.1);
+		ASL_ASSERT(fabs(d - Date(d.toUTCString(Date::HTTP))) < 0.1);
+		ASL_ASSERT(fabs(d - Date(d.toUTCString(Date::SHORT))) < 0.1);
+		ASL_ASSERT(fabs(d - Date(d.toUTCString(Date::FULL))) < 0.1);
 	}
 	
 	ASL_CHECK(Date("2021-11-29T23:31:10.25+01:30").toUTCString(Date::FULL), ==, "2021-11-29T22:01:10.250Z");
 	ASL_CHECK(Date("2021-11-29T23:31:10.25Z").toUTCString(Date::FULL), ==, "2021-11-29T23:31:10.250Z");
 	ASL_CHECK(Date("2021-11-29T23:31:10-01:00").toUTCString(), == , "2021-11-30T00:31:10Z");
+	ASL_CHECK(Date("Tue, 30 Nov 2021 00:31:10 GMT").toUTCString(Date::HTTP), ==, "Tue, 30 Nov 2021 00:31:10 GMT");
 }
 
 int add(int x, int y)

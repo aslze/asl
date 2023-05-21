@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_DATE_H
@@ -33,7 +33,15 @@ String compact = today.toString(Date::SHORT); // without '-' or ':' symbols
 Date fileTime = File("x.txt").lastModified();
 double age = today - fileTime;                // file modified 'age' seconds ago
 
-Date future("1/05/2030 12:30", "D/M/Y?h:m");  // formatted parsing
+~~~
+
+Dates can be initialized by parsing formatted strings, and can be encoded as strings. The format can be ISO-8601 or the fixed-length
+RFC2616 format used in the HTTP protocol, or any format, given a format specification:
+
+~~~
+Date future("1/05/2030 12:30", "D/M/Y?h:m");    // specific format
+Date httptime("Tue, 30 Nov 2021 00:31:10 GMT"); // as in HTTP (only GMT)
+Date isotime("2021-11-29T23:31:10.25+01:30");   // ISO 8601
 ~~~
 
 Dates can be created by their components, either as local time or UTC time:
@@ -57,7 +65,17 @@ int y = d.year, month = d.month, day = d.day, hours = d.hours;
 class ASL_API Date
 {
 public:
-	enum Format {LONG, SHORT, DATE_ONLY, HTTP, FULL};
+	/**
+	Format for toString() and toUTCString()
+	*/
+	enum Format
+	{
+		LONG,      //!< "2021-11-29T23:31:10.25Z"
+		SHORT,     //!< "20211129T233110.25Z"
+		DATE_ONLY, //!< "2021-11-29"
+		HTTP,      //!< "Mon, 29 Nov 2021 23:31:10 GMT
+		FULL       //!< "2021-11-29T23:31:10.250Z" (with milliseconds)
+	};
 	enum Zone {UTC, LOCAL};
 	Date() {}
 	Date(double t) : _t(t) {}
