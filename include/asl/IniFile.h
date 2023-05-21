@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_INIFILE_H
@@ -134,6 +134,16 @@ public:
 	with `arraysize()`.
 	*/
 	String array(const String& name, int index) const;
+
+	/**
+	Returns all keys and values as a map with keys as "section/key"
+	*/
+	Dic<> values() const;
+
+	/**
+	Returns a section's keys and values as a map
+	*/
+	Dic<> values(const String& secname) const;
 
 protected:
 	Dic<Section> _sections;
