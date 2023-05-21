@@ -26,7 +26,7 @@ namespace asl {
  * auto C = A.inverse() * A + b * b.transposed();
  * ~~~
  *
- * And you can solve linear systems:
+ * And you can solve linear systems, even using least-squares, if more equations than unknowns:
  * 
  * ~~~
  * auto x = solve(A, b); // solution to linear system A * x = b
@@ -360,7 +360,8 @@ struct SolveParams
 {
 	int maxiter;
 	double maxerr;
-	SolveParams(int mi = 50, double me = 0.0001) : maxiter(mi), maxerr(me) {}
+	double delta;
+	SolveParams(int mi = 50, double me = 0.0001, double d = 0) : maxiter(mi), maxerr(me), delta(d) {}
 };
 
 
@@ -369,7 +370,8 @@ Matrix_<T> solve_(Matrix_<T>& A, Matrix_<T>& b);
 
 /**
  * Solves the matrix equation A*x=b and returns x; if b is a matrix (not a column) then the equation is solved
- * for each of b's columns and solutions returned as the columns of the returned matrix.
+ * for each of b's columns and solutions returned as the columns of the returned matrix; if A is not square (more equations than unknowns),
+ then a least-squares solution is computed
  * \ingroup Math3D
  */
 template<class T>
@@ -473,12 +475,12 @@ Matrix_<T> solve_(Matrix_<T>& A_, Matrix_<T>& b_)
 template <class T, class F>
 Matrix_<T> solveZero(F f, const Matrix_<T>& x0, const SolveParams& p = SolveParams())
 {
-	T dx = sizeof(T) == sizeof(float) ? T(1e-5) : T(1e-6);
+	T dx = p.delta > 0 ? p.delta : sizeof(T) == sizeof(float) ? T(1e-5) : T(1e-6);
 	Matrix_<T> x = x0.clone();
 	int nf = f(x).rows(), nb = 0;
 	T me = T(p.maxerr);
 	Matrix_<T> J(nf, x.rows());
-	T r = 0, r0 = (T)1e30;
+	T r = 0, r0 = T(1e38);
 	for (int it = 0; it < p.maxiter; it++)
 	{
 		Matrix_<T> f1 = f(x);
@@ -500,7 +502,7 @@ Matrix_<T> solveZero(F f, const Matrix_<T>& x0, const SolveParams& p = SolvePara
 
 		f1.negate();
 		Matrix_<T> h = solve_(J, f1);
-		if (h.norm() < T(0.0001))
+		if (h.norm() < T(me))
 			break;
 
 		x += h;
@@ -519,11 +521,13 @@ Matrix_<T> solveZero(F f, const std::initializer_list<T>& x0, const SolveParams&
 
 /**
  * Solves the equation f(x)=0 given by functor f using an iterative method starting at x0 as initial estimate.
+ * \ingroup Math3D
  */
 template<class T, class F>
 T solveZero(F f, T x0, const SolveParams& p = SolveParams())
 {
-	T x1 = x0 + T(1e-3), x2 = x0;
+	T dx = p.delta > 0 ? p.delta : T(1e-3);
+	T x1 = x0 + dx, x2 = x0;
 	T y0 = f(x0);
 	for (int i = 0; i < p.maxiter; i++)
 	{
