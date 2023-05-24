@@ -361,7 +361,7 @@ struct SolveParams
 	int maxiter;
 	double maxerr;
 	double delta;
-	SolveParams(int mi = 50, double me = 0.0001, double d = 0) : maxiter(mi), maxerr(me), delta(d) {}
+	SolveParams(int mi = 15, double me = 1e-6, double d = 0) : maxiter(mi), maxerr(me), delta(d) {}
 };
 
 
@@ -475,20 +475,26 @@ Matrix_<T> solve_(Matrix_<T>& A_, Matrix_<T>& b_)
 template <class T, class F>
 Matrix_<T> solveZero(F f, const Matrix_<T>& x0, const SolveParams& p = SolveParams())
 {
-	T dx = p.delta > 0 ? p.delta : sizeof(T) == sizeof(float) ? T(1e-5) : T(1e-6);
-	Matrix_<T> x = x0.clone();
-	int nf = f(x).rows(), nb = 0;
+	T dx = p.delta > 0 ? T(p.delta) : sizeof(T) == sizeof(float) ? T(1e-5) : T(1e-6);
 	T me = T(p.maxerr);
+	Matrix_<T> x = x0.clone(), f1 = f(x), xx = x.clone();
+	int nf = f1.rows(), nb = 0, mi = abs(p.maxiter);
 	Matrix_<T> J(nf, x.rows());
-	T r = 0, r0 = T(1e38);
-	for (int it = 0; it < p.maxiter; it++)
+	T r = 0, r0 = T(1e38), hn = 0;
+	for (int it = 0; it < mi; it++)
 	{
-		Matrix_<T> f1 = f(x);
 		r = f1.norm();
+		if (p.maxiter < 0)
+			printf("%-3i %g %g\n", it, r, hn);
 		nb = (r > r0) ? nb + 1 : 0;
-		if (r < me || nb > 3)
+		if (r < me || nb > 2 || r != r)
 			break;
-		r0 = r;
+		
+		if (r < r0)
+		{
+			xx.copy(x);
+			r0 = r;
+		}
 
 		for (int j = 0; j < J.cols(); j++)
 		{
@@ -502,13 +508,19 @@ Matrix_<T> solveZero(F f, const Matrix_<T>& x0, const SolveParams& p = SolvePara
 
 		f1.negate();
 		Matrix_<T> h = solve_(J, f1);
-		if (h.norm() < T(me))
+		hn = h.norm();
+		if (hn < T(me) || hn != hn)
+		{
+			if (p.maxiter < 0)
+				printf("-%3i %g %g  !!\n", it, r, hn);
 			break;
+		}
 
 		x += h;
+		f1 = f(x);
 	}
 
-	return x;
+	return xx;
 }
 
 #ifdef ASL_HAVE_INITLIST
@@ -532,13 +544,13 @@ T solveZero(F f, T x0, const SolveParams& p = SolveParams())
 	for (int i = 0; i < p.maxiter; i++)
 	{
 		T y1 = f(x1);
-		if (fabs(y1) < T(0.01 * p.maxerr))
+		if (fabs(y1) < T(p.maxerr))
 			break;
 		x2 = x1 - y1 * (x1 - x0) / (y1 - y0);
 		x0 = x1;
 		y0 = y1;
 		x1 = x2;
-		if (fabs(x1 - x0) < T(0.01 * p.maxerr))
+		if (fabs(x1 - x0) < T(p.maxerr))
 			break;
 	}
 	return x2;
