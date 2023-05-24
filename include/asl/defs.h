@@ -127,17 +127,17 @@ Check that the argument is true.
 #ifndef ASL_NO_DEPRECATE
 
 #if defined(_MSC_VER) && !defined(__clang__)
-#define ASL_DEPRECATED(x, m) __declspec(deprecated("Deprecated. " ## m)) x
+#define ASL_DEPRECATED(f, m) __declspec(deprecated("Deprecated. " ## m)) f
 #elif defined(__GNUC__) && ASL_C_VER < 40503
-#define ASL_DEPRECATED(x, m) x __attribute__((deprecated))
+#define ASL_DEPRECATED(f, m) __attribute__((deprecated)) f
 #elif defined(__clang__) || defined(__GNUC__)
-#define ASL_DEPRECATED(x, m) x __attribute__((deprecated(m)))
+#define ASL_DEPRECATED(f, m) __attribute__((deprecated(m))) f
 #else
-#define ASL_DEPRECATED(x, m) x
+#define ASL_DEPRECATED(f, m) f
 #endif
 
 #else
-#define ASL_DEPRECATED(x, m) x
+#define ASL_DEPRECATED(f, m) f
 #endif
 
 namespace asl {
