@@ -1,6 +1,7 @@
 #include <asl/IniFile.h>
 #include <asl/TextFile.h>
 
+#define NOSECTION "-"
 namespace asl {
 
 IniFile::Section IniFile::Section::clone() const
@@ -15,7 +16,7 @@ IniFile::IniFile(const String& name, bool shouldwrite)
 {
 	_modified = false;
 	_filename = name;
-	_currentTitle = "-";
+	_currentTitle = NOSECTION;
 	_ok = false;
 	_shouldwrite = shouldwrite;
 	TextFile file(name, File::READ);
@@ -44,7 +45,8 @@ IniFile::IniFile(const String& name, bool shouldwrite)
 				continue;
 			String name = line.substring(1, end);
 			_currentTitle = name;
-			_sections[_currentTitle] = Section(_currentTitle);
+			if (!_sections.has(_currentTitle))
+				_sections[_currentTitle] = Section(_currentTitle);
 		}
 		else if(line[i0] != '#' && line[i0] > 47 && line[i0] != ';')
 		{
@@ -69,7 +71,7 @@ IniFile::IniFile(const String& name, bool shouldwrite)
 			_sections[_currentTitle][key] = value;
 		}
 	}
-	_currentTitle = "-";
+	_currentTitle = NOSECTION;
 	for(int i=_lines.length()-1; i>0 && _lines[i][0] == '\0'; i--)
 	{
 		_lines.resize(_lines.length()-1);
@@ -147,7 +149,7 @@ void IniFile::write(const String& fname)
 	foreach(Section & s, newsec)
 	 	s = s.clone();
 
-	Section* section = &_sections["-"];
+	Section* section = &_sections[NOSECTION];
 
 	Array<String> oldlines = _lines.clone();
 
@@ -202,9 +204,9 @@ void IniFile::write(const String& fname)
 		int j=-1;
 		for(int i=0; i<_lines.length(); i++)
 		{
-			if(section.title()=="-" || _lines[i]=='['+section.title()+']')
+			if (section.title() == NOSECTION || _lines[i] == '[' + section.title() + ']')
 			{
-				int k = (section.title()=="-")? 0 : 1;
+				int k = (section.title() == NOSECTION) ? 0 : 1;
 				for(j=i+k; j<_lines.length() && _lines[j][0]!='['; j++)
 				{}
 				j--;

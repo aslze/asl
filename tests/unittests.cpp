@@ -88,6 +88,9 @@ ASL_TEST(IniFile)
 		ASL_ASSERT(file.arraysize("list") == 2);
 		ASL_ASSERT(file.array("x", 0) == "7");
 		ASL_ASSERT(file.array("y", 1) == "3");
+		Dic<> all = file.values();
+		ASL_ASSERT(all["sec1/field1"] == "value1");
+		ASL_ASSERT(file.values("sec1")["field1"] == "value1");
 	}
 }
 
