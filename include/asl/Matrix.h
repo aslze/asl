@@ -356,11 +356,14 @@ public:
 typedef Matrix_<double> Matrixd;
 typedef Matrix_<float> Matrix;
 
+/**
+Optional parameters for solveZero() functions
+*/
 struct SolveParams
 {
-	int maxiter;
-	double maxerr;
-	double delta;
+	int maxiter;   //!< maximum number of iterations
+	double maxerr; //!< stop if current residual es lower than this value
+	double delta;  //!< step used to approximate derivatives
 	SolveParams(int mi = 15, double me = 1e-6, double d = 0) : maxiter(mi), maxerr(me), delta(d) {}
 };
 
@@ -487,15 +490,14 @@ Matrix_<T> solveZero(F f, const Matrix_<T>& x0, const SolveParams& p = SolvePara
 		if (p.maxiter < 0)
 			printf("%-3i %g %g\n", it, r, hn);
 		nb = (r > r0) ? nb + 1 : 0;
-		if (r < me || nb > 2 || r != r)
-			break;
-		
 		if (r < r0)
 		{
 			xx.copy(x);
 			r0 = r;
 		}
-
+		if (r < me || nb > 2 || r != r)
+			break;
+		
 		for (int j = 0; j < J.cols(); j++)
 		{
 			T x0 = x[j];
@@ -509,12 +511,8 @@ Matrix_<T> solveZero(F f, const Matrix_<T>& x0, const SolveParams& p = SolvePara
 		f1.negate();
 		Matrix_<T> h = solve_(J, f1);
 		hn = h.norm();
-		if (hn < T(me) || hn != hn)
-		{
-			if (p.maxiter < 0)
-				printf("-%3i %g %g  !!\n", it, r, hn);
+		if (hn < me || hn != hn)
 			break;
-		}
 
 		x += h;
 		f1 = f(x);
@@ -527,7 +525,7 @@ Matrix_<T> solveZero(F f, const Matrix_<T>& x0, const SolveParams& p = SolvePara
 template <class T, class F>
 Matrix_<T> solveZero(F f, const std::initializer_list<T>& x0, const SolveParams& p = SolveParams())
 {
-	return solveZero(f, Matrix_<T>(x0));
+	return solveZero(f, Matrix_<T>(x0), p);
 }
 #endif
 
