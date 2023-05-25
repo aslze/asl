@@ -211,7 +211,7 @@ public:
 	*/
 	void close() { _()->close(); }
 	/**
-	Reads a line of text from the socket (keep in mind this is not buffered)
+	Reads a line of text from the socket (keep in mind this is not buffered, can be a bit inefficient, and there is a length limit of 8000 bytes)
 	*/
 	String readLine() { return _()->readLine(); }
 	/**
@@ -326,13 +326,17 @@ public:
 		return *this;
 	}
 
+	/**
+	Reads a string from the socket that is preceded by its length as an int32 (the sender must send the byte length before)
+	*/
 	Socket& operator>>(String& x)
 	{
 		int n;
 		*this >> n;
 		x.resize(n);
 		x[n] = '\0';
-		read(&x[0], n);
+		n = read(&x[0], n);
+		x.fix(n >= 0 ? n : 0);
 		return *this;
 	}
 
