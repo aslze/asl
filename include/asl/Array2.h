@@ -59,7 +59,7 @@ public:
 	Creates an array of rows x cols elements and copies them from the pointer p (row-wise)
 	*/
 	ASL_EXPLICIT Array2(int rows, int cols, const T* p) :
-		_a(rows * cols, p), _rows(rows), _cols(cols)
+		_a(p, rows * cols), _rows(rows), _cols(cols)
 	{}
 
 	ASL_EXPLICIT Array2(int rows, int cols, const Array<T>& a) :
