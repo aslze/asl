@@ -92,6 +92,31 @@ public:
 				(*this)(i, j) = q[j];
 		}
 	}
+
+	void operator=(std::initializer_list<T> a)
+	{
+		_cols = 1;
+		_rows = (int)a.size();
+		_a.resize(_rows);
+		for (int i = 0; i < _rows; i++)
+			_a[i] = a.begin()[i];
+	}
+
+	void operator=(std::initializer_list<std::initializer_list<T>> a)
+	{
+		_rows = (int)a.size();
+		if (_rows == 0)
+			return;
+		const std::initializer_list<T>* p = a.begin();
+		_cols = (int)p->size();
+		_a.resize(_rows * _cols);
+		for (int i = 0; i < _rows; i++)
+		{
+			const T* q = p[i].begin();
+			for (int j = 0; j < _cols; j++)
+				(*this)(i, j) = q[j];
+		}
+	}
 #endif
 
 	/**

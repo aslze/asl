@@ -161,5 +161,16 @@ ASL_TEST(Matrix)
 	};
 
 	ASL_ASSERT(C == A);
+
+	C = { { 1, 2 } };
+
+	ASL_ASSERT(C.rows() == 1 && C.cols() == 2);
+	ASL_ASSERT(C(0, 0) == 1 && C(0, 1) == 2);
+
+	C = { 3, 5 };
+	ASL_ASSERT(C.rows() == 2 && C.cols() == 1);
+	ASL_ASSERT(C(0, 0) == 3 && C(1, 0) == 5);
+	ASL_ASSERT(C[0] == 3 && C[1] == 5);
+
 #endif
 }
