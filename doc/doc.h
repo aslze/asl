@@ -633,7 +633,7 @@ The program does not need the declaration of class `Cat`, only that of the base 
 Class Log and related macros allow logging messages to the console and/or to a file.
 
 ~~~
-ASL_LOG_E("Cannot load file %s\n", *filename);
+ASL_LOG_E("Cannot load file %s", *filename);
 ~~~
 */
 

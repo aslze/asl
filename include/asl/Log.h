@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_LOGGER
@@ -16,25 +16,34 @@ class Mutex;
 Log is a utility to log messages to either the console, a file or both. Messages have a *category*
 (usuarlly a module or area identifier) and a *level* (to distinguish errors, warnings,
 information and debug messages), and are written together with the current date and time. By default
-messages are written to a file named "log.txt" and to the console (with errors and warnings colored).
-These as well as the maximum level of messages logged can be configured.
+messages are written to a file named "log.log" and to the console (with errors and warnings colored).
+These, as well as the maximum log level of messages logged, can be configured.
+
+Default settings can be changed like this:
 
 ~~~
-Log::setFile("app.log"); // write to this file (default is "log.log")
-Log::useConsole(false);  // do not write to the console
+Log::setFile("app.log");     // write to this file (default is "log.log")
+Log::useConsole(false);      // do not write to the console
+Log::setMaxLevel(Log::INFO); // skip debug and verbose messages (default is DEBUG)
 ~~~
 
 The easiest way to write messages is with the provided macro ASL_LOG_ similar to a `printf` call.
 It uses the current source file as *category*.
 
 ~~~
-ASL_LOG_(WARNING, "Ignored unknown mode %i", mode);
+ASL_LOG_(ERR, "Port %i already in use", port);
 ~~~
 
-That is equivalent to:
+Writes something like:
 
 ~~~
-ASL_LOG_W("Ignored unknown mode %i", mode);
+[2021-03-18T12:35:00][Server] ERROR: Port 80 already in use
+~~~
+
+There are recommended shorter macros for each log level: ASL_LOG_X (with X one of E, W, I, D, V):
+
+~~~
+ASL_LOG_E("Port %i already in use", port);
 ~~~
 
 On Android this class uses the system logger.
