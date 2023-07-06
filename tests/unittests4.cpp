@@ -5,6 +5,7 @@
 #include <asl/Array2.h>
 #include <asl/Matrix.h>
 #include <asl/StreamBuffer.h>
+#include <asl/Http.h>
 #include <stdio.h>
 #include <asl/testing.h>
 
@@ -173,4 +174,17 @@ ASL_TEST(Matrix)
 	ASL_ASSERT(C[0] == 3 && C[1] == 5);
 
 #endif
+}
+
+ASL_TEST(URL)
+{
+	String p = Url::params(Dic<>("x", "a b")("y", "3"));
+	ASL_ASSERT(p == "x=a%20b&y=3");
+	Dic<> q = Url::parseQuery(p);
+	ASL_ASSERT(q["x"] == "a b" && q["y"] == "3");
+	Url u("http://w.org/path");
+	ASL_ASSERT(u.host == "w.org");
+	ASL_ASSERT(u.path == "/path");
+	ASL_ASSERT(Url::encode("a\t b") == "a%09%20b");
+	ASL_ASSERT(Url::decode("a%09%20b") == "a\t b");
 }

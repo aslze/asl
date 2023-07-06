@@ -20,20 +20,59 @@ class File;
 
 
 /**
-The components of a URL, as split by parseUrl().
+The components of a URL plus some utility static functions
 */
-struct Url
+struct ASL_API Url
 {
 	String protocol, host, path;
 	int port;
+
 	Url() : port(0) {}
+
+	/**
+	Constructs an object by parsing a URL string
+	*/
+	Url(const String& u);
+
+	/**
+	Parses a query string ("a=2&b=hello") and returns a map if names and values
+	*/
+	static Dic<> parseQuery(const String& q);
+
+	/**
+	Returns the query string, if any
+	*/
+	String query() const
+	{
+		int i = path.indexOf('?');
+		return (i >= 0) ? path.substring(i + 1) : String();
+	}
+
+	/**
+	Returns the parameters in the query string as a map of names and values
+	*/
+	Dic<> params() const { return parseQuery(query()); }
+
 	/**
 	Builds a query string from a Dic (as key1=value1&key2=value2, with URL encoding of chars)
 	*/
 	static String params(const Dic<>& p);
+
+	/**
+	Encodes a string with percent encoding for use in a URL
+	*/
+	static String encode(const String& s);
+
+	/**
+	Decodes a string containing percent encoding
+	*/
+	static String decode(const String& s);
 };
 
-Url ASL_API parseUrl(const String& url);
+inline ASL_DEPRECATED(Url parseUrl(const String& url), "Use Url(url)")
+{
+	return Url(url);
+}
 
 /**
 \defgroup Global Global functions
@@ -41,17 +80,24 @@ Url ASL_API parseUrl(const String& url);
 */
 
 /**
-Encodes a string with percent encoding for use in a URL
+Encodes a string with percent encoding for use in a URL.
+\deprecated Use Url::encode()
 */
-String ASL_API encodeUrl(const String& params);
+inline ASL_DEPRECATED(String encodeUrl(const String& s), "Use Url::encode()")
+{
+	return Url::encode(s);
+}
 
 /**
-Decodes a string with percent encoding
+Decodes a string with percent encoding.
+\deprecated Use Url::decode()
 */
-String ASL_API decodeUrl(const String& params);
+inline ASL_DEPRECATED(String decodeUrl(const String& s), "Use Url::decode()")
+{
+	return Url::decode(s);
+}
 
 /**@}*/
-
 
 /**
 

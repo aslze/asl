@@ -1,4 +1,5 @@
 #include <asl/Socket.h>
+#include <asl/Var.h>
 #include <asl/Map.h>
 #include <asl/File.h>
 #include <asl/IniFile.h>
@@ -12,7 +13,7 @@
 
 namespace asl {
 
-String decodeUrl(const String& q0)
+String Url::decode(const String& q0)
 {
 	String q;
 	for (int i = 0; i < q0.length(); i++)
@@ -32,14 +33,14 @@ String decodeUrl(const String& q0)
 	return q;
 }
 
-String encodeUrl(const String& q0)
+String Url::encode(const String& q0)
 {
 	String q;
 	for (int i = 0; i < q0.length(); i++)
 	{
 		byte c = *(byte*)&q0[i];
 		if (!isalnum(c) && c != '-' && c != '.' && c != '~' && c != '/' && c != ':')
-			q << String(3, "%%%0X", (int)c);
+			q << String(3, "%%%02X", (int)c);
 		else
 			q << (char)c;
 	}
@@ -50,43 +51,45 @@ String Url::params(const Dic<>& q)
 {
 	Dic<> d;
 	foreach2(String& k, const String& v, q)
-		d[encodeUrl(k)] = encodeUrl(v);
+		d[Url::encode(k)] = Url::encode(v);
 	return d.join('&', '=');
 }
 
-Dic<> decodeUrlParams(const String& querystring)
+Dic<> Url::parseQuery(const String& querystring)
 {
 	Dic<> query;
 	Dic<> q = querystring.replace('+', ' ').split('&', '=');
 	foreach2(String& k, const String& v, q)
-		query[decodeUrl(k)] = decodeUrl(v);
+		query[Url::decode(k)] = Url::decode(v);
 	return query;
 }
 
-Url parseUrl(const String& url)
+Url::Url(const String& url)
 {
-	Url u;
 	int hoststart = 0;
 	int i = url.indexOf("://");
 	if (i > 0) {
-		u.protocol = url.substring(0, i);
+		protocol = url.substring(0, i);
 		hoststart = i + 3;
 	}
 
 	int pathstart = url.indexOf('/', hoststart);
 	if (pathstart < 0)
 		pathstart = url.length();
-	u.host = url.substring(hoststart, pathstart);
-	u.path = url.substring(pathstart);
-	if (u.path == "")
-		u.path = '/';
+	host = url.substring(hoststart, pathstart);
+	path = url.substring(pathstart);
+	if (path == "")
+		path = '/';
 	int hostend = pathstart, portstart = 0;
 	if (url[hoststart] == '[') // IPv6
 	{
 		hoststart++;
 		hostend = url.indexOf(']', hoststart);
 		if (hostend < 0)
-			return Url();
+		{
+			*this = Url();
+			return;
+		}
 		if (url[hostend + 1] == ':')
 			portstart = hostend + 2;
 	}
@@ -97,9 +100,8 @@ Url parseUrl(const String& url)
 			portstart = i + 1;
 		}
 	}
-	u.host = url.substring(hoststart, hostend);
-	u.port = (portstart == 0)? 0 : (int)url.substring(portstart, pathstart);
-	return u;
+	host = url.substring(hoststart, hostend);
+	port = (portstart == 0)? 0 : (int)url.substring(portstart, pathstart);
 }
 
 struct HttpSinkArray : public HttpSink
@@ -148,7 +150,7 @@ Var HttpMessage::json() const
 {
 	String str = _body;
 	Var data = Json::decode(str);
-	return data.ok() ? data : Var(decodeUrlParams(str));
+	return data.ok() ? data : Var(Url::parseQuery(str));
 }
 
 void HttpMessage::put(const String& body)
@@ -169,7 +171,7 @@ void HttpMessage::put(const Var& body)
 	{
 		Dic<> dic;
 		foreach2(String & k, Var & v, body)
-			dic[encodeUrl(k)] = encodeUrl(v);
+			dic[Url::encode(k)] = Url::encode(v);
 		put(dic.join('&', '='));
 	}
 	else
@@ -310,7 +312,7 @@ HttpResponse Http::request(HttpRequest& request)
 	HttpResponse response(request);
 	response.setCode(0);
 
-	Url url = parseUrl(request.url());
+	Url url(request.url());
 	bool hasPort = url.port != 0;
 
 	if (url.protocol == "https")
@@ -453,11 +455,8 @@ void HttpRequest::read()
 const Dic<>& HttpRequest::query()
 {
 	if(_querystring.length() != 0 && _query.length() == 0)
-	{
-		Dic<> q = split(_querystring.replaceme('+', ' '), '&', '=');
-		foreach2(String& k, const String& v, q)
-			_query[decodeUrl(k)] = decodeUrl(v);
-	}
+		_query = Url::parseQuery(_querystring);
+
 	return _query;
 }
 
