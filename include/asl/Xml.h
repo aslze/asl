@@ -155,7 +155,7 @@ __Parsing/reading__
 This can be parsed from a string or read from a file:
 
 ~~~{.cpp}
-Xml html = Xml::decode(xml);    // from a string
+Xml html = Xml::decode(xml);           // from a string
 
 Xml html = Xml::read("document.xml");  // from a file
 ~~~
@@ -340,8 +340,9 @@ public:
 
 	/**
 	Changes the tag name of this element
+	\deprecated Why would anyone do this?
 	*/
-	void setTag(const String& tag)
+	ASL_DEPRECATED(void setTag(const String& tag), "Seems unneeded")
 	{
 		_()->tag = tag;
 	}
@@ -627,14 +628,17 @@ public:
 	*/
 	const String& text() const { return _()->text(); }
 
-	// for compatibility [deprecated]
-	const String& value() const { return text(); }
+	/**
+	Returns the trimmed content of this element converted to a given type; As in `elem.value<int>()`
+	*/
+	template<class T>
+	T value() const { return (T)text().trimmed(); }
 
 	/**
 	Reads and decodes a file as XML and returns its root element
 	*/
 	static Xml read(const String& file);
-	
+
 	/**
 	Writes an XML document to a file
 	*/

@@ -36,6 +36,7 @@ set(TESTS
 	StreamBuffer
 	Function
 	Matrix
+	URL
 )
 
 foreach(T ${TESTS})
