@@ -496,36 +496,7 @@ public:
 	/**
 	Returns the number of full characters (code points) in the string (may be different from `length()` )
 	*/
-	int count() const {
-		auto u = str();
-		int count_ = 0;
-		while (int c = *u++)
-		{
-			if ((c & 0x80) == 0) {
-				++count_;
-			}
-			else if ((c & 0xe0) == 0xc0) {
-				++u; ++count_;
-			}
-			else if ((c & 0xf0) == 0xe0) {
-				++count_;
-				char c2 = *u++;
-				if (c2 == 0) break;
-				char c3 = *u++;
-				if (c3 == 0) break;
-			}
-			else if ((c & 0xf8) == 0xf0) {
-				++count_;
-				char c2 = *u++;
-				if (c2 == 0) break;
-				char c3 = *u++;
-				if (c3 == 0) break;
-				char c4 = *u++;
-				if (c4 == 0) break;
-			}
-		}
-		return count_;
-	} // to improve
+	int count() const;
 	/**
 	Return the substring starting at position `i` and up to but not including position `j`
 	*/
