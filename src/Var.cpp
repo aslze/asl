@@ -569,6 +569,25 @@ Var& Var::operator<<(const Var& x)
 	return *this;
 }
 
+Var& Var::extend(const Var& v)
+{
+	if (_type == NONE)
+	{
+		NEW_DIC(o);
+		_type = OBJ;
+	}
+	
+	if (_type == OBJ)
+	{
+		foreach2 (String& k, Var & x, *v.o)
+		{
+			if (x.ok())
+				(*o)[k] = x;
+		}
+	}
+	return *this;
+}
+
 Var Var::clone() const
 {
 	Var v(*this);

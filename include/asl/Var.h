@@ -365,6 +365,8 @@ class ASL_API Var
 	/** Appends `x` to this var if this var is an array */
 	template<class T>
 	Var& operator<<(const T& x) {return (*this) << (Var)x;}
+	/** Adds keys and values from v to this var if it is an object, overwriting existing keys */
+	Var& extend(const Var& v);
 	/** Resizes this var to `n` elements if this var is an array, converting if was NONE */
 	void resize(int n)
 	{
