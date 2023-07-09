@@ -483,7 +483,6 @@ void String::append(const char* b, int n)
 	s[_len] = '\0';
 }
 
-
 int String::count() const 
 {
 	auto u = str();
