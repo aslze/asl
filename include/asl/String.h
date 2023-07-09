@@ -496,7 +496,7 @@ public:
 	/**
 	Returns the number of full characters (code points) in the string (may be different from `length()` )
 	*/
-	int count() const {const wchar_t* w(*(String*)this); return (int)wcslen(w);} // to improve
+	int count() const;
 	/**
 	Return the substring starting at position `i` and up to but not including position `j`
 	*/
