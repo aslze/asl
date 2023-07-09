@@ -494,7 +494,11 @@ public:
 	*/
 	int length() const {return _len;}
 	/**
-	Returns the number of full characters (code points) in the string (may be different from `length()` )
+	Returns the length of this string in wchar_t wide chars (UTF16 code units)
+	*/
+	int wlength() const { const wchar_t* w(*(String*)this); return (int)wcslen(w); }
+	/**
+	Returns the number of full characters (code points) in the string
 	*/
 	int count() const;
 	/**
