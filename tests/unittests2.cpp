@@ -169,6 +169,9 @@ ASL_TEST(XML)
 	ASL_ASSERT(Xml::decode("<_x:y a_z:t='4' z-z='5'>..</_x:y>"));
 	ASL_ASSERT(Xml::decode("<A9  Z0='4'>..</A9>"));
 	ASL_ASSERT(Xml::decode(U8("<Πριν アス='4'>..</Πριν>")));
+
+	Xml xx = Xml::decode("<a>35</a>");
+	ASL_ASSERT(xx.value<int>() + 1 == 36);
 }
 
 struct Animal

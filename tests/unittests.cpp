@@ -362,6 +362,9 @@ ASL_TEST(String)
 	ASL_ASSERT(g.equalsNocase(U8("ñanDÚ εΞΈλΙξΗ ЖиЗНИ")));
 	ASL_ASSERT(!g.equalsNocase(U8("ñanDU εΞΈλΙξΗ ЖиЗНИ")));
 	String unicode = U8("añ€😀");
+	ASL_ASSERT(unicode.length() == 10);
+	ASL_ASSERT(unicode.wlength() == 5);
+	ASL_ASSERT(unicode.count() == 4);
 	wchar_t wunicode[16];
 	utf8toUtf16(unicode, wunicode, 15);
 	Array<int> chars = unicode.chars();
@@ -467,6 +470,9 @@ ASL_TEST(Var)
 	ASL_ASSERT(a.has("x", Var::NUMBER));
 
 	ASL_ASSERT((a("z") | a["x"]) == 3);
+
+	a.extend(Var("z", 5));
+	ASL_ASSERT(a("x") == 3 && a("y") == 2 && a("z") == 5);
 
 	ASL_CHECK((a("w") | 35), ==, 35);
 

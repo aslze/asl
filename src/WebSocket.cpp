@@ -154,7 +154,7 @@ bool WebSocket::connect(const String& uri, int port)
 {
 	String path = "/";
 
-	Url url = parseUrl(uri);
+	Url url(uri);
 	if (port != 0 && url.port == 0)
 		url.port = port;
 	if (url.protocol == "wss")
@@ -173,7 +173,6 @@ bool WebSocket::connect(const String& uri, int port)
 		if (url.port == 0) url.port = 80;
 
 	if (!_socket.connect(url.host, url.port)) {
-		//printf("Cannot connect to %s : %i\n", *url.host, url.port);
 		return false;
 	}
 
