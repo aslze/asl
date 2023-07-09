@@ -483,6 +483,39 @@ void String::append(const char* b, int n)
 	s[_len] = '\0';
 }
 
+
+int String::count() const 
+{
+	auto u = str();
+	int count_ = 0;
+	while (int c = *u++)
+	{
+		if ((c & 0x80) == 0) {
+			++count_;
+		}
+		else if ((c & 0xe0) == 0xc0) {
+			++u; ++count_;
+		}
+		else if ((c & 0xf0) == 0xe0) {
+			++count_;
+			char c2 = *u++;
+			if (c2 == 0) break;
+			char c3 = *u++;
+			if (c3 == 0) break;
+		}
+		else if ((c & 0xf8) == 0xf0) {
+			++count_;
+			char c2 = *u++;
+			if (c2 == 0) break;
+			char c3 = *u++;
+			if (c3 == 0) break;
+			char c4 = *u++;
+			if (c4 == 0) break;
+		}
+	}
+	return count_;
+}
+
 String String::substring(int i, int j) const
 {
 	String s(j-i, j-i);
