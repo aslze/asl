@@ -266,6 +266,44 @@ String::String(const wchar_t* s)
 	_len = to8bit(s, str(), cap());
 }
 
+String::String(const Array<wchar_t>& txt)
+{
+	init(4 * txt.length());
+	Array<wchar_t> a = txt.clone(); // hack to append a nul
+	a << 0;
+	_len = to8bit(a.ptr(), str(), cap());
+}
+
+String String::fromCodes(const Array<int>& codes)
+{
+#ifndef ASL_ANSI
+	Array<int> a = codes.clone(); // hack to append a nul
+	a << 0;
+	String s(codes.length() * 4, 0);
+	s.fix(utf32toUtf8(a.ptr(), s.str(), 1));
+#else
+	String s(codes.length(), codes.length());
+	char* p = s.str();
+	for (int i = 0; i < codes.length(); i++)
+	{
+		p[i] = codes[i] < 128 ? (char)codes[i] : '?';
+	}
+#endif
+	return s;
+}
+
+String String::fromCode(int code)
+{
+#ifndef ASL_ANSI
+	int codes[] = { code, 0 };
+	String s(4, 0);
+	s.fix(utf32toUtf8(codes, s.str(), 1));
+#else
+	String s(code < 128 ? (char)code : '?');
+#endif
+	return s;
+}
+
 String& String::fix()
 {
 	_len = (int)strlen(str());

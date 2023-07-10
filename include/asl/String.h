@@ -178,7 +178,7 @@ public:
 		str()[n] = '\0';
 	}
 	/**
-	Constructs a string from a byte array`
+	Constructs a string from a char array
 	*/
 	String(const Array<char>& txt)
 	{
@@ -187,6 +187,7 @@ public:
 		memcpy(str(), txt.ptr(), n);
 		str()[n] = '\0';
 	}
+	
 	String(const Array<byte>& txt)
 	{
 		int n = txt.length();
@@ -194,6 +195,21 @@ public:
 		memcpy(str(), txt.ptr(), n);
 		str()[n] = '\0';
 	}
+	/**
+	Constructs a string from an array of wide chars (UTF16)
+	*/
+	String(const Array<wchar_t>& txt);
+
+	/**
+	Creates a string from an array of Unicode code points
+	*/
+	static String fromCodes(const Array<int>& codes);
+
+	/**
+	Creates a one-'character' string from an Unicode code point
+	*/
+	static String fromCode(int code);
+
 	/**
 	Constructs a string from a character
 	*/

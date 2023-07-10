@@ -356,6 +356,9 @@ ASL_TEST(String)
 	ASL_ASSERT(g.toUpperCase() == "MY TAILOR IS RICH 1990");
 	ASL_ASSERT(g.equalsNocase("My Tailor is Rich 1990"));
 	ASL_ASSERT(!g.equalsNocase("My Taylor is Rich 1990"));
+
+	ASL_ASSERT(String::fromCodes(array(65, 66, 67)) == "ABC");
+	ASL_ASSERT(String::fromCode(65) == "A");
 #else
 	String g = U8("Ñandú εξέλιξη жизни");
 	ASL_ASSERT(g.toUpperCase() == U8("ÑANDÚ ΕΞΈΛΙΞΗ ЖИЗНИ"));
@@ -371,6 +374,10 @@ ASL_TEST(String)
 	ASL_ASSERT(chars.length() == 4 && chars[0] == 97 && chars[1] == 241 && chars[2] == 0x20ac && chars[3] == 0x1f600);
 	String unicode2 = wunicode;
 	ASL_ASSERT(unicode2 == unicode);
+
+	String unicode3 = String::fromCodes(chars);
+	ASL_ASSERT(unicode3 == unicode);
+	ASL_ASSERT(String::fromCode(chars.last()) == U8("😀"));
 #endif
 	ASL_ASSERT(String(" \rmy  taylor\n\tis rich\r\n").split().join('_') == "my_taylor_is_rich");
 	ASL_ASSERT(String("my  taylor is rich").split().join('_') == "my_taylor_is_rich");
