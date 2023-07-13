@@ -42,6 +42,24 @@ Console::~Console()
 	}
 }
 
+void Console::setup_console_if_windows()
+{
+#ifdef _WIN32
+	if (IsValidCodePage(WINDOWS_UTF8_FLAG))
+	{
+		if (!SetConsoleCP(WINDOWS_UTF8_FLAG)) goto err;
+		if (!SetConsoleOutputCP(WINDOWS_UTF8_FLAG)) goto err;
+		return;
+	}
+
+err:
+	{
+		printf("A UTF-8 compatible terminal is required\n");
+		abort();
+	}
+#endif
+}
+
 void Console::gotoxy(int x, int y)
 {
 	CONSOLE_SCREEN_BUFFER_INFO info;
@@ -244,7 +262,7 @@ Console::Size Console::size()
 		unsigned short ws_ypixel;
 	};
 	WinSize win;
-	
+
 	Console::Size s = {0, 0};
 
 	if (ioctl(0, TIOCGWINSZ, &win) == 0)

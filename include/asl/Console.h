@@ -54,6 +54,7 @@ class ASL_API Console
 	HANDLE _hinput;
 	int _w, _h, _fullh;
 	WORD _defaultAttrib, _attrib;
+	static constexpr unsigned int WINDOWS_UTF8_FLAG = 65001;
 #endif
 	int _colorMode; // 0: basic, 1: 256, 2: truecolor
 	bool _colorChanged;
@@ -74,7 +75,12 @@ public:
 
 	Console();
 	~Console();
-	
+
+	/**
+	Make any utf8 compatible terminal ready to print out utf8 characters
+	*/
+	static void setup_console_if_windows();
+
 	/**
 	Sets the cursor position to coordinates `x`, `y`
 	*/
@@ -82,24 +88,24 @@ public:
 
 	/** Clear the console */
 	void clear();
-	
+
 	/**
 	 * Sets color mode: 1=256 colors (RGB 6x6x6), 2=true color (RGB 24bit) for RGB color setting
 	 * functions (only for relatively modern consoles)
 	 */
 	void setColorMode(int mode) { _colorMode = mode; }
-	
+
 	/**
 	Sets the current text output color, or if no argument is given, the color will be the default terminal
 	text color
 	*/
 	void color(Color color = DEFAULT);
-	
+
 	/**
 	Sets the current output background color
 	*/
 	void bgcolor(Color color = DEFAULT);
-	
+
 	/**
 	* Sets current text color as RGB (if supported)
 	*/
@@ -114,7 +120,7 @@ public:
 	 * Returns the prefix code to set a background color
 	 */
 	String bg() const { return "\033[48;"; }
-	
+
 	/**
 	 * Returns the prefix code to set a foreground color
 	 */

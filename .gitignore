@@ -1,0 +1,6 @@
+cmake-build-*
+build*/
+.cache
+*.10x
+.vscode
+.idea
