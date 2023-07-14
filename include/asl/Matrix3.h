@@ -113,13 +113,23 @@ public:
 		                a[1][0]*v.x + a[1][1]*v.y + a[1][2]);
 	}
 	/**
-	Returns vector `v` left-multiplied by this matrix.
+	Returns vector `v` transformed by this affine transform.
 	*/
 	Vec3_<T> operator*(const Vec3_<T>& v) const
 	{
 		return Vec3_<T>(a[0][0]*v.x + a[0][1]*v.y + a[0][2]*v.z,
 		                a[1][0]*v.x + a[1][1]*v.y + a[1][2]*v.z,
 		                a[2][0]*v.x + a[2][1]*v.y + a[2][2]*v.z);
+	}
+
+	/**
+	Returns vector `v` transformed by this projective transform.
+	*/
+	Vec2_<T> operator^(const Vec2_<T>& v) const
+	{
+		T iw = 1 / (a[2][0] * v.x + a[2][1] * v.y + a[2][2]);
+		return Vec2_<T>((a[0][0] * v.x + a[0][1] * v.y + a[0][2]) * iw,
+		                (a[1][0] * v.x + a[1][1] * v.y + a[1][2]) * iw);
 	}
 	Vec2_<T> operator%(const Vec2_<T>& v) const
 	{

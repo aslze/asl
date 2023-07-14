@@ -123,8 +123,25 @@ double distance(const Vec3_<T>& a, const Vec3_<T>& b)
 	return (a - b).length();
 }
 
-template<>
-inline String asString(const Vec3& x) { return String::f("(%g, %g, %g)", x.x, x.y, x.z); }
+template<class T>
+inline String asString(const Vec3_<T>& x)
+{
+	return String::f("(%g, %g, %g)", x.x, x.y, x.z);
+}
+#endif
+
+#ifdef ASL_VECTOR2_H
+template<class T>
+double distance(const Vec2_<T>& a, const Vec2_<T>& b)
+{
+	return (a - b).length();
+}
+
+template<class T>
+inline String asString(const Vec2_<T>& x)
+{
+	return String::f("(%g, %g)", x.x, x.y);
+}
 #endif
 
 #ifdef ASL_MATRIX4_H

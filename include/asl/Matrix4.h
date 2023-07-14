@@ -177,7 +177,7 @@ public:
 			a[3][0] * p.x + a[3][1] * p.y + a[3][2] * p.z + a[3][3] * p.w);
 	}
 	/**
-	Returns vector `p` left-multiplied by this matrix.
+	Returns vector `p` transformed by this affine transform.
 	*/
 	Vec3_<T> operator*(const Vec3_<T>& p) const
 	{
@@ -185,6 +185,17 @@ public:
 			a[0][0] * p.x + a[0][1] * p.y + a[0][2] * p.z + a[0][3],
 			a[1][0] * p.x + a[1][1] * p.y + a[1][2] * p.z + a[1][3],
 			a[2][0] * p.x + a[2][1] * p.y + a[2][2] * p.z + a[2][3]);
+	}
+	/**
+	Returns vector `p` transformed by this projective transform.
+	*/
+	Vec3_<T> operator^(const Vec3_<T>& p) const
+	{
+		T iw = 1/(a[3][0] * p.x + a[3][1] * p.y + a[3][2] * p.z + a[3][3]);
+		return Vec3_<T>(
+			(a[0][0] * p.x + a[0][1] * p.y + a[0][2] * p.z + a[0][3]) * iw,
+			(a[1][0] * p.x + a[1][1] * p.y + a[1][2] * p.z + a[1][3]) * iw,
+			(a[2][0] * p.x + a[2][1] * p.y + a[2][2] * p.z + a[2][3]) * iw);
 	}
 	/**
 	Returns vector `p` left-multiplied by this matrix without applying the translation part.

@@ -1,5 +1,7 @@
 #include <asl/Vec3.h>
+#include <asl/Vec4.h>
 #include <asl/Matrix4.h>
+#include <asl/Matrix3.h>
 #include <asl/Quaternion.h>
 #include <asl/Uuid.h>
 #include <asl/Array2.h>
@@ -69,6 +71,20 @@ ASL_TEST(Matrix4)
 	Matrix4d mi = m1.inverse();
 	ASL_APPROX(mi * m1, Matrix4d::identity(), EPS);
 	ASL_APPROX(mi.inverse(), m1, EPS);
+
+	m1(3, 0) = 0.5;
+	m1(3, 1) = -0.1;
+	m1(3, 2) = 1.5;
+
+	Vec3d v3(1, 2, 3);
+
+	ASL_APPROX((m1 ^ v3), (m1 * Vec4d(v3, 1)).h2c(), EPS);
+
+	Matrix3 h = Matrix3::translate(1.0f, -2.0f) * Matrix3::rotate(0.5f);
+	h(2, 0) = 0.2f;
+	h(2, 1) = -0.15f;
+	Vec2 v2(1, 3);
+	ASL_APPROX((h ^ v2), (h * Vec3(v2, 1)).h2c(), EPS);
 }
 
 ASL_TEST(Uuid)
