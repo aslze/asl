@@ -523,7 +523,7 @@ void String::append(const char* b, int n)
 
 int String::count() const 
 {
-	auto u = str();
+	const char* u = str();
 	int count_ = 0;
 	while (int c = *u++)
 	{
