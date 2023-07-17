@@ -455,6 +455,11 @@ ASL_TEST(JSON)
 	ASL_CHECK(Xdl::decode(xdl2), == , v);
 	ASL_CHECK(Json::decode(json1), == , v);
 	ASL_CHECK(Json::decode(json2), == , v);
+
+#ifndef ASL_ANSI
+	ASL_ASSERT(Json::decode("\"\\ud83d\\ude00\"") == U8("😀"));
+	ASL_ASSERT(Json::decode("\"35 \\u20ac.\"") == U8("35 €."));
+#endif
 }
 
 ASL_TEST(Var)

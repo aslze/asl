@@ -506,7 +506,6 @@ void XdlParser::parse(const char* s)
 			else if (c == 'u')
 			{
 				_state = UNICODECHAR;
-				_unicodeCount = 0;
 				break;
 			}
 			else
@@ -547,14 +546,35 @@ void XdlParser::parse(const char* s)
 			}
 			break;
 		case UNICODECHAR:
-			_unicode[_unicodeCount++] = c;
-			if(_unicodeCount == 4) // still only BMP!
+			_unicode[(_unicodeCount++) % 4] = c;
+			if (_unicodeCount == 4 || _unicodeCount == 8)
 			{
-				_unicode[4] = '\0';
-				wchar_t wch[2] = {(wchar_t)strtoul(_unicode, NULL, 16), 0};
-				char ch[4];
-				utf16toUtf8(wch, ch, 1);
+				char unicode[5];
+				memcpy(unicode, _unicode, 4);
+				unicode[4] = '\0';
+				wchar_t wchar = (wchar_t)strtoul(unicode, NULL, 16);
+				
+				if (_unicodeCount == 8)
+				{
+					wchar_t u16[3] = { _wchar, wchar, 0 };
+					char ch[9];
+					utf16toUtf8(u16, ch, 2);
 				_buffer << ch;
+					_unicodeCount = 0;
+				}
+				else if (_unicodeCount == 4) // first code
+				{
+					if (wchar < 0xd800 || wchar >= 0xdc00) // not first surrogate
+					{
+						wchar_t u16[2] = { wchar, 0 };
+						char    ch[8];
+						utf16toUtf8(u16, ch, 1);
+						_buffer << ch;
+						_unicodeCount = 0;
+					}
+					else
+						_wchar = wchar;
+				}
 				_state = _prevState;
 			}
 			break;

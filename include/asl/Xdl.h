@@ -45,8 +45,9 @@ class ASL_API XdlParser: public XdlCodec
 	String _buffer;
 	bool _inComment;
 	int _unicodeCount;
-	char _unicode[5];
 	char _ldp;
+	char _unicode[4];
+	wchar_t _wchar;
 	void put(const Var& x);
 public:
 	XdlParser();
