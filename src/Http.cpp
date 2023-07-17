@@ -33,13 +33,22 @@ String Url::decode(const String& q0)
 	return q;
 }
 
-String Url::encode(const String& q0)
+inline bool isanyof(char c, const char* chars)
+{
+	char k;
+	while ((k = *chars++))
+		if (k == c)
+			return true;
+	return false;
+}
+
+String Url::encode(const String& q0, bool component)
 {
 	String q;
 	for (int i = 0; i < q0.length(); i++)
 	{
 		byte c = *(byte*)&q0[i];
-		if (!isalnum(c) && c != '-' && c != '.' && c != '~' && c != '/' && c != ':')
+		if (!isalnum(c) && !isanyof(c, component ? "-_.!~*'()" : "-_.!~*'();/?:@&=+$,#"))
 			q << String(3, "%%%02X", (int)c);
 		else
 			q << (char)c;
@@ -51,7 +60,7 @@ String Url::params(const Dic<>& q)
 {
 	Dic<> d;
 	foreach2(String& k, const String& v, q)
-		d[Url::encode(k)] = Url::encode(v);
+		d[Url::encode(k, true)] = Url::encode(v, true);
 	return d.join('&', '=');
 }
 
@@ -171,7 +180,7 @@ void HttpMessage::put(const Var& body)
 	{
 		Dic<> dic;
 		foreach2(String & k, Var & v, body)
-			dic[Url::encode(k)] = Url::encode(v);
+			dic[Url::encode(k, true)] = Url::encode(v, true);
 		put(dic.join('&', '='));
 	}
 	else

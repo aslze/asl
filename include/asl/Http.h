@@ -59,12 +59,13 @@ struct ASL_API Url
 	static String params(const Dic<>& p);
 
 	/**
-	Encodes a string with percent encoding for use in a URL
+	Encodes a string with percent encoding for chars not allowed in URLs, by default more characters are left untouched (including '/', ':', like in JS `encodeURI()`),
+	if the `component` flag is set, then more characters are encoded (like JS `encodeURIComponent()`)
 	*/
-	static String encode(const String& s);
+	static String encode(const String& s, bool component = false);
 
 	/**
-	Decodes a string containing percent encoding
+	Decodes a string containing percent-encoded characters
 	*/
 	static String decode(const String& s);
 };
