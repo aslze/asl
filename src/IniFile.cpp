@@ -270,16 +270,20 @@ String IniFile::array(const String& name, int index) const
 	return _sections[_currentTitle][key];
 }
 
-Dic<> asl::IniFile::values() const
+Dic<> IniFile::values() const
 {
 	Dic<> vals;
-	foreach2 (String& secname, const Section& sec, _sections)
+	foreach (Section sec, _sections)
+	{
 		foreach2 (String& k, const String& v, sec._vars)
-			vals[secname + '/' + k] = v;
+		{
+			vals[sec.title() + "/" + k] = v;
+		}
+	}
 	return vals;
 }
 
-Dic<> asl::IniFile::values(const String& secname) const
+Dic<> IniFile::values(const String& secname) const
 {
 	Dic<> vals;
 	if (!_sections.has(secname))
