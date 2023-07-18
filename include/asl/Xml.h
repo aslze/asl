@@ -632,7 +632,17 @@ public:
 	Returns the trimmed content of this element converted to a given type; As in `elem.value<int>()`
 	*/
 	template<class T>
-	T value() const { return (T)text().trimmed(); }
+	T value(T deflt = T()) const
+	{
+		String t = text().trimmed();
+		return t.ok() ? (T)t: deflt;
+	}
+
+	bool value(bool deflt = false) const
+	{
+		String t = text().trimmed();
+		return t.ok() ? t.isTrue() : deflt;
+	}
 
 	/**
 	Reads and decodes a file as XML and returns its root element
