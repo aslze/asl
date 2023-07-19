@@ -559,7 +559,11 @@ void XdlParser::parse(const char* s)
 					wchar_t u16[3] = { _wchar, wchar, 0 };
 					char ch[9];
 					utf16toUtf8(u16, ch, 2);
+#ifdef ASL_ANSI
+					_buffer << utf8ToLocal(ch);
+#else
 				_buffer << ch;
+#endif
 					_unicodeCount = 0;
 				}
 				else if (_unicodeCount == 4) // first code
@@ -569,7 +573,11 @@ void XdlParser::parse(const char* s)
 						wchar_t u16[2] = { wchar, 0 };
 						char    ch[8];
 						utf16toUtf8(u16, ch, 1);
+#ifdef ASL_ANSI
+						_buffer << utf8ToLocal(ch);
+#else
 						_buffer << ch;
+#endif
 						_unicodeCount = 0;
 					}
 					else

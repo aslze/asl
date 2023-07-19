@@ -211,6 +211,31 @@ String localToString(const String& a)
 	return String(ws.ptr());
 }
 
+String stringToLocal(const String& a)
+{
+	Array<char> s(a.length() + 1);
+	utf16toLocal8((const wchar_t*)a, s.ptr(), a.length() + 1);
+	return String(s.ptr());
+}
+
+String localToUtf8(const String& a)
+{
+	Array<wchar_t> ws(a.length() + 1);
+	local8toUtf16(a, ws.ptr(), a.length() + 1);
+	String u(a.length() * 3, 0);
+	int n = utf16toUtf8(ws.ptr(), u.data(), a.length() * 3);
+	return u.fix(n);
+}
+
+String utf8ToLocal(const String& a)
+{
+	Array<char> s(a.length() + 1);
+	Array<wchar_t> ws(a.length() + 1);
+	int         n = utf8toUtf16(*a, ws.ptr(), a.length());
+	utf16toLocal8(ws.ptr(), s.ptr(), a.length() + 1);
+	return String(s.ptr());
+}
+
 int String::Enumerator::operator*()
 {
 #ifdef ASL_ANSI

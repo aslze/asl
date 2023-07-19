@@ -33,7 +33,11 @@ String Url::decode(const String& q0)
 		else
 		q << c;
 	}
+#ifdef ASL_ANSI
+	return utf8ToLocal(q);
+#else
 	return q;
+#endif
 }
 
 inline bool isanyof(char c, const char* chars)
@@ -51,8 +55,14 @@ inline char hexNibble(int x)
 	return h[x];
 }
 
-String Url::encode(const String& q0, bool component)
+String Url::encode(const String& q0_, bool component)
 {
+#ifdef ASL_ANSI
+	String q0 = localToUtf8(q0_);
+#else
+	const String& q0 = q0_;
+#endif
+
 	String q(q0.length(), 0);
 	for (int i = 0; i < q0.length(); i++)
 	{
