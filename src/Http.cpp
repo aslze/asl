@@ -16,6 +16,8 @@ namespace asl {
 String Url::decode(const String& q0)
 {
 	String q;
+	char   b[3];
+	b[2] = '\0';
 	for (int i = 0; i < q0.length(); i++)
 	{
 		char c = q0[i];
@@ -23,11 +25,12 @@ String Url::decode(const String& q0)
 		{
 			if (i > q0.length() - 2)
 				break;
-			int val = q0.substring(i + 1, i + 3).hexToInt();
-			q << (char)val;
+			b[0] = q0[i + 1];
+			b[1] = q0[i + 2];
+			q << (char)strtoul(b, NULL, 16);
 			i += 2;
-			continue;
 		}
+		else
 		q << c;
 	}
 	return q;
@@ -42,14 +45,20 @@ inline bool isanyof(char c, const char* chars)
 	return false;
 }
 
+inline char hexNibble(int x)
+{
+	const char h[] = "0123456789ABCDEF";
+	return h[x];
+}
+
 String Url::encode(const String& q0, bool component)
 {
-	String q;
+	String q(q0.length(), 0);
 	for (int i = 0; i < q0.length(); i++)
 	{
 		byte c = *(byte*)&q0[i];
 		if (!isalnum(c) && !isanyof(c, component ? "-_.!~*'()" : "-_.!~*'();/?:@&=+$,#"))
-			q << String(3, "%%%02X", (int)c);
+			q << '%' << hexNibble(c >> 4) << hexNibble(c & 0x0f);
 		else
 			q << (char)c;
 	}

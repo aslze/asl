@@ -201,6 +201,7 @@ ASL_TEST(URL)
 	Url u("http://w.org/path");
 	ASL_ASSERT(u.host == "w.org");
 	ASL_ASSERT(u.path == "/path");
-	ASL_ASSERT(Url::encode("a\t b") == "a%09%20b");
-	ASL_ASSERT(Url::decode("a%09%20b") == "a\t b");
+	ASL_ASSERT(Url::encode("a\t b?") == "a%09%20b?");
+	ASL_ASSERT(Url::encode("a\t b?", true) == "a%09%20b%3F");
+	ASL_ASSERT(Url::decode("a%09%20b%3F") == "a\t b?");
 }
