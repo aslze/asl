@@ -53,6 +53,7 @@ class ASL_API Console
 	HANDLE _handle;
 	HANDLE _hinput;
 	int _w, _h, _fullh;
+	int    _cp0;
 	WORD _defaultAttrib, _attrib;
 #endif
 	int _colorMode; // 0: basic, 1: 256, 2: truecolor
@@ -74,6 +75,11 @@ public:
 
 	Console();
 	~Console();
+	
+	/**
+	On Windows, sets the console output code page (if 0 given, uses the system code page, if -1 uses the default console page)
+	*/
+	void setCP(int cp = 0);
 	
 	/**
 	Sets the cursor position to coordinates `x`, `y`

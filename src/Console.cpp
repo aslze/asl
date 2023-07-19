@@ -12,8 +12,11 @@ ASL_API Console console;
 
 Console::Console()
 {
+	_cp0 = (int)GetConsoleOutputCP();
 #ifndef ASL_ANSI
 	SetConsoleOutputCP(65001);
+#else 
+	SetConsoleOutputCP(GetACP());
 #endif
 	_colorChanged = false;
 	_colorMode = 2;
@@ -40,6 +43,11 @@ Console::~Console()
 		color();
 		bgcolor();
 	}
+}
+
+void Console::setCP(int cp)
+{
+	SetConsoleOutputCP(cp == 0 ? _cp0 : cp < 0 ? GetACP() : cp);
 }
 
 void Console::gotoxy(int x, int y)
@@ -165,6 +173,8 @@ Console::~Console()
 	if(_colorChanged)
 		color();
 }
+
+void Console::setCP(int cp) {}
 
 void Console::gotoxy(int x, int y)
 {
