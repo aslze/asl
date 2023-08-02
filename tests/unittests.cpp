@@ -428,6 +428,7 @@ ASL_TEST(JSON)
 	String d = "A/*...*/{x=3.5, //...\ny=\"s\", z=[Y, N)}";
 	Var e = Xdl::decode(d);
 	ASL_ASSERT(!e.ok());
+	ASL_ASSERT(!Json::decode("\"\n\"").ok());
 	Var f = Json::decode("{\"x\":null,\"y\":3}");
 	ASL_ASSERT(f.ok());
 	ASL_ASSERT(f["y"] == 3);
@@ -457,8 +458,10 @@ ASL_TEST(JSON)
 	ASL_CHECK(Json::decode(json2), == , v);
 
 #ifndef ASL_ANSI
+	ASL_ASSERT(Json::decode(U8("\"😀\"")) == U8("😀"));
 	ASL_ASSERT(Json::decode("\"\\ud83d\\ude00\"") == U8("😀"));
 	ASL_ASSERT(Json::decode("\"35 \\u20ac.\"") == U8("35 €."));
+	ASL_ASSERT(Json::decode("\"a\xc3\xb1o\"") == U8("año"));
 #endif
 }
 

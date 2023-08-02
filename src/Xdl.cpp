@@ -323,13 +323,18 @@ void XdlParser::parse(const char* s)
 				_state = ESCAPE;
 				_prevState = STRING;
 			}
-			else if (c != '"')
-				_buffer << c;
-			else // disallow TAB and newline?
+			else if (c == '"')
 			{
 				new_string(_buffer);
 				value_end();
 			}
+			else if (unsigned(c) < ' ') // disallow control chars in string
+			{
+				_state = ERR;
+				return;
+			}
+			else
+				_buffer << c;
 			break;
 
 		case PROPERTY:
