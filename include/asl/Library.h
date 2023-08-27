@@ -130,7 +130,7 @@ class Library
 	void open(String file, bool tryprefix=true)
 	{
 		if(file.indexOf('.', 2) < 0)
-			file += ASL_LIB_EXT;
+			file += "." ASL_LIB_EXT;
 #ifdef _WIN32
 		file.replaceme('/', '\\');
 		_lib = LoadLibrary(file);
