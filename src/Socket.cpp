@@ -535,12 +535,7 @@ InetAddress Socket_::localAddress() const
 bool Socket_::setOption(int level, int opt, const void* val, int n)
 {
 	init();
-	int r = setsockopt(_handle, level, opt, (const char*)val, n);
-	/*if (r < 0) {
-		int e = h_errno;
-		printf("sockopt %i fail %i\n", opt, e);
-	}*/
-	return r >= 0;
+	return setsockopt(_handle, level, opt, (const char*)val, n) == 0;
 }
 
 void Socket::enableBroadcast(bool on)

@@ -449,8 +449,8 @@ ASL_SMART_CLASS(MulticastSocket, PacketSocket)
 {
 	ASL_SMART_INNER_DEF(MulticastSocket);
 	MulticastSocket_();
-	void join(const InetAddress& a);
-	void leave(const InetAddress& a);
+	bool join(const InetAddress& a);
+	bool leave(const InetAddress& a);
 	void multicast(const InetAddress& a, int ttl = 1);
 	void setOptions(bool loop, int ttl);
 };
@@ -488,16 +488,16 @@ public:
 	ASL_SMART_DEF(MulticastSocket, PacketSocket);
 	
 	/** Joins a multicast group. Packets sent to the group's address will be received */
-	void join(const InetAddress& a)
+	bool join(const InetAddress& a)
 	{
-		_()->join(a);
+		return _()->join(a);
 	}
 	/** Leaves a multicast group and stops receiving packets from it. */
-	void leave(const InetAddress& a)
+	bool leave(const InetAddress& a)
 	{
-		_()->leave(a);
+		return _()->leave(a);
 	}
-	/** Starts a multicast session for group address `a`. Packers sent will be received by
+	/** Starts a multicast session for group address `a`. Packets sent will be received by
 	all sockets that join the group. */
 	void multicast(const InetAddress& a, int ttl = 2)
 	{
