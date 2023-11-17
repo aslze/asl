@@ -17,7 +17,7 @@ bool Xml::write(const Xml& e, const String& path)
 	TextFile file(path, File::WRITE);
 	if (!file)
 		return false;
-	file << "<?xml version=\"1.0\"?>\n" << Xml::encode(e, true) << "\n";
+	file << "<?xml version=\"1.0\"?>\n" << Xml::encode(e, true);
 	return true;
 }
 
