@@ -491,6 +491,8 @@ TextFile("image.jpg.b64").put( encodeBase64(File("image.jpg").content()) );
 /**
 \defgroup Math3D Math
 
+## Vectors and matrices for 2D/3D geometry
+
 Classes and functions for math, including vector and matrix types useful in 2D/3D geometric computations and graphics.
 
 These classes are templates that can be used with elements of any numeric type, but some functions oly make sense with floating point types.
@@ -504,8 +506,8 @@ They all have two predefined specializations, for `float` and `double` elements.
 type for double has a `d` suffix, and the type for float has no suffix:
 
 ~~~
-Vec3 v;   // -> Vec3_<float>
-Vec3d w;  // -> Vec3_<double>
+Vec3 v;   // = Vec3_<float>
+Vec3d w;  // = Vec3_<double>
 ~~~
 
 Classes Vec2_, Vec3_ and Vec4_ represent 2D, 3D and 4D vectors. Classes Matrix3_ and Matrix4_ represent 3x3 and 4x4 matrices, useful to work
@@ -517,11 +519,42 @@ Matrix4 transform = Matrix4::translate(position) * Matrix4::rotateX(angleX);
 Vec3 worldPos = transform * position;
 ~~~
 
-Class Matrix_ represents a matrix of any size. It uses dynamic memory and is less efficient than the fixed size types above. Matrix_ can be
-used to represent systems of linear equations or arbitrary vectors.
+## Representation of 3D rotations
 
-Functions solve() and solveZero() can be used to solve linear or non-linear systems with equal number of equations and unknowns, or more
-equations (least-squares).
+Rotations in 3D space can be represented in different ways and they can be converted to one another (via a Matrix4).
+
+A rotation matrix can be constructed these ways:
+
+~~~
+m = Matrix4::rotateX(alpha); // a rotation angle around the X axis (or Y or Z)
+
+m = Matrix4::rotate(axis, angle); // rotation angle around an arbitrary axis
+
+m = Matrix4::rotate(axisAngle); // axis-angle: the axis vector with magnitude equal to the rotation angle
+
+m = Matrix4::rotateE({ alpha, beta, gamma }, "XYZ*"); // Euler angles with an arbitrary axis sequence
+
+m = quaternion.matrix(); // a quaternion
+~~~
+
+The matrix can then be converted to other rotation representations:
+
+~~~
+auto angles = m.eulerAngles("XYZ*"); // to Euler angles
+
+auto aa = m.axisAngle(); // to axis-angle
+
+Quaternion q = m.rotation(); // to a quaternion
+~~~
+
+## Vectors and matrices of any size
+
+Class Matrix_ represents a matrix of any size (predefined `Matrix` and `Matrixd` for `float`/`double`). It uses dynamic
+memory and is less efficient than the fixed size types above. Matrix_ can be used to represent systems of linear equations
+or arbitrary vectors.
+
+Functions solve() and solveZero() can be used to solve linear or non-linear systems with equal number of equations and
+unknowns, or more equations (least-squares).
 
 */
 

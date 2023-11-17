@@ -73,8 +73,8 @@ public:
 		LONG,      //!< "2021-11-29T23:31:10.25Z"
 		SHORT,     //!< "20211129T233110.25Z"
 		DATE_ONLY, //!< "2021-11-29"
-		HTTP,      //!< "Mon, 29 Nov 2021 23:31:10 GMT
-		FULL       //!< "2021-11-29T23:31:10.250Z" (with milliseconds)
+		HTTP,      //!< "Mon, 29 Nov 2021 23:31:10 GMT"
+		FULL       //!< "2021-11-29T23:31:10.253Z" (with milliseconds)
 	};
 	enum Zone {UTC, LOCAL};
 	Date() {}
@@ -109,13 +109,13 @@ public:
 	/**
 	Returns a string representation of this date in ISO-8601 format. The format argument is one of
 	`LONG` (default): full ISO-8601, `SHORT`: compact ISO-8601 (no separators), `DATE_ONLY`: just the date
-	part with separators, `HTTP` HTTP long format in GMT.
+	part with separators, `HTTP` HTTP long format in GMT, `FULL` like long but with milliseconds.
 	*/
 	String toString(Format f = LONG) const { return toString(f, false); }
 	/**
 	Returns a string representation of this date in UTC in ISO-8601 format. The format argument is one of
 	`LONG` (default): full ISO-8601, `SHORT`: compact ISO-8601 (no separators), `DATE_ONLY`: just the date
-	part with separators.
+	part with separators, `FULL` like long but with milliseconds.
 	*/
 	String toUTCString(Format f = LONG) const { return toString(f, true); }
 	/**
