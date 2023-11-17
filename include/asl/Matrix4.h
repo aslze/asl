@@ -16,11 +16,14 @@ class String;
 /**
 A Matrix4 is a 4x4 matrix useful for representing affine transformations in 3D space.
 
+Warning: the inverse() method assumes the bottom row is [0, 0, 0, 1] as in affine transform matrices, so
+it is not a general 4x4 matrix inverse.
+
 ~~~
 Matrix4 a = Matrix4::translate(10, 4, 0) * Matrix4::rotateX(PI/2);
 Vec3 v = a.inverse().transposed() * Vec3(1, 0, 0);
 
-Matrix4 r = Matrix4::fromEuler(Vec3(alpha, beta, gamma), "XYZ*");
+Matrix4 r = Matrix4::rotateE(Vec3(alpha, beta, gamma), "XYZ*");
 Vec3 angles = r.eulerAngles("ZYX");
 ~~~
 \ingroup Math3D
@@ -50,10 +53,12 @@ public:
 	/**
 	Returns the element at row `i`, column `j`.
 	*/
-	T& operator()(int i,int j) {return a[i][j];}
-	T operator()(int i,int j) const {return a[i][j];}
-	T& at(int i,int j) {return a[i][j];}
-	T at(int i,int j) const {return a[i][j];}
+	T& operator()(int i, int j) { return a[i][j]; }
+	const T& operator()(int i, int j) const { return a[i][j]; }
+
+	T& at(int i, int j) {return a[i][j];}
+	const T& at(int i, int j) const { return a[i][j]; }
+	
 	template<class T2>
 	Matrix4_(const Matrix4_<T2>& m)
 	{
@@ -246,18 +251,28 @@ public:
 	Returns a rotation matrix created from Euler angles rotating the components of r in axes a0, a1, a2 (each one of 0, 1 or 2), the result
 	is R[a0](r.x) * R[a1](r.y) * R[a2](r.z)
 	*/
-	static Matrix4_ fromEuler(const Vec3_<T>& r, int a0, int a1, int a2);
+	static Matrix4_ rotateE(const Vec3_<T>& r, int a0, int a1, int a2);
 
-	static Matrix4_ rotateE(const Vec3_<T>& r, int a0, int a1, int a2) { return fromEuler(r, a0, a1, a2); }
+	/**
+	Same as rotateE()
+	\deprecated Use rotateE()
+	*/
+	static Matrix4_ fromEuler(const Vec3_<T>& r, int a0, int a1, int a2) { return rotateE(r, a0, a1, a2); }
 
 	/**
 	Returns a rotation matrix created from Euler angles rotating the components of r in axes given as a string, such as "XYZ",
 	if an '*' is appended then the result is equivalent to rotations on fixed axes, while by default it is equivalent to rotations
 	on moving axes.
 	*/
-	static Matrix4_ fromEuler(const Vec3_<T>& r, const char* a);
+	static Matrix4_ rotateE(const Vec3_<T>& r, const char* a);
 
-	static Matrix4_ rotateE(const Vec3_<T>& r, const char* a) { return fromEuler(r, a); }
+	/**
+	Returns a rotation matrix created from Euler angles rotating the components of r in axes given as a string, such as
+	"XYZ", if an '*' is appended then the result is equivalent to rotations on fixed axes, while by default it is
+	equivalent to rotations on moving axes.
+	\deprecated Use rotateE()
+	*/
+	static Matrix4_ fromEuler(const Vec3_<T>& r, const char* a) { return rotateE(r, a); }
 
 	/**
 	Computes the Euler angles corresponding to this rotation matrix (the top-left 3x3 submatrix) for the given axes rotation order
@@ -498,7 +513,7 @@ Matrix4_<T> Matrix4_<T>::rotate(int axis, T angle)
 }
 
 template<class T>
-Matrix4_<T> Matrix4_<T>::fromEuler(const Vec3_<T>& r, int a0, int a1, int a2)
+Matrix4_<T> Matrix4_<T>::rotateE(const Vec3_<T>& r, int a0, int a1, int a2)
 {
 	return rotate(a0, r.x) * rotate(a1, r.y) * rotate(a2, r.z);
 }
@@ -546,7 +561,7 @@ Vec3_<T> Matrix4_<T>::eulerAngles(int a0, int a1, int a2) const
 }
 
 template<class T>
-inline Matrix4_<T> Matrix4_<T>::fromEuler(const Vec3_<T>& r, const char* a)
+inline Matrix4_<T> Matrix4_<T>::rotateE(const Vec3_<T>& r, const char* a)
 {
 	if (strlen(a) < 3)
 		return Matrix4_<T>::identity();

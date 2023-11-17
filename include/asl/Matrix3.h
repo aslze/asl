@@ -102,7 +102,7 @@ public:
 
 	/** Returns the element at row `i`, column `j`. */
 	T& operator()(int i, int j) {return a[i][j];}
-	T operator()(int i, int j) const {return a[i][j];}
+	const T& operator()(int i, int j) const { return a[i][j]; }
 
 	/**
 	Returns vector `v` left-multiplied by this matrix (only two components, to apply an affine transform).

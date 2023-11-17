@@ -100,7 +100,7 @@ public:
 	/**
 	Returns true if this object refers to an *open* file
 	*/
-	operator bool() const {return _file!=0;}
+	ASL_EXPLICIT operator bool() const { return _file != 0; }
 	/**
 	Returns true if this object does not refer to an *open* file
 	*/
