@@ -174,25 +174,37 @@ public:
 	*/
 	void clear() { resize(0); }
 	/* Frees all elements (with delete) and clears the array; elements must be pointers */
-	void destroy() { for(int i=0; i<length(); i++) delete _a[i]; clear(); }
+	ASL_DEPRECATED(void destroy(), "") { for(int i=0; i<length(); i++) delete _a[i]; clear(); }
 	/**
 	Returns a pointer to the base of the array
-	\deprecated this conversion will not be implicit! Use .ptr()
+	\deprecated this conversion will not be implicit! Use .data()
 	*/
-	ASL_DEPRECATED(operator const T*() const, "Use ptr()") { return &_a[0]; }
+	ASL_DEPRECATED(operator const T*() const, "Use .data()") { return &_a[0]; }
 	/**
 	Returns a pointer to the base of the array
-	\deprecated this conversion will not be implicit! Use .ptr()
+	\deprecated this conversion will not be implicit! Use .data()
 	*/
-	ASL_DEPRECATED(operator T*(), "Use ptr()") { return &_a[0]; }
+	ASL_DEPRECATED(operator T*(), "Use .data()") { return &_a[0]; }
 	/**
 	Returns a pointer to the first element
+	\deprecated Use .data()
 	*/
 	const T* ptr() const { return &_a[0]; }
 	/**
 	Returns a pointer to the first element
+	\deprecated Use .data()
 	*/
-	T* ptr() {return &_a[0];}
+	T* ptr() { return &_a[0]; }
+
+	/**
+	Returns a pointer to the first element
+	*/
+	T* data() { return &_a[0]; }
+
+	/**
+	Returns a pointer to the first element
+	*/
+	const T* data() const { return &_a[0]; }
 
 	bool operator!() const { return d().n == 0; }
 

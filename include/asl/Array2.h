@@ -132,9 +132,20 @@ public:
 
 	/**
 	Returns the internal array holding all values (row-major)
+	\deprecated This will return a pointer in the future. Use .array()
 	*/
 	const Array<T>& data() const { return _a; }
 
+	/**
+	Returns the internal array holding all values (row-major)
+	*/
+	Array<T>& array() { return _a; }
+
+	/**
+	Returns the internal array holding all values (row-major)
+	*/
+	const Array<T>& array() const { return _a; }
+	
 	/**
 	Returns true if both arrays are equal
 	*/

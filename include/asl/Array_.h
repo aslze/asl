@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_ARRAYX_H
@@ -38,11 +38,11 @@ public:
 	Array_(const Array_<K, N>& b)
 	{
 		for(int i = 0; i < N; i++)
-			_a[i]=(T)b[i];
+			_a[i] = (T)b[i];
 	}
 	Array_(const Array_& b)
 	{
-		for(int i=0; i<N; i++)
+		for(int i = 0; i < N; i++)
 			_a[i] = b._a[i];
 	}
 #ifdef ASL_HAVE_INITLIST
@@ -98,10 +98,13 @@ public:
 	const T* ptr() const { return &_a[0]; }
 	T* ptr() { return &_a[0]; }
 
+	const T* data() const { return &_a[0]; }
+	T* data() { return &_a[0]; }
+
 	/** Tests for equality of all elements of both arrays*/
 	bool operator==(const Array_& b) const
 	{
-		for(int i=0; i<N; i++)
+		for (int i = 0; i < N; i++)
 			if(_a[i] != b._a[i])
 				return false;
 		return true;
@@ -152,9 +155,9 @@ public:
 	/** Assigns array b into this array by reference. */
 	Array_& operator=(const Array_& b)
 	{
-		if(this==&b) return *this;
+		if(this == &b) return *this;
 		for(int i = 0; i < N; i++)
-			_a[i]=b[i];
+			_a[i] = b[i];
 		return *this;
 	}
 	Array_ reversed() const

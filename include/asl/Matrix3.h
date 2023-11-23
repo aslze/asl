@@ -37,6 +37,9 @@ public:
 	*/
 	T trace() const { return a[0][0] + a[1][1] + a[2][2]; }
 
+	T* data() { return &a[0][0]; }
+	const T* data() const { return &a[0][0]; }
+
 	Matrix3_() {}
 
 	/**
@@ -101,7 +104,7 @@ public:
 	Matrix3_ t() const { return transposed(); }
 
 	/** Returns the element at row `i`, column `j`. */
-	T& operator()(int i, int j) {return a[i][j];}
+	T& operator()(int i, int j) { return a[i][j]; }
 	const T& operator()(int i, int j) const { return a[i][j]; }
 
 	/**
