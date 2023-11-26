@@ -204,20 +204,6 @@ int utf8toUtf16(const char* u, wchar_t* p, int)
 	return 0;
 }
 
-String localToString(const String& a)
-{
-	Array<wchar_t> ws(a.length() + 1);
-	local8toUtf16(a, ws.ptr(), a.length() + 1);
-	return String(ws.ptr());
-}
-
-String stringToLocal(const String& a)
-{
-	Array<char> s(a.length() + 1);
-	utf16toLocal8((const wchar_t*)a, s.ptr(), a.length() + 1);
-	return String(s.ptr());
-}
-
 String localToUtf8(const String& a)
 {
 	Array<wchar_t> ws(a.length() + 1);
@@ -276,10 +262,10 @@ int String::Enumerator::operator*()
 }
 
 
-String::operator const wchar_t*() const
+const wchar_t* String::dataw() const
 {
-	((String*)this)->resize(_len + 1 + (_len + 2)*sizeof(wchar_t), true, false);
-	int offset = (_len + 1) + ((4 - ((_len + 1) & 0x03)) & 0x03);
+	((String*)this)->resize(_len + 1 + (_len + 2) * sizeof(wchar_t), true, false);
+	int      offset = (_len + 1) + ((4 - ((_len + 1) & 0x03)) & 0x03);
 	wchar_t* wstr = (wchar_t*)(str() + offset);
 	from8bit(str(), wstr, _len);
 	return wstr;
@@ -327,6 +313,17 @@ String String::fromCode(int code)
 	String s(code < 128 ? (char)code : '?');
 #endif
 	return s;
+}
+
+String String::fromLocal(const String& a)
+{
+#ifdef ASL_ANSI
+	return a;
+#else
+	Array<wchar_t> ws(a.length() + 1);
+	local8toUtf16(a, ws.data(), a.length() + 1);
+	return String(ws.data());
+#endif
 }
 
 String& String::fix()
@@ -501,6 +498,17 @@ String::String(bool x)
 Long String::toLong() const
 {
 	return myatol(str());
+}
+
+String String::toLocal() const
+{
+#ifdef ASL_ANSI
+	return *this;
+#else
+	Array<char> s(length() + 1);
+	utf16toLocal8(dataw(), s.data(), length() + 1);
+	return String(s.data());
+#endif
 }
 
 bool String::isTrue() const

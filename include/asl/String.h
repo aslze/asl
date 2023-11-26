@@ -184,7 +184,7 @@ public:
 	{
 		int n = txt.length();
 		init(n);
-		memcpy(str(), txt.ptr(), n);
+		memcpy(str(), txt.data(), n);
 		str()[n] = '\0';
 	}
 	
@@ -192,7 +192,7 @@ public:
 	{
 		int n = txt.length();
 		init(n);
-		memcpy(str(), txt.ptr(), n);
+		memcpy(str(), txt.data(), n);
 		str()[n] = '\0';
 	}
 	/**
@@ -209,6 +209,11 @@ public:
 	Creates a one-'character' string from an Unicode code point
 	*/
 	static String fromCode(int code);
+
+	/**
+	Creates a (UTF8 or ANSI) string from a string in the local charset
+	*/
+	static String fromLocal(const String& a);
 
 	/**
 	Constructs a string from a character
@@ -375,18 +380,18 @@ public:
 	const char* data() const { return str(); }
 	
 	/**
-	Returns a const pointer to a Unicode UTF16 representation of this string by expanding from the internal
-	byte representation (suitable for functions requiring C-style wide strings (LPCWSTR))
-	*/
-	operator const wchar_t*() const;
-
-	/**
 	Returns a pointer to a Unicode UTF16 representation of this string by expanding from the internal
 	byte representation (suitable for functions requiring C-style wide strings (LPWSTR))
 	*/
-	wchar_t* dataw() { return (wchar_t*)(const wchar_t*)*this; }
-	const wchar_t* dataw() const { return (const wchar_t*)*this; }
+	const wchar_t* dataw() const;
 	
+	wchar_t* dataw() { return (wchar_t*)(((const String*)this)->dataw()); } // do we need this?
+
+	/**
+	Returns a const pointer to a Unicode UTF16 representation of this string by expanding from the internal
+	byte representation (suitable for functions requiring C-style wide strings (LPCWSTR))
+	*/
+	operator const wchar_t*() const { return dataw(); }
 	/**
 	Returns a const pointer to the beginning of the character data (suitable for functions
 	for functions requiring C-style strings)
@@ -400,6 +405,12 @@ public:
 	*/
 	bool isTrue() const;
 	Long toLong() const;
+
+	/**
+	Returns a local charset version of this string (which is UTF8 or ANSI)
+	*/
+	String toLocal() const;
+
 	/**
 	Converts this string to an unsigned integer number by interpreting it as an hexadecimal number
 	*/
@@ -752,8 +763,6 @@ int ASL_API utf16toUtf8(const wchar_t* p, char* u, int);
 int ASL_API utf8toUtf16(const char* u, wchar_t* p, int);
 int ASL_API utf32toUtf8(const int* p, char* u, int);
 int ASL_API utf8toUtf32(const char* u, int* p, int);
-String ASL_API localToString(const String& a);
-String ASL_API stringToLocal(const String& a);
 String ASL_API localToUtf8(const String& a);
 String ASL_API utf8ToLocal(const String& a);
 }

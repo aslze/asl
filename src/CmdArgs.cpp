@@ -67,7 +67,7 @@ void CmdArgs::parse(int argc, char* argv[], const String& spec)
 	for (int i = 0; i < n; i++)
 	{
 #ifdef _WIN32
-		_args << ((argc < 0) ? String(argv[i]) : localToString(argv[i]));
+		_args << ((argc < 0) ? String(argv[i]) : String::fromLocal(argv[i]));
 #else
 		_args << argv[i];
 #endif
