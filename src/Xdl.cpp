@@ -55,7 +55,7 @@ Var Xdl::read(const String& file)
 	TextFile tfile(file, File::READ);
 	if (!tfile)
 		return Var();
-	int size = (int)tfile.size();
+	int size = int(clamp(tfile.size(), 0ll, 100000ll));
 	if (size == 0)
 		return Var();
 	Array<char> buffer(min(16384, size) + 1);
