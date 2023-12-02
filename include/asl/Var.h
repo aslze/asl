@@ -316,8 +316,11 @@ class ASL_API Var
 	Returns the boolean value of this var (similar to JS conversion)
 	*/
 	operator bool() const;
-	operator const char*() const;
-	const char* operator*() const {return (const char*)*this;}
+
+	const char* operator*() const;
+
+	ASL_DEPRECATED(operator const char*() const, "Use operator*") { return *(*this); }
+	
 	/** Returns the left value if it is defined or the right otherwise */
 	template<class T>
 	Var operator|(const T& v) const { return is(NONE) ? Var(v) : *this; }
