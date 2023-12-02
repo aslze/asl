@@ -735,10 +735,10 @@ void XdlEncoder::_encode(const Var& v)
 		int n = v.length();
 		const Var& v0 = n>0? v[0] : v;
 		bool multi = (_pretty && (n > 10 || (n>0  && (v0.is(Var::ARRAY) || v0.is(Var::DIC)))));
-		if (!multi && v0.is(Var::STRING))
+		if (_pretty && !multi && v0.is(Var::STRING))
 		{
-			for(int i = 0; i < n; i++)
-				if (v[i].length() > 10)
+			for (int i = 0, m = 0; i < n; i++)
+				if ((m += v[i].length()) > 100)
 				{
 					multi = true;
 					break;
@@ -774,7 +774,8 @@ void XdlEncoder::_encode(const Var& v)
 		else
 			begin_object("");
 		int k = (hasclass && _json)?1:0;
-		_indent = String::repeat(INDENT_CHAR, ++_level);
+		if (_pretty)
+			_indent = String::repeat(INDENT_CHAR, ++_level);
 		foreach2(String& name, Var& value, v)
 		{
 			if(value.ok() && (_json || name != ASL_XDLCLASS))
