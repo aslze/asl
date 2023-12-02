@@ -768,17 +768,21 @@ void XdlEncoder::_encode(const Var& v)
 		break;
 		}
 	case Var::DIC: {
-		bool hasclass = !_json && v.has(ASL_XDLCLASS);
-		if(hasclass)
-			begin_object(v[ASL_XDLCLASS].toString());
+		const Var* cname = 0;
+		if (!_json)
+		{
+			cname = v.getp(ASL_XDLCLASS);
+			begin_object(cname ? **cname : "");
+		}
 		else
 			begin_object("");
-		int k = (hasclass && _json)?1:0;
+		int k = 0;
 		if (_pretty)
 			_indent = String::repeat(INDENT_CHAR, ++_level);
+
 		foreach2(String& name, Var& value, v)
 		{
-			if(value.ok() && (_json || name != ASL_XDLCLASS))
+			if(value.ok() && (_json || &value != cname))
 			{
 				if (k++ > 0)
 					_out << _sep2;
@@ -890,22 +894,25 @@ void XdlEncoder::new_string(const char* x)
 {
 	_out << '\"';
 	const char* p = x;
-	while(char c = *p++) // optimizable: not appending chars directly
+	while (char c = *p++)
 	{
-		if(c=='\\')
-			_out << "\\\\";
-		else if (c == '\"')
-			_out << "\\\"";
-		else if (c == '\n')
-			_out << "\\n";
-		else if (c == '\r')
-			_out << "\\r";
-		else if (c == '\t')
-			_out << "\\t";
-		else if (c == '\f')
-			_out << "\\f";
-		else
+		switch (c)
+		{
+		case '\\':
+			_out << "\\\\"; break;
+		case '\"':
+			_out << "\\\""; break;
+		case '\n':
+			_out << "\\n"; break;
+		case '\r':
+			_out << "\\r"; break;
+		case '\t':
+			_out << "\\t"; break;
+		case '\f':
+			_out << "\\f"; break;
+		default:
 			_out << c;
+		}
 	}
 	_out << '\"';
 }

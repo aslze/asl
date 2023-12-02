@@ -242,7 +242,7 @@ bool Var::isTrue() const
 	return (bool)*this;
 }
 
-Var::operator const char*() const
+const char* Var::operator*() const
 {
 	switch(_type)
 	{
@@ -254,6 +254,12 @@ Var::operator const char*() const
 		return "[?]"; break;
 	case DIC:
 		return "{?}"; break;
+	case NUL:
+		return "null"; break;
+	case NONE:
+		return ""; break;
+	case BOOL:
+		return b ? "true" : "false"; break;
 	default: return "?";
 	}
 	return "?";
@@ -262,7 +268,6 @@ Var::operator const char*() const
 String Var::toString() const
 {
 	String r(15, 0);
-	r[0]='\0';
 	switch(_type) {
 	case INT:
 		r.fix(snprintf(r.data(), r.cap(), "%i", i));
@@ -277,7 +282,6 @@ String Var::toString() const
 		break;
 	case BOOL:
 		r=b?"true":"false";
-		r.fix();
 		break;
 	case STRING:
 		r=(*s).ptr();
@@ -286,10 +290,10 @@ String Var::toString() const
 		r=ss;
 		break;
 	case ARRAY:
-		r = '[' + a->join(',') + ']';
+		r << '[' << a->join(',') << ']';
 		break;
 	case DIC:
-		r = '{' + o->join(',', '=') + '}';
+		r << '{' << o->join(',', '=') << '}';
 		break;
 	case NUL:
 		r="null";
