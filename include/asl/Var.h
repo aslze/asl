@@ -257,7 +257,7 @@ class ASL_API Var
 		else {
 			_type=STRING;
 			NEW_STRINGC(s, v.length()+1);
-			memcpy((*s).ptr(), *v, v.length() + 1);
+			memcpy(s->data(), *v, v.length() + 1);
 		}
 	}
 	template<class T>
@@ -415,9 +415,9 @@ class ASL_API Var
 	bool operator==(const Var& other) const
 	{
 		if(_type == STRING && other._type == SSTRING)
-			return !strcmp((*s).ptr(), other.ss);
+			return !strcmp(s->data(), other.ss);
 		else if(_type == SSTRING && other._type == STRING)
-			return !strcmp(ss, (*other.s).ptr());
+			return !strcmp(ss, other.s->data());
 		else if (_type == NUMBER || _type == FLOAT || _type == INT)
 		{
 			double x = *this;
@@ -429,7 +429,7 @@ class ASL_API Var
 			case FLOAT: return d == other.d;
 			case INT: return i==other.i;
 			case BOOL: return b==other.b;
-			case STRING: return !strcmp((*s).ptr(), (*other.s).ptr());
+			case STRING: return !strcmp(s->data(), other.s->data());
 			case SSTRING: return !strcmp(ss, other.ss);
 			case ARRAY: return *a==*other.a;
 			case DIC: return *o == *other.o;
@@ -480,7 +480,7 @@ class ASL_API Var
 	bool operator==(const char* other) const
 	{
 		switch(_type){
-		case STRING: return !strcmp((*s).ptr(), other);
+		case STRING: return !strcmp(s->data(), other);
 		case SSTRING: return !strcmp(ss, other);
 		default: return false;
 		}
@@ -489,7 +489,7 @@ class ASL_API Var
 	bool operator==(const String& other) const
 	{
 		switch(_type){
-		case STRING: return !strcmp((*s).ptr(), &other[0]);
+		case STRING: return !strcmp(s->data(), &other[0]);
 		case SSTRING: return !strcmp(ss, other);
 		default: return false;
 		}

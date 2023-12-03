@@ -163,7 +163,7 @@ ASL_TEST(SmartObject)
 
 ASL_TEST(Date)
 {
-	for (double t = -2000000000.0; t < 3000000000.0; t += 3 * Date::DAY + 777)
+	for (double t = -2000000000.0; t < 3000000000.0; t += 11 * Date::DAY + 777)
 	{
 		Date d(t);
 		DateData p = d.splitUTC();

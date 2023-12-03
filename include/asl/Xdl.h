@@ -17,24 +17,7 @@ namespace asl {
  * @{
  */
 
-class ASL_API XdlCodec
-{
-public:
-	XdlCodec() {}
-	virtual ~XdlCodec() {}
-	virtual void new_number(int x) {}
-	virtual void new_number(double x) {}
-	virtual void new_string(const char* s) {}
-	virtual void new_string(const String& x) {}
-	virtual void new_bool(bool b) {}
-	virtual void begin_array() {}
-	virtual void end_array() {}
-	virtual void begin_object(const char* c) {}
-	virtual void end_object() {}
-	virtual void new_property(const String& name) {}
-};
-
-class ASL_API XdlParser: public XdlCodec
+class ASL_API XdlParser
 {
 	typedef char State;
 	typedef char Context;
@@ -70,7 +53,9 @@ public:
 	virtual void new_property(const String& name);
 };
 
-class ASL_API XdlEncoder: public XdlCodec
+struct XdlSink;
+
+class ASL_API XdlEncoder
 {
 protected:
 	String _out;
@@ -83,10 +68,14 @@ protected:
 	String _sep1; // between items in same line
 	String _sep2; // between items, end of line
 	int _level;
+	XdlSink* _sink;
 	void _encode(const Var& v);
 public:
 	XdlEncoder();
-	~XdlEncoder() {}
+	~XdlEncoder();
+
+	void use(XdlSink* sink);
+
 	String data() const {return _out;}
 
 	String encode(const Var& v, Json::Mode mode);

@@ -463,12 +463,28 @@ ASL_TEST(JSON)
 	ASL_ASSERT(Json::decode("\"35 \\u20ac.\"") == U8("35 €."));
 	ASL_ASSERT(Json::decode("\"a\xc3\xb1o\"") == U8("año"));
 #endif
+
+	Var big;
+	for (int i = 0; i < 50000; i++)
+		big << i;
+	ASL_ASSERT(big.isArrayOf(50000, Var::INT));
+	ASL_ASSERT(Json::decode(Json::encode(big)) == big);
+
+#ifndef __ANDROID__
+	ASL_ASSERT(Json::write(v, "v.json"));
+	ASL_ASSERT(Json::read("v.json") == v);
+
+	Json::write(big, "v.json");
+	ASL_ASSERT(Json::read("v.json") == big);
+
+	TextFile("v.json").remove();
+#endif
 }
 
 ASL_TEST(Var)
 {
 	Var b = Var("x", 3);
-	ASL_ASSERT(b.type() == Var::DIC && b.length()==1 && b["x"]==3);
+	ASL_ASSERT(b.type() == Var::OBJ && b.length()==1 && b["x"]==3);
 
 	Var c = array<Var>("x", 3, true, 0);
 	ASL_ASSERT(c.type() == Var::ARRAY && c.length()==4 && c[0]=="x" && c[1]==3 && c[2]==true);
@@ -478,7 +494,7 @@ ASL_TEST(Var)
 	ASL_ASSERT((bool)c && (bool)c[0] && (bool)c[1] && (bool)c[2] && !(bool)c[3])
 
 	Var a = Var("x", 3)("y", 2);
-	ASL_ASSERT(a.type() == Var::DIC);
+	ASL_ASSERT(a.type() == Var::OBJ);
 	ASL_ASSERT(a.length()==2);
 	ASL_ASSERT(a["x"]==3);
 	ASL_ASSERT(a["y"]==2);

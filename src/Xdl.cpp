@@ -16,6 +16,26 @@
 
 namespace asl {
 
+struct XdlSink
+{
+	virtual ~XdlSink() {}
+	virtual void write(String& s) {}
+};
+
+struct XdlSinkString : XdlSink
+{
+	String& str;
+	XdlSinkString(String& s) : str(s) {}
+	void write(String& s) {}
+};
+
+struct XdlSinkFile : XdlSink
+{
+	TextFile& file;
+	XdlSinkFile(TextFile& f) : file(f) {}
+	void write(String& s) { file << s; s = ""; }
+};
+
 enum StateN {
 	NUMBER, INT, STRING, PROPERTY, IDENTIFIER,
 	NUMBER_E, NUMBER_ES, NUMBER_EV, NUMBER_DOT, MINUS, WAIT_SEP,
@@ -58,12 +78,12 @@ Var Xdl::read(const String& file)
 	int size = int(clamp(tfile.size(), 0ll, 100000ll));
 	if (size == 0)
 		return Var();
-	Array<char> buffer(min(16384, size) + 1);
+	Array<char> buffer(min(16382, size) + 1);
 	while (1)
 	{
-		int n = tfile.read(buffer.ptr(), buffer.length() - 1);
+		int n = tfile.read(buffer.data(), buffer.length() - 1);
 		buffer[n] = '\0';
-		parser.parse(buffer.ptr());
+		parser.parse(buffer.data());
 		if (n < buffer.length() - 1)
 			break;
 	}
@@ -73,7 +93,13 @@ Var Xdl::read(const String& file)
 
 bool Xdl::write(const Var& v, const String& file, int mode)
 {
-	return TextFile(file).put(Xdl::encode(v, mode) << '\n');
+	XdlEncoder encoder;
+	TextFile f(file, File::WRITE);
+	if (!f)
+		return false;
+	encoder.use(new XdlSinkFile(f));
+	encoder.encode(v, Json::Mode(mode));
+	return true;
 }
 
 Var Json::read(const String& file)
@@ -83,7 +109,7 @@ Var Json::read(const String& file)
 
 bool Json::write(const Var& v, const String& file, Json::Mode mode)
 {
-	return TextFile(file).put(Json::encode(v, mode) << '\n');
+	return Xdl::write(v, file, mode | Json::JSON);
 }
 
 
@@ -318,7 +344,7 @@ void XdlParser::parse(const char* s)
 			break;
 
 		case STRING:
-			if(c == '\\')
+			if (c == '\\')
 			{
 				_state = ESCAPE;
 				_prevState = STRING;
@@ -642,7 +668,7 @@ void XdlParser::end_array()
 
 void XdlParser::begin_object(const char* _class)
 {
-	_lists << Var(Var::DIC);
+	_lists << Var(Var::OBJ);
 	if(_class[0] != '\0')
 		_lists.top()[ASL_XDLCLASS] = _class;
 }
@@ -667,7 +693,7 @@ void XdlParser::put(const Var& x)
 	case Var::ARRAY:
 		top << x;
 		break;
-	case Var::DIC: {
+	case Var::OBJ: {
 		top[_props.top()] = x;
 		_props.pop();
 		break;
@@ -687,6 +713,18 @@ XdlEncoder::XdlEncoder()
 	_simple = false;
 	_fmtF = "%.9g";
 	_fmtD = "%.17g";
+	_sink = new XdlSinkString(_out);
+}
+
+XdlEncoder::~XdlEncoder()
+{
+	delete _sink;
+}
+
+void XdlEncoder::use(XdlSink* sink)
+{
+	delete _sink;
+	_sink = sink;
 }
 
 String XdlEncoder::encode(const Var& v, Json::Mode mode)
@@ -704,6 +742,9 @@ String XdlEncoder::encode(const Var& v, Json::Mode mode)
 		_sep2 = "";
 	reset();
 	_encode(v);
+	if (_pretty)
+		_out += '\n';
+	_sink->write(_out);
 	return data();
 }
 
@@ -722,7 +763,7 @@ void XdlEncoder::_encode(const Var& v)
 		new_number(v.i);
 		break;
 	case Var::STRING:
-		new_string((*v.s).ptr());
+		new_string(v.s->data());
 		break;
 	case Var::SSTRING:
 		new_string(v.ss);
@@ -734,7 +775,7 @@ void XdlEncoder::_encode(const Var& v)
 		begin_array();
 		int n = v.length();
 		const Var& v0 = n>0? v[0] : v;
-		bool multi = (_pretty && (n > 10 || (n>0  && (v0.is(Var::ARRAY) || v0.is(Var::DIC)))));
+		bool multi = (_pretty && (n > 10 || (n>0  && (v0.is(Var::ARRAY) || v0.is(Var::OBJ)))));
 		if (_pretty && !multi && v0.is(Var::STRING))
 		{
 			for (int i = 0, m = 0; i < n; i++)
@@ -744,7 +785,7 @@ void XdlEncoder::_encode(const Var& v)
 					break;
 				}
 		}
-		bool big = n > 0 && (v0.is(Var::ARRAY) || v0.is(Var::DIC) || v0.is(Var::STRING));
+		bool big = n > 0 && (v0.is(Var::ARRAY) || v0.is(Var::OBJ) || v0.is(Var::STRING));
 		if(multi)
 		{
 			_indent = String::repeat(INDENT_CHAR, ++_level);
@@ -767,7 +808,7 @@ void XdlEncoder::_encode(const Var& v)
 		end_array();
 		break;
 		}
-	case Var::DIC: {
+	case Var::OBJ: {
 		const Var* cname = 0;
 		if (!_json)
 		{
@@ -807,6 +848,9 @@ void XdlEncoder::_encode(const Var& v)
 		_out << "null";
 		break;
 	}
+
+	if (_out.length() > 16000)
+		_sink->write(_out);
 }
 
 void XdlEncoder::put_separator()
@@ -916,7 +960,6 @@ void XdlEncoder::new_string(const char* x)
 	}
 	_out << '\"';
 }
-
 
 void XdlEncoder::new_bool(bool x)
 {

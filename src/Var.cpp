@@ -40,7 +40,7 @@ void Var::copy(const Var& v)
 	switch(_type) {
 	case STRING:
 		NEW_STRINGC(s, v.s->length());
-		memcpy(s->ptr(), v.s->ptr(), v.s->length());
+		memcpy(s->data(), v.s->data(), v.s->length());
 		break;
 	case ARRAY:
 		NEW_ARRAYC(a, *v.a);
@@ -97,7 +97,7 @@ Var::Var(const char* y)
 	else {
 		_type=STRING;
 		NEW_STRINGC(s, len + 1);
-		memcpy(s->ptr(), y, len + 1);
+		memcpy(s->data(), y, len + 1);
 	}
 }
 
@@ -123,7 +123,7 @@ Var::operator double() const
 	case INT:
 		return i;
 	case STRING:
-		return atof(s->ptr());
+		return atof(s->data());
 	case SSTRING:
 		return atof(ss);
 	case NUL:
@@ -143,7 +143,7 @@ Var::operator float() const
 	case INT:
 		return (float)i;
 	case STRING:
-		return (float)atof(s->ptr());
+		return (float)atof(s->data());
 	case SSTRING:
 		return (float)atof(ss);
 	case NUL:
@@ -162,7 +162,7 @@ Var::operator int() const
 	case FLOAT:
 		return (int)d;
 	case STRING:
-		return atoi(s->ptr());
+		return atoi(s->data());
 	case SSTRING:
 		return atoi(ss);
 	default: break;
@@ -179,7 +179,7 @@ Var::operator unsigned() const
 	case FLOAT:
 		return (unsigned)d;
 	case STRING:
-		return (unsigned)atoi(s->ptr());
+		return (unsigned)atoi(s->data());
 	case SSTRING:
 		return (unsigned)atoi(ss);
 	default: break;
@@ -196,7 +196,7 @@ Var::operator Long() const
 	case FLOAT:
 		return (Long)d;
 	case STRING:
-		return (Long)atoi(s->ptr());
+		return (Long)atoi(s->data());
 	case SSTRING:
 		return (Long)atoi(ss);
 	default: break;
@@ -207,7 +207,7 @@ Var::operator Long() const
 Var::operator String() const
 {
 	if(_type==STRING)
-		return (*s).ptr();
+		return s->data();
 	if(_type==SSTRING)
 		return ss;
 	return toString();
@@ -247,7 +247,7 @@ const char* Var::operator*() const
 	switch(_type)
 	{
 	case STRING:
-		return (s->ptr()); break;
+		return (s->data()); break;
 	case SSTRING:
 		return ss; break;
 	case ARRAY:
@@ -284,7 +284,7 @@ String Var::toString() const
 		r=b?"true":"false";
 		break;
 	case STRING:
-		r=(*s).ptr();
+		r=s->data();
 		break;
 	case SSTRING:
 		r=ss;
@@ -319,9 +319,8 @@ void Var::free()
 void Var::operator=(const Var& v)
 {
 	if(_type == STRING && v._type == STRING) {
-		//(*s) = (*v.s);
 		s->resize(v.s->length());
-		memcpy(s->ptr(), v.s->ptr(), v.s->length());
+		memcpy(s->data(), v.s->data(), v.s->length());
 		return;
 	}
 	if(_type == ARRAY && v._type == ARRAY) {
@@ -332,7 +331,7 @@ void Var::operator=(const Var& v)
 		(*o) = (*v.o);
 		return;
 	}
-	//if(_type!=NONE)
+	
 	if(!isPod())
 		free();
 	memcpy(this, &v, sizeof(v));
@@ -340,7 +339,7 @@ void Var::operator=(const Var& v)
 	{
 	case STRING:
 		NEW_STRINGC(s, v.s->length());
-		memcpy(s->ptr(), v.s->ptr(), v.s->length());
+		memcpy(s->data(), v.s->data(), v.s->length());
 		break;
 	case ARRAY:
 		NEW_ARRAYC(a, *v.a);
@@ -416,8 +415,8 @@ void Var::operator=(const char* x)
 {
 	int n = (int)strlen(x);
 	if (_type == STRING) {
-		(*s).resize(n + 1);
-		memcpy((*s).ptr(), x, n + 1);
+		s->resize(n + 1);
+		memcpy(s->data(), x, n + 1);
 	}
 	else if(_type==SSTRING && n < VAR_SSPACE)
 		memcpy(ss, x, n + 1);
@@ -433,7 +432,7 @@ void Var::operator=(const char* x)
 		{
 			_type=STRING;
 			NEW_STRINGC(s, n + 1);
-			memcpy((*s).ptr(), x, n + 1);
+			memcpy(s->data(), x, n + 1);
 		}
 	}
 }
@@ -444,8 +443,8 @@ void Var::operator=(const String& x)
 	Type t = _type;
 	if(t==NONE) {}
 	else if(t==STRING) {
-		(*s).resize(len + 1);
-		memcpy((*s).ptr(), *x, len + 1);
+		s->resize(len + 1);
+		memcpy(s->data(), *x, len + 1);
 		return;
 	}
 	else if(t==SSTRING && len < VAR_SSPACE) {
@@ -466,7 +465,7 @@ void Var::operator=(const String& x)
 		{
 			_type=STRING;
 			NEW_STRINGC(s, len + 1);
-			memcpy((*s).ptr(), *x, len + 1);
+			memcpy(s->data(), *x, len + 1);
 		}
 	}
 }
@@ -477,14 +476,6 @@ const Var& Var::operator[](int i) const
 		return (*a)[i];
 
 	return none;
-	/*else if (_type == NONE)
-	{
-		((Var*)this)->_type=ARRAY;
-		NEW_ARRAY( ((Var*)this)->a );
-		((Var*)this)->a->resize(i+1);
-		return (*a)[i];
-	}
-	return *(Var*)this;*/
 }
 
 Var& Var::operator[](int i)
@@ -532,16 +523,6 @@ const Var& Var::operator[](const String& k) const
 
 	return none;
 }
-
-/*
-const Var& Var::operator()(const String& k) const
-{
-	if(_type==DIC)
-		return (*o)[k];
-	asl_error("Var(String)");
-	return *(Var*)this;
-}
-*/
 
 int Var::length() const
 {
