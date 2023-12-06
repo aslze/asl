@@ -175,20 +175,18 @@ String TextFile::text()
 	return text;
 }
 
-bool TextFile::append(const String& text)
+bool TextFile::append(const String& s)
 {
-	if (_file) close();
-	if (!open(_path, APPEND))
+	if (!_file && !open(APPEND))
 		return false;
-	return fprintf(_file, "%s", *text) >= 0;
+	return fwrite(*s, 1, s.length(), _file) >= s.length();
 }
 
-bool TextFile::put(const String& text)
+bool TextFile::write(const String& s)
 {
-	if (_file) close();
-	if(!open(_path, WRITE))
+	if (!_file && !open(WRITE))
 		return false;
-	return fprintf(_file, "%s", *text) >= 0;
+	return fwrite(*s, 1, s.length(), _file) >= s.length();
 }
 
 TextFile& TextFile::operator>>(char &x)
@@ -285,7 +283,7 @@ TextFile& TextFile::operator<<(float x)
 {
 	if(!_file && !open(_path, WRITE))
 		return *this;
-	fprintf(_file, "%.8g", x);
+	fprintf(_file, "%.7g", x);
 	return *this;
 }
 
@@ -293,7 +291,7 @@ TextFile& TextFile::operator<<(double x)
 {
 	if(!_file && !open(_path, WRITE))
 		return *this;
-	fprintf(_file, "%.16lg", x);
+	fprintf(_file, "%.15g", x);
 	return *this;
 }
 
@@ -301,7 +299,7 @@ TextFile& TextFile::operator<<(const String& x)
 {
 	if(!_file && !open(_path, WRITE))
 		return *this;
-	fprintf(_file, "%s", (const char*)x);
+	fprintf(_file, "%s", *x);
 	return *this;
 }
 

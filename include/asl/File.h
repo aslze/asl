@@ -22,6 +22,7 @@ struct FileInfo
 	Date creationDate;
 	unsigned flags;
 	FileInfo() : size(-1), lastModified(0), creationDate(0), flags(0) {}
+	void clear() { size = -1; }
 	bool operator!() const {return size==-1;}
 };
 
@@ -157,7 +158,7 @@ public:
 	/**
 	Returns true if the file exists
 	*/
-	bool exists() const {return creationDate().time() != 0;}
+	bool exists() const { _info.clear(); return creationDate().time() != 0; }
 
 	/**
 	Copies this file to a new directory or name

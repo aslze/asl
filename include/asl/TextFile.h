@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2023 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_TEXTFILE_H
@@ -21,7 +21,7 @@ TextFile("info.log").printf("Error connecting to port %i\n", port);
 
 String text = TextFile("data.txt").text();
 
-TextFile("data.json").put( Json::encode(data) );
+TextFile("data.json").write(Json::encode(data));
 
 String last_entry = TextFile("errors.log").lines().last();
 ~~~
@@ -78,14 +78,12 @@ public:
 	String text();
 	/** Returns all the lines contained in the file as an array of strings. The file does not need to be opened. */
 	Array<String> lines();
-	/** Writes the given string at the end of the file. Returns false on failure. */
+	/** Writes the given string at the end of the file, opening in append mode if the file was not opened. Returns false on failure. */
 	bool append(const String& line);
-	/** Replaces the content of the file with the given text string. Returns false on failure.
-	*/
-	bool put(const String& t);
-	/** Writes the given string into the file replacing its content. Returns false on failure.
-	If the file was opened the text is written normally at the end. */
-	bool write(const String& t) { return put(t); }
+	/** Writes the given string at the end of the file, opening in write mode if the file was not opened. Returns false on failure. */
+	bool write(const String& s);
+	/** Writes the given string at the end of the file, opening in write mode if the file was not opened. Returns false on failure. */
+	bool put(const String& s) { return write(s); }
 
 	TextFile& operator>>(char &x);
 	TextFile& operator>>(byte &x);
