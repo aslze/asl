@@ -719,7 +719,8 @@ bool asl::Http::upload(const String& url, const String& path, const Dic<>& heade
 	if (!File(path).exists())
 		return false;
 	HttpRequest req("POST", url, File(path), headers);
-	req.setHeader("Content-Type", "multipart/form-data");
+	if (!req.hasHeader("Content-Type"))
+		req.setHeader("Content-Type", "multipart/form-data");
 	req.onProgress(f);
 	HttpResponse res = request(req);
 	return res.ok();

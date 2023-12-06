@@ -584,11 +584,10 @@ public:
 	static bool download(const String& url, const String& path, const Function<void, const HttpStatus&>& f = Progress(), const Dic<>& headers = Dic<>());
 
 	/**
-	* Uploads to the given URL the file specified, optionally notifying progress.
+	* Uploads (POST) to the given URL the file specified, optionally notifying progress (uses `multipart/form-data` unless a specific `Content-Type` is given)
 	*/
 	static bool upload(const String& url, const String& path, const Dic<>& headers = Dic<>(), const Function<void, const HttpStatus&>& f = Progress());
 };
-
 
 }
 #endif
