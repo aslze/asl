@@ -52,7 +52,8 @@ public:
 	{
 		unref();
 		_p = n._p;
-		++_p->rc;
+		if (_p)
+			++_p->rc;
 		return *this;
 	}
 	~SmartObject()

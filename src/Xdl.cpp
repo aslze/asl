@@ -79,6 +79,9 @@ Var Xdl::read(const String& file)
 	if (size == 0)
 		return Var();
 	Array<char> buffer(min(16382, size) + 1);
+	byte bom[3];
+	if(tfile.read(bom, 3) == 3 && !(bom[0] == 0xef && bom[1] == 0xbb && bom[2] == 0xbf))
+		tfile.seek(0);
 	while (1)
 	{
 		int n = tfile.read(buffer.data(), buffer.length() - 1);
@@ -785,9 +788,10 @@ void XdlEncoder::_encode(const Var& v)
 					break;
 				}
 		}
-		bool big = n > 0 && (v0.is(Var::ARRAY) || v0.is(Var::OBJ) || v0.is(Var::STRING));
+		bool big = false;
 		if(multi)
 		{
+			big = n > 0 && (v0.is(Var::ARRAY) || v0.is(Var::DIC) || v0.is(Var::STRING));
 			_indent = String::repeat(INDENT_CHAR, ++_level);
 			_out << '\n' << _indent;
 		}
