@@ -492,7 +492,7 @@ public:
 	const char& operator[](int i) const {return str()[i];}
 	int compare(const String& s) const {return strcmp(str(), s.str());}
 	int compare(const char* s) const {return strcmp(str(), s);}
-	bool equalsNocase(const String& s) const {return toUpperCase() == s.toUpperCase();}
+	bool equalsNocase(const String& s) const;
 	/**
 	Returns the first index where character `c` appears in this string, optionally starting search at position
 	`i0`, or -1 if it is not found.
@@ -660,12 +660,11 @@ public:
 	struct ASL_API Enumerator
 	{
 		const char* u;
-		int i, n;
-		Enumerator(const String& s): u(s), i(0), n(1) {}
+		int n;
+		Enumerator(const String& s): u(s), n(1) {}
 		bool operator!=(const Enumerator& e) const { return (bool)*this; }
 		void operator++() {u += n;}
 		int operator*();
-		int operator~() {return i;}
 		operator bool() const {return *u != 0;}
 	};
 	Enumerator all() {return Enumerator(*this);}

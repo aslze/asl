@@ -639,35 +639,33 @@ extern char toLowercaseU8[];
 String String::toUpperCase() const
 {
 	String s(_len, _len);
+	char* p = s.str();
+	const char* p0 = str();
 #ifdef ASL_ANSI
 	for(int i=0; i<_len; i++)
-		s[i] = toupper(str()[i]);
-	s[_len]='\0';
+		p[i] = toupper(p0[i]);
+	p[_len] = '\0';
 #else
-	unsigned char* p = (unsigned char*)str();
-	char* p2 = s.str();
-	for(int i=0; i<_len; i++)
+	int   u[2] = { 0, 0 };
+	for (Enumerator e = all(); e; ++e)
 	{
-		int code = (unsigned char)p[i];
-		if((code & 0x80) == 0) {}
-		else if((code & 0xe0) == 0xc0){
-			code = ((p[i] & 0x1f) << 6) | (p[i+1] & 0x3f);
-			i++;
-		}
-		else {
-			*p2++ = p[i++];
-			*p2++ = p[i++];
-			*p2++ = p[i];
-			continue;
-		}
+		int code = *e;
+		if (code < 1415)
+	{
 		char c1 = toUppercaseU8[code*2];
 		char c2 = toUppercaseU8[code*2 + 1];
-		*p2++ = c1;
+			*p++ = c1;
 		if(c2 != 0)
-			*p2++ = c2;
+				*p++ = c2;
+		}
+		else
+		{
+			u[0] = code;
+			p += utf32toUtf8(u, p, 1);
 	}
-	*p2++='\0';
-	s.fix(int(p2-s.str()-1));
+	}
+	*p++ = '\0';
+	s.fix(int(p - s.str() - 1));
 #endif
 	return s;
 }
@@ -675,37 +673,71 @@ String String::toUpperCase() const
 String String::toLowerCase() const
 {
 	String s(_len, _len);
+	char* p = s.str();
+	const char* p0 = str();
 #ifdef ASL_ANSI
 	for(int i=0; i<_len; i++)
-		s[i] = tolower(str()[i]);
-	s[_len]='\0';
+		p[i] = tolower(p0[i]);
+	p[_len] = '\0';
 #else
-	unsigned char* p = (unsigned char*)str();
-	char* p2 = s.str();
-	for(int i=0; i<_len; i++)
+	int   u[2] = { 0, 0 };
+	for (Enumerator e = all(); e; ++e)
 	{
-		int code = (unsigned char)p[i];
-		if((code & 0x80) == 0) {}
-		else if((code & 0xe0) == 0xc0){
-			code = ((p[i] & 0x1f) << 6) | (p[i+1] & 0x3f);
-			i++;
-		}
-		else {
-			*p2++ = p[i++];
-			*p2++ = p[i++];
-			*p2++ = p[i];
-			continue;
-		}
+		int  code = *e;
+		if (code < 1415)
+	{
 		char c1 = toLowercaseU8[code*2];
 		char c2 = toLowercaseU8[code*2 + 1];
-		*p2++ = c1;
+			*p++ = c1;
 		if(c2 != 0)
-			*p2++ = c2;
+				*p++ = c2;
+		}
+		else
+		{
+			u[0] = code;
+			p += utf32toUtf8(u, p, 1);
+		}
 	}
-	*p2++='\0';
-	s.fix(int(p2-s.str()-1));
+	*p++ = '\0';
+	s.fix(int(p - s.str() - 1));
 #endif
 	return s;
+}
+
+bool String::equalsNocase(const String& s) const
+{
+#ifdef ASL_ANSI
+	if (length() != s.length())
+		return false;
+	const char* p1 = str();
+	const char* p2 = s.str();
+	for (; *p1 && *p2; p1++, p2++)
+		if (tolower(*p1) != tolower(*p2))
+			return false;
+	return true;
+#else
+	Enumerator e1 = all();
+	Enumerator e2 = s.all();
+
+	for (; e1 && e2; ++e1, ++e2)
+	{
+		int code1 = *e1, code2 = *e2;
+		
+		if (code1 > 1415 || code2 > 1415)
+		{
+			if (code1 != code2)
+				return false;
+		}
+		else if (toLowercaseU8[code1 * 2] != toLowercaseU8[code2 * 2] ||
+		    toLowercaseU8[code1 * 2 + 1] != toLowercaseU8[code2 * 2 + 1])
+			return false;
+	}
+
+	if ((e1 && !e2) || (!e1 && e2))
+		return false;
+	
+	return true;
+#endif
 }
 
 String String::trimmed() const
