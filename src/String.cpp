@@ -75,7 +75,7 @@ int local8toUtf32(const char* u, int* p, int nmax)
 	return int(p - p0);
 }
 
-int utf32toUtf8(const int* p, char* u, int)
+int utf32toUtf8(const int* p, char* u, int n)
 {
 	char* u0 = u;
 	while (int c = *p++) {
@@ -97,6 +97,8 @@ int utf32toUtf8(const int* p, char* u, int)
 			*u++ = ((c >> 6 & 0x3F) | 0x80);
 			*u++ = ((c & 0x3F) | 0x80);
 		}
+		if (--n == 0)
+			break;
 	}
 	*u = '\0';
 	return int(u - u0);
@@ -291,7 +293,7 @@ String String::fromCodes(const Array<int>& codes)
 	Array<int> a = codes.clone(); // hack to append a nul
 	a << 0;
 	String s(codes.length() * 4, 0);
-	s.fix(utf32toUtf8(a.ptr(), s.str(), 1));
+	s.fix(utf32toUtf8(a.data(), s.str(), a.length()));
 #else
 	String s(codes.length(), codes.length());
 	char* p = s.str();
@@ -360,14 +362,12 @@ String::String(int n, const char* fmt, ...)
 String String::f(const char* fmt, ...)
 {
 	String s;
-	char ss[128];
+	char    ss[256];
 	char* p = ss;
 	va_list arg;
 	va_start(arg, fmt);
-	int i = 0, n = 100;
-	//int space = s._size ? s._size : ASL_STR_SPACE;
-	int space = 127;
-	while (((n = vsnprintf(p, space, fmt, arg)) == -1 || n >= space) && ++i < 10) {
+	int i = 0, n = 0, space = 255;
+	while (((n = vsnprintf(p, space, fmt, arg)) == -1 || n >= space) && ++i < 16) {
 		s.resize((n >= space) ? n : 2 * space, false);
 		space = s._size ? s._size : ASL_STR_SPACE;
 		p = s.str();
@@ -376,7 +376,7 @@ String String::f(const char* fmt, ...)
 	}
 	va_end(arg);
 	if (p == ss)
-		s = p;
+		s.assign(ss, n);
 	s._len = n;
 	return s;
 }
