@@ -13,8 +13,8 @@ Class TextFile represents a text file in the filesystem. It can be used to get i
 a file (its size, its modification date, whether it exists), to read or write in it in one step, or to
 open it and perform typical read/write operations as text, just like `File`.
 
-Functions text()`, `lines()`, `put()`, `append()`, `printf()`, etc. read or write in the file by first opening it. Intended
-as a short-hand for one-line operations.
+Functions text()`, `lines()`, `write()`, `append()`, `printf()`, etc. read or write in the file by first opening it.
+Intended as a short-hand for one-line operations.
 
 ~~~
 TextFile("info.log").printf("Error connecting to port %i\n", port);

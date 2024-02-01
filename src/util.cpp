@@ -272,7 +272,7 @@ Array<byte> decodeBase64(const char* src0, int n)
 		len2--;
 	result.resize(len2);
 
-	byte* dest = result.ptr();
+	byte* dest = result.data();
 	while (*src) {
 		byte a = base64_chars_inv[*src++];
 		byte b = base64_chars_inv[*src++];
@@ -304,7 +304,7 @@ Array<byte> decodeBase64(const char* src0, int n)
 		if (*p-- == '=')
 			e++;
 
-	byte* dest = result.ptr();
+	byte* dest = result.data();
 	byte k[4];
 	int i = 0;
 	while (*src) {
@@ -320,7 +320,7 @@ Array<byte> decodeBase64(const char* src0, int n)
 			i = 0;
 		}
 	}
-	result.resize(int(dest - result.ptr()) - e);
+	result.resize(int(dest - result.data()) - e);
 	return result;
 }
 

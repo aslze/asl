@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_ARRAY_H
@@ -145,7 +145,7 @@ public:
 		int i, j;
 		Enumerator(Array& a_): a(a_), i(0), j(a.length()) {}
 		Enumerator(Array& a_, int i_, int j_): a(a_), i(i_), j(j_) {}
-		Enumerator(const Array& a_): a((Array&)a_), i(0), j(a_.length()) {}
+		Enumerator(const Array<T>& a_): a((Array<T>&)a_), i(0), j(a_.length()) {}
 		bool operator!=(const Enumerator& e) const {return (bool)*this;}
 		void operator++() {i++;}
 		T& operator*() {return a[i];}
@@ -156,6 +156,7 @@ public:
 		T& operator[](int k) const {return a[i+k];}
 		int length() const {return j-i;}
 	};
+
 	int r() {return d().rc;}
 	/**
 	Returns the number of elements in the array
@@ -414,7 +415,7 @@ public:
 	*/
 	bool removeOne(const T& x, int i0=0)
 	{
-		int i = indexOf(x);
+		int i = indexOf(x, i0);
 		if(i != -1) {
 			remove(i);
 			return true;

@@ -152,13 +152,15 @@ public:
 	*/
 	String directory() const;
 	/**
-	Returns true if the file is a directory
+	Returns true if the 'file' is a directory
 	*/
 	bool isDirectory() const;
 	/**
 	Returns true if the file exists
 	*/
 	bool exists() const { _info.clear(); return creationDate().time() != 0; }
+
+	bool isFile() const { return creationDate().time() != 0 && !isDirectory(); }
 
 	/**
 	Copies this file to a new directory or name

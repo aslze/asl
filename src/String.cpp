@@ -44,29 +44,27 @@ void printf_(const char* fmt, ...)
 		delete [] str;
 }
 
-int utf16toLocal8(const wchar_t* p, char* u, int nmax)
+int utf16toLocal8(const wchar_t* p, char* u, int n)
 {
 #ifdef _WIN32
 	char def = '_';
 	BOOL used = false;
-	return WideCharToMultiByte(CP_ACP, 0, p, -1, u, nmax + 1, &def, &used) - 1;
+	return WideCharToMultiByte(CP_ACP, 0, p, -1, u, n + 1, &def, &used) - 1;
 #else
-	return (int)wcstombs(u, p, nmax);
+	return (int)wcstombs(u, p, n);
 #endif
 }
 
-int local8toUtf16(const char* u, wchar_t* p, int nmax)
+int local8toUtf16(const char* u, wchar_t* p, int n)
 {
 #ifdef _WIN32
-	char def = '_';
-	BOOL used = false;
-	return MultiByteToWideChar(CP_ACP, 0, u, -1, p, nmax + 1) - 1;
+	return MultiByteToWideChar(CP_ACP, 0, u, -1, p, n + 1) - 1;
 #else
-	return (int)mbstowcs(p, u, nmax);
+	return (int)mbstowcs(p, u, n);
 #endif
 }
 
-int local8toUtf32(const char* u, int* p, int nmax)
+int local8toUtf32(const char* u, int* p, int)
 {
 	int* p0 = p;
 	while (int c = *u++)
@@ -80,22 +78,22 @@ int utf32toUtf8(const int* p, char* u, int n)
 	char* u0 = u;
 	while (int c = *p++) {
 		if (c < 0x80) {
-			*u++ = c;
+			*u++ = c & 0xff;
 		}
 		else if (c < 0x0800) {
-			*u++ = (c >> 6 | 0xC0);
-			*u++ = ((c & 0x3F) | 0x80);
+			*u++ = (c >> 6 | 0xc0);
+			*u++ = ((c & 0x3f) | 0x80);
 		}
 		else if (c < 0x10000) {
-			*u++ = (c >> 12 | 0xE0);
-			*u++ = ((c >> 6 & 0x3F) | 0x80);
-			*u++ = ((c & 0x3F) | 0x80);
+			*u++ = (c >> 12 | 0xe0);
+			*u++ = ((c >> 6 & 0x3f) | 0x80);
+			*u++ = ((c & 0x3f) | 0x80);
 		}
 		else {
-			*u++ = (c >> 18 | 0xF0);
-			*u++ = ((c >> 12 & 0x3F) | 0x80);
-			*u++ = ((c >> 6 & 0x3F) | 0x80);
-			*u++ = ((c & 0x3F) | 0x80);
+			*u++ = (c >> 18 | 0xf0);
+			*u++ = ((c >> 12 & 0x3f) | 0x80);
+			*u++ = ((c >> 6 & 0x3f) | 0x80);
+			*u++ = ((c & 0x3f) | 0x80);
 		}
 		if (--n == 0)
 			break;
@@ -110,7 +108,7 @@ int utf8toUtf32(const char* u, int* p, int)
 	while (int c = *u++)
 	{
 		if ((c & 0x80) == 0) {
-			*p++ = c;
+			*p++ = c & 0xff;
 		}
 		else if ((c & 0xe0) == 0xc0) {
 			char c2 = *u++;
@@ -172,6 +170,7 @@ int utf16toUtf8(const wchar_t* p, char* u, int)
 
 int utf8toUtf16(const char* u, wchar_t* p, int)
 {
+	wchar_t* p0 = p;
 	while(int c = *u++)
 	{
 		if((c & 0x80) == 0) {
@@ -203,25 +202,25 @@ int utf8toUtf16(const char* u, wchar_t* p, int)
 		else break;
 	}
 	*p=L'\0';
-	return 0;
+	return int(p - p0);
 }
 
 String localToUtf8(const String& a)
 {
 	Array<wchar_t> ws(a.length() + 1);
-	local8toUtf16(a, ws.ptr(), a.length() + 1);
-	String u(a.length() * 3, 0);
-	int n = utf16toUtf8(ws.ptr(), u.data(), a.length() * 3);
-	return u.fix(n);
+	int n = local8toUtf16(*a, ws.data(), a.length());
+	String u(a.length() * 4, 0);
+	n = utf16toUtf8(ws.data(), u.data(), n);
+	return u.fix(n - 1);
 }
 
 String utf8ToLocal(const String& a)
 {
-	Array<char> s(a.length() + 1);
+	String s(a.length(), 0);
 	Array<wchar_t> ws(a.length() + 1);
-	int         n = utf8toUtf16(*a, ws.ptr(), a.length());
-	utf16toLocal8(ws.ptr(), s.ptr(), a.length() + 1);
-	return String(s.ptr());
+	int n = utf8toUtf16(*a, ws.data(), a.length());
+	n = utf16toLocal8(ws.data(), s.data(), n);
+	return s.fix(n - 1);
 }
 
 int String::Enumerator::operator*()
@@ -259,7 +258,6 @@ int String::Enumerator::operator*()
 		if (c4 == 0) { n = 3; return 0; }
 		return ((c & 0x07) << 18) | ((c2 & 0x3f) << 12) | ((c3 & 0x3f) << 6) | (c4 & 0x3f);
 	}
-	return 0;
 #endif
 }
 
@@ -284,7 +282,7 @@ String::String(const Array<wchar_t>& txt)
 	init(4 * txt.length());
 	Array<wchar_t> a = txt.clone(); // hack to append a nul
 	a << 0;
-	_len = to8bit(a.ptr(), str(), cap());
+	_len = to8bit(a.data(), str(), cap());
 }
 
 String String::fromCodes(const Array<int>& codes)
@@ -323,7 +321,7 @@ String String::fromLocal(const String& a)
 	return a;
 #else
 	Array<wchar_t> ws(a.length() + 1);
-	local8toUtf16(a, ws.data(), a.length() + 1);
+	int n = local8toUtf16(a, ws.data(), a.length());
 	return String(ws.data());
 #endif
 }
@@ -506,7 +504,7 @@ String String::toLocal() const
 	return *this;
 #else
 	Array<char> s(length() + 1);
-	utf16toLocal8(dataw(), s.data(), length() + 1);
+	utf16toLocal8(dataw(), s.data(), length());
 	return String(s.data());
 #endif
 }
@@ -520,7 +518,7 @@ bool String::isTrue() const
 Array<int> String::chars() const
 {
 	Array<int> c(length() + 1);
-	int n = utf8toUtf32(str(), c.ptr(), 1);
+	int        n = utf8toUtf32(str(), c.data(), 1);
 	c.resize(n);
 	return c;
 }
@@ -640,8 +638,8 @@ String String::toUpperCase() const
 {
 	String s(_len, _len);
 	char* p = s.str();
-	const char* p0 = str();
 #ifdef ASL_ANSI
+	const char* p0 = str();
 	for(int i=0; i<_len; i++)
 		p[i] = toupper(p0[i]);
 	p[_len] = '\0';
@@ -674,8 +672,8 @@ String String::toLowerCase() const
 {
 	String s(_len, _len);
 	char* p = s.str();
-	const char* p0 = str();
 #ifdef ASL_ANSI
+	const char* p0 = str();
 	for(int i=0; i<_len; i++)
 		p[i] = tolower(p0[i]);
 	p[_len] = '\0';

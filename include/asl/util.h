@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_UTIL_H
@@ -32,9 +32,9 @@ ASL_API String encodeBase64(const byte* data, int n);
 /**
 Encodes a byte array as a string using base64 encoding.
 */
-inline String encodeBase64(const Array<byte>& s)
+inline String encodeBase64(const ByteArray& s)
 {
-	return encodeBase64(s.ptr(), s.length());
+	return encodeBase64(s.data(), s.length());
 }
 
 /**
@@ -54,7 +54,7 @@ ASL_API String encodeHex(const byte* data, int n);
 /**
 Encodes a byte array as a string using hexadecimal
 */
-inline String encodeHex(const Array<byte>& src) { return encodeHex(src.ptr(), src.length()); }
+inline String encodeHex(const ByteArray& src) { return encodeHex(src.data(), src.length()); }
 
 template<int N>
 String encodeHex(const Array_<byte, N>& src) { return encodeHex((const byte*)src, N); }
@@ -73,8 +73,8 @@ struct _FuncB
 {
 	virtual ~_FuncB() {}
 	virtual R operator()() { return R(); }
-	virtual R operator()(T1 x) { return R(); }
-	virtual R operator()(T1 x, T2 y) { return R(); }
+	virtual R operator()(T1) { return R(); }
+	virtual R operator()(T1, T2) { return R(); }
 };
 
 template<class F, class R, class T1, class T2>

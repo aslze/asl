@@ -50,7 +50,7 @@ SHA1::SHA1()
 
 // Hash a single 512-bit block. This is the core of the algorithm.
 
-void SHA1::transform(const byte buffer[64])
+void SHA1::transform(const byte buf[64])
 {
 	uint32_t a, b, c, d, e;
 	union Char64Int16 {
@@ -58,7 +58,7 @@ void SHA1::transform(const byte buffer[64])
 		uint32_t l[16];
 	};
 	Char64Int16 block[1];
-	memcpy(block, buffer, 64);
+	memcpy(block, buf, 64);
 	a = state[0];
 	b = state[1];
 	c = state[2];
@@ -209,7 +209,7 @@ SHA1::Hash SHA1::hash(const byte* data, int len)
 
 SHA1::Hash SHA1::hash(const Array<byte>& data)
 {
-	return hash(data.ptr(), data.length());
+	return hash(data.data(), data.length());
 }
 
 SHA1::Hash SHA1::hash(const String& data)

@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_XML_H
@@ -336,7 +336,7 @@ public:
 	/**
 	Returns a separate copy of this element with its children, and no parent
 	*/
-	Xml clone(bool detach = true) const { return _()->clone(); }
+	Xml clone(bool detach = true) const { return _()->clone(detach); }
 
 	/**
 	Changes the tag name of this element
@@ -581,7 +581,7 @@ public:
 		Xml& operator*() { return _children[i]; }
 		Xml* operator->() { return &(_children[i]); }
 		operator bool() const { return i < _children.length(); }
-		bool operator!=(const Enumerator& e) const { return (bool)*this; }
+		bool operator!=(const Enumerator&) const { return (bool)*this; }
 	};
 
 	/**
@@ -695,7 +695,7 @@ protected:
 		_XmlText(const String& t) : _text(t) {}
 		const String& text() const { return _text; }
 		bool isText() const { return true; }
-		_Xml* clone(bool detach = true) const { return new _XmlText(_text); }
+		_Xml* clone(bool) const { return new _XmlText(_text); }
 	};
 
 	_XmlText* _() { return (_XmlText*)_p; }

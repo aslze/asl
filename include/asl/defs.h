@@ -1,5 +1,5 @@
 // ASL - All-purpose Simple Library
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_DEFS_H
@@ -390,7 +390,7 @@ inline T min(T a, T b) {if(a<b) return a; else return b;}
 }
 
 inline void* operator new (size_t, int* p) { return p; }
-inline void operator delete(void* p, int* r) {}
+inline void operator delete(void*, int*) {}
 
 namespace asl {
 
@@ -415,23 +415,23 @@ inline void asl_destroy(T* p, int n) {T* q=p+n; while(p!=q) {p->~T(); p++;}}
 #if !defined _MSC_VER || _MSC_VER > 11600
 
 template <class T>
-inline void asl_construct(T** p) {}
+inline void asl_construct(T**) {}
 
 template <class T>
-inline void asl_construct(T** p, int n) {}
+inline void asl_construct(T**, int) {}
 
 template <class T>
-inline void asl_destroy(T** p) {}
+inline void asl_destroy(T**) {}
 
 template <class T>
-inline void asl_destroy(T** p, int n) {}
+inline void asl_destroy(T**, int) {}
 #endif
 
 #define ASL_POD_CONSTRUCT(T) \
-inline void asl_construct(T* p) {}\
-inline void asl_construct(T* p, int n) {}\
-inline void asl_destroy(T* p) {}\
-inline void asl_destroy(T* p, int n) {}\
+inline void asl_construct(T*) {}\
+inline void asl_construct(T*, int) {}\
+inline void asl_destroy(T*) {}\
+inline void asl_destroy(T*, int) {}\
 inline void asl_construct_copy(T* p, const T& x) {*p = x;} \
 inline void bswap(T& a, T& b) {swap(a, b);}
 

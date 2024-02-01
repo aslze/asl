@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 /*! \file */ 
@@ -30,7 +30,7 @@ inline EnumWrapper<C>& enumData(C*, const EnumWrapper_& e) { return *(EnumWrappe
 #undef foreach
 
 template<class T>
-const T* ref2nulp(const T& x) { return 0; } // avoid warning with temporary Enumerators
+const T* ref2nulp(const T&) { return 0; } // avoid warning with temporary Enumerators
 
 #define ASL_TY(x) (true?0:ref2nulp(x))
 

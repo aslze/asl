@@ -140,7 +140,8 @@ static const char* messages[] = {
 	"SOCKET_BAD_TLS"
 };
 
-static void my_debug(void* ctx, int level, const char* file, int line, const char* str)
+#ifdef TLS_DEBUG
+static void my_debug(void*, int level, const char* file, int line, const char* str)
 {
 	for (const char* p = file; *p != '\0'; p++)
 		if (*p == '/' || *p == '\\')
@@ -148,6 +149,7 @@ static void my_debug(void* ctx, int level, const char* file, int line, const cha
 
 	printf("%s:%04i: [%i] %s", file, line, level, str);
 }
+#endif
 
 static void verbose_print(...) {}
 //#define verbose_print printf
@@ -283,7 +285,7 @@ bool TlsSocket_::bind(const String& ip, int port)
 }
 
 
-void TlsSocket_::listen(int n)
+void TlsSocket_::listen(int)
 {
 }
 

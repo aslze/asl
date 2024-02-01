@@ -122,10 +122,10 @@ Url::Url(const String& url)
 			portstart = hostend + 2;
 	}
 	else {
-		int i = url.indexOf(':', hoststart);
-		if (i >= 0 && i < pathstart) {
-			hostend = i;
-			portstart = i + 1;
+		int j = url.indexOf(':', hoststart);
+		if (j >= 0 && j < pathstart) {
+			hostend = j;
+			portstart = j + 1;
 		}
 	}
 	host = url.substring(hoststart, hostend);
@@ -406,9 +406,9 @@ HttpResponse Http::request(HttpRequest& request)
 	if (request.followRedirects() && (code == 301 || code == 302 || code == 307 || code == 308)) // 303 ?
 	{
 		socket.close();
-		String url = response.header("Location");
+		String loc = response.header("Location");
 		HttpRequest req(request);
-		req.setUrl(url);
+		req.setUrl(loc);
 		Http::Progress progress = req._progress;
 		req.onProgress(progress);
 		int n = request.recursion() + 1;
@@ -716,7 +716,7 @@ bool Http::download(const String& url, const String& path, const Function<void, 
 
 bool asl::Http::upload(const String& url, const String& path, const Dic<>& headers, const Function<void, const HttpStatus&>& f)
 {
-	if (!File(path).exists())
+	if (!File(path).isFile())
 		return false;
 	HttpRequest req("POST", url, File(path), headers);
 	if (!req.hasHeader("Content-Type"))

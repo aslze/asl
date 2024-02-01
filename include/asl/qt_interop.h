@@ -23,10 +23,13 @@ inline String qt(const QString& s)
 	return String(a.data(), a.size());
 }
 
-inline ASL_DEPRECATED(QString _qt_(const String& s), "Use qt(s)") { return qt(s); }
+inline ASL_DEPRECATED(QString _qt_(const String& s), "Use qt(s)");
 
-inline ASL_DEPRECATED(String _qt_(const QString& s), "Use qt(s)") { return qt(s); }
+inline ASL_DEPRECATED(String _qt_(const QString& s), "Use qt(s)");
 
+inline QString _qt_(const String& s) { return qt(s); }
+
+inline String _qt_(const QString& s) { return qt(s); }
 }
 
 #endif

@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_MUTEX_H
@@ -72,8 +72,8 @@ on the same semaphore to signal that.
 class Semaphore
 {
 	HANDLE _semaphore;
-	Semaphore(const Semaphore& s): _semaphore(0) {}
-	void operator=(const Semaphore& s) { _semaphore = 0; }
+	Semaphore(const Semaphore&): _semaphore(0) {}
+	void operator=(const Semaphore&) { _semaphore = 0; }
 public:
 	Semaphore(int count=0)
 	{
@@ -144,8 +144,8 @@ class Condition
 {
 	HANDLE _cond;
 	Mutex* _mutex;
-	Condition(const Condition& c) : _cond(0), _mutex(0) {}
-	void operator=(const Condition& c) { _cond = 0; _mutex = 0; }
+	Condition(const Condition&) : _cond(0), _mutex(0) {}
+	void operator=(const Condition&) { _cond = 0; _mutex = 0; }
 public:
 	Condition(): _mutex(0)
 	{

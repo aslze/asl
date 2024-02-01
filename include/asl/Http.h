@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_HTTP
@@ -113,9 +113,9 @@ struct HttpStatus
 
 struct HttpSink
 {
-	virtual int write(byte* p, int n) { return 0; }
-	virtual void use(HttpMessage* m) {}
-	virtual void init(int n) {}
+	virtual int write(byte*, int) { return 0; }
+	virtual void use(HttpMessage*) {}
+	virtual void init(int) {}
 };
 
 /**
@@ -386,7 +386,7 @@ public:
 	/**
 	Enables or disables automatic HTTP redirection
 	*/
-	void setFollowRedirects(bool enable) { _followRedirects = enable; }
+	HttpRequest& setFollowRedirects(bool enable) { _followRedirects = enable; return *this; }
 
 	bool followRedirects() const { return _followRedirects; }
 

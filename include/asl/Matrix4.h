@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_MATRIX4_H

@@ -68,21 +68,21 @@ void WebSocketServer::serve(Socket client)
 	while (line = client.readLine(), line != "\r")
 	{
 		line = line.trim();
-		int i = line.indexOf(':');
-		if (i<0) {
+		int c = line.indexOf(':');
+		if (c < 0) {
 			client.close();
 			return;
 		}
-		String name = line.substring(0, i);
+		String name = line.substring(0, c);
 		String cname;
 		bool capitalize = true;
-		for (int i = 0; i < name.length(); i++)
+		for (int k = 0; k < name.length(); k++)
 		{
-			cname << char(capitalize ? toupper(name[i]) : tolower(name[i]));
-			capitalize = !isalnum(name[i]);
+			cname << char(capitalize ? toupper(name[k]) : tolower(name[k]));
+			capitalize = !isalnum(name[k]);
 		}
 
-		String value = (i < line.length() - 1) ? line.substring(i + 2) : String();
+		String value = (c < line.length() - 1) ? line.substring(c + 2) : String();
 		headers[cname] = value;
 	}
 
@@ -128,7 +128,7 @@ void WebSocketServer::process(Socket& client, const Dic<String>& headers)
 
 
 
-void WebSocketServer::serve(WebSocket& ws)
+void WebSocketServer::serve(WebSocket&)
 {
 }
 
@@ -214,13 +214,13 @@ bool WebSocket::connect(const String& uri, int port)
 	while (line = _socket.readLine(), line != "\r")
 	{
 		line.trim();
-		int i = line.indexOf(':');
-		if (i<0) {
+		int c = line.indexOf(':');
+		if (c<0) {
 			_socket.close();
 			return false;
 		}
-		String name = line.substring(0, i);
-		String value = (i < line.length() - 1) ? line.substring(i + 2) : String();
+		String name = line.substring(0, c);
+		String value = (c < line.length() - 1) ? line.substring(c + 2) : String();
 		headers[name] = value;
 	}
 
@@ -290,7 +290,7 @@ WebSocketMsg WebSocket::receive()
 
 		buffer.resize(buffer.length() + len);
 		if (len > 0)
-			_socket.read(buffer.ptr() + buffer.length() - len, len);
+			_socket.read(buffer.data() + buffer.length() - len, len);
 
 		DEBUG_LOG("frame: op %i fin %i len %i\n", opcode, fin ? 1 : 0, (int)len);
 
@@ -302,7 +302,7 @@ WebSocketMsg WebSocket::receive()
 			int n = buffer.length() / 4 + 1;
 			for (int i = 0; i < n; i++)
 			{
-				((unsigned*)buffer.ptr())[i] ^= mask;
+				((unsigned*)buffer.data())[i] ^= mask;
 			}
 		}
 
@@ -326,7 +326,7 @@ WebSocketMsg WebSocket::receive()
 			break;
 		}
 		case 9: // ping
-			send(buffer.ptr(), buffer.length(), FRAME_PONG);
+			send(buffer.data(), buffer.length(), FRAME_PONG);
 			break;
 		case 10: // pong
 			buffer.clear();
@@ -375,7 +375,7 @@ void WebSocket::send(const byte* p, int length, FrameType type)
 		int n = data.length() / 4 + 1;
 		for (int i = 0; i < n; i++)
 		{
-			((unsigned*)data.ptr())[i] ^= mask;
+			((unsigned*)data.data())[i] ^= mask;
 		}
 	}
 	if (!_closed || _socket.disconnected())

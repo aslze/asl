@@ -19,14 +19,14 @@ namespace asl {
 struct XdlSink
 {
 	virtual ~XdlSink() {}
-	virtual void write(String& s) {}
+	virtual void write(String&) {}
 };
 
 struct XdlSinkString : XdlSink
 {
 	String& str;
 	XdlSinkString(String& s) : str(s) {}
-	void write(String& s) {}
+	void write(String&) {}
 };
 
 struct XdlSinkFile : XdlSink
@@ -118,7 +118,7 @@ bool Json::write(const Var& v, const String& file, Json::Mode mode)
 
 inline void XdlParser::value_end()
 {
-	_state = (_context.top() == ROOT) ? WAIT_VALUE : WAIT_SEP;
+	_state = State((_context.top() == ROOT) ? WAIT_VALUE : WAIT_SEP);
 	_buffer="";
 }
 
@@ -757,22 +757,22 @@ void XdlEncoder::_encode(const Var& v)
 	switch(v._type)
 	{
 	case Var::FLOAT:
-		new_number((float)v.d);
+		new_number((float)v._d);
 		break;
 	case Var::NUMBER:
-		new_number(v.d);
+		new_number(v._d);
 		break;
 	case Var::INT:
-		new_number(v.i);
+		new_number(v._i);
 		break;
 	case Var::STRING:
-		new_string(v.s->data());
+		new_string(v._s->data());
 		break;
 	case Var::SSTRING:
-		new_string(v.ss);
+		new_string(v._ss);
 		break;
 	case Var::BOOL:
-		new_bool(v.b);
+		new_bool(v._b);
 		break;
 	case Var::ARRAY: {
 		begin_array();

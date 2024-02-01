@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_LOGGER
@@ -62,8 +62,8 @@ class ASL_API Log : public Singleton<Log>
 	Mutex* _mutex;
 	void storeState();
 	void updateState();
-	Log(const Log& l) : _mutex(0) { _maxLevel = 0; _useconsole = _usefile = false; }
-	void operator=(const Log& l) { _mutex = 0; _maxLevel = 0; _useconsole = _usefile = false;}
+	Log(const Log&) : _mutex(0) { _maxLevel = 0; _useconsole = _usefile = false; }
+	void operator=(const Log&) { _mutex = 0; _maxLevel = 0; _useconsole = _usefile = false;}
 public:
 	Log();
 	~Log();

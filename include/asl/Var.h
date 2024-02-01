@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_VAR_H
@@ -185,13 +185,13 @@ For a better representation that can be parsed back into a Var, you can use XDL 
 class ASL_API Var
 {
 	// avoid these operators
-	void operator+(const Var& v) {}
-	void operator-(const Var& v) {}
+	void operator+(const Var&) {}
+	void operator-(const Var&) {}
 	static const Var none;
   public:
 	enum Type {NONE, NUL, NUMBER, BOOL, INT, SSTRING, FLOAT, STRING=8, ARRAY, DIC, OBJ=10};
 	bool isPod() const {return (_type & 8)==0;}
-	Var(): _type(NONE), ll(0) {}
+	Var(): _type(NONE), _l(0) {}
 	Var(Type t);
 	Var(const Var& v)
 	{
@@ -211,32 +211,32 @@ class ASL_API Var
 	Var(const std::initializer_list<Obj> b)
 	{
 		_type = DIC;
-		NEW_DIC(o);
-		o->reserve((int)b.size());
+		NEW_DIC(_o);
+		_o->reserve((int)b.size());
 		for (const Obj* p = b.begin(); p != b.end(); p++)
-			o->set(p->key, p->value);
+			_o->set(p->key, p->value);
 	}
 	
 	template<class T>
 	Var(const std::initializer_list<T> b)
 	{
 		_type = ARRAY;
-		NEW_ARRAY(a);
-		a->resize((int)b.size());
+		NEW_ARRAY(_a);
+		_a->resize((int)b.size());
 		const T* p = b.begin();
-		for (int i = 0; i < a->length(); i++)
-			(*a)[i] = p[i];
+		for (int i = 0; i < _a->length(); i++)
+			(*_a)[i] = p[i];
 	}
 
 	template<class T>
 	Var(const std::initializer_list<std::initializer_list<T>> b)
 	{
 		_type = ARRAY;
-		NEW_ARRAY(a);
-		a->resize((int)b.size());
+		NEW_ARRAY(_a);
+		_a->resize((int)b.size());
 		const std::initializer_list<T>* p = b.begin();
-		for (int i = 0; i < a->length(); i++)
-			(*a)[i] = p[i];
+		for (int i = 0; i < _a->length(); i++)
+			(*_a)[i] = p[i];
 	}
 
 	/**
@@ -252,26 +252,26 @@ class ASL_API Var
 	{
 		if(v.length() < VAR_SSPACE) {
 			_type=SSTRING;
-			memcpy(ss, *v, v.length() + 1);
+			memcpy(_ss, *v, v.length() + 1);
 		}
 		else {
 			_type=STRING;
-			NEW_STRINGC(s, v.length()+1);
-			memcpy(s->data(), *v, v.length() + 1);
+			NEW_STRINGC(_s, v.length()+1);
+			memcpy(_s->data(), *v, v.length() + 1);
 		}
 	}
 	template<class T>
 	Var(const Array<T>& v);
 	template<class T>
 	Var(const VDic<T>& v);
-	Var(const Array<Var>& v) {_type=ARRAY; NEW_ARRAYC(a, v);}
-	Var(const VDic<Var>& v) {_type=DIC; NEW_DICC(o, v);}
-	Var(double x); // : _type(NUMBER), d(x){}
-	Var(int x): _type(INT), i(x){}
-	Var(float x): _type(FLOAT) {d=x;}
+	Var(const Array<Var>& v) {_type=ARRAY; NEW_ARRAYC(_a, v);}
+	Var(const VDic<Var>& v) {_type=DIC; NEW_DICC(_o, v);}
+	Var(double x);
+	Var(int x): _type(INT), _i(x){}
+	Var(float x): _type(FLOAT) {_d=x;}
 	Var(unsigned x);
-	Var(long x) : _type(INT), i((int)x){}
-	Var(unsigned long x) : _type(INT), i((int)x){}
+	Var(long x) : _type(INT), _i((int)x){}
+	Var(unsigned long x) : _type(INT), _i((int)x){}
 	Var(Long x);
 	Var(ULong x);
 	Var(bool x);
@@ -305,12 +305,12 @@ class ASL_API Var
 	/**
 	Returns the internal Dic if this var is an object
 	*/
-	Dic<Var> object() const { return _type == OBJ ? *o : Dic<Var>(); }
+	Dic<Var> object() const { return _type == OBJ ? *_o : Dic<Var>(); }
 
 	/**
 	Returns the internal Array if this var is an array
 	*/
-	Array<Var> array() const { return _type == ARRAY ? *a : Array<Var>(); }
+	Array<Var> array() const { return _type == ARRAY ? *_a : Array<Var>(); }
 
 	/**
 	Returns the boolean value of this var (similar to JS conversion)
@@ -355,11 +355,11 @@ class ASL_API Var
 	template<class T>
 	void operator=(const VDic<T>& x);
 #ifdef ASL_HAVE_INITLIST
-	void operator=(const std::initializer_list<Obj> b) { *this = Var(b); }
+	void operator=(const std::initializer_list<Obj> x) { *this = Var(x); }
 	template<class T>
-	void operator=(const std::initializer_list<T> b) { *this = Var(b); }
+	void operator=(const std::initializer_list<T> x) { *this = Var(x); }
 	template<class T>
-	void operator=(const std::initializer_list<std::initializer_list<T>> b) { *this = Var(b); }
+	void operator=(const std::initializer_list<std::initializer_list<T>> x) { *this = Var(x); }
 #endif
 	/** Appends `x` to this var if this var is an array (useful for Var construction) */
 	Var& operator,(const Var& x) {return (*this) << (Var)x;}
@@ -375,10 +375,10 @@ class ASL_API Var
 	{
 		if(_type==NONE) {
 			_type=ARRAY;
-			NEW_ARRAY(a);
+			NEW_ARRAY(_a);
 		}
 		else if(_type==ARRAY)
-			a->resize(n);
+			_a->resize(n);
 	}
 	/** Returns the element at index `i` if this var is an array */
 	const Var& operator[](int i) const;
@@ -415,9 +415,9 @@ class ASL_API Var
 	bool operator==(const Var& other) const
 	{
 		if(_type == STRING && other._type == SSTRING)
-			return !strcmp(s->data(), other.ss);
+			return !strcmp(_s->data(), other._ss);
 		else if(_type == SSTRING && other._type == STRING)
-			return !strcmp(ss, other.s->data());
+			return !strcmp(_ss, other._s->data());
 		else if (_type == NUMBER || _type == FLOAT || _type == INT)
 		{
 			double x = *this;
@@ -425,18 +425,17 @@ class ASL_API Var
 		}
 		else if(_type != other._type) return false;
 		switch(_type){
-			case NUMBER: return d==other.d;
-			case FLOAT: return d == other.d;
-			case INT: return i==other.i;
-			case BOOL: return b==other.b;
-			case STRING: return !strcmp(s->data(), other.s->data());
-			case SSTRING: return !strcmp(ss, other.ss);
-			case ARRAY: return *a==*other.a;
-			case DIC: return *o == *other.o;
+			case NUMBER: return _d==other._d;
+			case FLOAT: return _d == other._d;
+			case INT: return _i==other._i;
+			case BOOL: return _b==other._b;
+			case STRING: return !strcmp(_s->data(), other._s->data());
+			case SSTRING: return !strcmp(_ss, other._ss);
+			case ARRAY: return *_a==*other._a;
+			case DIC: return *_o == *other._o;
 			case NUL: return true;
 			default: return false;
 		}
-		return false;
 	}
 	template<class T>
 	bool operator!=(const T& other) const
@@ -445,55 +444,50 @@ class ASL_API Var
 	}
 	bool operator==(bool other) const
 	{
-		return _type == BOOL && b==other;
+		return _type == BOOL && _b==other;
 	}
 	bool operator==(int other) const
 	{
 		switch(_type){
-		case INT: return i==other;
-		case NUMBER: return d==other;
-		case FLOAT: return d == other;
+		case INT: return _i==other;
+		case NUMBER: return _d==other;
+		case FLOAT: return _d == other;
 		default: return false;
 		}
-		return false;
 	}
 	bool operator==(double other) const
 	{
 		switch(_type){
-		case NUMBER: return d==other;
-		case INT: return i==other;
-		case FLOAT: return d == other;
+		case NUMBER: return _d==other;
+		case INT: return _i==other;
+		case FLOAT: return _d == other;
 		default: return false;
 		}
-		return false;
 	}
 	bool operator==(float other) const
 	{
 		switch (_type) {
-		case NUMBER: return d == other;
-		case INT: return i == other;
-		case FLOAT: return d == other;
+		case NUMBER: return _d == other;
+		case INT: return _i == other;
+		case FLOAT: return _d == other;
 		default: return false;
 		}
-		return false;
 	}
 	bool operator==(const char* other) const
 	{
 		switch(_type){
-		case STRING: return !strcmp(s->data(), other);
-		case SSTRING: return !strcmp(ss, other);
+		case STRING: return !strcmp(_s->data(), other);
+		case SSTRING: return !strcmp(_ss, other);
 		default: return false;
 		}
-		return false;
 	}
 	bool operator==(const String& other) const
 	{
 		switch(_type){
-		case STRING: return !strcmp(s->data(), &other[0]);
-		case SSTRING: return !strcmp(ss, other);
+		case STRING: return !strcmp(_s->data(), &other[0]);
+		case SSTRING: return !strcmp(_ss, other);
 		default: return false;
 		}
-		return false;
 	}
 
 	/** Checks if this var's type is `t`. */
@@ -511,7 +505,7 @@ class ASL_API Var
 		if (_type != ARRAY)
 			return false;
 		for (int i = 0, n = length(); i < n; i++)
-			if (!(*a)[i].is(t))
+			if (!(*_a)[i].is(t))
 				return false;
 		return true;
 	}
@@ -521,38 +515,38 @@ class ASL_API Var
 	*/
 	bool isArrayOf(int n, Type t) const
 	{
-		if (_type != ARRAY || a->length() != n)
+		if (_type != ARRAY || _a->length() != n)
 			return false;
 		for (int i = 0; i < n; i++)
-			if (!(*a)[i].is(t))
+			if (!(*_a)[i].is(t))
 				return false;
 		return true;
 	}
 
 	/** Checks if this var is an object of class `clas`. */
-	bool is(const char* clas) const {return _type == DIC && (*o)[ASL_XDLCLASS] == clas;}
+	bool is(const char* clas) const {return _type == DIC && (*_o)[ASL_XDLCLASS] == clas;}
 	/** Checks if this var is an object and has a property named `k`. */
 	bool has(const String& k) const
 	{
-		return (_type==DIC)? o->has(k) : false;
+		return (_type==DIC)? _o->has(k) : false;
 	}
 	/** Checks if this var is an object and has a property named `k` of type `t`. */
 	bool has(const String& k, Type t) const
 	{
-		return (_type==DIC)? o->has(k) && (*o)[k].is(t) : false;
+		return (_type==DIC)? _o->has(k) && (*_o)[k].is(t) : false;
 	}
 	/** Checks if this var is an array and contains an element with value `x`. */
 	bool contains(const Var& x) const
 	{
-		return (_type==ARRAY)? a->contains(x) : false;
+		return (_type==ARRAY)? _a->contains(x) : false;
 	}
 	/** Clears the contents if this var is an array or an object. */
 	void clear()
 	{
 		if (_type==ARRAY)
-			a->clear();
+			_a->clear();
 		else if (_type==DIC)
-			o->clear();
+			_o->clear();
 	}
 
 	/**
@@ -561,15 +555,15 @@ class ASL_API Var
 	void remove(const String& k)
 	{
 		if (_type == DIC)
-			o->remove(k);
+			_o->remove(k);
 	}
 
 	/**
 	Removes one or more items, starting at the given index, if this is an array
 	*/
 	void removeAt(int i, int n = 1)
-	{if (_type == ARRAY && i >= 0 && n > 0 && i < a->length() && i + n <= a->length())
-			a->remove(i, n);
+	{if (_type == ARRAY && i >= 0 && n > 0 && i < _a->length() && i + n <= _a->length())
+			_a->remove(i, n);
 	}
 
 	/**
@@ -590,9 +584,9 @@ class ASL_API Var
 		{
 			if(x._type==DIC)
 #ifndef ASL_VAR_STATIC
-				e=new VDic<Var>::Enumerator(*x.o);
+				e=new VDic<Var>::Enumerator(*x._o);
 #else
-				e.construct(*x.o);
+				e.construct(*x._o);
 #endif
 		}
 		~Enumerator()
@@ -605,10 +599,10 @@ class ASL_API Var
 #endif
 		}
 		void operator++() {i++; if(v._type==DIC) ++*e;}
-		Var& operator*() {if(v._type==ARRAY) return (*v.a)[i]; else if(v._type==DIC) return **e; else return v;}
+		Var& operator*() {if(v._type==ARRAY) return (*v._a)[i]; else if(v._type==DIC) return **e; else return v;}
 		String operator~() {return ~*e;}
 		operator bool() const {return i < v.length();}
-		bool operator!=(const Enumerator& e) const { return (bool)*this; }
+		bool operator!=(const Enumerator&) const { return (bool)*this; }
 	};
 	/** Returns an enumerator for this var's contents */
 	const Enumerator all() const {return Enumerator(*this);}
@@ -619,20 +613,20 @@ class ASL_API Var
  protected:
 	Type _type;
 	union {
-		double d;
-		int i;
-		bool b;
-		Long ll;
+		double _d;
+		int _i;
+		bool _b;
+		Long _l;
 #ifndef ASL_VAR_STATIC
-		Array<Var>* a;
-		VDic<Var>* o;
-		Array<char>* s;
+		Array<Var>* _a;
+		VDic<Var>* _o;
+		Array<char>* _s;
 #else
-		StaticSpace< Array<Var> > a;
-		StaticSpace< VDic<Var> > o;
-		StaticSpace< Array<char> > s;
+		StaticSpace< Array<Var> > _a;
+		StaticSpace< VDic<Var> > _o;
+		StaticSpace< Array<char> > _s;
 #endif
-		char ss[VAR_SSPACE];
+		char _ss[VAR_SSPACE];
 	};
 	void free();
 	friend class XdlEncoder;
@@ -642,10 +636,10 @@ template<class T>
 Var::Var(const Array<T>& v)
 {
 	_type=ARRAY;
-	NEW_ARRAY(a);
-	a->resize(v.length());
+	NEW_ARRAY(_a);
+	_a->resize(v.length());
 	for(int i=0; i<v.length(); i++)
-		(*a)[i] = v[i];
+		(*_a)[i] = v[i];
 }
 
 template<class T>
@@ -654,9 +648,9 @@ Var::operator Array<T>() const
 	Array<T> a2;
 	if(_type==ARRAY)
 	{
-		a2.resize(a->length());
+		a2.resize(_a->length());
 		for(int i=0; i < a2.length(); i++)
-			a2[i]=(*a)[i];
+			a2[i]=(*_a)[i];
 	}
 	return a2;
 }
@@ -667,7 +661,7 @@ Var::operator VDic<T>() const
 	VDic<T> a2;
 	if (_type == DIC)
 	{
-		foreach2(String& k, Var& v, *o)
+		foreach2(String& k, Var& v, *_o)
 			a2[k] = v;
 	}
 	return a2;
@@ -677,9 +671,9 @@ template<class T>
 Var::Var(const VDic<T>& x)
 {
 	_type=DIC;
-	NEW_DIC(o);
+	NEW_DIC(_o);
 	foreach2(String& k, T& v, x)
-		o->set(k, v);
+		_o->set(k, v);
 }
 
 template<class T>
@@ -687,10 +681,10 @@ void Var::operator=(const Array<T>& x)
 {
 	free();
 	_type=ARRAY;
-	NEW_ARRAY(a);
-	a->resize(x.length());
+	NEW_ARRAY(_a);
+	_a->resize(x.length());
 	for(int i=0; i<x.length(); i++)
-		(*a)[i] = x[i];
+		(*_a)[i] = x[i];
 }
 
 template<class T>
@@ -698,9 +692,9 @@ void Var::operator=(const VDic<T>& x)
 {
 	free();
 	_type=DIC;
-	NEW_DIC(o);
+	NEW_DIC(_o);
 	foreach2(String& k, T& v, x)
-		o->set(k, v);
+		_o->set(k, v);
 }
 
 template<class T>

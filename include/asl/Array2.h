@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_ARRAY2_H
@@ -128,13 +128,17 @@ public:
 		return Array2<K>(_rows, _cols, _a.template with<K>());
 	}
 
-	Array<T>& data() { return _a; }
+	/**
+	Returns the internal array holding all values (row-major)
+	\deprecated This will return a pointer to the beginning (for consistency)
+	*/
+	ASL_DEPRECATED(Array<T>& data(), "Use .array(), .data will return a pointer in the future") { return _a; }
 
 	/**
 	Returns the internal array holding all values (row-major)
-	\deprecated This will return a pointer in the future. Use .array()
+	\deprecated This will return a pointer to the beginning (for consistency)
 	*/
-	const Array<T>& data() const { return _a; }
+	ASL_DEPRECATED(const Array<T>& data() const, "Use .array(), .data will return a pointer in the future") { return _a; }
 
 	/**
 	Returns the internal array holding all values (row-major)

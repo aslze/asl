@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_SET_H
@@ -147,8 +147,7 @@ public:
 	Set notIn(const Set& s) const
 	{
 		Set b;
-		const Set& a=*this;
-		foreach(const T& x, a) if(!s.contains(x)) b << x;
+		foreach(const T& x, *this) if(!s.contains(x)) b << x;
 		return b;
 	}
 	/**
@@ -157,8 +156,7 @@ public:
 	Set in(const Set& s) const
 	{
 		Set b;
-		const Set& a=*this;
-		foreach(const T& x, a) if(s.contains(x)) b << x;
+		foreach(const T& x, *this) if(s.contains(x)) b << x;
 		return b;
 	}
 	/**

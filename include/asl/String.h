@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_STRING_H
@@ -360,6 +360,12 @@ public:
 	ASL_EXPLICIT operator bool() const { return _len > 0; }
 
 	/**
+	Converts this string to another basic type, if supported `n = str.to<int>();`
+	*/
+	template<class T>
+	T to() const { return (T) *this; }
+
+	/**
 	Returns true if this string is empty (warning: this might change in the future to mean !isTrue(), use `!ok()`)
 	*/
 	bool operator!() const {return _len == 0;}
@@ -662,7 +668,7 @@ public:
 		const char* u;
 		int n;
 		Enumerator(const String& s): u(s), n(1) {}
-		bool operator!=(const Enumerator& e) const { return (bool)*this; }
+		bool operator!=(const Enumerator&) const { return (bool)*this; }
 		void operator++() {u += n;}
 		int operator*();
 		operator bool() const {return *u != 0;}
@@ -756,11 +762,11 @@ public:
 };
 
 
-int ASL_API utf16toLocal8(const wchar_t* p, char* u, int nmax);
-int ASL_API local8toUtf16(const char* u, wchar_t* p, int nmax);
+int ASL_API utf16toLocal8(const wchar_t* p, char* u, int n);
+int ASL_API local8toUtf16(const char* u, wchar_t* p, int n);
 int ASL_API utf16toUtf8(const wchar_t* p, char* u, int);
 int ASL_API utf8toUtf16(const char* u, wchar_t* p, int);
-int ASL_API utf32toUtf8(const int* p, char* u, int);
+int ASL_API utf32toUtf8(const int* p, char* u, int n);
 int ASL_API utf8toUtf32(const char* u, int* p, int);
 String ASL_API localToUtf8(const String& a);
 String ASL_API utf8ToLocal(const String& a);

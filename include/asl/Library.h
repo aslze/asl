@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_LIB_H
@@ -210,7 +210,7 @@ The argument must be an identifier (no "::") and it will be used when importing.
 */
 #define ASL_EXPORT_CLASS(Class) \
 extern "C" {\
-	ASL_EXPORT void* new_##Class() {return new Class;}\
+	void* new_##Class() {return new Class;}\
 }
 
 /**
@@ -221,7 +221,7 @@ The arguments must be identifiers (no "::") and the second will be used when imp
 */
 #define ASL_EXPORT_CLASS_AS(Class, Name) \
 extern "C" {\
-	ASL_EXPORT void* new_##Name() {return new Class;}\
+	void* new_##Name() {return new Class;}\
 }
 
 }
