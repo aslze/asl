@@ -58,11 +58,19 @@ public:
 	/**
 	Returns the angle rotated by this quaternion
 	*/
-	T angle() const { return 2 * acos(w); }
+	T angle() const
+	{
+		T a = (w >= 1) ? 0 : (w <= -1) ? (2 * T(PI)) : 2 * acos(w);
+		return a <= T(PI) ? a : a - 2 * T(PI);
+	}
 	/*
 	Returns the angle between this orientation and another
 	*/
-	T angle(const Quaternion_& q) const { return 2 * acos(*this * q) / (length() * q.length()); }
+	T angle(const Quaternion_& q) const
+	{
+		T k = (T)fabs ((*this * q) / (length() * q.length()));
+		return k >= 1 ? 0 : (k <= -1) ? (2 * T(PI)) : (2 * acos(k));
+	}
 	/**
 	Returns the normalized axis of rotation of this quaternion
 	*/
@@ -144,9 +152,10 @@ public:
 	Quaternion_ slerp(const Quaternion_& q, T t) const
 	{
 		Quaternion_ a = *this;
-		if (a*q < 0.0)
+		T aq = a * q;
+		if (aq < 0)
 			a = -a;
-		T theta = (T)acos(a*q);
+		T theta = aq >= 1 ? 0 : (T)acos(a * q);
 		if (theta == 0)
 			return a;
 		return a*(sin(theta - t * theta) / sin(theta)) + q*(sin(t * theta) / sin(theta));
