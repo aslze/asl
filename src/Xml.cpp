@@ -7,6 +7,11 @@
 
 namespace asl {
 
+inline bool myisalpha(char c)
+{
+	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
 Xml Xml::read(const String& file)
 {
 	return Xml::decode(TextFile(file).text());
@@ -34,6 +39,7 @@ Xml::Xml(const String& tag, const Map<>& attrs, const String& val) : NodeBase(ne
 
 Xml::_Xml* Xml::_Xml::clone(bool detach) const
 {
+	(void)detach;
 	_Xml* e = new _Xml(tag);
 	e->attribs = attribs.clone();
 
@@ -392,8 +398,13 @@ Xml Xml::decode(const String& x)
 			}
 			break;
 		case TAG_QUES:
-			if (c == '>') // should be ?>
+			if (c == '>' && *(p - 2) == '?' && b.length() > 1 && myisalpha(b[0]))
+			{
 				state = FREE;
+				b = ""; // b contained processing instruction (plus '?')
+			}
+			else
+				b << c;
 			break;
 		case COMMENT_START2:
 			if (c == '-')
