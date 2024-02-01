@@ -280,8 +280,8 @@ namespace asl {
 		if(!_ready)
 			return 0;
 		DWORD read;
-		int _ok = ReadFile(_stdout, p, n, &read, NULL);
-		return _ok? read : -1;
+		int ok = ReadFile(_stdout, p, n, &read, NULL);
+		return ok? read : -1;
 	}
 
 	int Process::readErrors(void* p, int n)
@@ -289,8 +289,8 @@ namespace asl {
 		if(!_ready)
 			return 0;
 		DWORD  read;
-		int _ok = ReadFile(_stderr, p, n, &read, NULL);
-		return _ok? read : -1;
+		int ok = ReadFile(_stderr, p, n, &read, NULL);
+		return ok? read : -1;
 	}
 
 	int Process::writeInput(const void* p, int n)
@@ -302,7 +302,7 @@ namespace asl {
 		return written;
 	}
 
-	void Process::signal(int s)
+	void Process::signal(int)
 	{
 		//kill(_pid, s);
 	}
@@ -621,7 +621,7 @@ int Process::exec(const String& command, const Array<String>& args)
 	for(int i=0; i<args.length(); i++)
 		argv << args[i];
 	argv << 0;
-	return execv(command, (char* const*)argv.ptr());
+	return execvp(command, (char* const*)argv.data());
 }
 
 bool Process::started()
