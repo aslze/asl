@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_VECTOR3_H
@@ -60,7 +60,7 @@ class Vec3_
 	static ASL_DEPRECATED(Vec3_ fromCylindrical(T r, T a, T z), "Use your own axes") { return Vec3_(r * cos(a), r * sin(a), z); }
 	static ASL_DEPRECATED(Vec3_ fromSpherical( T r, T a, T b), "Use your own axes") {float R=r*cos(b); return Vec3_(R*cos(a), R*sin(b), r*sin(b));}
 
-	ASL_DEPRECATED(void set(T X, T Y, T Z)) {x=X; y=Y; z=Z;}
+	ASL_DEPRECATED(void set(T X, T Y, T Z), "Set components separately") {x=X; y=Y; z=Z;}
 
 	/** Returns a normalized version of this vector */
 	Vec3_ normalized() const {
@@ -74,7 +74,7 @@ class Vec3_
 	T operator!() const {return length();}
 	Vec3_ abs() const {return Vec3_(fabs(x), fabs(y), fabs(z));}
 	/** Returns the angle between this vector and `b` */
-	T angle(const Vec3_& b) const {return acos(clamp((*this) * b / (!(*this)*!b), -1.0f, 1.0f) );}
+	T angle(const Vec3_& b) const {return acos(clamp((*this) * b / (!(*this)*!b), T(-1), T(1)) );}
 
 	/** Returns this plus `b` */
 	Vec3_ operator+(const Vec3_& b) const {return Vec3_(x+b.x, y+b.y, z+b.z);}
