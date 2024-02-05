@@ -60,7 +60,7 @@ class Vec3_
 	static ASL_DEPRECATED(Vec3_ fromCylindrical(T r, T a, T z), "Use your own axes") { return Vec3_(r * cos(a), r * sin(a), z); }
 	static ASL_DEPRECATED(Vec3_ fromSpherical( T r, T a, T b), "Use your own axes") {float R=r*cos(b); return Vec3_(R*cos(a), R*sin(b), r*sin(b));}
 
-	void set(T X, T Y, T Z) {x=X; y=Y; z=Z;}
+	ASL_DEPRECATED(void set(T X, T Y, T Z)) {x=X; y=Y; z=Z;}
 
 	/** Returns a normalized version of this vector */
 	Vec3_ normalized() const {

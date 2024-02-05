@@ -410,6 +410,11 @@ ASL_TEST(String)
 	ASL_ASSERT((x1 | x2) == x2);
 	ASL_ASSERT((x1 | 123) == "123");
 	ASL_ASSERT((x2 | 123) == "a");
+
+	x1 = "-32";
+	x2 = "1.5";
+	ASL_ASSERT(x1.to<int>() == -32);
+	ASL_APPROX(x2.to<float>(), 1.5f, 1e-7f);
 }
 
 ASL_TEST(JSON)

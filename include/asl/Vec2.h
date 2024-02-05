@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_VECTOR2_H
@@ -50,6 +50,8 @@ class Vec2_
 	Vec2_ normalized() const {return (*this)/length();}
 	/** Returns the angle between this vector and the +X axis in the [-PI, PI] range */
 	T angle()     const {return (T) atan2(y, x);}
+	/** Returns the angle between this vector and `b` */
+	T angle(const Vec2_& b) const { return acos(clamp((*this) * b / (!(*this) * !b), T(-1), T(1))); }
 	/** Returns the length of this vector */
 	T operator!() const {return sqrt(x*x+y*y);}
 	/** Returns the length of this vector */

@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_JSON_H
@@ -13,14 +13,27 @@ namespace asl {
  */
 
 /**
-Functions to encode/decode data as JSON. These functions use class Var to represent JSON values.
+Functions to encode/decode data as JSON. These functions use class Var to represent JSON values. JSON parsing
+supports C/C++ style comments.
 
 ~~~
+Var data = Json::read("data.json");                         // read and parse JSON from a file
 Var data = Json::decode("{\"a\":\"abc\", \"b\":[1.5, 3]}"); // decode JSON from a string
 data["c"] = true;                                           // add a property
 String json = Json::encode(data);                           // encode to string
 
 Json::write(data, "data.json");                             // write to file
+~~~
+
+Write and encode functions support an additional argument to control style. By default `encode()` uses a compact format (no newlines or whitespace) and
+`write()` uses an indented style (`PRETTY`). This can be changed with this argument.
+
+The `SIMPLE` and `NICE` (same but multiline, indented) values will
+write real numbers having a slightly reduced precision to avoid numbers like `12.25000001` or `2.09999999` (will look like `12.25` and `2.1`). By default
+numbers are written so that they are recovered exactly when parsing.
+
+~~~
+Json::write(data, "data.json", Json::NICE);
 ~~~
 
 The same `data` object can be built in one statement, in C++11 compilers:

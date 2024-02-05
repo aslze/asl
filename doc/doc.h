@@ -218,7 +218,7 @@ The `true` parameter makes the function write the code with new lines and indent
 the result is compact.
 
 The **JSON** functions `Json::encode()`, `Json::decode()`do the same using JSON syntax. Class names are represented 
-by a propery named `_` in this case (actually, the macro ASL_XDLCLASS). All of JSON syntax is supported.
+by a propery named `$type` in this case (actually, the macro ASL_XDLCLASS). All of JSON syntax is supported.
 
 */
 
@@ -596,7 +596,7 @@ socket << *buffer;                                 // send it all at once
 
 ~~~
 ByteArray data(12);
-socket.read(data.ptr(), 12);                       // read 12 bytes into a buffer
+socket.read(data.data(), 12);                       // read 12 bytes into a buffer
 StreamBufferReader reader(ENDIAN_BIG);
 int32_t x, y;
 reader >> x >> y;                                  // read 2 int32 variables from the buffer
