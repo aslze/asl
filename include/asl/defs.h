@@ -191,6 +191,10 @@ inline T sqr(T x) {return x*x;}
 template <class T>
 inline T fract(T x) {return x - floor(x);}
 
+/** Rounds a number to a multiple of k */
+template<class T>
+inline T round(T x, T k) { return floor(x / k + T(0.5)) * k; }
+
 /** Clamps the value of x to make it lie inside the [a,b] interval */
 template <class T, class C>
 inline T clamp(T x, C a, C b) { const T t = x < a ? a : x; return t > b ? b : t; }
