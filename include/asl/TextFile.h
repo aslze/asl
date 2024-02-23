@@ -92,15 +92,10 @@ public:
 	TextFile& operator>>(float &x);
 	TextFile& operator>>(double &x);
 	TextFile& operator>>(String &x);
-	TextFile& operator<<(char x);
-	TextFile& operator<<(byte x);
-	TextFile& operator<<(int x);
-	TextFile& operator<<(unsigned x);
-	TextFile& operator<<(float x);
-	TextFile& operator<<(double x);
+	template<class T>
+	TextFile& operator<<(const T& x) { write(String(x)); return *this; }
 	TextFile& operator<<(const String& x);
-	TextFile& operator<<(char* x) { *this << String(x); return *this; }
-	TextFile& operator<<(const char* x) { *this << String(x); return *this; }
+	TextFile& operator<<(const char* x);
 };
 
 }

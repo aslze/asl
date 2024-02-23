@@ -12,14 +12,14 @@ IniFile::Section IniFile::Section::clone() const
 	return s;
 }
 
-IniFile::IniFile(const String& name, bool shouldwrite)
+IniFile::IniFile(const String& fname, bool shouldwrite)
 {
 	_modified = false;
-	_filename = name;
+	_filename = fname;
 	_currentTitle = NOSECTION;
 	_ok = false;
 	_shouldwrite = shouldwrite;
-	TextFile file(name, File::READ);
+	TextFile file(fname, File::READ);
 	if(!file) {
 		return;
 	}
@@ -58,10 +58,10 @@ IniFile::IniFile(const String& name, bool shouldwrite)
 				continue;
 			}
 			if (!_indent.ok())
-				for (int i = 0; i < line.length(); i++)
+				for (int j = 0; j < line.length(); j++)
 				{
-					if (myisspace(line[i]))
-						_indent += line[i];
+					if (myisspace(line[j]))
+						_indent += line[j];
 					else
 						break;
 				}
@@ -122,11 +122,6 @@ const String IniFile::operator[](const String& name) const
 	}
 }
 
-const String IniFile::operator()(const String& name, const String& defaultVal) const
-{
-	return has(name)? (*this)[name] : defaultVal;
-}
-
 bool IniFile::has(const String& name) const
 {
 	int slash = name.indexOf('/');
@@ -149,7 +144,7 @@ void IniFile::write(const String& fname)
 	foreach(Section & s, newsec)
 	 	s = s.clone();
 
-	Section* section = &_sections[NOSECTION];
+	Section* psection = &_sections[NOSECTION];
 
 	Array<String> oldlines = _lines.clone();
 
@@ -165,7 +160,7 @@ void IniFile::write(const String& fname)
 				continue;
 			String name = line.substring(1, end);
 			_currentTitle = name;
-			section = &_sections[name];
+			psection = &_sections[name];
 		}
 		else if (line[i0] != '#' && line[i0] > 47 && line[i0] != ';')
 		{
@@ -174,7 +169,7 @@ void IniFile::write(const String& fname)
 				continue;
 			String key = line.substring(0,i).trimmed();
 			String value0 = line.substring(i+1).trimmed();
-			const String& value1 = (*section)[key];
+			const String& value1 = (*psection)[key];
 			line = _indent; line << key << '=' << value1;
 			if(value0 != value1 && value1 != "")
 			{
@@ -255,19 +250,6 @@ IniFile::~IniFile()
 {
 	if(_shouldwrite)
 		write(_filename);
-}
-
-int IniFile::arraysize(const String& name) const
-{
-	_currentTitle = name;
-	return _sections[_currentTitle]["size"];
-}
-
-String IniFile::array(const String& name, int index) const
-{
-	String key = index + 1;
-	key << '\\' << name;
-	return _sections[_currentTitle][key];
 }
 
 Dic<> IniFile::values() const

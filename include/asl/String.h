@@ -444,29 +444,26 @@ public:
 	void assign(const char* b, int n);
 
 	void clear() { _len = 0; str()[0] = '\0'; }
-	void operator=(const String& s) {assign(s.str(), s._len);}
-	void operator=(const char* s) {assign(s, (int)strlen(s));}
-	void operator=(char* const s) {assign(s, (int)strlen(s));}
-	void operator=(int n) {(*this)=(String)n;}
-	void operator=(double n) {(*this)=(String)n;}
-	void operator=(bool n) {(*this)=(String)n;}
+	
+	String& operator=(const String& s) { assign(s.str(), s._len); return *this; }
+	String& operator=(const char* s) { assign(s, (int)strlen(s)); return *this; }
+	String& operator=(char* const s) { assign(s, (int)strlen(s)); return *this; }
 	template <class T>
-	void operator=(const T& x) { String s=x; *this = s; }
+	String& operator=(const T& x) { String s=x; *this = s; return *this; }
+
 	String operator+(const String& b) const {return concat(b.str(), b._len);}
 	String operator+(const char* b) const {return concat(b, (int)strlen(b));}
 	String operator+(char b) const {return concat(&b, 1);}
-	void operator+=(const String& b) {append(b.str(), b._len);}
-	void operator+=(const char* b) {append(b, (int)strlen(b));}
-	void operator+=(char b) {int n=_len+1; if(n>=_size) resize(n); char*s = str(); s[n-1] = b; s[n] = '\0'; _len=n;}
+	
+	String& operator+=(const String& b) { append(b.str(), b._len);  return *this; }
+	String& operator+=(const char* b) { append(b, (int)strlen(b)); return *this; }
+	String& operator+=(char b) { int n=_len+1; if(n>=_size) resize(n); char*s = str(); s[n-1] = b; s[n] = '\0'; _len=n; return *this; }
 
 	template<class T>
 	String& operator<<(const T& x) {*this += String(x); return *this;}
 
-	//template<>
 	String& operator<<(const String& x) {*this += x; return *this;}
-
 	String& operator<<(char x) {*this += x; return *this;}
-
 	String& operator<<(const char* x) {*this += x; return *this;}
 
 	bool operator==(const String& s) const

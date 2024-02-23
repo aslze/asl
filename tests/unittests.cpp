@@ -65,10 +65,6 @@ ASL_TEST(IniFile)
 		file["sec1/field1"] = "value1";
 		file["sec1/field2"] = "value2";
 		file["sec2/field"] = "value3";
-
-		file["list/1\\x"] = "7";
-		file["list/2\\y"] = "3";
-		file["list/size"] = "2";
 	}
 	{
 		IniFile file("config.ini");
@@ -85,9 +81,6 @@ ASL_TEST(IniFile)
 		file.section("sec2");
 		ASL_ASSERT(file["field"] == "value3");
 		
-		ASL_ASSERT(file.arraysize("list") == 2);
-		ASL_ASSERT(file.array("x", 0) == "7");
-		ASL_ASSERT(file.array("y", 1) == "3");
 		Dic<> all = file.values();
 		ASL_ASSERT(all["sec1/field1"] == "value1");
 		ASL_ASSERT(file.values("sec1")["field1"] == "value1");
@@ -160,7 +153,7 @@ ASL_TEST(CmdArgs)
 	argv << "convert" << "-format" << "jpeg" << "-fast" << "-q" << "85" <<
 		"-k" << "k1" << "-k" << "k2" << "-gray" << "on" << "-rgb" << "no" << "-progressive!" << "-scale" << "-1.0" << "image1.png" << "image2.bmp";
 
-	CmdArgs args(argv.length(), (char**)argv.ptr());
+	CmdArgs args(argv.length(), (char**)argv.data());
 
 	ASL_ASSERT( args.has("format") );
 	ASL_ASSERT( !args["size"] );

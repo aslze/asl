@@ -28,7 +28,7 @@ namespace asl {
 
 bool TextFile::printf(const char* fmt, ...)
 {
-	if(!_file && !open(_path, WRITE))
+	if(!_file && !open(WRITE))
 		return false;
 	va_list arg;
 	va_start(arg,fmt);
@@ -39,7 +39,7 @@ bool TextFile::printf(const char* fmt, ...)
 
 int TextFile::scanf(const String& fmt, void* p1, void* p2, void* p3, void* p4)
 {
-	if(!_file && !open(_path, READ))
+	if(!_file && !open(READ))
 		return 0;
 	return fscanf(_file, fmt, p1, p2, p3, p4);
 }
@@ -55,7 +55,7 @@ String TextFile::readLine(char newline)
 {
 	String s(1000, 0);
 	s[0] = '\0';
-	if(!_file && !open(_path, READ))
+	if(!_file && !open(READ))
 		return s;
 	while (1)
 	{
@@ -72,7 +72,7 @@ bool TextFile::readLine(String& s)
 	int chunk = 255;
 	int m = 0, n = 0;
 	s[0] = '\0';
-	if(!_file && !open(_path, READ))
+	if(!_file && !open(READ))
 		return false;
 	do {
 		s.resize(m + chunk);
@@ -102,7 +102,7 @@ bool TextFile::readLine(String& s)
 Array<String> TextFile::lines()
 {
 	Array<String> lines;
-	if(!_file && !open(_path, READ))
+	if(!_file && !open(READ))
 		return lines;
 	while (!end()) {
 		lines << String();
@@ -115,7 +115,7 @@ String TextFile::text()
 {
 	int n = (int)(size() & 0x7fffffff); // truncate
 	String text;
-	if (!_file && !open(_path, READ)) {
+	if (!_file && !open(READ)) {
 		return text;
 	}
 	byte head[8];
@@ -138,7 +138,7 @@ String TextFile::text()
 				c0 = c;
 			}
 			a << 0;
-			text = a.ptr();
+			text = a.data();
 			return text;
 		}
 		else if (head[0] == 0xfe && head[1] == 0xff) // UTF16BE
@@ -157,7 +157,7 @@ String TextFile::text()
 				c0 = c;
 			}
 			a << 0;
-			text = a.ptr();
+			text = a.data();
 			return text;
 		}
 		else if (head[0] == 0xef && head[1] == 0xbb && n>=3 && read<byte>() == 0xbf) // UTF8
@@ -191,7 +191,7 @@ bool TextFile::write(const String& s)
 
 TextFile& TextFile::operator>>(char &x)
 {
-	if(!_file && !open(_path, READ))
+	if(!_file && !open(READ))
 		return *this;
 	x=getc(_file);
 	return *this;
@@ -199,7 +199,7 @@ TextFile& TextFile::operator>>(char &x)
 
 TextFile& TextFile::operator>>(byte &x)
 {
-	if(!_file && !open(_path, READ))
+	if(!_file && !open(READ))
 		return *this;
 	x=getc(_file);
 	return *this;
@@ -207,7 +207,7 @@ TextFile& TextFile::operator>>(byte &x)
 
 TextFile& TextFile::operator>>(int &x)
 {
-	if (!_file && !open(_path, READ))
+	if (!_file && !open(READ))
 		return *this;
 	int n = fscanf(_file, "%i", &x); if (n < 1) {}
 	return *this;
@@ -215,7 +215,7 @@ TextFile& TextFile::operator>>(int &x)
 
 TextFile& TextFile::operator>>(unsigned &x)
 {
-	if(!_file && !open(_path, READ))
+	if(!_file && !open(READ))
 		return *this;
 	int n = fscanf(_file, "%ui", &x); if (n < 1) {}
 	return *this;
@@ -223,7 +223,7 @@ TextFile& TextFile::operator>>(unsigned &x)
 
 TextFile& TextFile::operator>>(float &x)
 {
-	if(!_file && !open(_path, READ))
+	if(!_file && !open(READ))
 		return *this;
 	int n = fscanf(_file, "%f", &x); if (n < 1) {}
 	return *this;
@@ -231,7 +231,7 @@ TextFile& TextFile::operator>>(float &x)
 
 TextFile& TextFile::operator>>(double &x)
 {
-	if(!_file && !open(_path, READ))
+	if(!_file && !open(READ))
 		return *this;
 	int n = fscanf(_file, "%lf", &x); if (n < 1) {}
 	return *this;
@@ -239,7 +239,7 @@ TextFile& TextFile::operator>>(double &x)
 
 TextFile& TextFile::operator>>(String &x)
 {
-	if(!_file && !open(_path, READ))
+	if(!_file && !open(READ))
 		return *this;
 	char s[256];
 	int n = fscanf(_file, "%255s", s); if (n < 1) {}
@@ -247,59 +247,19 @@ TextFile& TextFile::operator>>(String &x)
 	return *this;
 }
 
-TextFile& TextFile::operator<<(char x)
-{
-	if(!_file && !open(_path, WRITE))
-		return *this;
-	putc(x, _file);
-	return *this;
-}
-
-TextFile& TextFile::operator<<(byte x)
-{
-	if(!_file && !open(_path, WRITE))
-		return *this;
-	putc(x, _file);
-	return *this;
-}
-
-TextFile& TextFile::operator<<(int x)
-{
-	if(!_file && !open(_path, WRITE))
-		return *this;
-	fprintf(_file, "%i", x);
-	return *this;
-}
-
-TextFile& TextFile::operator<<(unsigned x)
-{
-	if(!_file && !open(_path, WRITE))
-		return *this;
-	fprintf(_file, "%ui", x);
-	return *this;
-}
-
-TextFile& TextFile::operator<<(float x)
-{
-	if(!_file && !open(_path, WRITE))
-		return *this;
-	fprintf(_file, "%.7g", x);
-	return *this;
-}
-
-TextFile& TextFile::operator<<(double x)
-{
-	if(!_file && !open(_path, WRITE))
-		return *this;
-	fprintf(_file, "%.15g", x);
-	return *this;
-}
-
 TextFile& TextFile::operator<<(const String& x)
 {
-	if(!_file && !open(_path, WRITE))
+	if(!_file && !open(WRITE))
 		return *this;
-	fprintf(_file, "%s", *x);
+	fwrite(*x, 1, x.length(), _file);
+	return *this;
+}
+
+TextFile& TextFile::operator<<(const char* x)
+{
+	if (!_file && !open(WRITE))
+		return *this;
+	fputs(x, _file);
 	return *this;
 }
 

@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_INIFILE_H
@@ -103,7 +103,10 @@ public:
 	/**
 	Returns the value associated with the key `name` or `defaultVal` if it was not found. 
 	*/
-	const String operator()(const String& name, const String& defaultVal) const;
+	const String operator()(const String& name, const String& defaultVal) const
+	{
+		return has(name) ? (*this)[name] : defaultVal;
+	}
 	
 	/**
 	Writes the file with its modifications; this is done automatically on destruction, just call this if you need
@@ -127,13 +130,19 @@ public:
 	/**
 	Returns the length of an "array" named `name` as written by the Qt library and enables reading its values.
 	*/
-	int arraysize(const String& name) const;
+	ASL_DEPRECATED(int arraysize(const String& name) const, "Use ini[name/size]")
+	{
+		return _sections[_currentTitle = name]["size"];
+	}
 
 	/**
 	Returns the value associated with field `name` at the array position `index` of the array last specified
 	with `arraysize()`.
 	*/
-	String array(const String& name, int index) const;
+	ASL_DEPRECATED(String array(const String& field, int index) const, "Use ini[name/index\\field]")
+	{
+		return _sections[_currentTitle][String(index + 1) << '\\' << field];
+	}
 
 	/**
 	Returns all keys and values as a map with keys as "section/key"

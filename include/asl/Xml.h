@@ -721,7 +721,7 @@ public:
 
 	void append(const String& txt)
 	{
-		return _()->_text += txt;
+		_()->_text += txt;
 	}
 
 	const String& text() const
