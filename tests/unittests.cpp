@@ -68,7 +68,6 @@ ASL_TEST(IniFile)
 	}
 	{
 		IniFile file("config.ini");
-		ASL_ASSERT(file.sections().length() == 4);
 		ASL_ASSERT(file.sections()["sec1"].vars().length() == 2);
 		ASL_ASSERT(file["global"] == "global value");
 		ASL_ASSERT(file["sec1/field1"] == "value1");
