@@ -66,7 +66,7 @@ public:
 	bool end() { return (_file || open(_path, READ)) ? feof(_file) != 0 : true; }
 	
 	/** Prints formatted text as with the regular printf. Returns false on failure */
-	bool printf(const char* fmt, ...);
+	bool printf(ASL_PRINTF_W1 const char* fmt, ...) ASL_PRINTF_W2(2);
 	/** Reads formatted text as with the regular scanf up to 4 items only! */
 	int scanf(const String& fmt, void* p1, void* p2 = 0, void* p3 = 0, void* p4 = 0);
 	/** Reads and returns a line from the file */

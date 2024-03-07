@@ -98,6 +98,11 @@ namespace asl {
 #define ASL_EXPLICIT
 #endif
 
+#if (defined(_MSC_VER) && _MSC_VER > 1600 && defined(_Printf_format_string_)) || \
+    (defined(__clang__) && ASL_C_VER > 30000 || defined(__GNUC__) && ASL_C_VER > 50000)
+#define ASL_PRINTF_WARN
+#endif
+
 #if defined(_MSC_VER) && _MSC_VER < 1910 && !defined(snprintf)
 #define snprintf _snprintf
 #endif

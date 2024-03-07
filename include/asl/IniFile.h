@@ -129,6 +129,7 @@ public:
 
 	/**
 	Returns the length of an "array" named `name` as written by the Qt library and enables reading its values.
+	\deprecated Use ini[name/size]
 	*/
 	ASL_DEPRECATED(int arraysize(const String& name) const, "Use ini[name/size]")
 	{
@@ -138,6 +139,7 @@ public:
 	/**
 	Returns the value associated with field `name` at the array position `index` of the array last specified
 	with `arraysize()`.
+	\deprecated Use ini[name/index\\field]
 	*/
 	ASL_DEPRECATED(String array(const String& field, int index) const, "Use ini[name/index\\field]")
 	{

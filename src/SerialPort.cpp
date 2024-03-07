@@ -165,7 +165,7 @@ int SerialPort::read(void *p, int n)
 Array<byte> SerialPort::read(int n)
 {
 	Array<byte> a(n);
-	n = read(a.ptr(), n);
+	n = read(a.data(), n);
 	a.resize(max(0, n));
 	return a;
 }
@@ -184,7 +184,6 @@ void SerialPort::close()
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <termios.h>

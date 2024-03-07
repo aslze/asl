@@ -207,7 +207,9 @@ public:
 	{
 		run(Thread::begin, this);
 	}
-	/** Cancels a thread */
+	/** Cancels a thread, but you should not normally do this
+	\deprecated Threads should end when their function ends
+	*/
 	void kill()
 	{
 #ifdef _WIN32

@@ -6,6 +6,7 @@
 #include <asl/Directory.h>
 #include <asl/Mutex.h>
 #include <asl/Process.h>
+#include <stdarg.h>
 
 #define ASL_LOG_MAX_SIZE 1000000
 
@@ -93,6 +94,27 @@ void log(const String& cat, Log::Level level, const String& message)
 	Log::instance()->log(cat, level, message);
 }
 
+void log(const String& cat, Log::Level level, const char* fmt, ...)
+{
+	String message(100, 0);
+	va_list arg;
+	va_start(arg, fmt);
+	int i = 0, n = 0;
+	int space = message.cap();
+	while (((n = vsnprintf(message.data(), space, fmt, arg)) == -1 || n >= space) && ++i < 10)
+	{
+		message.resize((n >= space) ? n : 2 * space, false);
+		space = message.cap();
+		va_end(arg);
+		va_start(arg, fmt);
+	}
+	va_end(arg);
+	message.fix(n);
+
+	Log::instance()->log(cat, level, message);
+}
+
+
 #ifndef __ANDROID_API__
 
 void Log::log(const String& cat, Log::Level level, const String& message)
@@ -100,18 +122,6 @@ void Log::log(const String& cat, Log::Level level, const String& message)
 	updateState();
 	if (level > _maxLevel)
 		return;
-#ifndef __ANDROID_API__
-	String logfile = _logfile;
-	if (_usefile && TextFile(logfile).size() > ASL_LOG_MAX_SIZE) {
-		Path path = logfile;
-		String oldfile = path.noExt() + "-1." + path.extension();
-		if (File(oldfile).exists())
-			Directory::remove(oldfile);
-		Directory::move(logfile, oldfile);
-	}
-#endif
-	bool colorchanged = false;
-	const char* slevel = "";
 
 	Date now = Date::now();
 
@@ -125,22 +135,43 @@ void Log::log(const String& cat, Log::Level level, const String& message)
 
 	Lock lock(*_mutex);
 
+#ifndef __ANDROID_API__
+	String logfile = _logfile;
+	if (_usefile && TextFile(logfile).size() > ASL_LOG_MAX_SIZE)
+	{
+		Path   path = logfile;
+		String oldfile = path.noExt() + "-1." + path.extension();
+		if (File(oldfile).exists())
+			Directory::remove(oldfile);
+		Directory::move(logfile, oldfile);
+	}
+#endif
+
+	const char* slevel = "";
+	Console::Color color = Console::COLOR_DEFAULT;
+
 	switch (level)
 	{
 	case Log::WARNING:
-		colorchanged = true;
 		slevel = "WARNING: ";
-		if (useconsole)
-			console.color(Console::BYELLOW);
+		color = Console::BYELLOW;
 		break;
 	case Log::ERR:
-		colorchanged = true;
 		slevel = "ERROR: ";
-		if (useconsole)
-			console.color(Console::BRED);
+		color = Console::BRED;
 		break;
-	default: break;
+	case Log::DEBUG:
+		color = Console::GREEN;
+		break;
+	case Log::VERBOSE:
+		color = Console::BLUE;
+		break;
+	default:
+		break;
 	}
+
+	if (useconsole && color != Console::COLOR_DEFAULT)
+		console.color(color);
 
 	String line(0, "[%s][%s] %s%s\n", *now.toString(), *catg, slevel, *message);
 
@@ -153,7 +184,7 @@ void Log::log(const String& cat, Log::Level level, const String& message)
 	if (useconsole)
 	{
 		printf("%s", *line);
-		if (colorchanged)
+		if (color != Console::COLOR_DEFAULT)
 			console.color();
 	}
 }

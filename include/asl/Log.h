@@ -76,6 +76,8 @@ public:
 	};
 
 	friend ASL_API void log(const String& cat, Log::Level level, const String& message);
+	friend ASL_API void log(const String& cat, Log::Level level, ASL_PRINTF_W1 const char* fmt, ...) ASL_PRINTF_W2(3);
+
 	/**
 	Sets the name of the file to write messages to.
 	*/
@@ -101,13 +103,20 @@ public:
 	*/
 	static int maxLevel();
 
-	/**
-	Writes a log message with the given category and log level.
-	*/
 	void log(const String& cat, Log::Level level, const String& message);
 };
 
+	/**
+	Writes a log message with the given category and log level.
+\ingroup Logging
+	*/
 ASL_API void log(const String& cat, Log::Level level, const String& message);
+
+/**
+Writes a printf-like formatted log message with the given category and log level
+\ingroup Logging
+*/
+ASL_API void log(const String& cat, Log::Level level, ASL_PRINTF_W1 const char* fmt, ...) ASL_PRINTF_W2(3);
 
 
 #if (defined( _MSC_VER ) && _MSC_VER > 1310) || !defined(_MSC_VER)
@@ -154,43 +163,6 @@ Log a formatted message with the VERBOSE level
 
 #define ASL_LOG_WHERE_AM_I() ASL_LOG_(DEBUG, "At %s: %i [%s]", \
 	*asl::String(__FILE__).split(ASL_PATH_SEP).last(), __LINE__, __FUNCTION__)
-
-template<class T1>
-void log(const String& cat, Log::Level level, const char* fmt, T1 a1)
-{
-	log(cat, level, String(0, fmt, a1));
-}
-
-template<class T1, class T2>
-void log(const String& cat, Log::Level level, const char* fmt, T1 a1, T2 a2)
-{
-	log(cat, level, String(0, fmt, a1, a2));
-}
-
-template<class T1, class T2, class T3>
-void log(const String& cat, Log::Level level, const char* fmt, T1 a1, T2 a2, T3 a3)
-{
-	log(cat, level, String(0, fmt, a1, a2, a3));
-}
-
-template<class T1, class T2, class T3, class T4>
-void log(const String& cat, Log::Level level, const char* fmt, T1 a1, T2 a2, T3 a3, T4 a4)
-{
-	log(cat, level, String(0, fmt, a1, a2, a3, a4));
-}
-
-template<class T1, class T2, class T3, class T4, class T5>
-void log(const String& cat, Log::Level level, const char* fmt, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5)
-{
-	log(cat, level, String(0, fmt, a1, a2, a3, a4, a5));
-}
-
-template<class T1, class T2, class T3, class T4, class T5, class T6>
-void log(const String& cat, Log::Level level, const char* fmt, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6)
-{
-	log(cat, level, String(0, fmt, a1, a2, a3, a4, a5, a6));
-}
-
 }
 
 #endif

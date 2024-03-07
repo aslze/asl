@@ -6,6 +6,7 @@
 #include <asl/String.h>
 #include <asl/Array.h>
 #include <asl/Map.h>
+#include <wctype.h>
 
 #ifdef _WIN32
 #define vsnprintf _vsnprintf

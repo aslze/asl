@@ -33,6 +33,19 @@
 class QString;
 #endif
 
+#ifdef ASL_PRINTF_WARN
+#ifdef _MSC_VER
+#define ASL_PRINTF_W1 _Printf_format_string_
+#define ASL_PRINTF_W2(i)
+#else
+#define ASL_PRINTF_W1
+#define ASL_PRINTF_W2(i) __attribute__((format(printf, i, i+1)))
+#endif
+#else
+#define ASL_PRINTF_W1
+#define ASL_PRINTF_W2(i)
+#endif
+
 namespace asl {
 	
 template<class T> class Dic;
@@ -278,12 +291,12 @@ public:
 	/*
 	*/
 	int cap() const { return (_size == 0) ? ASL_STR_SPACE : _size; }
-	/**
+	/*
 	Constructs a string by formatting values using `printf`-style specification `fmt`.
 	The first argument can give an initial buffer size, but will be automatically calculated if it is 0. In
 	any case, the function will automatically allocate _space as needed.
 	*/
-	ASL_EXPLICIT String(int n, const char* fmt, ...);
+	ASL_EXPLICIT String(int n, ASL_PRINTF_W1 const char* fmt, ...) ASL_PRINTF_W2(3);
 	/**
 	Constructs a string from a 64bit long integer number
 	*/
@@ -332,12 +345,11 @@ public:
 	/**
 	Creates a string by formatting values using `printf`-style specification `fmt`.
 	*/
-	static String f(const char* fmt, ...);
+	static String f(ASL_PRINTF_W1 const char* fmt, ...) ASL_PRINTF_W2(1);
 	/**
 	Converts this string to an integer number
 	*/
 	operator int() const {return myatoi(str());}
-	//operator int() {return atoi(str());}
 	/**
 	Converts this string to an unsigned integer number
 	*/
