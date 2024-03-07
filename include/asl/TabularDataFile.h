@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_TABDATAFILE_H
@@ -95,9 +95,10 @@ public:
 	*/
 	TabularDataFile& columns(const Array<String>& cols);
 	
+	TabularDataFile& columns(int cols);
+	
 	bool ok() {return !!_file;}
 
-	bool readHeader();
 	/**
 	Returns the number of columns
 	*/
@@ -177,7 +178,9 @@ public:
 		return _row;
 	}
 protected:
+	bool readHeader();
 	void init();
+
 	mutable TextFile _file;
 	Array<String> _columnNames;
 	Array<Var> _row;
@@ -189,8 +192,7 @@ protected:
 	String _equote;
 	bool _quoteStrings;
 	bool _dataStarted;
-	int _numCols, _currCol;
-	int _flushEvery, _rowIndex;
+	int _flushEvery, _rowIndex, _numCols;
 };
 
 }

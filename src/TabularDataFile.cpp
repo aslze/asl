@@ -1,8 +1,8 @@
 #include <asl/TabularDataFile.h>
 #include <ctype.h>
 
-namespace asl {
-
+namespace asl
+{
 inline bool myisdigit(char c)
 {
 	return c >= '0' && c <= '9';
@@ -14,7 +14,8 @@ inline bool isnumber(const String& s, char dec)
 	int n = s.length();
 	if (!myisdigit(p[0]) && p[0] != '-' && p[0] != dec)
 		return false;
-	for (int i = 1; i < n; i++) {
+	for (int i = 1; i < n; i++)
+	{
 		char c = p[i];
 		if (!myisdigit(c) && c != '-' && c != '+' && c != dec && c != 'e' && c != 'E')
 			return false;
@@ -50,6 +51,12 @@ TabularDataFile::TabularDataFile(const String& filename, const Array<String>& co
 	init();
 	_name = filename;
 	columns(cols);
+}
+
+TabularDataFile& TabularDataFile::columns(int cols)
+{
+	_numCols = cols;
+	return *this;
 }
 
 TabularDataFile& TabularDataFile::columns(const Array<String>& cols)
@@ -88,9 +95,14 @@ TabularDataFile& TabularDataFile::columns(const Array<String>& cols)
 			String type;
 			switch(typec)
 			{
-			case 'n': type = "numeric"; break;
-			case 's': type = "string"; break;
-			case 'c': type = '{' + parts[1].replaceme('|', ',') + '}';
+			case 'n':
+				type = "numeric";
+				break;
+			case 's':
+				type = "string";
+				break;
+			case 'c':
+				type = '{' + parts[1].replaceme('|', ',') + '}';
 			}
 			_file << "@attribute " << parts[0] << ' ' << type << '\n';
 		}
@@ -128,11 +140,17 @@ TabularDataFile& TabularDataFile::operator<<(const Var& x)
 		}
 		for(int i=0; i<_row.length(); i++)
 		{
-			bool quote = false;
 			if(i>0)
 				row << _separator;
 			Var& item = _row[i];
 			String value = item.ok() ? item.toString() : String();
+
+			if (item.is(Var::NUMBER))
+			{
+				float y = item; // print nans empty
+				if (y != y)
+					continue;
+			}
 			if (_decimal != '.' && item.is(Var::NUMBER))
 			{
 				value.replaceme('.', _decimal);
@@ -171,21 +189,6 @@ Array<Array<Var> > TabularDataFile::data()
 	return data;
 }
 
-
-/*
-void mysplit(const String& s, char sep, Array<String>& out)
-{
-	out.clear();
-	int j=0, n=s.length();
-	for(int i=0; i<=n; i=j+1)
-	{
-		j=s.indexOf(sep, i);
-		if(j==-1) j=n;
-		out << s.substring(i, j);
-	}
-}
-*/
-
 bool TabularDataFile::readHeader()
 {
 	if (_file)
@@ -195,7 +198,12 @@ bool TabularDataFile::readHeader()
 		return false;
 	String& line = _currentLine;
 	line = _file.readLine();
-	if (line.contains(';')) {
+	
+	if (line.length() >= 3 && line.startsWith("\xef\xbb\xbf")) // eat BOM
+	    line = line.substr(3);
+	
+	if (line.contains(';'))
+	{
 		_separator = ';';
 		_decimal = ',';
 	}
@@ -220,7 +228,9 @@ bool TabularDataFile::readHeader()
 
 enum State
 {
-	BASE, QUOTE, QUOTE2
+	BASE,
+	QUOTE,
+	QUOTE2
 };
 
 bool TabularDataFile::nextRow()
@@ -231,10 +241,12 @@ bool TabularDataFile::nextRow()
 		if (!readHeader())
 			return false;
 	}
-	if(_file.end())
+	if (_file.end() || !_file.readLine(line))
 		return false;
-	if(!_file.readLine(line)) 
-		return false;
+	
+	if (!_dataStarted && line.length() >= 3 && line.startsWith("\xef\xbb\xbf")) // eat BOM
+		line = line.substr(3);
+	
 	Array<String>& row = _currentRowParts;
 
 	row.clear();
@@ -297,23 +309,35 @@ bool TabularDataFile::nextRow()
 		{
 			switch(_types[i])
 			{
-			case 'n': if(decimal!='.') v.replaceme(decimal, '.'); _row << myatof(*v); break;
-			case 's': _row << v; break;
-			case 'i': _row << myatoi(*v); break;
-			case 'h': _row << v.hexToInt(); break;
+			case 'n':
+				if (decimal != '.')
+					v.replaceme(decimal, '.');
+				_row << myatof(*v);
+				break;
+			case 's':
+				_row << v;
+				break;
+			case 'i':
+				_row << myatoi(*v);
+				break;
+			case 'h':
+				_row << v.hexToInt();
+				break;
 			}
 		}
-		else {
+		else
+		{
 			if (isnumber(v, decimal))
 			{
-				if(decimal!='.') v.replaceme(decimal, '.');
+				if (decimal != '.')
+					v.replaceme(decimal, '.');
 					_row << myatof(*v);
 			}
 			else
 				_row << v;
 		}
 	}
-
+	_dataStarted = true;
 	return true;
 }
 
