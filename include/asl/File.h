@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_FILE_H
@@ -152,14 +152,16 @@ public:
 	*/
 	String directory() const;
 	/**
-	Returns true if the 'file' is a directory
+	Returns true if the 'file' path is a directory
 	*/
 	bool isDirectory() const;
 	/**
-	Returns true if the file exists
+	Returns true if the 'file' path exists (file or directory)
 	*/
 	bool exists() const { _info.clear(); return creationDate().time() != 0; }
-
+	/**
+	Returns true if the 'file' path exists and is actually a file
+	*/
 	bool isFile() const { return creationDate().time() != 0 && !isDirectory(); }
 
 	/**

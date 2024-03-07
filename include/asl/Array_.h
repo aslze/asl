@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_ARRAYX_H
@@ -192,8 +192,9 @@ public:
 	/**
 	Returns a string representation of the array, formed by joining its
 	elements with commas. The elements need to be convertible to String
+	\deprecated Use .join()
 	*/
-	ASL_DEPRECATED(operator String() const, "Use join()");
+	ASL_DEPRECATED(operator String() const, "Use .join()");
 	/**
 	Returns a string representation of the array, formed by joining its
 	elements with the given separator string sep. The elements need to be

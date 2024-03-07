@@ -174,16 +174,18 @@ public:
 	Removes all elements in the array
 	*/
 	void clear() { resize(0); }
-	/* Frees all elements (with delete) and clears the array; elements must be pointers */
+	/* Frees all elements (with delete) and clears the array; elements must be pointers
+	\deprecated Delete items explicitly or use smart pointers
+	*/
 	ASL_DEPRECATED(void destroy(), "") { for(int i=0; i<length(); i++) delete _a[i]; clear(); }
 	/**
 	Returns a pointer to the base of the array
-	\deprecated this conversion will not be implicit! Use .data()
+	\deprecated This conversion will not be implicit! Use .data()
 	*/
 	ASL_DEPRECATED(operator const T*() const, "Use .data()") { return &_a[0]; }
 	/**
 	Returns a pointer to the base of the array
-	\deprecated this conversion will not be implicit! Use .data()
+	\deprecated This conversion will not be implicit! Use .data()
 	*/
 	ASL_DEPRECATED(operator T*(), "Use .data()") { return &_a[0]; }
 	/**

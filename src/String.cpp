@@ -64,11 +64,15 @@ int local8toUtf16(const char* u, wchar_t* p, int n)
 #endif
 }
 
-int local8toUtf32(const char* u, int* p, int)
+int local8toUtf32(const char* u, int* p, int n)
 {
 	int* p0 = p;
 	while (int c = *u++)
+	{
 		*p++ = c;
+		if (--n == 0)
+			break;
+	}
 	*p = 0;
 	return int(p - p0);
 }
@@ -102,7 +106,7 @@ int utf32toUtf8(const int* p, char* u, int n)
 	return int(u - u0);
 }
 
-int utf8toUtf32(const char* u, int* p, int)
+int utf8toUtf32(const char* u, int* p, int n)
 {
 	int* p0 = p;
 	while (int c = *u++)
@@ -131,12 +135,14 @@ int utf8toUtf32(const char* u, int* p, int)
 			if (c4 == 0) break;
 			*p++ = ((c & 0x07) << 18) | ((c2 & 0x3f) << 12) | ((c3 & 0x3f) << 6) | (c4 & 0x3f);
 		}
+		if (--n == 0)
+			break;
 	}
 	*p = 0;
 	return int(p - p0);
 }
 
-int utf16toUtf8(const wchar_t* p, char* u, int)
+int utf16toUtf8(const wchar_t* p, char* u, int n)
 {
 	char* u0 = u;
 	while(wchar_t c = *p++) {
@@ -162,13 +168,16 @@ int utf16toUtf8(const wchar_t* p, char* u, int)
 			*u++ = ((d >> 6 & 0x3F) | 0x80);
 			*u++ = ((d & 0x3F) | 0x80);
 		}
-		else break;
+		else
+			break;
+		if (--n == 0)
+			break;
 	}
 	*u='\0';
 	return int(u - u0);
 }
 
-int utf8toUtf16(const char* u, wchar_t* p, int)
+int utf8toUtf16(const char* u, wchar_t* p, int n)
 {
 	wchar_t* p0 = p;
 	while(int c = *u++)
@@ -199,7 +208,10 @@ int utf8toUtf16(const char* u, wchar_t* p, int)
 			*p++ = (d >> 10) + 0xd800;
 			*p++ = (d & 0x3ff) + 0xdc00;
 		}
-		else break;
+		else
+			break;
+		if (--n == 0)
+			break;
 	}
 	*p=L'\0';
 	return int(p - p0);
@@ -518,9 +530,8 @@ bool String::isTrue() const
 Array<int> String::chars() const
 {
 	Array<int> c(length() + 1);
-	int        n = utf8toUtf32(str(), c.data(), 1);
-	c.resize(n);
-	return c;
+	int        n = utf8toUtf32(str(), c.data(), length());
+	return c.resize(n);
 }
 
 void String::assign(const char* b, int n)
@@ -868,42 +879,6 @@ Long myatol(const char* s)
 		y = 10 * y + (c - '0');
 	return y*sgn;
 }
-
-/*
-double myatof(const char* s)
-{
-double y = 0;
-double m = 1;
-int exp = 0;
-if (s[0] == '-') { m = -1; s++; }
-const char* p = strchr(s, '.');
-if(p) {
-p++;
-while (*p != '\0' && *p!='e' && *p!='E') {
-exp--;
-p++;
-}
-p--;
-}
-if (!p) p = s;
-while(*p++)
-if(*p == 'e' || *p == 'E'){
-if(*(p+1) == '+')
-p++;
-exp += myatoiz(p+1);
-break;
-}
-while(int c=*s++)
-{
-if(c=='.') continue;
-if(c=='E' || c=='e') break;
-y = 10.0*y + (c-'0');
-}
-if(exp != 0)
-y *= pow(10.0, exp);
-return y * m;
-}
-*/
 
 double myatof(const char* s)
 {

@@ -190,9 +190,9 @@ public:
 	Var json() const;
 
 	/**
-	\deprecated Use json()
+	\deprecated Use .json()
 	*/
-	ASL_DEPRECATED(Var data() const, "Use json()") { return json(); }
+	ASL_DEPRECATED(Var data() const, "Use .json()") { return json(); }
 
 	bool write();
 	/**

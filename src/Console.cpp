@@ -1,5 +1,8 @@
 #include <asl/Console.h>
 #include <asl/defs.h>
+#ifdef _WIN32
+#include <locale.h>
+#endif
 
 namespace asl {
 
@@ -45,9 +48,13 @@ Console::~Console()
 	}
 }
 
-void Console::setCP(int cp)
+void Console::setCP(int cp, bool loc)
 {
 	SetConsoleOutputCP(cp == 0 ? _cp0 : cp < 0 ? GetACP() : cp);
+#ifdef ASL_ANSI
+	if (loc)
+		setlocale(LC_CTYPE, ".ACP");
+#endif
 }
 
 void Console::gotoxy(int x, int y)
@@ -174,7 +181,7 @@ Console::~Console()
 		color();
 }
 
-void Console::setCP(int cp) {}
+void Console::setCP(int cp, bool loc) {}
 
 void Console::gotoxy(int x, int y)
 {

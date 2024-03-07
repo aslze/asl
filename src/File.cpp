@@ -280,7 +280,7 @@ bool File::put(const Array<byte>& data)
 {
 	if(!_file && !open(_path, WRITE))
 		return false;
-	return write(data.ptr(), data.length()) == data.length();
+	return write(data.data(), data.length()) == data.length();
 }
 
 Array<byte> File::firstBytes(int n)
@@ -321,7 +321,7 @@ File File::temp(const String& ext)
 	unsigned pid = (unsigned)getpid();
 #endif
 	do {
-		file._path = String(0, "%s/%04x%08x%08x%s", *tmpDir, pid, p, num++, *ext);
+		file._path = String::f("%s/%04x%08x%08x%s", *tmpDir, pid, p, num++, *ext);
 	} while (file.exists());
 	file.open(File::WRITE);
 	return file;

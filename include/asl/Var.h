@@ -317,6 +317,10 @@ class ASL_API Var
 	*/
 	operator bool() const;
 
+	/**
+	Returns a char pointer to the beginning of the string if this var is a string; this
+	is faster than calling `.toString()` but will not stringify numbers or other types.
+	*/
 	const char* operator*() const;
 
 	ASL_DEPRECATED(operator const char*() const, "Use operator*") { return *(*this); }

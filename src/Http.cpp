@@ -582,7 +582,7 @@ bool HttpMessage::write()
 	if (_fileBody)
 		return putFile(_body);
 	else
-		return write((const char*)_body.ptr(), _body.length()) > 0;
+		return write((const char*)_body.data(), _body.length()) > 0;
 }
 
 void HttpMessage::write(const String& text)

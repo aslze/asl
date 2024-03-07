@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_CONSOLE_H
@@ -77,9 +77,10 @@ public:
 	~Console();
 	
 	/**
-	On Windows, sets the console output code page (if 0 given, uses the system code page, if -1 uses the default console page)
+	On Windows, sets the console output code page (if 0 given, uses the system code page, if -1 uses the default console page),
+	and if loc is true sets the locale for string case management to the system locale. (this behavior might change in the future)
 	*/
-	void setCP(int cp = 0);
+	void setCP(int cp = 0, bool loc = false);
 	
 	/**
 	Sets the cursor position to coordinates `x`, `y`
