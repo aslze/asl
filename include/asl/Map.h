@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_MAP_H
@@ -85,7 +85,6 @@ public:
 		K key;
 		T value;
 		KeyVal(): key(K()), value(T()) {}
-		KeyVal(const K& n): key(n), value(T()) {}
 		KeyVal(const K& n, const T& v): key(n), value(v) {}
 	};
 protected:
@@ -131,6 +130,7 @@ public:
 #ifdef ASL_HAVE_INITLIST
 	Map(std::initializer_list< KeyVal > b)
 	{
+		a.reserve((int)b.size());
 		for (const KeyVal* p = b.begin(); p != b.end(); p++)
 			set(p->key, p->value);
 	}
@@ -221,7 +221,7 @@ public:
 	const T& operator[](const K& key) const
 	{
 		const T* p = find(key);
-		static T def;
+		static T def = T();
 		return p ? *p : def;
 	}
 
@@ -341,7 +341,7 @@ T& Map<K,T>::operator[](const K& key)
 		return a[i].value;
 	else
 	{
-		a.insert(-i-1, KeyVal(key));
+		a.insert(-i-1, KeyVal(key, T()));
 		return a[-i-1].value;
 	}
 }
@@ -379,6 +379,7 @@ public:
 	void operator=(std::initializer_list< KV > b)
 	{
 		this->clear();
+		this->reserve((int)b.size());
 		for (int i = 0; i < (int)b.size(); i++)
 		{
 			const KV& kv = b.begin()[i];

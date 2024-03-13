@@ -162,14 +162,25 @@ public:
 	Returns the number of elements in the array
 	*/
 	int length() const {return d().n;}
+
 	/**
-	Resizes the array to a capacity of m elements; up to m existing elements are preserved
+	Reserves space for m elements without increasing actual length (to make appending faster),
+	but decreases length if m is less than current size
 	*/
-	Array& resize(int m);
+	Array& reserve(int m);
 	/**
-	Reserves space for m elements without changing actual length
+	Resizes the array to m elements; up to m existing elements are preserved
 	*/
-	void reserve(int m) { int n = length(); resize(m); resize(n); }
+	Array& resize(int m)
+	{
+		int n = d().n;
+		reserve(m);
+		if (m > n)
+			asl_construct(_a + n, m - n);
+		d().n = m;
+		return *this;
+	}
+
 	/**
 	Removes all elements in the array
 	*/
@@ -381,10 +392,12 @@ public:
 	*/
 	Array& remove(int i)
 	{
+		int m = d().n;
+		if (i >= m)
+			return *this;
 		asl_destroy(_a+i);
-		memmove(_a+i, _a+i+1, (d().n-i-1)*sizeof(T));
-		d().n --;
-		resize(d().n);
+		memmove(_a+i, _a+i+1, (m-i-1)*sizeof(T));
+		resize(m - 1);
 		return *this;
 	}
 	/**
@@ -392,23 +405,12 @@ public:
 	*/
 	Array& remove(int i, int n)
 	{
+		int m = d().n;
+		if (i + n > m)
+			return *this;
 		asl_destroy(_a+i, n);
-		memmove(_a+i, _a+i+n, (d().n-i-n)*sizeof(T));
-		d().n -= n;
-		resize(d().n);
-		return *this;
-	}
-	/*
-	Removes n elements starting at position i.
-	*/
-	Array& remove(Enumerator& i, int n = 1)
-	{
-		asl_destroy(_a+i.i, n);
-		memmove(_a+i.i, _a+i.i+n, (d().n-i.i-n)*sizeof(T));
-		d().n -= n;
-		--i.i;
-		--i.j;
-		resize(d().n);
+		memmove(_a+i, _a+i+n, (m-i-n)*sizeof(T));
+		resize(m - n);
 		return *this;
 	}
 	/**
@@ -631,10 +633,8 @@ An alias for Array<byte>
 typedef Array<byte> ByteArray;
 
 template <class T>
-Array<T>& Array<T>::resize(int m)
+Array<T>& Array<T>::reserve(int m)
 {
-	//if(length()==m)
-	//	return;
 	int s=d().s;
 	int s1 = (m > s)? max(8*s/4, m) : s;
 	T* b = _a;
@@ -658,8 +658,11 @@ Array<T>& Array<T>::resize(int m)
 		s1 = s;
 		d().s = s1;
 	}
-	if(n<m) asl_construct(b+n, m-n);
-	else asl_destroy(_a+m, n-m);
+	if (m < n)
+	{
+		asl_destroy(_a + m, n - m);
+		d().n = m;
+	}
 	if(s1 != s)
 	{
 		int rc = d().rc;
@@ -668,8 +671,8 @@ Array<T>& Array<T>::resize(int m)
 		_a = b;
 		d().rc = rc;
 		d().s = s1;
+		d().n = n;
 	}
-	d().n = m;
 	return *this;
 }
 
