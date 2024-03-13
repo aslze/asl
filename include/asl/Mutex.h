@@ -27,10 +27,14 @@ class Mutex
 {
 	CRITICAL_SECTION _mutex;
 public:
+#pragma warning(push)
+#pragma warning(disable : 28125)
 	Mutex()
 	{
 		InitializeCriticalSection(&_mutex);
 	}
+#pragma warning(pop)
+
 	~Mutex()
 	{
 		DeleteCriticalSection(&_mutex);

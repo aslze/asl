@@ -50,7 +50,7 @@ namespace asl {
 	
 template<class T> class Dic;
 
-/**
+/*
 A substitute of `printf` that works on MingW with UTF8 text
 */
 void ASL_API printf_(const char* fmt, ...);
@@ -146,7 +146,7 @@ protected:
 	void init(int n) {alloc(n); _len=n;}
 	char* str() { return (_size == 0) ? (char*)_space : (char*)_str; }
 	const char* str() const {return (_size==0)? (const char*)_space : (const char*)_str;}
-	String(void*) {} // avoid accidental construction from arbitrary pointers
+	String(void*): _size(0), _len(0) {} // avoid accidental construction from arbitrary pointers
 public:
 	/**
 	Constructs an empty string
@@ -164,14 +164,6 @@ public:
 		init(max(cap, n));
 		_len=n;
 		str()[n] = '\0';
-	}
-	/**
-	Constructs a string from a C string (pointer to null-terminated string)
-	*/
-	String(char* txt)
-	{
-		init((int)strlen(txt));
-		memcpy(str(), txt, _len+1);
 	}
 	/**
 	Constructs a string from a C string (pointer to null-terminated string)

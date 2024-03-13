@@ -164,7 +164,7 @@ void Log::log(const String& cat, Log::Level level, const String& message)
 		color = Console::GREEN;
 		break;
 	case Log::VERBOSE:
-		color = Console::BLUE;
+		color = Console::CYAN;
 		break;
 	default:
 		break;

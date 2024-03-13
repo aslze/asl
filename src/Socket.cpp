@@ -105,7 +105,7 @@ int Sockets::waitInput(double t)
 	return changed.length();
 }
 
-bool Sockets::hasInput(Socket& s)
+bool Sockets::hasInput(const Socket& s)
 {
 	return set.contains(s);
 }
@@ -184,12 +184,12 @@ int InetAddress::port() const
 InetAddress& InetAddress::setPort(int port)
 {
 	if (_type == IPv6) {
-		sockaddr_in6* addr = (sockaddr_in6*)_data.ptr();
-		addr->sin6_port = htons(port);
+		sockaddr_in6* addr = (sockaddr_in6*)_data.data();
+		addr->sin6_port = htons((unsigned short)port);
 	}
 	else if (_type == IPv4) {
-		sockaddr_in* addr = (sockaddr_in*)_data.ptr();
-		addr->sin_port = htons(port);
+		sockaddr_in* addr = (sockaddr_in*)_data.data();
+		addr->sin_port = htons((unsigned short)port);
 	}
 	return *this;
 }
@@ -256,7 +256,7 @@ Array<InetAddress> InetAddress::lookup(const String& host)
 		verbose_print("Cannot resolve %s\n", *host);
 		return addresses;
 	}
-	for (struct addrinfo* ai = info; ai != NULL; ai = ai->ai_next) {
+	for (const struct addrinfo* ai = info; ai != NULL; ai = ai->ai_next) {
 		InetAddress a;
 		if (ai->ai_family == AF_INET)
 			a._type = IPv4;
@@ -298,7 +298,7 @@ bool InetAddress::set(const String& host, int port)
 			_data.clear();
 			return false;
 		}
-		addrinfo* inf = info;
+		const addrinfo* inf = info;
 		for (addrinfo* ai = info; ai != NULL; ai = ai->ai_next) {
 			if (ai->ai_family == AF_INET) {
 				inf = ai;

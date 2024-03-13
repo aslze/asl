@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_DATE_H
@@ -77,7 +77,7 @@ public:
 		FULL       //!< "2021-11-29T23:31:10.253Z" (with milliseconds)
 	};
 	enum Zone {UTC, LOCAL};
-	Date() {}
+	Date() : _t(0) {}
 	Date(double t) : _t(t) {}
 	Date(const Date& d) : _t(d._t) {}
 	/**

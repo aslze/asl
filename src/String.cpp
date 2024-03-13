@@ -67,7 +67,7 @@ int local8toUtf16(const char* u, wchar_t* p, int n)
 
 int local8toUtf32(const char* u, int* p, int n)
 {
-	int* p0 = p;
+	const int* p0 = p;
 	while (int c = *u++)
 	{
 		*p++ = c;
@@ -80,7 +80,7 @@ int local8toUtf32(const char* u, int* p, int n)
 
 int utf32toUtf8(const int* p, char* u, int n)
 {
-	char* u0 = u;
+	const char* u0 = u;
 	while (int c = *p++) {
 		if (c < 0x80) {
 			*u++ = c & 0xff;
@@ -109,7 +109,7 @@ int utf32toUtf8(const int* p, char* u, int n)
 
 int utf8toUtf32(const char* u, int* p, int n)
 {
-	int* p0 = p;
+	const int* p0 = p;
 	while (int c = *u++)
 	{
 		if ((c & 0x80) == 0) {
@@ -145,7 +145,7 @@ int utf8toUtf32(const char* u, int* p, int n)
 
 int utf16toUtf8(const wchar_t* p, char* u, int n)
 {
-	char* u0 = u;
+	const char* u0 = u;
 	while(wchar_t c = *p++) {
 		if(c < 0x80) {
 			*u++ = c & 0xff;
@@ -161,7 +161,7 @@ int utf16toUtf8(const wchar_t* p, char* u, int n)
 		}
 		else if (c < 0xdc00) { // 1st surrogate
 			int c2 = *p++;
-			if (c2 == 0 || c2 < 0xdc00 || c2 > 0xdfff)
+			if (c2 < 0xdc00 || c2 > 0xdfff)
 				break;
 			unsigned int d = ((((unsigned int)c - 0xd800) << 10) | (c2 - 0xdc00)) + 0x10000;
 			*u++ = (d >> 18 | 0xF0);
@@ -180,7 +180,7 @@ int utf16toUtf8(const wchar_t* p, char* u, int n)
 
 int utf8toUtf16(const char* u, wchar_t* p, int n)
 {
-	wchar_t* p0 = p;
+	const wchar_t* p0 = p;
 	while(int c = *u++)
 	{
 		if((c & 0x80) == 0) {
@@ -319,7 +319,7 @@ String String::fromCodes(const Array<int>& codes)
 String String::fromCode(int code)
 {
 #ifndef ASL_ANSI
-	int codes[] = { code, 0 };
+	const int codes[] = { code, 0 };
 	String s(4, 0);
 	s.fix(utf32toUtf8(codes, s.str(), 1));
 #else

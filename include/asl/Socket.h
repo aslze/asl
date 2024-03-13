@@ -32,7 +32,7 @@ public:
 	const Socket& operator[](int i) const { return set[i]; }
 	Sockets& operator<<(Socket& s);
 	int waitInput(double t=60);
-	bool hasInput(Socket& s);
+	bool hasInput(const Socket& s);
 	Socket& activeAt(int i) {return changed[i];}
 	void close();
 };
