@@ -397,6 +397,7 @@ public:
 			return *this;
 		asl_destroy(_a+i);
 		memmove(_a+i, _a+i+1, (m-i-1)*sizeof(T));
+		d().n--;
 		resize(m - 1);
 		return *this;
 	}
@@ -410,6 +411,7 @@ public:
 			return *this;
 		asl_destroy(_a+i, n);
 		memmove(_a+i, _a+i+n, (m-i-n)*sizeof(T));
+		d().n -= n;
 		resize(m - n);
 		return *this;
 	}

@@ -78,8 +78,8 @@ void Xml::remove(const Xml& e)
 	for (int i = 0; i < numChildren(); i++)
 	{
 		if (child(i)._p == e._p) {
-			remove(i);
 			e._()->parent = NULL;
+			remove(i);
 			return;
 		}
 	}
