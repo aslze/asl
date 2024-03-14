@@ -325,18 +325,27 @@ public:
 		write(*x, x.length());
 		return *this;
 	}
+	/**
+	Reads n bytes from the socket a string
+	*/
+	String readString(int n)
+	{
+		String s(n, 0);
+		n = read(&s[0], n);
+		if (n >= 0)
+			s[n] = '\0';
+		return s.fix();
+	}
 
 	/**
 	Reads a string from the socket that is preceded by its length as an int32 (the sender must send the byte length before)
+	\deprecated Too specific
 	*/
 	Socket& operator>>(String& x)
 	{
-		int n;
+		int n = 0;
 		*this >> n;
-		x.resize(n);
-		x[n] = '\0';
-		n = read(&x[0], n);
-		x.fix(n >= 0 ? n : 0);
+		x = readString(n);
 		return *this;
 	}
 

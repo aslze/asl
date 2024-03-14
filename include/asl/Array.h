@@ -388,23 +388,9 @@ public:
 	*/
 	Array& operator,(const T& x) { return (*this) << x; }
 	/**
-	Removes the element at position i.
+	Removes n elements (1 be default) starting at position i.
 	*/
-	Array& remove(int i)
-	{
-		int m = d().n;
-		if (i >= m)
-			return *this;
-		asl_destroy(_a+i);
-		memmove(_a+i, _a+i+1, (m-i-1)*sizeof(T));
-		d().n--;
-		resize(m - 1);
-		return *this;
-	}
-	/**
-	Removes n elements starting at position i.
-	*/
-	Array& remove(int i, int n)
+	Array& remove(int i, int n = 1)
 	{
 		int m = d().n;
 		if (i + n > m)

@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_SOCKETSERVER_H
@@ -13,7 +13,7 @@ struct SockClientThread;
 
 /**
 This is a reusable TCP socket server that listens to incoming connections and answers them concurrently (default) or sequentially.
-To make an actual server, derive a class from it and implement the virtual function `serve()`. That function will
+To make an actual server, derive a class from it and implement the virtual function `serve()`. That function will be called
 whenever a new connection arrives.
 
 ~~~

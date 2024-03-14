@@ -221,7 +221,7 @@ static const double PI = 3.14159265358979323;
 static const float  PIf = 3.1415926536f;
 
 template<class T>
-inline void vswap(T& a, T& b)
+inline void swap(T& a, T& b)
 {
 	T A = a;
 	a = b;
@@ -229,7 +229,7 @@ inline void vswap(T& a, T& b)
 }
 
 template<class T>
-inline void swap(T& a, T& b)
+inline void bswap(T& a, T& b)
 {
 	char t[sizeof(T)];
 	memcpy(t, &a, sizeof(T));
@@ -273,7 +273,7 @@ class ASL_API Random
 	ULong _state[4];
 	static const int _size;
 public:
-	Random(bool autoseed = true, bool fast = true);
+	ASL_EXPLICIT Random(bool autoseed = true, bool fast = true);
 	/** Returns an integer pseudo-random number in the [0, 2^32-1] interval */
 	unsigned get();
 

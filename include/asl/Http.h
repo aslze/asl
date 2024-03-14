@@ -113,6 +113,7 @@ struct HttpStatus
 
 struct HttpSink
 {
+	virtual ~HttpSink() {}
 	virtual int write(byte*, int) { return 0; }
 	virtual void use(HttpMessage*) {}
 	virtual void init(int) {}

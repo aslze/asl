@@ -202,7 +202,7 @@ class ASL_API Var
 	void copy(const Var& v);
 #ifdef ASL_HAVE_MOVE
 	Var(Var&& v) {memcpy(this, &v, sizeof(Var)); v._type = NONE;}
-	void operator=(Var&& v) {swap(*this, v);}
+	void operator=(Var&& v) {bswap(*this, v);}
 #endif
 #ifdef ASL_HAVE_INITLIST
 

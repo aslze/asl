@@ -267,7 +267,7 @@ public:
 		s._size = 0;
 	}
 	void operator=(String&& s) {
-		swap(*this, s);
+		bswap(*this, s);
 	}
 #endif
 	/**
@@ -411,7 +411,7 @@ public:
 	double toDouble() const { return atof(str()); }
 	float toFloat() const {return (float)atof(str());}
 	/**
-	Returns true if this string represents a non-false value (e.g. none of: "", "0", "N", "false", "no")
+	Returns true if this string represents a non-false value (e.g. none of: "", "0", "false", "False", "FALSE", "no", "NO")
 	*/
 	bool isTrue() const;
 	Long toLong() const;

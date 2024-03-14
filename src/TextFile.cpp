@@ -179,14 +179,14 @@ bool TextFile::append(const String& s)
 {
 	if (!_file && !open(APPEND))
 		return false;
-	return fwrite(*s, 1, s.length(), _file) >= s.length();
+	return (int)fwrite(*s, 1, s.length(), _file) >= s.length();
 }
 
 bool TextFile::write(const String& s)
 {
 	if (!_file && !open(WRITE))
 		return false;
-	return fwrite(*s, 1, s.length(), _file) >= s.length();
+	return (int)fwrite(*s, 1, s.length(), _file) >= s.length();
 }
 
 TextFile& TextFile::operator>>(char &x)

@@ -52,7 +52,7 @@ int utf16toLocal8(const wchar_t* p, char* u, int n)
 	BOOL used = false;
 	return WideCharToMultiByte(CP_ACP, 0, p, -1, u, n + 1, &def, &used) - 1;
 #else
-	return (int)wcstombs(u, p, n);
+	return (int)wcstombs(u, p, n + 1);
 #endif
 }
 
@@ -61,7 +61,7 @@ int local8toUtf16(const char* u, wchar_t* p, int n)
 #ifdef _WIN32
 	return MultiByteToWideChar(CP_ACP, 0, u, -1, p, n + 1) - 1;
 #else
-	return (int)mbstowcs(p, u, n);
+	return (int)mbstowcs(p, u, n + 1);
 #endif
 }
 
@@ -224,16 +224,16 @@ String localToUtf8(const String& a)
 	int n = local8toUtf16(*a, ws.data(), a.length());
 	String u(a.length() * 4, 0);
 	n = utf16toUtf8(ws.data(), u.data(), n);
-	return u.fix(n - 1);
+	return u.fix(n);
 }
 
 String utf8ToLocal(const String& a)
 {
-	String s(a.length(), 0);
+	String s(a.length() * 2, 0);
 	Array<wchar_t> ws(a.length() + 1);
 	int n = utf8toUtf16(*a, ws.data(), a.length());
-	n = utf16toLocal8(ws.data(), s.data(), n);
-	return s.fix(n - 1);
+	utf16toLocal8(ws.data(), s.data(), n);
+	return s.fix();
 }
 
 int String::Enumerator::operator*()
@@ -516,8 +516,8 @@ String String::toLocal() const
 #ifdef ASL_ANSI
 	return *this;
 #else
-	Array<char> s(length() + 1);
-	utf16toLocal8(dataw(), s.data(), length());
+	Array<char> s(length() * 2 + 1);
+	utf16toLocal8(dataw(), s.data(), s.length());
 	return String(s.data());
 #endif
 }
