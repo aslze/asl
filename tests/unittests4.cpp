@@ -158,6 +158,13 @@ ASL_TEST(Array2)
 	Array2<int> a4 = a.slice(0, 2, 1, 2);
 
 	ASL_ASSERT(a4 == Array2<int>(2, 1, array(1, 11)));
+
+#ifdef ASL_HAVE_RANGEFOR
+	float s = 0;
+	for (auto& x : a4)
+		s += x;
+	ASL_ASSERT(s == 12);
+#endif
 }
 
 ASL_TEST(Matrix)
@@ -189,6 +196,13 @@ ASL_TEST(Matrix)
 	ASL_ASSERT(C(0, 0) == 3 && C(1, 0) == 5);
 	ASL_ASSERT(C[0] == 3 && C[1] == 5);
 
+#endif
+
+#ifdef ASL_HAVE_RANGEFOR
+	float s = 0;
+	for (auto& x : A)
+		s += x;
+	ASL_ASSERT(s == 5);
 #endif
 }
 

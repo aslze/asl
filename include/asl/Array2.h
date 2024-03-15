@@ -268,13 +268,13 @@ inline IndexIJEnumerator end(const IndexIJEnumerator& e) { return e.all(); }
 template<class T>
 typename Array<T>::Enumerator begin(const Array2<T>& a)
 {
-	return a.data().all();
+	return a.array().all();
 }
 
 template<class T>
 typename Array<T>::Enumerator end(const Array2<T>& a)
 {
-	return a.data().all();
+	return a.array().all();
 }
 
 #endif
