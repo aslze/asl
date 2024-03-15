@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_SOCKET_H
@@ -74,8 +74,8 @@ public:
 	Returns the host IP as a string
 	*/
 	String host() const;
-	byte* ptr() {return _data.ptr();}
-	const byte* ptr() const {return _data.ptr();}
+	byte* ptr() {return _data.data();}
+	const byte* ptr() const {return _data.data();}
 	unsigned length() const {return _data.length();}
 	/**
 	Returns the type IPv4 or IPv6 of this address
@@ -229,7 +229,7 @@ public:
 	/**
 	Writes the byte array to the socket and returns the number of bytes actually sent.
 	*/
-	int write(const ByteArray& data) { return _()->write(data.ptr(), data.length()); }
+	int write(const ByteArray& data) { return _()->write(data.data(), data.length()); }
 	/**
 	Reads n bytes and returns them as an array of bytes, or reads all available bytes if no argument is given.
 	*/
@@ -408,7 +408,7 @@ public:
 	/**
 	Sends a data packet to the address `addr`.
 	*/
-	void sendTo(const InetAddress& addr, const ByteArray& data) { sendTo(addr, data.ptr(), data.length()); }
+	void sendTo(const InetAddress& addr, const ByteArray& data) { sendTo(addr, data.data(), data.length()); }
 
 	void sendTo(const InetAddress& addr, const String& data) { sendTo(addr, data.data(), data.length()); }
 
@@ -428,7 +428,7 @@ public:
 	ByteArray readFrom(InetAddress& addr, int n = 1000)
 	{
 		ByteArray data(n);
-		n = _()->readFrom(addr, data.ptr(), n);
+		n = _()->readFrom(addr, data.data(), n);
 		return n > 0? data.resize(n) : data.resize(0);
 	}
 };

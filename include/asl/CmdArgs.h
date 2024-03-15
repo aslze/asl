@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef CMDLINE_H
@@ -34,7 +34,7 @@ CmdArgs args(argc, argv);
 
 String format = args["format"];
 int quality = args["q"] | 90;             // use value 90 if the option is not given
-bool fast = args.is("fast");
+bool fast = args.has("fast");
 
 for( int i=0; i < args.length(); i++)
 {
@@ -98,7 +98,7 @@ public:
 	String operator[](const String& opt) const;
 	/** Returns the value of option named `opt` or the default value `def` if it was not defined */
 	String operator()(const String& opt, const String& def) const;
-	/** Returns the rest argument at index `i` (after the options) */
+	/** Returns the rest argument at index `i` (excluding options), or empty string if `i` is past the number of arguments */
 	String operator[](int i) const;
 	/** Returns an array with all values of option `opt` if more than one was given */
 	Array<String> operator()(const String& opt) const;

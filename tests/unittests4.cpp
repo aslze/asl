@@ -106,7 +106,7 @@ ASL_TEST(StreamBuffer)
 	ASL_ASSERT(b.length() == 14);
 	ASL_ASSERT(b[0] == 'a' && b[1] == 0x04 && b[2] == 0 && b[3] == 0 && b[4] == 0)
 
-	StreamBufferReader c(b.ptr(), b.length());
+	StreamBufferReader c(b.data(), b.length());
 	signed char a;
 	int x;
 	double y;
@@ -126,7 +126,7 @@ ASL_TEST(StreamBuffer)
 	ASL_ASSERT(b2.length() == 13);
 	ASL_ASSERT(b2[0] == 'a' && b2[1] == 0 && b2[2] == 0 && b2[3] == 0 && b2[4] == 4)
 
-	StreamBufferReader c2(b2.ptr(), b2.length(), ENDIAN_BIG);
+	StreamBufferReader c2(b2.data(), b2.length(), ENDIAN_BIG);
 	c2 >> a >> x >> y;
 
 	ASL_ASSERT(a == 'a' && x == 4 && y == 3.5);

@@ -109,20 +109,6 @@ public:
 	}
 };
 
-
-/*
-Parses the given string as XML and returns the equivalent DOM tree.
-\deprecated Use Xml::decode()
-*/
-ASL_DEPRECATED(Xml ASL_API decodeXML(const String& xml), "Use Xml::decode()");
-
-/*
-Encodes the given XML document as XML, with or without formatting.
-\deprecated Use Xml::encode()
-*/
-ASL_DEPRECATED(String ASL_API encodeXML(const Xml& e, bool formatted = true), "Use Xml::encode()");
-
-
 class XmlText;
 
 /**

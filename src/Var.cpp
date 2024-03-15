@@ -235,11 +235,6 @@ Var::operator bool() const
 	}
 }
 
-bool Var::isTrue() const
-{
-	return (bool)*this;
-}
-
 const char* Var::operator*() const
 {
 	switch(_type)

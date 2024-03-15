@@ -57,8 +57,6 @@ class Vec3_
 	{
 		return Vec3_<T2>(T2(x), T2(y), T2(z));
 	}
-	static ASL_DEPRECATED(Vec3_ fromCylindrical(T r, T a, T z), "Use your own axes") { return Vec3_(r * cos(a), r * sin(a), z); }
-	static ASL_DEPRECATED(Vec3_ fromSpherical( T r, T a, T b), "Use your own axes") {float R=r*cos(b); return Vec3_(R*cos(a), R*sin(b), r*sin(b));}
 
 	ASL_DEPRECATED(void set(T X, T Y, T Z), "Set components separately") {x=X; y=Y; z=Z;}
 

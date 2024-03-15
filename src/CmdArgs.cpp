@@ -31,7 +31,7 @@ CmdArgs::CmdArgs(const String& spec)
 		a << wargs[i];
 
 	LocalFree(wargs);
-	parse(-nArgs, (char**)(a.with<const char*>()).ptr(), spec);
+	parse(-nArgs, (char**)(a.with<const char*>()).data(), spec);
 #else
 	File file("/proc/self/cmdline", File::READ);
 	if (!file)
@@ -55,7 +55,7 @@ CmdArgs::CmdArgs(const String& spec)
 		i = j + 1;
 	}
 
-	parse(a.length(), (char**)(a.with<const char*>()).ptr(), spec);
+	parse(a.length(), (char**)(a.with<const char*>()).data(), spec);
 #endif
 }
 #endif

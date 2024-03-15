@@ -171,7 +171,7 @@ public:
 	/**
 	Reads n bytes into an Array (or all remaining bytes by default)
 	*/
-	Array<byte> read(int n = -1) { if (n < 0) n = length();  Array<byte> a(n); memcpy(a.ptr(), _ptr, n); _ptr += n; return a; }
+	Array<byte> read(int n = -1) { if (n < 0) n = length();  Array<byte> a(n); memcpy(a.data(), _ptr, n); _ptr += n; return a; }
 
 	// [deprecated] symbols for compatibility with old code:
 	static const Endian BIGENDIAN = ENDIAN_BIG;

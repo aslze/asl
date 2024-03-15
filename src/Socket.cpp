@@ -165,17 +165,17 @@ InetAddress::InetAddress(InetAddress::Type t)
 	default: ;
 	}
 	_data.resize(n);
-	memset(_data.ptr(), 0, n);
+	memset(_data.data(), 0, n);
 }
 
 int InetAddress::port() const
 {
 	if (_type == IPv6) {
-		sockaddr_in6* addr = (sockaddr_in6*)_data.ptr();
+		sockaddr_in6* addr = (sockaddr_in6*)_data.data();
 		return ntohs(addr->sin6_port);
 	}
 	else if (_type == IPv4) {
-		sockaddr_in* addr = (sockaddr_in*)_data.ptr();
+		sockaddr_in* addr = (sockaddr_in*)_data.data();
 		return ntohs(addr->sin_port);
 	}
 	return 0;
@@ -198,7 +198,7 @@ String InetAddress::host() const
 {
 	if (_type == IPv6)
 	{
-		sockaddr_in6* addr = (sockaddr_in6*)_data.ptr();
+		sockaddr_in6* addr = (sockaddr_in6*)_data.data();
 		unsigned short* ip = (unsigned short*)&addr->sin6_addr;
 		return String(40, "%x:%x:%x:%x:%x:%x:%x:%x",
 			ntohs(ip[0]), ntohs(ip[1]), ntohs(ip[2]), ntohs(ip[3]),
@@ -206,12 +206,12 @@ String InetAddress::host() const
 	}
 	else if (_type == IPv4)
 	{
-		sockaddr_in* addr = (sockaddr_in*)_data.ptr();
+		sockaddr_in* addr = (sockaddr_in*)_data.data();
 		byte* ip = (byte*)&addr->sin_addr;
 		return String(15, "%i.%i.%i.%i", ip[0], ip[1], ip[2], ip[3]);
 	}
 #ifndef _WIN32
-	sockaddr_un* addr = (sockaddr_un*)_data.ptr();
+	sockaddr_un* addr = (sockaddr_un*)_data.data();
 	return addr->sun_path;
 #else
 	return "";
@@ -263,7 +263,7 @@ Array<InetAddress> InetAddress::lookup(const String& host)
 		else
 			a._type = IPv6;
 		a._data.resize((int)ai->ai_addrlen);
-		memcpy(a._data.ptr(), ai->ai_addr, ai->ai_addrlen);
+		memcpy(a._data.data(), ai->ai_addr, ai->ai_addrlen);
 		if (!addresses.contains(a)) {
 			if (a._type == IPv4)
 				addresses.insert(0, a);
@@ -306,22 +306,22 @@ bool InetAddress::set(const String& host, int port)
 			}
 		}
 		_data.resize((int)inf->ai_addrlen);
-		memcpy(_data.ptr(), inf->ai_addr, inf->ai_addrlen);
+		memcpy(_data.data(), inf->ai_addr, inf->ai_addrlen);
 		if (inf->ai_family == AF_INET)
 		{
-			((sockaddr_in*)_data.ptr())->sin_port = htons(port);
+			((sockaddr_in*)_data.data())->sin_port = htons(port);
 			_type = IPv4;
 		}
 		else if (inf->ai_family == AF_INET6)
 		{
-			((sockaddr_in6*)_data.ptr())->sin6_port = htons(port);
+			((sockaddr_in6*)_data.data())->sin6_port = htons(port);
 			_type = IPv6;
 		}
 		freeaddrinfo(info);
 	}
 	else {
 		_data.resize(sizeof(sockaddr_in));
-		sockaddr_in* addr = (sockaddr_in*)_data.ptr();
+		sockaddr_in* addr = (sockaddr_in*)_data.data();
 		addr->sin_addr.s_addr = INADDR_ANY;
 		addr->sin_family = AF_INET;
 		addr->sin_port = htons(port);
@@ -372,7 +372,7 @@ bool InetAddress::set(const String& host)
 	{
 #ifndef _WIN32
 		_data.resize(sizeof(sockaddr_un));
-		sockaddr_un* a=(sockaddr_un*)_data.ptr();
+		sockaddr_un* a=(sockaddr_un*)_data.data();
 		a->sun_family=AF_UNIX;
 		strcpy(a->sun_path, host.substring(0, min(107, host.length())));
 		_type = LOCAL;
@@ -632,7 +632,7 @@ Array<byte> Socket_::read(int n)
 void Socket_::skip(int n)
 {
 	Array<byte> a(n);
-	read(a.ptr(), a.length());
+	read(a.data(), a.length());
 }
 
 bool Socket_::disconnected()

@@ -30,7 +30,7 @@ WebSocketMsg::operator Var() const
 
 const char* WebSocketMsg::operator*() const
 {
-	return (const char*)_data.ptr();
+	return (const char*)_data.data();
 }
 
 WebSocketMsg& WebSocketMsg::fix()

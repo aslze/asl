@@ -191,12 +191,6 @@ public:
 	}
 	/**
 	Returns a string representation of the array, formed by joining its
-	elements with commas. The elements need to be convertible to String
-	\deprecated Use .join()
-	*/
-	ASL_DEPRECATED(operator String() const, "Use .join()");
-	/**
-	Returns a string representation of the array, formed by joining its
 	elements with the given separator string sep. The elements need to be
 	convertible to String
 	*/
@@ -205,12 +199,6 @@ public:
 	Enumerator all() {return Enumerator(*this);}
 	Enumerator all() const {return Enumerator(*this);}
 };
-
-template<class T, int N>
-Array_<T, N>::operator String() const
-{
-	return String('[') << join(',') << ']';
-}
 
 template<class T, int N>
 String Array_<T, N>::join(const String& sep) const

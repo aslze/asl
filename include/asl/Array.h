@@ -442,14 +442,6 @@ public:
 		return b;
 	}
 	/**
-	Same as slice()
-	\deprecated Use .slice()
-	*/
-	ASL_DEPRECATED(Array sslice(int i1, int i2 = 0) const, "Use slice()")
-	{
-		return slice(i1, i2);
-	}
-	/**
 	Adds all elements from array b at the end of the array
 	*/
 	Array& append(const Array& b)

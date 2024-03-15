@@ -26,7 +26,7 @@ inline int hash(const String& s)
 inline int hash(const Array<byte>& s)
 {
 	int h = 0, n = s.length();
-	const byte* p = s.ptr();
+	const byte* p = s.data();
 	for (int i = 0; i<n; i++)
 		h = 33 * h + p[i];
 	return h;

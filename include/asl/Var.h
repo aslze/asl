@@ -331,11 +331,7 @@ class ASL_API Var
 
 	template<class T>
 	void read(const String& key, T& x) const { if (has(key)) x = (*this)[key]; }
-	/**
-	Returns the bool value of this var
-	\deprecated Use `bool` conversion
-	*/
-	ASL_DEPRECATED(bool isTrue() const, "Use bool conversion");
+
 	/**
 	Returns true if this var has a value (its type is not NONE)
 	*/

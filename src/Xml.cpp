@@ -528,14 +528,4 @@ String Xml::encode(const Xml& e, bool formatted)
 	return c.text();
 }
 
-Xml decodeXML(const String& xml)
-{
-	return Xml::decode(xml);
-}
-
-String encodeXML(const Xml& e, bool formatted)
-{
-	return Xml::encode(e, formatted);
-}
-
 }

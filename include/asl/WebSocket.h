@@ -78,7 +78,7 @@ public:
 	/**
 	Sends a binary message to the peer
 	*/
-	void send(const Array<byte>& m) { send(m.ptr(), m.length(), FRAME_BINARY); }
+	void send(const Array<byte>& m) { send(m.data(), m.length(), FRAME_BINARY); }
 	/**
 	Sends a text message to the peer
 	*/
@@ -99,7 +99,7 @@ public:
 	Waits for incoming data for a maximum time or a disconnection, returns true only if there is
 	incoming data
 	*/
-	bool waitData(double timeout = 5) { return wait() && !closed(); }
+	bool waitData(double timeout = 5) { return wait(timeout) && !closed(); }
 
 	/** Checks if there is some input available */
 	bool hasInput();
