@@ -94,6 +94,10 @@ public:
 	*/
 	bool isAbsolute() const;
 	/**
+	Returns true if this has a parent directory and is not just a name
+	*/
+	bool hasDirectory() const { return name() == _path; }
+	/**
 	Removes double dots in a path by stepping up one directory each time.
 	*/
 	Path& removeDDots();

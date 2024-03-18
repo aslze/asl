@@ -17,12 +17,12 @@ class Array_;
 @{
 */
 
-ASL_API Array<byte> decodeBase64(const char* src, int n = -1);
+ASL_API ByteArray decodeBase64(const char* src, int n = -1);
 
 /**
 Decodes a base64 encoded string into a byte array; the string can contain whitespace.
 */
-inline Array<byte> decodeBase64(const String& s)
+inline ByteArray decodeBase64(const String& s)
 {
 	return decodeBase64((const char*)s, s.length());
 }
@@ -62,7 +62,7 @@ String encodeHex(const Array_<byte, N>& src) { return encodeHex((const byte*)src
 /**
 Decodes a hexadecimal encoded string into a byte array
 */
-ASL_API Array<byte> decodeHex(const String& src);
+ASL_API ByteArray decodeHex(const String& src);
 
 /**@}*/
 

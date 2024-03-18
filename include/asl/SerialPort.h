@@ -90,7 +90,7 @@ public:
 	*/
 	int read(void* p, int n);
 
-	Array<byte> read(int n);
+	ByteArray read(int n);
 
 	/**
 	Writes the given string to the port

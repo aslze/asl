@@ -162,13 +162,13 @@ public:
 	/**
 	Sets the body of the message as a binary blob.
 	*/
-	void put(const Array<byte>& data);
+	void put(const ByteArray& data);
 	/**
 	Sets the body of the message as a text string.
 	*/
 	void put(const String& body);
 
-	void put(const char* body) { put(Array<byte>((const byte*)body, (int)strlen(body))); }
+	void put(const char* body) { put(ByteArray((const byte*)body, (int)strlen(body))); }
 	/**
 	Sets the body of the message as a JSON document.
 	*/
@@ -180,7 +180,7 @@ public:
 	/**
 	Returns the binary body of the message.
 	*/
-	const Array<byte>& body() const { return _body; }
+	const ByteArray& body() const { return _body; }
 	/**
 	Returns the message body as text
 	*/
@@ -224,7 +224,7 @@ protected:
 	String _command;
 	String _proto;
 	Dic<> _headers;
-	Array<byte> _body;
+	ByteArray _body;
 	mutable Socket* _socket;
 	Function<void, const HttpStatus&> _progress;
 	Shared<HttpSink> _sink;
@@ -243,7 +243,7 @@ enum HttpMethod { HTTP_UNKNOWN, HTTP_GET, HTTP_POST, HTTP_PUT, HTTP_PATCH, HTTP_
 An HTTP request that servers can read from.
 
 An HttpRequest has a method (such as GET or POST), optional headers, and optional body. The body can be a
-String, an Array<byte> or a Var. In the case of a Var it will be encoded as JSON and the request content type
+String, a ByteArray or a Var. In the case of a Var it will be encoded as JSON and the request content type
 header automatically set.
 
 \sa HttpServer

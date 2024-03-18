@@ -73,7 +73,7 @@ With CMake 3.14+, instead of using `find_package()`, you can download and build 
 
 ~~~
 include(FetchContent)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.7.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.10.zip)
 FetchContent_MakeAvailable(asl)
 ~~~
 
@@ -310,7 +310,7 @@ Map, Dic, Stack, HashMap). These classes are reference-counted, so they
 are copied by reference. If a separate copy is required, use the `clone()` method:
 
 ~~~
-Array<int> a = array(1, 2, 3);
+Array<int> a = { 1, 2, 3 };
 Array<int> b = a;               // b is the same as a
 Array<int> c = a.clone();       // c is a separate copy of a
 ~~~
@@ -613,7 +613,7 @@ that runs all defined tests. Use the `ASL_TEST_ENABLE()` macro if you will provi
 ~~~
 #include <asl/testing.h>
 
-ASL_TEST_ENABLE_MAIN();
+ASL_TEST_ENABLE_MAIN()
 
 ASL_TEST(Car)
 {

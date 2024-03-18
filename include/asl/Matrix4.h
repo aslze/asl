@@ -161,24 +161,70 @@ public:
 	/**
 	Returns this matrix plus `B`
 	*/
-	Matrix4_ operator+(const Matrix4_& B) const;
+	Matrix4_ operator+(const Matrix4_& B) const
+	{
+		Matrix4_ C;
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				C(i, j) = a[i][j] + B(i, j);
+		return C;
+	}
 	/**
 	Returns this matrix minus `B`
 	*/
-	Matrix4_ operator-(const Matrix4_& B) const;
+	Matrix4_ operator-(const Matrix4_& B) const
+	{
+		Matrix4_ C;
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				C(i, j) = a[i][j] - B(i, j);
+		return C;
+	}
 	/**
 	Returns this matrix multiplied by `B`
 	*/
-	Matrix4_ operator*(const Matrix4_& B) const;
+	Matrix4_ operator*(const Matrix4_& B) const
+	{
+		Matrix4_ C;
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				C(i, j) = a[i][0] * B(0, j) + a[i][1] * B(1, j) + a[i][2] * B(2, j) + a[i][3] * B(3, j);
+		return C;
+	}
+	/**
+	Multipies this matrix by `B`
+	*/
+	Matrix4_& operator*=(const Matrix4_& B)
+	{
+		Matrix4_ C;
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				C(i, j) = a[i][0] * B(0, j) + a[i][1] * B(1, j) + a[i][2] * B(2, j) + a[i][3] * B(3, j);
+		*this = C;
+		return *this;
+	}
 	/**
 	Returns this matrix multipled by scalar `t`
 	*/
-	Matrix4_ operator*(T t) const;
+	Matrix4_ operator*(T t) const
+	{
+		Matrix4_ C;
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				C(i, j) = t * a[i][j];
+		return C;
+	}
 	friend Matrix4_ operator*(T t, const Matrix4_& m) {return m * t;}
 	/**
 	Multiplies this matrix by scalar `t`
 	*/
-	Matrix4_& operator*=(T t);
+	Matrix4_& operator*=(T t)
+	{
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				a[i][j] *= t;
+		return *this;
+	}
 	/**
 	Returns vector `p` left-multiplied by this matrix.
 	*/
@@ -294,11 +340,6 @@ public:
 	given as a string, such as "XYZ" or "XYZ*", equivalent to the fromEuler function
 	*/
 	Vec3_<T> eulerAngles(const char* a) const;
-
-	/**
-	Multipies this matrix by `B`
-	*/
-	Matrix4_& operator*=(const Matrix4_& B);
 	/**
 	Returns the inverse of this matrix
 	*/
@@ -382,66 +423,6 @@ asl::Matrix4_<T> orthonormalize(const asl::Matrix4_<T>& m)
 #include <asl/Quaternion.h>
 
 namespace asl {
-
-template<class T>
-Matrix4_<T> Matrix4_<T>::operator+(const Matrix4_<T>& B) const
-{
-	Matrix4_<T> C;
-	for (int i = 0; i < 4; i++)
-		for (int j = 0; j < 4; j++)
-			C(i, j) = a[i][j] + B(i, j);
-	return C;
-}
-
-template<class T>
-Matrix4_<T> Matrix4_<T>::operator-(const Matrix4_<T>& B) const
-{
-	Matrix4_<T> C;
-	for (int i = 0; i < 4; i++)
-		for (int j = 0; j < 4; j++)
-			C(i, j) = a[i][j] - B(i, j);
-	return C;
-}
-
-template<class T>
-inline Matrix4_<T> Matrix4_<T>::operator*(const Matrix4_<T>& B) const
-{
-	Matrix4_<T> C;
-	for (int i = 0; i < 4; i++)
-		for (int j = 0; j < 4; j++)
-			C(i, j) = a[i][0] * B(0, j) + a[i][1] * B(1, j) + a[i][2] * B(2, j) + a[i][3] * B(3, j);
-	return C;
-}
-
-template<class T>
-Matrix4_<T> Matrix4_<T>::operator*(T t) const
-{
-	Matrix4_<T> C;
-	for (int i = 0; i < 4; i++)
-		for (int j = 0; j < 4; j++)
-			C(i, j) = t * a[i][j];
-	return C;
-}
-
-template<class T>
-Matrix4_<T>& Matrix4_<T>::operator*=(T t)
-{
-	for (int i = 0; i < 4; i++)
-		for (int j = 0; j < 4; j++)
-			a[i][j] *= t;
-	return *this;
-}
-
-template<class T>
-inline Matrix4_<T>& Matrix4_<T>::operator*=(const Matrix4_<T>& B)
-{
-	Matrix4_<T> C;
-	for (int i = 0; i < 4; i++)
-		for (int j = 0; j < 4; j++)
-			C(i, j) = a[i][0] * B(0, j) + a[i][1] * B(1, j) + a[i][2] * B(2, j) + a[i][3] * B(3, j);
-	*this = C;
-	return *this;
-}
 
 template<class T>
 Matrix4_<T> Matrix4_<T>::identity()

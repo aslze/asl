@@ -137,8 +137,8 @@ Url::Url(const String& url)
 
 struct HttpSinkArray : public HttpSink
 {
-	Array<byte>* a;
-	HttpSinkArray(Array<byte>& a) : a(&a) {}
+	ByteArray* a;
+	HttpSinkArray(ByteArray& a) : a(&a) {}
 	int write(byte* p, int n)
 	{
 		a->append(p, n);
@@ -146,7 +146,7 @@ struct HttpSinkArray : public HttpSink
 	}
 	void use(HttpMessage* m)
 	{
-		a = (Array<byte>*)&m->body();
+		a = (ByteArray*)&m->body();
 	}
 	void init(int n)
 	{
@@ -186,11 +186,11 @@ Var HttpMessage::json() const
 
 void HttpMessage::put(const String& body)
 {
-	_body = Array<byte>((byte*)*body, body.length());
+	_body = ByteArray((const byte*)*body, body.length());
 	setHeader("Content-Length", _body.length());
 }
 
-void HttpMessage::put(const Array<byte>& data)
+void HttpMessage::put(const ByteArray& data)
 {
 	_body = data;
 	setHeader("Content-Length", _body.length());

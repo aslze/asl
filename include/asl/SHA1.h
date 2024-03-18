@@ -23,7 +23,7 @@ public:
 	SHA1();
 	static Hash hash(const byte* data, int len);
 	static Hash hash(const char* data) { return hash((const byte*)data, (int)strlen(data)); }
-	static Hash hash(const Array<byte>& data);
+	static Hash hash(const ByteArray& data);
 	static Hash hash(const String& data);
 private:
 	void transform(const byte buffer[64]);

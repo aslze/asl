@@ -163,9 +163,9 @@ int SerialPort::read(void *p, int n)
 	return bytes;
 }
 
-Array<byte> SerialPort::read(int n)
+ByteArray SerialPort::read(int n)
 {
-	Array<byte> a(n);
+	ByteArray a(n);
 	n = read(a.data(), n);
 	a.resize(max(0, n));
 	return a;

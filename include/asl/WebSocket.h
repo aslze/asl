@@ -17,18 +17,18 @@ struct WebSocketMsg
 {
 	friend class WebSocket;
 	WebSocketMsg() {}
-	WebSocketMsg(const Array<byte>& data) : _data(data) {}
+	WebSocketMsg(const ByteArray& data) : _data(data) {}
 	operator String() const;
 	operator Var() const;
-	operator Array<byte>() const { return _data; }
+	operator ByteArray() const { return _data; }
 	int length() const { return _data.length(); }
 	operator bool() const { return length() != 0; }
 	bool operator!() const { return length() == 0; }
 	const char* operator*() const;
-	void append(const Array<byte>& data) { _data.append(data); }
+	void append(const ByteArray& data) { _data.append(data); }
 private:
 	WebSocketMsg& fix();
-	Array<byte> _data;
+	ByteArray _data;
 };
 
 /**
@@ -78,7 +78,7 @@ public:
 	/**
 	Sends a binary message to the peer
 	*/
-	void send(const Array<byte>& m) { send(m.data(), m.length(), FRAME_BINARY); }
+	void send(const ByteArray& m) { send(m.data(), m.length(), FRAME_BINARY); }
 	/**
 	Sends a text message to the peer
 	*/
@@ -113,7 +113,7 @@ public:
 	bool closed();
 protected:
 	Socket _socket;
-	Array<byte> _buffer;
+	ByteArray _buffer;
 	bool _isClient;
 	bool _closed;
 	int _code;
@@ -173,7 +173,7 @@ public:
 	const Array<WebSocket*>& clients() const { return _clients; }
 	Mutex& mutex() { return _mutex; }
 protected:
-	Array<byte> readMessage();
+	ByteArray readMessage();
 private:
 	void process(Socket& socket, const Dic<String>& headers);
 	void serve(Socket client);

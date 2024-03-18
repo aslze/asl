@@ -90,7 +90,7 @@ public:
 	*/
 	static Array<InetAddress> lookup(const String& name);
 protected:
-	Array<byte> _data;
+	ByteArray _data;
 	Type _type;
 };
 
@@ -128,7 +128,7 @@ ASL_SMART_CLASS(Socket, SmartObject)
 	virtual int available();
 	virtual int read(void* data, int size);
 	virtual int write(const void* data, int n);
-	Array<byte> read(int n = -1);
+	ByteArray read(int n = -1);
 	void skip(int n);
 	virtual bool waitInput(double timeout = 60);
 	int error() const { return _error; }
@@ -236,7 +236,7 @@ public:
 	/**
 	Reads n bytes and returns them as an array of bytes, or reads all available bytes if no argument is given.
 	*/
-	Array<byte> read(int n = -1) { return _()->read(n); }
+	ByteArray read(int n = -1) { return _()->read(n); }
 
 	/**
 	Skips (reads and discards) the next n bytes from the socket.

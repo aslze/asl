@@ -265,7 +265,7 @@ WebSocketMsg WebSocket::receive()
 	bool haveMsg = false;
 	while (!haveMsg)
 	{
-		Array<byte> buffer;
+		ByteArray buffer;
 		byte b0, mlen;
 		DEBUG_LOG("receive\n");
 		if (closed()) {
@@ -371,7 +371,7 @@ void WebSocket::send(const byte* p, int length, FrameType type)
 		mask = _random.get();
 		buf << mask;
 	}
-	Array<byte> data(p, length);
+	ByteArray data(p, length);
 	if (mask != 0){
 		swapBytes(mask);
 		data.resize(data.length() + 4);

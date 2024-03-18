@@ -274,21 +274,21 @@ bool File::setLastModified(const Date& t)
 #endif
 }
 
-Array<byte> File::content()
+ByteArray File::content()
 {
 	return firstBytes((int)size());
 }
 
-bool File::put(const Array<byte>& data)
+bool File::put(const ByteArray& data)
 {
 	if(!_file && !open(_path, WRITE))
 		return false;
 	return write(data.data(), data.length()) == data.length();
 }
 
-Array<byte> File::firstBytes(int n)
+ByteArray File::firstBytes(int n)
 {
-	Array<byte> data(n);
+	ByteArray data(n);
 	if (!_file && !open(_path)) {
 		data.clear();
 		return data;

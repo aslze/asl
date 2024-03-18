@@ -211,7 +211,7 @@ SHA1::Hash SHA1::hash(const byte* data, int len)
 	return sha.end();
 }
 
-SHA1::Hash SHA1::hash(const Array<byte>& data)
+SHA1::Hash SHA1::hash(const ByteArray& data)
 {
 	return hash(data.data(), data.length());
 }

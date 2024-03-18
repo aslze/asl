@@ -256,12 +256,12 @@ String encodeBase64(const byte* data, int n)
 
 #ifdef ASL_B64_NOWS
 
-Array<byte> decodeBase64(const char* src0, int n)
+ByteArray decodeBase64(const char* src0, int n)
 {
 	const byte* src = (const byte*)src0;
 	int len = n < 0? (int)strlen(src0) : n;
 	int len2 = len / 4 * 3;
-	Array<byte> result(len2);
+	ByteArray result(len2);
 	if (len & 3) {
 		result.clear();
 		return result;
@@ -288,12 +288,12 @@ Array<byte> decodeBase64(const char* src0, int n)
 
 #else
 
-Array<byte> decodeBase64(const char* src0, int n)
+ByteArray decodeBase64(const char* src0, int n)
 {
 	const byte* src = (const byte*)src0;
 	int len = n < 0 ? (int)strlen(src0) : n;
 	int len2 = len / 4 * 3;
-	Array<byte> result(len2);
+	ByteArray result(len2);
 	if (len < 4) {
 		result.clear();
 		return result;
@@ -334,9 +334,9 @@ String encodeHex(const byte* data, int n)
 	return h;
 }
 
-Array<byte> decodeHex(const String& s)
+ByteArray decodeHex(const String& s)
 {
-	Array<byte> a(s.length()/2);
+	ByteArray a(s.length() / 2);
 	for (int i = 0; i < s.length(); i += 2)
 		a[i/2] = (byte)s.substring(i, i + 2).hexToInt();
 	return a;

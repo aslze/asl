@@ -102,9 +102,9 @@ ASL_TEST(StreamBuffer)
 {
 	StreamBuffer b;
 	b.setEndian(ENDIAN_LITTLE);
-	b << 'a' << 4 << 3.5 << true << 0.5f;
+	b << 'a' << 4 << 3.5 << true << 0.5f << 90000000000000009ll;
 
-	ASL_ASSERT(b.length() == 18);
+	ASL_ASSERT(b.length() == 26);
 	ASL_ASSERT(b[0] == 'a' && b[1] == 0x04 && b[2] == 0 && b[3] == 0 && b[4] == 0)
 
 	StreamBufferReader c(b.data(), b.length());
@@ -113,26 +113,28 @@ ASL_TEST(StreamBuffer)
 	double y;
 	bool f;
 	float x;
-	c >> a >> i >> y >> f >> x;
+	Long l;
+	c >> a >> i >> y >> f >> x >> l;
 
-	ASL_ASSERT(a == 'a' && i == 4 && y == 3.5 && f == true && x == 0.5f);
+	ASL_ASSERT(a == 'a' && i == 4 && y == 3.5 && f == true && x == 0.5f && l == 90000000000000009ll);
 
 	StreamBuffer b2;
 	b2.setEndian(ENDIAN_BIG);
-	b2 << 'a' << 4 << 3.5 << 0.25f;
+	b2 << 'a' << 4 << 3.5 << 0.25f << l;
 
 	a = ' ';
 	i = 0;
 	y = 0;
 	x = 0;
+	l = 0;
 
-	ASL_ASSERT(b2.length() == 17);
+	ASL_ASSERT(b2.length() == 25);
 	ASL_ASSERT(b2[0] == 'a' && b2[1] == 0 && b2[2] == 0 && b2[3] == 0 && b2[4] == 4)
 
 	StreamBufferReader c2(b2.data(), b2.length(), ENDIAN_BIG);
-	c2 >> a >> i >> y >> x;
+	c2 >> a >> i >> y >> x >> l;
 
-	ASL_ASSERT(a == 'a' && i == 4 && y == 3.5 && x == 0.25f);
+	ASL_ASSERT(a == 'a' && i == 4 && y == 3.5 && x == 0.25f && l == 90000000000000009ll);
 }
 
 ASL_TEST(Array2)

@@ -22,7 +22,7 @@ struct AsBytes
 {
 	union { T x; byte b[sizeof(T)]; };
 	AsBytes() {}
-	AsBytes(const T& a) : x(a) {}
+	AsBytes(const T& a) { memcpy(b, &a, sizeof(T)); }
 	byte& operator[](int i) { return b[i]; }
 };
 
@@ -46,7 +46,7 @@ This class allows reading a memory buffer as a binary stream. It can read bytes,
 point numbers in big-endian or little-endian byte order. You have to make sure you don't read past the bounds of the buffer.
 
 ~~~
-Array<byte> data = File("data.bin").content();
+ByteArray data = File("data.bin").content();
 StreamBufferReader buffer (data, ENDIAN_BIG);
 int n = buffer.read<int>();
 double x, y, z;
@@ -62,7 +62,7 @@ public:
 	/**
 	Constructs a buffer reader from a byte array
 	*/
-	StreamBufferReader(const Array<byte>& data, Endian e = ENDIAN_LITTLE) : _ptr(data.ptr()), _end(data.ptr() + data.length()), _endian(e) {}
+	StreamBufferReader(const ByteArray& data, Endian e = ENDIAN_LITTLE) : _ptr(data.data()), _end(data.data() + data.length()), _endian(e) {}
 	/**
 	Constructs a buffer reader from a raw byte array
 	*/
@@ -120,7 +120,7 @@ public:
 		        ? ((ULong)_ptr[0] << 56) | ((ULong)_ptr[1] << 48) | ((ULong)_ptr[2] << 40) | ((ULong)_ptr[3] << 32) |
 		              ((ULong)_ptr[4] << 24) | ((ULong)_ptr[5] << 16) | ((ULong)_ptr[6] << 8) | ((ULong)_ptr[7])
 		        : ((ULong)_ptr[7] << 56) | ((ULong)_ptr[6] << 48) | ((ULong)_ptr[5] << 40) | ((ULong)_ptr[4] << 32) |
-		              ((ULong)_ptr[3] << 24) | ((ULong)_ptr[2] << 16) | ((ULong)_ptr[1] << 8) | ((ULong)_ptr[3]));
+		              ((ULong)_ptr[3] << 24) | ((ULong)_ptr[2] << 16) | ((ULong)_ptr[1] << 8) | ((ULong)_ptr[0]));
 		x = a.other();
 		_ptr += 8;
 		return *this;
@@ -179,7 +179,7 @@ public:
 	/**
 	Reads n bytes into an Array (or all remaining bytes by default)
 	*/
-	Array<byte> read(int n = -1) { if (n < 0) n = length();  Array<byte> a(n); memcpy(a.data(), _ptr, n); _ptr += n; return a; }
+		ByteArray read(int n = -1) { if (n < 0) n = length();  ByteArray a(n); memcpy(a.data(), _ptr, n); _ptr += n; return a; }
 
 protected:
 	const byte* _ptr;
@@ -193,7 +193,7 @@ typedef StreamBufferReader BufferReader;
 This class is a buffer that can be written to as a binary stream. The buffer is initially
 empty and grows as you append variables. You can change endianness at any moment.
 
-You can then get the content as an Array<byte> and for example write it to a file or send it
+You can then get the content as a ByteArray and for example write it to a file or send it
 through a socket.
 ~~~
 StreamBuffer buffer(ENDIAN_BIG);
@@ -212,8 +212,8 @@ class StreamBuffer : public Array<byte>
 public:
 	ASL_EXPLICIT StreamBuffer(Endian e = ENDIAN_LITTLE) : _endian(e) {}
 
-	Array<byte>& operator*() { return (Array<byte>&)*this; }
-	const Array<byte>& operator*() const { return (const Array<byte>&)*this; }
+	ByteArray&       operator*() { return (ByteArray&)*this; }
+	const ByteArray& operator*() const { return (const ByteArray&)*this; }
 	
 	/**
 	Set endianness for binary writing
@@ -227,8 +227,7 @@ public:
 	template<class T>
 	StreamBuffer& operator<<(const T& x)
 	{
-		AsBytes<T> y;
-		memcpy(y.b, &x, sizeof(T));
+		AsBytes<T> y(x);
 		if (_endian == ASL_OTHER_ENDIAN)
 			swapBytes(y);
 		write(y.b, sizeof(T));
@@ -237,25 +236,25 @@ public:
 
 	StreamBuffer& operator<<(const bool& x)
 	{
-		(Array<byte>&)(*this) << byte(x? 1 : 0);
+		(ByteArray&)(*this) << byte(x ? 1 : 0);
 		return *this;
 	}
 
 	StreamBuffer& operator<<(const byte& x)
 	{
-		(Array<byte>&)(*this) << x;
+		(ByteArray&)(*this) << x;
 		return *this;
 	}
 
 	StreamBuffer& operator<<(const char& x)
 	{
-		(Array<byte>&)(*this) << *(byte*)&x;
+		(ByteArray&)(*this) << *(byte*)&x;
 		return *this;
 	}
 
 	StreamBuffer& operator<<(const signed char& x)
 	{
-		(Array<byte>&)(*this) << *(byte*)&x;
+		(ByteArray&)(*this) << *(byte*)&x;
 		return *this;
 	}
 
@@ -272,7 +271,7 @@ public:
 		return *this;
 	}
 
-	StreamBuffer& operator<<(const Array<byte>& x)
+	StreamBuffer& operator<<(const ByteArray& x)
 	{
 		write(x.data(), x.length());
 		return *this;
@@ -294,6 +293,9 @@ protected:
 	Endian _endian;
 };
 
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 }
 
 #endif

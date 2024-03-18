@@ -620,13 +620,13 @@ ASL_TEST(Base64)
 	ASL_ASSERT(b64 == "MjAwMS1BIFNwYWNlIE9keXNzZXk=");
 	String c = decodeBase64(b64);
 	ASL_ASSERT(c == input);
-	Array<byte> data = array<byte>(0x05, 0xf0, 0x7a, 0x45);
+	ByteArray data = array<byte>(0x05, 0xf0, 0x7a, 0x45);
 	b64 = encodeBase64(data);
 	ASL_ASSERT(b64 == "BfB6RQ==");
 	ASL_ASSERT(decodeBase64(b64) == data);
 	String h = encodeHex(data);
 	ASL_ASSERT(h == "05f07a45");
-	Array<byte> data2 = decodeHex(h);
+	ByteArray data2 = decodeHex(h);
 	ASL_ASSERT(data == data2);
 	String b64w = " MjAwMS\n1BIFN\n\twYWNlIE 9keXNzZXk = \n"; // with whitespace
 	ASL_ASSERT(String(decodeBase64(b64w)) == input);

@@ -622,16 +622,16 @@ int Socket_::write(const void* data, int n)
 #endif
 }
 
-Array<byte> Socket_::read(int n)
+ByteArray Socket_::read(int n)
 {
-	Array<byte> a((n < 0) ? available() : n);
+	ByteArray a((n < 0) ? available() : n);
 	n = read(&a[0], a.length());
 	return a.resize(max(0, n));
 }
 
 void Socket_::skip(int n)
 {
-	Array<byte> a(n);
+	ByteArray a(n);
 	read(a.data(), a.length());
 }
 
