@@ -27,7 +27,7 @@ void Random::getBytes(void* buffer, int n)
 	FILE* f = fopen("/dev/urandom", "rb");
 	if (f)
 	{
-		if(fread(buffer, 1, n, f) == n) {
+		if((int)fread(buffer, 1, n, f) == n) {
 			fclose(f);
 			return;
 		}
@@ -132,7 +132,7 @@ void Random::init(bool fast)
 	if (fast)
 	{
 		ULong s = (ULong)inow();
-		for (int i = 0; i < sizeof(s)/2; i++)
+		for (int i = 0; i < (int)sizeof(s)/2; i++)
 			s ^= ((s & (255ull << i)) ^ (255ull << i)) << 8 * (sizeof(s) - i - i - 1);
 		seed(s);
 	}

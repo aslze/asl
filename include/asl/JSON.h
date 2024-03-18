@@ -12,6 +12,11 @@ namespace asl {
  * @{
  */
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 26812)
+#endif
+
 /**
 Functions to encode/decode data as JSON. These functions use class Var to represent JSON values. JSON parsing
 supports C/C++ style comments.
@@ -104,6 +109,8 @@ inline Json::Mode operator|(Json::Mode a, Json::Mode b)
 }
 
 /**@}*/
-
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 }
 #endif

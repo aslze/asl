@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_MATRIX3_H
@@ -40,7 +40,12 @@ public:
 	T* data() { return &a[0][0]; }
 	const T* data() const { return &a[0][0]; }
 
-	Matrix3_() {}
+	Matrix3_()
+	{
+		a[0][0]=1; a[0][1]=0; a[0][2]=0;
+		a[1][0]=0; a[1][1]=1; a[1][2]=0;
+		a[2][0]=0; a[2][1]=0; a[2][2]=1;
+	}
 
 	/**
 	Constructs a 3x3 matrix given its elements (by rows).

@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <asl/testing.h>
 
-ASL_TEST_ENABLE();
+ASL_TEST_ENABLE()
 
 #ifdef __CODEGEARC__
 #define U8(x) u8##x

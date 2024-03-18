@@ -21,6 +21,10 @@ namespace asl {
 #define DEL_STRING(s) (s).destroy()
 #endif
 
+#ifdef _MSC_VER
+#pragma warning(disable : 26451 26495 26812)
+#endif
+
 const Var Var::none;
 
 Var::Var(Type t)

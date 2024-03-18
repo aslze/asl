@@ -26,6 +26,10 @@ struct FileInfo
 	bool operator!() const {return size==-1;}
 };
 
+#ifdef _MSC_VER 
+#pragma warning(push)
+#pragma warning(disable : 26812)
+#endif
 /**
 Class File represents a file in the filesystem. It can be used to get information about
 a file (its size, its modification date, whether it exists), to read or write in it in one step,
@@ -284,7 +288,7 @@ public:
 		return *this;
 	}
 
-	File& operator<<(const Array<byte>& x)
+	File& operator<<(const ByteArray& x)
 	{
 		write(&x[0], x.length());
 		return *this;
@@ -326,5 +330,8 @@ inline int hash(const File& f)
 }
 #endif
 
+#ifdef _MSC_VER 
+#pragma warning(pop)
+#endif
 }
 #endif

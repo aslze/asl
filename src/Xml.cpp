@@ -5,6 +5,10 @@
 
 #define INDENT_CHAR '\t'
 
+#ifdef _MSC_VER
+#pragma warning(disable : 26451 26495 26812)
+#endif
+
 namespace asl {
 
 inline bool myisalpha(char c)

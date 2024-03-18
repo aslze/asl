@@ -14,6 +14,10 @@
 #include <utime.h>
 #endif
 
+#ifdef _MSC_VER
+#pragma warning(disable : 6387)
+#endif
+
 namespace asl {
 
 #if defined(_WIN32) && !defined(ASL_ANSI)
@@ -26,7 +30,12 @@ namespace asl {
 #define CHART char
 #endif
 
-bool TextFile::printf(const char* fmt, ...)
+bool TextFile::end()
+{
+	return (_file || open(_path, READ)) ? feof(_file) != 0 : true;
+}
+
+bool TextFile::printf(ASL_PRINTF_W1 const char* fmt, ...)
 {
 	if(!_file && !open(WRITE))
 		return false;

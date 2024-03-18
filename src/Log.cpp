@@ -10,6 +10,10 @@
 
 #define ASL_LOG_MAX_SIZE 1000000
 
+#ifdef _MSC_VER
+#pragma warning(disable : 26812)
+#endif
+
 namespace asl {
 
 Log::Log()
@@ -94,7 +98,7 @@ void log(const String& cat, Log::Level level, const String& message)
 	Log::instance()->log(cat, level, message);
 }
 
-void log(const String& cat, Log::Level level, const char* fmt, ...)
+void log(const String& cat, Log::Level level, ASL_PRINTF_W1 const char* fmt, ...)
 {
 	String message(100, 0);
 	va_list arg;

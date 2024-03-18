@@ -18,7 +18,6 @@ class HttpRequest;
 class Http;
 class File;
 
-
 /**
 The components of a URL plus some utility static functions
 */
@@ -128,6 +127,7 @@ class ASL_API HttpMessage
 	friend class Http;
 public:
 	HttpMessage();
+
 	/**
 	Adds a message header with name `header` and value `value`
 	*/
@@ -214,7 +214,7 @@ public:
 
 	HttpMessage& onProgress(const Function<void, const HttpStatus&>& f) { _progress = f; return *this; }
 
-	void useSink(const Shared<HttpSink>& s) { _sink = s; _sink->use(this); }
+	void useSink(const Shared<HttpSink>& s);
 
 	void setSockError(const String& s) { _socketError = s; }
 
@@ -282,7 +282,7 @@ public:
 		init();
 		read();
 	}
-	~HttpRequest();
+
 	void init()
 	{
 		_recursion = 0;

@@ -17,6 +17,10 @@ ASL_API2 const double Date::DAY = 86400;
 ASL_API2 const double Date::HOUR = 3600;
 ASL_API2 const double Date::MINUTE = 60;
 
+#ifdef _MSC_VER
+#pragma warning(disable : 26451 26812)
+#endif
+
 inline bool myisdigit(char c)
 {
 	return c >= '0' && c <= '9';

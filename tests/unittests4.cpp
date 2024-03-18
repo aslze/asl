@@ -26,6 +26,7 @@ ASL_TEST(Vec3)
 	Vec3d a2 = a, b2 = b;
 	Vec3 a3 = a2.with<float>();
 	ASL_APPROX(a2 + b2, Vec3d(2, 2.5, 3), EPS);
+	ASL_APPROX(a3 + b2.with<float>(), Vec3(2, 2.5, 3), (float)EPS);
 }
 
 ASL_TEST(Matrix4)
@@ -101,35 +102,37 @@ ASL_TEST(StreamBuffer)
 {
 	StreamBuffer b;
 	b.setEndian(ENDIAN_LITTLE);
-	b << 'a' << 4 << 3.5 << true;
+	b << 'a' << 4 << 3.5 << true << 0.5f;
 
-	ASL_ASSERT(b.length() == 14);
+	ASL_ASSERT(b.length() == 18);
 	ASL_ASSERT(b[0] == 'a' && b[1] == 0x04 && b[2] == 0 && b[3] == 0 && b[4] == 0)
 
 	StreamBufferReader c(b.data(), b.length());
 	signed char a;
-	int x;
+	int i;
 	double y;
 	bool f;
-	c >> a >> x >> y >> f;
+	float x;
+	c >> a >> i >> y >> f >> x;
 
-	ASL_ASSERT(a == 'a' && x == 4 && y == 3.5 && f == true);
+	ASL_ASSERT(a == 'a' && i == 4 && y == 3.5 && f == true && x == 0.5f);
 
 	StreamBuffer b2;
 	b2.setEndian(ENDIAN_BIG);
-	b2 << 'a' << 4 << 3.5;
+	b2 << 'a' << 4 << 3.5 << 0.25f;
 
 	a = ' ';
-	x = 0;
+	i = 0;
 	y = 0;
+	x = 0;
 
-	ASL_ASSERT(b2.length() == 13);
+	ASL_ASSERT(b2.length() == 17);
 	ASL_ASSERT(b2[0] == 'a' && b2[1] == 0 && b2[2] == 0 && b2[3] == 0 && b2[4] == 4)
 
 	StreamBufferReader c2(b2.data(), b2.length(), ENDIAN_BIG);
-	c2 >> a >> x >> y;
+	c2 >> a >> i >> y >> x;
 
-	ASL_ASSERT(a == 'a' && x == 4 && y == 3.5);
+	ASL_ASSERT(a == 'a' && i == 4 && y == 3.5 && x == 0.25f);
 }
 
 ASL_TEST(Array2)

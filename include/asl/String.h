@@ -46,6 +46,11 @@ class QString;
 #define ASL_PRINTF_W2(i)
 #endif
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 26451 26495)
+#endif
+
 namespace asl {
 	
 template<class T> class Dic;
@@ -146,7 +151,7 @@ protected:
 	void init(int n) {alloc(n); _len=n;}
 	char* str() { return (_size == 0) ? (char*)_space : (char*)_str; }
 	const char* str() const {return (_size==0)? (const char*)_space : (const char*)_str;}
-	String(void*): _size(0), _len(0) {} // avoid accidental construction from arbitrary pointers
+	String(void*) : _size(0), _len(0), _str(0) {} // avoid accidental construction from arbitrary pointers
 public:
 	/**
 	Constructs an empty string
@@ -772,6 +777,10 @@ int ASL_API utf8toUtf32(const char* u, int* p, int n);
 String ASL_API localToUtf8(const String& a);
 String ASL_API utf8ToLocal(const String& a);
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #ifdef QSTRING_H
 #include <asl/qt_interop.h>

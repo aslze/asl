@@ -75,6 +75,7 @@ set( ASL_SRC
 	../include/asl/util.h
 	../include/asl/TlsSocket.h
 	../include/asl/SHA1.h
+	../include/asl/StreamBuffer.h
 )
 
 set(ASL_DEFS "")

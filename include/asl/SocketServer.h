@@ -64,7 +64,7 @@ Add `&& !_requestStop` to the while condition to let the service be stoppable by
 
 class ASL_API SocketServer
 {
-	friend struct SockClientThread;;
+	friend struct SockClientThread;
 	SockServerThread* _thread;
 protected:
 	Sockets _sockets;

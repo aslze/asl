@@ -376,8 +376,9 @@ T bytesSwapped(const T& x)
 	T y;
 	const byte* px = (const byte*)&x;
 	byte* py = (byte*)&y;
-	for (int i = 0; i < sizeof(T); i++)
-		py[i] = px[sizeof(T) - i - 1];
+	const int n = sizeof(T);
+	for (int i = 0; i < n; i++)
+		py[i] = px[n - i - 1];
 	return y;
 }
 

@@ -20,6 +20,10 @@ struct DateData
 	int weekDay;
 };
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 26812)
+#endif
 /**
 This class represents a point in time, both a date and a time. It can be used to store date-time values, add or
 subtract time, compare times and convert to/from string representations. Time is stored as the number of seconds (with fractions)
@@ -206,6 +210,8 @@ inline Date::Format operator|(Date::Format a, Date::Format b)
 {
 	return Date::Format(int(a) | int(b));
 }
-
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 }
 #endif

@@ -38,6 +38,10 @@ namespace asl {
 
 #define VAR_SSPACE 8
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 26451 26495 26812)
+#endif
 /**
 A Var is a type that can hold a value of one of several types, similarly to a `var` in JavaScript.
 Upon assignment to a number, string, bool, array or dic, it will take its value and type.
@@ -180,8 +184,6 @@ will print the string:
 For a better representation that can be parsed back into a Var, you can use XDL (`Xdl::encode(var)`) or JSON (`Json::encode(var)`).
 
 */
-
-
 class ASL_API Var
 {
 	// avoid these operators
@@ -738,6 +740,9 @@ inline Var::Enumerator end(const Var& a)
 
 #endif
 
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 }
 
 #undef NEW_ARRAY

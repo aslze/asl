@@ -16,6 +16,10 @@ A million repetitions of "a"
 #include <string.h>
 #include <asl/SHA1.h>
 
+#ifdef _MSC_VER
+#pragma warning(disable : 26451 26495)
+#endif
+
 namespace asl {
 
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))

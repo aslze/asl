@@ -1,6 +1,10 @@
 #include <asl/TabularDataFile.h>
 #include <ctype.h>
 
+#ifdef _MSC_VER
+#pragma warning(disable : 26451 26812)
+#endif
+
 namespace asl
 {
 inline bool myisdigit(char c)

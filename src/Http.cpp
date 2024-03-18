@@ -10,6 +10,10 @@
 #define SEND_BLOCK_SIZE 128000
 #define RECV_BLOCK_SIZE 16000
 
+#ifdef _MSC_VER
+#pragma warning(disable : 26451 26812)
+#endif
+
 namespace asl {
 
 String Url::decode(const String& q0)
@@ -261,9 +265,8 @@ void HttpMessage::readHeaders()
 
 void HttpMessage::readBody()
 {
-	int size = hasHeader("Content-Length") ? (int)header("Content-Length") : 0;
+	int size = header("Content-Length");
 
-	//int totalsize = size;
 	int currentsize = 0;
 
 	bool chunked = header("Transfer-Encoding") == "chunked"; // Handle specially!!
@@ -327,10 +330,6 @@ void HttpMessage::readBody()
 		}
 	}
 	//printf("readbody end\n");
-}
-
-HttpRequest::~HttpRequest()
-{
 }
 
 HttpResponse Http::request(HttpRequest& request)
@@ -558,6 +557,11 @@ String HttpResponse::socketError() const
 	return _socketError;
 }
 
+void HttpMessage::useSink(const Shared<HttpSink>& s)
+{
+	_sink = s;
+	_sink->use(this);
+}
 
 bool HttpMessage::sendHeaders()
 {
@@ -630,9 +634,9 @@ void HttpMessage::writeFile(const String& path, int begin, int end)
 	if (begin != end)
 		size = end - begin + 1;
 	int bytesSent = 0;
-	HttpStatus status;
-	status.sent = 0;
-	status.totalSend = (int)size;
+	//HttpStatus status;
+	//status.sent = 0;
+	//status.totalSend = (int)size;
 	while(n > 0 && bytesSent < (int)size)
 	{
 		char buf[RECV_BLOCK_SIZE];

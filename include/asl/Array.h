@@ -4,17 +4,6 @@
 #ifndef ASL_ARRAY_H
 #define ASL_ARRAY_H
 
-// Define ASL_DEBUG_ARRAY to emit an exception if array bounds exceeded (useful for debugging)
-
-#pragma warning( disable : 4284 )
-#pragma warning( disable : 4251 )
-
-namespace asl {
-class String;
-template<class T>
-class Array;
-}
-
 #include <asl/defs.h>
 #include "foreach1.h"
 #include <string.h>
@@ -24,8 +13,19 @@ class Array;
 #include <initializer_list>
 #endif
 
+// Define ASL_DEBUG_ARRAY to emit an exception if array bounds exceeded (useful for debugging)
+
+#ifdef _MSC_VER
+#pragma warning(disable : 4251)
+#pragma warning(push)
+#pragma warning(disable : 4284 26451)
+#endif
+
 namespace asl {
 
+class String;
+template<class T>
+class Array;
 template<class T, int N>
 class Array_;
 class Var;
@@ -73,9 +73,9 @@ protected:
 	Data& d() const {return *((Data*)_a-1);}
 	void alloc(int m);
 	void free();
-	ASL_EXPLICIT Array(T* p);
+	ASL_EXPLICIT Array(T* p) {}
 	/*ASL_EXPLICIT*/ operator void* () { return NULL; }
-	ASL_EXPLICIT Array(const String& s);
+	ASL_EXPLICIT Array(const String& s) {}
 	Array& operator=(int b) { return *this; }
 	bool operator==(int x) const { return false; }
 public:
@@ -829,4 +829,8 @@ static asl::Array<T> rad2deg(const asl::Array<T>& a)
 }
 
 }
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #endif

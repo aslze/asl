@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_THREAD_H
@@ -213,7 +213,14 @@ public:
 	void kill()
 	{
 #ifdef _WIN32
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 6258)
+#endif
 		TerminateThread(_thread, 0);
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #elif !defined(__ANDROID__)
 		pthread_cancel(_thread);
 #endif

@@ -56,14 +56,14 @@ public:
 
 	bool open(const String& name, OpenMode mode = READ)
 	{
-		return File::open(name, OpenMode(mode | TEXT));
+		return File::open(name, OpenMode(mode | TEXT)) && _file != 0;
 	}
 	bool open(OpenMode mode = READ)
 	{
 		return open(_path, mode);
 	}
 
-	bool end() { return (_file || open(_path, READ)) ? feof(_file) != 0 : true; }
+	bool end();
 	
 	/** Prints formatted text as with the regular printf. Returns false on failure */
 	bool printf(ASL_PRINTF_W1 const char* fmt, ...) ASL_PRINTF_W2(2);

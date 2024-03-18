@@ -96,6 +96,8 @@ bool SocketServer::bindPath(const String& sname)
 		return true;
 	}
 	_socketError = server.errorMsg();
+#else
+	(void)sname;
 #endif
 	return false;
 }

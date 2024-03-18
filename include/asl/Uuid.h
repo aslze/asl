@@ -25,7 +25,7 @@ String u = Uuid::generate();
 class ASL_API Uuid
 {
 public:
-	Uuid() {}
+	Uuid() { memset(_u, 0, 16); }
 	/**
 	Constructs an UUID from a string representation
 	*/

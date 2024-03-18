@@ -108,7 +108,7 @@ public:
 
 struct Rect_ : public Shape_
 {
-	ASL_SMART_INNER_DECL(Rect);
+	ASL_SMART_INNER_DECL(Rect)
 	Rect_(float w, float h) { _w = w; _h = h; }
 	float area() const { return _w * _h; }
 	float _w, _h;
@@ -195,8 +195,6 @@ ASL_TEST(Function)
 #ifdef ASL_HAVE_LAMBDA
 	int base = 5;
 	Function<bool, int> isMultiple = [=](int x) { return x % base == 0; };
-
-	bool multiple = isMultiple(15);
 
 	ASL_ASSERT(isMultiple(15));
 	ASL_ASSERT(!isMultiple(7));

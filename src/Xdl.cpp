@@ -14,6 +14,10 @@
 #define ASL_ATOF atof
 #endif
 
+#ifdef _MSC_VER
+#pragma warning(disable : 26451 26495 26812)
+#endif
+
 namespace asl {
 
 struct XdlSink

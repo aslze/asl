@@ -9,6 +9,11 @@
 
 namespace asl {
 
+#ifdef _MSC_VER 
+#pragma warning(push)
+#pragma warning(disable : 6011)
+#endif
+
 inline int hash(int x)
 {
 	return x;
@@ -55,7 +60,7 @@ inline int hash(const File& f)
 }
 #endif
 
-#define ASL_HMAP_SKIP (2 + (sizeof(AtomicCount)-1)/sizeof(void*))
+#define ASL_HMAP_SKIP (2 + int((sizeof(AtomicCount)-1)/sizeof(void*)))
 
 inline int nextPoT(int n)
 {
@@ -112,7 +117,6 @@ protected:
 	{
 		K key;
 		T value;
-		KeyVal(const K& k): key(k) {}
 		KeyVal(const K& k, const T& v): key(k), value(v) {}
 	};
 
@@ -120,7 +124,6 @@ protected:
 	{
 		KeyValN* next;
 		KeyValN(): next(0) {}
-		KeyValN(const K& k): KeyVal(k), next(0) {}
 		KeyValN(const K& k, const T& v) : KeyVal(k, v), next(0) {}
 	};
 
@@ -322,7 +325,7 @@ public:
 			q = p;
 			p = p->next;
 		}
-		p = new KeyValN(key);
+		p = new KeyValN(key, T());
 		p->next = 0;
 		if(!q)
 			a[bin] = p;
@@ -510,6 +513,8 @@ public:
 		return b;
 	}
 };
-
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 }
 #endif

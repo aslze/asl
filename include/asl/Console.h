@@ -9,6 +9,11 @@
 #include <windows.h>
 #endif
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 26812)
+#endif
+
 namespace asl {
 
 /**
@@ -160,4 +165,8 @@ extern ASL_API Console console;
 static Console _myconsole_ = console;
 #endif
 }
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #endif

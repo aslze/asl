@@ -1,4 +1,6 @@
-#define TLSSOCKET_CPP
+#ifdef _MSC_VER
+#pragma warning(disable : 26812 26451)
+#endif
 #include <mbedtls/version.h>
 #include <mbedtls/ssl.h>
 #include <mbedtls/debug.h>

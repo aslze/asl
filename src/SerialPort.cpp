@@ -157,7 +157,8 @@ int SerialPort::read(void *p, int n)
 	DWORD bytes;
 	OVERLAPPED overlapped;
 	memset(&overlapped, 0, sizeof(OVERLAPPED));
-	ReadFile(_handle, p, n, NULL, &overlapped);
+	if (!ReadFile(_handle, p, n, NULL, &overlapped))
+		return 0;
 	GetOverlappedResult(_handle, &overlapped, &bytes, TRUE);
 	return bytes;
 }

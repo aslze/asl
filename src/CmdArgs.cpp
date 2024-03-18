@@ -42,7 +42,7 @@ CmdArgs::CmdArgs(const String& spec)
 	while ((n = file.read(buffer, sizeof(buffer))) > 0)
 	{
 		all.append(Array<char>((char*)buffer, n));
-		if (n <= sizeof(buffer))
+		if (n <= (int)sizeof(buffer))
 			break;
 	}
 	if (all.length() == 0)

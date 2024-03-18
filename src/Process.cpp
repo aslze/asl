@@ -137,6 +137,10 @@ namespace asl {
 
 	Process::Process()
 	{
+	    _pipe_err[0] = 0;
+	    _pipe_err[1] = 0;
+	    _pipe_in[0] = 0;
+	    _pipe_in[1] = 0;
 		_ok = false;
 		_ready = false;
 		_exitstat = 0;
@@ -522,7 +526,7 @@ void Process::run(const String& command, const Array<String>& args)
 			close(2);
 			close(0);
 			//::signal (SIGHUP, SIG_IGN);
-			pid_t sid = setsid();
+			//pid_t sid = setsid();
 		}
 		exec(command, args);
 		_exit(0);

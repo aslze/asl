@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_BUFFER_H
@@ -7,7 +7,12 @@
 #include "Array.h"
 #include "String.h"
 
-namespace asl {
+namespace asl
+{
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 26812 26495)
+#endif
 
 class File;
 class Socket;
@@ -24,9 +29,16 @@ struct AsBytes
 template <class T, class T2>
 struct AsOther
 {
-	union { T x; T2 y; };
-	AsOther() {}
-	AsOther(const T& a) : x(a) {}
+	byte b[sizeof(T)];
+
+	AsOther(const T& x) { memcpy(b, &x, sizeof(T)); }
+
+	T2 other() const
+	{
+		T2 y;
+		memcpy(&y, b, sizeof(T));
+		return y;
+	}
 };
 
 /**
@@ -80,12 +92,10 @@ public:
 	template <class T>
 	StreamBufferReader& read2(T& x)
 	{
-		AsOther<T, unsigned short> a;
-		if (_endian == ENDIAN_BIG)
-			a.y = ((unsigned short)_ptr[0] << 8) | ((unsigned short)_ptr[1]);
-		else
-			a.y = ((unsigned short)_ptr[1] << 8) | ((unsigned short)_ptr[0]);
-		x = a.x;
+		AsOther<unsigned short, T> a((_endian == ENDIAN_BIG)
+		                                 ? ((unsigned short)_ptr[0] << 8) | ((unsigned short)_ptr[1])
+		                                 : ((unsigned short)_ptr[1] << 8) | ((unsigned short)_ptr[0]));
+		x = a.other();
 		_ptr += 2;
 		return *this;
 	}
@@ -93,12 +103,11 @@ public:
 	template <class T>
 	StreamBufferReader& read4(T& x)
 	{
-		AsOther<T, unsigned> a;
-		if (_endian == ENDIAN_BIG)
-			a.y = ((unsigned)_ptr[0] << 24) | ((unsigned)_ptr[1] << 16) | ((unsigned)_ptr[2] << 8) | ((unsigned)_ptr[3]);
-		else
-			a.y = ((unsigned)_ptr[3] << 24) | ((unsigned)_ptr[2] << 16) | ((unsigned)_ptr[1] << 8) | ((unsigned)_ptr[0]);
-		x = a.x;
+		AsOther<unsigned, T> a(
+		    (_endian == ENDIAN_BIG)
+		        ? ((unsigned)_ptr[0] << 24) | ((unsigned)_ptr[1] << 16) | ((unsigned)_ptr[2] << 8) | ((unsigned)_ptr[3])
+		        : ((unsigned)_ptr[3] << 24) | ((unsigned)_ptr[2] << 16) | ((unsigned)_ptr[1] << 8) | ((unsigned)_ptr[0]));
+		x = a.other();
 		_ptr += 4;
 		return *this;
 	}
@@ -106,14 +115,13 @@ public:
 	template <class T>
 	StreamBufferReader& read8(T& x)
 	{
-		AsOther<T, ULong> a;
-		if (_endian == ENDIAN_BIG)
-			a.y = ((ULong)_ptr[0] << 56) | ((ULong)_ptr[1] << 48) | ((ULong)_ptr[2] << 40) | ((ULong)_ptr[3] << 32)
-			    | ((ULong)_ptr[4] << 24) | ((ULong)_ptr[5] << 16) | ((ULong)_ptr[6] << 8) | ((ULong)_ptr[7]);
-		else
-			a.y = ((ULong)_ptr[7] << 56) | ((ULong)_ptr[6] << 48) | ((ULong)_ptr[5] << 40) | ((ULong)_ptr[4] << 32)
-			    | ((ULong)_ptr[3] << 24) | ((ULong)_ptr[2] << 16) | ((ULong)_ptr[1] << 8) | ((ULong)_ptr[3]);
-		x = a.x;
+		AsOther<ULong, T> a(
+		    (_endian == ENDIAN_BIG)
+		        ? ((ULong)_ptr[0] << 56) | ((ULong)_ptr[1] << 48) | ((ULong)_ptr[2] << 40) | ((ULong)_ptr[3] << 32) |
+		              ((ULong)_ptr[4] << 24) | ((ULong)_ptr[5] << 16) | ((ULong)_ptr[6] << 8) | ((ULong)_ptr[7])
+		        : ((ULong)_ptr[7] << 56) | ((ULong)_ptr[6] << 48) | ((ULong)_ptr[5] << 40) | ((ULong)_ptr[4] << 32) |
+		              ((ULong)_ptr[3] << 24) | ((ULong)_ptr[2] << 16) | ((ULong)_ptr[1] << 8) | ((ULong)_ptr[3]));
+		x = a.other();
 		_ptr += 8;
 		return *this;
 	}
@@ -173,10 +181,6 @@ public:
 	*/
 	Array<byte> read(int n = -1) { if (n < 0) n = length();  Array<byte> a(n); memcpy(a.data(), _ptr, n); _ptr += n; return a; }
 
-	// [deprecated] symbols for compatibility with old code:
-	static const Endian BIGENDIAN = ENDIAN_BIG;
-	static const Endian LITTLEENDIAN = ENDIAN_LITTLE;
-
 protected:
 	const byte* _ptr;
 	const byte* _end;
@@ -216,10 +220,7 @@ public:
 	*/
 	void setEndian(Endian e) { _endian = e; }
 
-	void write(const void* data, int n)
-	{
-		append((const byte*)data, n);
-	}
+	void write(const void* data, int n) { append((const byte*)data, n); }
 	/**
 	Writes variable x to the buffer respecting endianness in binary form
 	*/
@@ -273,7 +274,7 @@ public:
 
 	StreamBuffer& operator<<(const Array<byte>& x)
 	{
-		write(x.ptr(), x.length());
+		write(x.data(), x.length());
 		return *this;
 	}
 
@@ -288,10 +289,6 @@ public:
 		write(*x, x.length());
 		return *this;
 	}
-
-	// [deprecated] symbols for compatibility with old code:
-	static const Endian BIGENDIAN = ENDIAN_BIG;
-	static const Endian LITTLEENDIAN = ENDIAN_LITTLE;
 
 protected:
 	Endian _endian;

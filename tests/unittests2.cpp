@@ -250,6 +250,7 @@ ASL_TEST(Factory)
 		Shared<Dog> dog = Shared<Animal>(Factory<Animal>::create("Dog")).as<Dog>();
 		animal = dog;
 		int l = len(dog);
+		ASL_ASSERT(l > 0);
 
 		Array<Shared<Animal> > zoo;
 		zoo << new Dog() << new Cat();
@@ -431,7 +432,7 @@ ASL_TEST(AtomicCount)
 	for (int i = 0; i < 30; i++)
 		threads1 << AThread();
 	threads1.start();
-	int n = AThread::n;
+	//int n = AThread::n;
 	threads1.join();
 	ASL_ASSERT(AThread::n == 0);
 
@@ -440,8 +441,8 @@ ASL_TEST(AtomicCount)
 	for (int i = 0; i < 20; i++)
 		threads2 << A2Thread<ItemType>();
 	threads2.start();
-	sleep(0.001);
-	double bn = A2Thread<ItemType>::n;
+	//sleep(0.001);
+	//double bn = A2Thread<ItemType>::n;
 	threads2.join();
 	ASL_ASSERT(A2Thread<ItemType>::n == ItemType(20.0 * A2Thread<ItemType>::N));
 }

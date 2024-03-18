@@ -57,7 +57,7 @@ String Directory::createTemp()
 	unsigned pid = (unsigned)getpid();
 #endif
 	do {
-		dir = String(0, "%s/%04x%08x%08x", *tmpDir, pid, p, num++);
+		dir = String::f("%s/%04x%08x%08x", *tmpDir, pid, p, num++);
 	} while (File(dir).exists());
 	create(dir);
 	return dir;

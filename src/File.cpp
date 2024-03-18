@@ -37,6 +37,10 @@ namespace asl {
 
 #ifdef _WIN32
 
+#ifdef _MSC_VER
+#pragma warning(disable : 26451 26495 26812)
+#endif
+
 const char File::SEP = '\\';
 
 inline double ft2t(const FILETIME& ft)

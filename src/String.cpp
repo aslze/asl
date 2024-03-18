@@ -22,26 +22,31 @@
 #define to32bit local8toUtf32
 #endif
 
+#ifdef _MSC_VER
+#pragma warning(disable : 26451 26812 6386)
+#endif
+
 namespace asl {
 
 void printf_(const char* fmt, ...)
 {
-	char buffer[1000];
+	const int N = 1000;
+	char    buffer[N];
 	char* str = buffer;
 	va_list arg;
 	va_start(arg, fmt);
 	int i=0, n=0;
-	int space = sizeof(buffer);
+	int space = N;
 	while(((n=vsnprintf(str, space, fmt, arg)) == -1 || n > space) && ++i < 10)
 	{
-		if(space > sizeof(buffer))
+		if (space > N)
 			delete [] str;
 		space *= 2;
 		str = new char[space];
 	}
 	va_end(arg);
 	fwrite(str, n, 1, stdout);
-	if(space > sizeof(buffer))
+	if (space > N)
 		delete [] str;
 }
 
@@ -334,7 +339,7 @@ String String::fromLocal(const String& a)
 	return a;
 #else
 	Array<wchar_t> ws(a.length() + 1);
-	int n = local8toUtf16(a, ws.data(), a.length());
+	local8toUtf16(a, ws.data(), a.length());
 	return String(ws.data());
 #endif
 }
@@ -353,7 +358,7 @@ String& String::fixW()
 	return *this;
 }
 
-String::String(int n, const char* fmt, ...)
+String::String(int n, ASL_PRINTF_W1 const char* fmt, ...)
 {
 	alloc(n? n : 100);
 	va_list arg;
@@ -370,7 +375,7 @@ String::String(int n, const char* fmt, ...)
 	_len=n;
 }
 
-String String::f(const char* fmt, ...)
+String String::f(ASL_PRINTF_W1 const char* fmt, ...)
 {
 	String s;
 	char    ss[256];

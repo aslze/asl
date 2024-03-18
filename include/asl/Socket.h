@@ -37,11 +37,14 @@ public:
 	void close();
 };
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 26812)
+#endif
 /**
 Represents an endpoint of a socket which is ususally an IP address and a port. Both IPv4 and IPv6 are supported.
 \ingroup Sockets
 */
-
 class ASL_API InetAddress
 {
 public:
@@ -341,7 +344,7 @@ public:
 	Reads a string from the socket that is preceded by its length as an int32 (the sender must send the byte length before)
 	\deprecated Too specific
 	*/
-	Socket& operator>>(String& x)
+	ASL_DEPRECATED(Socket& operator>>(String& x), "Use your own logic to read strings")
 	{
 		int n = 0;
 		*this >> n;
@@ -351,10 +354,6 @@ public:
 
 	template <class T>
 	T read() { T x; *this >> x; return x; }
-
-	// [deprecated] symbols for compatibility with old code:
-	static const Endian BIGENDIAN = ENDIAN_BIG;
-	static const Endian LITTLEENDIAN = ENDIAN_LITTLE;
 };
 
 ASL_SMART_CLASS(PacketSocket, Socket)
@@ -518,6 +517,9 @@ public:
 	}
 };
 
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 }
 
 #undef ASL_OTHERENDIAN

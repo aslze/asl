@@ -13,6 +13,10 @@
 
 namespace asl {
 	
+#ifdef _MSC_VER
+#pragma warning(disable : 26812)
+#endif
+
 static void DEBUG_LOG(...) {}
 //#define DEBUG_LOG printf
 //#define DEBUG_LOG

@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_Pointer_H
@@ -7,6 +7,11 @@
 #include <asl/atomic.h>
 
 namespace asl {
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 6001)
+#endif
 
 template<class T>
 struct SharedCore
@@ -343,6 +348,8 @@ struct StaticSpace
 private:
 	byte _space[sizeof(T)];
 };
-
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 }
 #endif

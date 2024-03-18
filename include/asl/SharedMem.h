@@ -55,7 +55,7 @@ public:
 	*/
 	byte* ptr();
 protected:
-	SharedMem(const SharedMem& m) {}
+	SharedMem(const SharedMem&) : _handle(0), _size(0), _ptr(0) {}
 
 #ifdef _WIN32
 	HANDLE _handle;

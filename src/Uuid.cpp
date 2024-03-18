@@ -4,6 +4,7 @@ namespace asl {
 
 Uuid::Uuid(const String& s)
 {
+	memset(_u, 0, 16);
 	if (s.length() != 36)
 		return;
 	for (int i = 0, j = 0; i < 16; i++, j+=2)
