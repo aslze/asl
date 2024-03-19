@@ -348,7 +348,7 @@ ASL_TEST(Map)
 	ASL_ASSERT(join1({{"a", "1"}, {"b", "2"}}) == "a:1,b:2");
 #endif
 
-	Dic<> snumbers2 = split("-2=minus two,12=twelve,100=one hundred", ",", "=");
+	Dic<> snumbers2 = String("-2=minus two,12=twelve,100=one hundred").split(",", "=");
 	ASL_ASSERT(snumbers == snumbers2);
 	snumbers2.remove("12");
 	ASL_ASSERT(snumbers != snumbers2);

@@ -29,9 +29,6 @@
  #define ASL_QTFROM fromUtf8
  #define ASL_QTTO toUtf8
 #endif
-#ifndef QSTRING_H
-class QString;
-#endif
 
 #ifdef ASL_PRINTF_WARN
 #ifdef _MSC_VER
@@ -198,7 +195,7 @@ public:
 		str()[n] = '\0';
 	}
 	
-	String(const Array<byte>& txt)
+	String(const ByteArray& txt)
 	{
 		int n = txt.length();
 		init(n);
@@ -322,7 +319,7 @@ public:
 	Constructs a string from a boolean value
 	*/
 	String(bool x);
-#if defined(QSTRING_H) && defined(ASL_STATIC)
+#if defined(QSTRING_H) && defined(ASL_STATIC) && !defined(ASL_NOQT)
 	String(const QString& s)
 	{
 		QByteArray a = s.ASL_QTTO();

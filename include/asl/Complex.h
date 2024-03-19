@@ -8,6 +8,7 @@ namespace asl {
 
 /**
 Complex numbers.
+\deprecated This class name might change to match Vec2 and others (`Complex_<T>`, `Complex`, `Complexd`)
 */
 template<class T = double>
 class Complex
@@ -59,6 +60,7 @@ public:
 };
 
 typedef Complex<float> Complexf;
+typedef Complex<double> Complexd;
 
 }
 #endif

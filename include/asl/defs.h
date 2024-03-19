@@ -10,7 +10,7 @@
 Main definitions.
 */
 
-#define ASL_VERSION 11109
+#define ASL_VERSION 11110
 
 #ifdef _WIN32
 #ifndef _CRT_SECURE_NO_DEPRECATE
@@ -371,26 +371,27 @@ void asl_error(const char* msg);
 void os_error(const char* msg);
 
 template <class T>
-T bytesSwapped(const T& x)
+inline void swapBytes(T& x)
 {
-	T y;
-	const byte* px = (const byte*)&x;
-	byte* py = (byte*)&y;
+	byte bx[sizeof(T)], by[sizeof(T)];
+	memcpy(bx, &x, sizeof(T));
 	const int n = sizeof(T);
 	for (int i = 0; i < n; i++)
-		py[i] = px[n - i - 1];
-	return y;
+		by[i] = bx[n - i - 1];
+	memcpy(&x, by, sizeof(T));
 }
 
 template <class T>
-void swapBytes(T& x)
+inline T bytesSwapped(const T& x)
 {
 	T y = x;
-	x = bytesSwapped(y);
+	swapBytes(y);
+	return y;
 }
 
 #undef min
 #undef max
+
 template <class T>
 inline T max(T a, T b) {if(a>b) return a; else return b;}
 
