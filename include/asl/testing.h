@@ -97,8 +97,8 @@ Add support for testing in this executable and create a function `main()` that r
 @hideinitializer
 */
 #define ASL_TEST_ENABLE_MAIN() \
-	ASL_TEST_ENABLE(); \
-	ASL_TEST_MAIN();
+ASL_TEST_ENABLE() \
+ASL_TEST_MAIN()
 
 /** 
 Create a test named Name.
@@ -149,7 +149,7 @@ template<class T>
 double distance(const Matrix4_<T>& a, const Matrix4_<T>& b)
 {
 	Vec3_<T> vx(1,0,0), vy(0,1,0), vz(0,0,1);
-	return Vec3_<T>(!(a*vx - b*vx), !(a*vy - b*vy), !(a*vz - b*vz)).length();
+	return Vec3_<T>((a*vx - b*vx).length(), (a*vy - b*vy).length(), (a*vz - b*vz).length()).length();
 }
 #endif
 
@@ -183,18 +183,23 @@ Check that the argument is true.
 /** 
 Check a condition with the given operator and operands.
 ~~~
-ASL_CHECK(sqrt(x), >=, 0);
+ASL_EXPECT(sqrt(x), >=, 0);
 ~~~
 @hideinitializer
 */
-#define ASL_CHECK(x, op, y) if(!((x) op (y))) { printf("\n%s(%i): error: Expected '%s' %s '%s' but it is %s\n\n", __FILE__, __LINE__, #x, #op, *asString(y), *asString(x)); testFailed = true;}
+
+#define ASL_EXPECT(x, op, y) if(!((x) op (y))) { printf("\n%s(%i): error: Expected '%s' %s '%s' but it is %s\n\n", __FILE__, __LINE__, #x, #op, *asString(y), *asString(x)); testFailed = true; }
+
+#define ASL_CHECK(x, op, y) ASL_EXPECT(x, op, y)
 #endif
+
+#define ASL_APPROX(x, y, d) ASL_EXPECT(distance((x), (y)), <, (d))
 
 /** 
 Check that `x` and `y` are approximately equal (within distance `d`).
 @hideinitializer
 */
-#define ASL_APPROX(x, y, d) ASL_CHECK(distance((x), (y)), <, (d))
+#define ASL_EXPECT_NEAR(x, y, d) ASL_EXPECT(distance((x), (y)), <, (d))
 
 /**@}*/
 }

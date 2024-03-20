@@ -1,11 +1,8 @@
-
-set(EXE_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
 add_executable( unittests unittests.cpp unittests2.cpp unittests3.cpp unittests4.cpp)
 target_link_libraries( unittests asls )
 
 macro(TEST name)
-	add_test( ${name} ${EXE_PATH}/unittests ${name})
+	add_test(${name} "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/unittests" ${name})
 endmacro()
 
 set(TESTS

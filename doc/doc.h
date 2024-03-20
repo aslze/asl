@@ -305,9 +305,10 @@ while(true)
 /**
 \defgroup Containers Containers
 
-There are several container classes that can hold elements of any type (Array, Array_, Array2, 
-Map, Dic, Stack, HashMap). These classes are reference-counted, so they 
-are copied by reference. If a separate copy is required, use the `clone()` method:
+There are several container classes that can hold elements of different types (Array, Array_, Array2, 
+Map, Dic, Stack, HashMap). Currently these containers can only contain elements of POD types or classes that do not hold pointers into
+themselves (all ASL classes are fine). These classes are reference-counted, so they are copied by reference. If a separate copy
+is required, use the `clone()` method:
 
 ~~~
 Array<int> a = { 1, 2, 3 };
@@ -342,7 +343,6 @@ for(auto& [name, value] : constants)
 }
 ~~~
 
-
 For older compilers there are special macros for iterating, `foreach` and `foreach2` loops. The
 first iterates on the values of elements. And the second on both the keys and values of elements.
 
@@ -364,7 +364,6 @@ foreach2(String& name, int age, ages)
 }
 ~~~
 
-
 In order to support iterating the elements contained, these classes implement an _Enumerator_. These are similar to
 _iterators_ but don't have to come in pairs (*begin* and *end*). Just one Enumerator knows how to go to the
 next element and when to stop iterating.
@@ -384,8 +383,6 @@ for(Array<T>::Enumerator e = container.all(); e; ++e)
 ~~~
 
 That way, if container was a Dic, it would be printing the names and values of all elements.
-
-
 */
 
 /**
@@ -619,13 +616,13 @@ ASL_TEST(Car)
 {
 	Car car;
 	ASL_ASSERT(car.isStopped());
-	ASL_CHECK(car.numWheels(), >, 2);
+	ASL_EXPECT(car.numWheels(), >, 2);
 }
 
 ASL_TEST(Volume)
 {
     Sphere sphere(1.0);
-    ASL_APPROX(sphere.volume(), 4.1888, 1e-3);
+    ASL_EXPECT_NEAR(sphere.volume(), 4.1888, 1e-3);
 }
 ~~~
 */

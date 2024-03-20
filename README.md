@@ -10,7 +10,6 @@ ASL is a collection of multiplatform general purpose classes and utilities focus
 - [Online API documentation](https://aslze.github.io/asl-doc/)
 
 
-
 ## Features
 
 __OS-related functionalities__:
@@ -21,7 +20,7 @@ __OS-related functionalities__:
 - Directory enumeration and file system operations (copy, move, delete)
 - Sockets TCP, UDP and Unix (where available), IPv4 and IPv6, with optional SSL/TLS
 - Runtime dynamically loadable libraries (DLLs or shared libraries)
-- Console: text and background color, cursor position, etc.
+- Console control: text and background color, cursor position, etc.
 - Serial ports
 - Shared memory
 
@@ -37,9 +36,10 @@ __Utilities__:
 - Singletons and Factories
 - Base64 and hex encoding/decoding
 - Binary buffer reading/writing (endian-aware)
-- Random number generator
-- Basic testing functionality
+- Random number and UUID generators
+- Elapsed time measurement
 - Linear and nonlinear systems solving
+- Basic testing functionality
 
 __Basic data types__:
 
@@ -307,7 +307,7 @@ With CMmake 3.14+, instead of using `find_package()`, you can download and build
 
 ```cmake
 include(FetchContent)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.8.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.10.zip)
 FetchContent_MakeAvailable(asl)
 ```
 
@@ -345,7 +345,7 @@ With a recent CMake (3.14+) you can also build mbedTLS together with ASL as subp
 set(ASL_TLS ON)
 set(ENABLE_PROGRAMS OFF CACHE BOOL "") # skip samples
 FetchContent_Declare(mbedtls URL https://github.com/Mbed-TLS/mbedtls/archive/v3.2.1.zip)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.8.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.10.zip)
 FetchContent_MakeAvailable(mbedtls asl)
 ```
 

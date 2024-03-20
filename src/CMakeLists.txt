@@ -34,7 +34,9 @@ set( ASL_SRC
 	../include/asl/String.h
 	../include/asl/Array.h
 	../include/asl/Array_.h
+	../include/asl/Array2.h
 	../include/asl/Stack.h
+	../include/asl/Queue.h
 	../include/asl/Map.h
 	../include/asl/HashMap.h
 	../include/asl/Vec2.h
@@ -76,6 +78,7 @@ set( ASL_SRC
 	../include/asl/TlsSocket.h
 	../include/asl/SHA1.h
 	../include/asl/StreamBuffer.h
+	../include/asl/testing.h
 )
 
 set(ASL_DEFS "")
