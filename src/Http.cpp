@@ -184,12 +184,6 @@ Var HttpMessage::json() const
 	return data.ok() ? data : Var(Url::parseQuery(str));
 }
 
-void HttpMessage::put(const String& body)
-{
-	_body = ByteArray((const byte*)*body, body.length());
-	setHeader("Content-Length", _body.length());
-}
-
 void HttpMessage::put(const ByteArray& data)
 {
 	_body = data;
@@ -544,7 +538,7 @@ void HttpResponse::setCode(int code)
 	else
 		msg = "Not found";
 
-	_command = String(15, "%s %i %s", *_proto, code, *msg);
+	_command = String::f("%s %i %s", *_proto, code, *msg);
 }
 
 bool HttpResponse::is(HttpResponse::StatusType code) const
@@ -604,7 +598,7 @@ int HttpMessage::write(const char* buffer, int n)
 	{
 		int m = min(n, SEND_BLOCK_SIZE);
 		if (_chunked)
-			*_socket << String(15, "%x\r\n", m);
+			*_socket << String::f("%x\r\n", m);
 		int written = _socket->write(buffer, m);
 		if (written != m)
 			return sent;
@@ -658,6 +652,7 @@ bool HttpMessage::putFile(const String& path, int begin, int end)
 	if (!file.exists())
 	{
 		printf("file to upload not found %s\n", *path);
+		setHeader("Content-Length", "0");
 		return false;
 	}
 	if (begin == 0 && end == 0 && !hasHeader("Content-Range"))
@@ -669,6 +664,7 @@ bool HttpMessage::putFile(const String& path, int begin, int end)
 			end = (int)size - 1;
 		if (end <= begin || begin < 0 || end > size)
 		{
+			setHeader("Content-Length", "0");
 			setHeader("Content-Range", String::f("bytes */%lli", size));
 			return false;
 		}

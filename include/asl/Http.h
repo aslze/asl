@@ -166,7 +166,7 @@ public:
 	/**
 	Sets the body of the message as a text string.
 	*/
-	void put(const String& body);
+	void put(const String& body) { put(ByteArray((const byte*)*body, body.length())); }
 
 	void put(const char* body) { put(ByteArray((const byte*)body, (int)strlen(body))); }
 	/**

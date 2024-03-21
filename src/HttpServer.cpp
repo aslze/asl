@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #include <asl/Socket.h>
@@ -64,8 +64,9 @@ void HttpServer::serve(Socket client)
 			_wsserver->process(client, request.headers());
 			return;
 		}
+
 		HttpResponse response(request);
-		response.put("");
+
 		if (_cors && request.hasHeader("Origin"))
 		{
 			response.setHeader("Access-Control-Allow-Origin", request.header("Origin"));
@@ -74,6 +75,10 @@ void HttpServer::serve(Socket client)
 		if (!handleOptions(request, response))
 		{
 			serve(request, response);
+
+			if (!response.body())
+				response.put("");
+
 			if (response.code() == 405)
 				response.setHeader("Allow", _methods);
 
@@ -144,7 +149,7 @@ void HttpServer::serveFile(HttpRequest& request, HttpResponse& response)
 		if (file.isDirectory())
 		{
 			response.setCode(301);
-			response.setHeader("Location", "http://" + request.header("Host") + path+'/');
+			response.setHeader("Location", "http://" + request.header("Host") + path + '/');
 		}
 		else if (file.exists())
 		{
