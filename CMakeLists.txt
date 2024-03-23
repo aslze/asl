@@ -1,15 +1,14 @@
 cmake_minimum_required(VERSION 2.8.12...3.5)
 
-set(CMAKE_DEBUG_POSTFIX "d")
-
 project(asl)
+
+set(ASL_VERSION 1.11.10)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_MACOSX_RPATH ON)
-
-set(ASL_VERSION 1.11.9)
+set(CMAKE_DEBUG_POSTFIX d)
 
 if(POLICY CMP0077)
 	cmake_policy(SET CMP0077 NEW)
@@ -32,7 +31,7 @@ else()
 	set(ASL_BUILD_SHARED_HINT OFF)
 endif()
 
-option(ASL_USE_LOCAL8BIT "Treat char strings as local 8 bit instead of UTF8 when converting wchar_t strings")
+option(ASL_USE_LOCAL8BIT "Treat char strings as local 8 bit instead of UTF8")
 option(ASL_TLS "TLS Sockets")
 option(ASL_BUILD_STATIC "Build static library" ON)
 option(ASL_BUILD_SHARED "Build shared library" ${ASL_BUILD_SHARED_HINT})
