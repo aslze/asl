@@ -372,12 +372,13 @@ class ASL_API Var
 	Var& operator<<(const T& x) {return (*this) << (Var)x;}
 	/** Adds keys and values from v to this var if it is an object, overwriting existing keys */
 	Var& extend(const Var& v);
-	/** Resizes this var to `n` elements if this var is an array, converting if was NONE */
+	/** Resizes this var to `n` elements if this var is an array, converting if it was NONE */
 	void resize(int n)
 	{
 		if(_type==NONE) {
 			_type=ARRAY;
 			NEW_ARRAY(_a);
+			_a->resize(n);
 		}
 		else if(_type==ARRAY)
 			_a->resize(n);
