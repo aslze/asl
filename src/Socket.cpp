@@ -581,25 +581,29 @@ String Socket_::readLine()
 
 int Socket_::read(void* data, int size)
 {
-	if(_blocking) {
-	int s = 0;
-	do {
+	if (_blocking)
+	{
+		int s = 0, size0 = size;
+		do
+		{
 #ifdef _WIN32
 		int n = recv(_handle, (char*)data, size, 0);
 #else
 		int n = ::read(_handle, (char*)data, size);
 #endif
-		if (n <= 0) {
+			if (n <= 0)
+			{
 			_error = SOCKET_BAD_RECV;
 			break;
 		}
 		data = (char*)data + n;
 		s += n;
 		size -= n;
-	} while (s < size);
+		} while (s < size0);
 	return s;
 	}
-	else {
+	else
+	{
 #ifdef _WIN32
 		return recv(_handle, (char*)data, size, 0);
 #else
