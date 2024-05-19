@@ -467,6 +467,7 @@ bool Socket_::bind(const String& ip, int port)
 
 	if(::bind(_handle, (sockaddr*)here.ptr(), here.length())) {
 		verbose_print("Can't bind to %s\n", *here.toString());
+		_error = SOCKET_BAD_BIND;
 		return false;
 	}
 	return true;
@@ -568,7 +569,7 @@ String Socket_::readLine()
 			int n = read(&c, 1);
 			if (n <= 0 || c == '\n' || _error != 0)
 				break;
-			if (s.length() > 8000) {
+			if (s.length() > 16000) {
 				_error = SOCKET_BAD_LINE;
 				s = "";
 				break;
@@ -581,8 +582,6 @@ String Socket_::readLine()
 
 int Socket_::read(void* data, int size)
 {
-	if (_blocking)
-	{
 		int s = 0, size0 = size;
 		do
 		{
@@ -591,6 +590,8 @@ int Socket_::read(void* data, int size)
 #else
 		int n = ::read(_handle, (char*)data, size);
 #endif
+		if (!_blocking)
+			return n;
 			if (n <= 0)
 			{
 			_error = SOCKET_BAD_RECV;
@@ -602,28 +603,31 @@ int Socket_::read(void* data, int size)
 		} while (s < size0);
 	return s;
 	}
-	else
+
+int Socket_::write(const void* data, int size)
+{
+	if (size == 0)
+		return 0;
+	int s = 0, size0 = size;
+	do
 	{
 #ifdef _WIN32
-		return recv(_handle, (char*)data, size, 0);
+		int n = ::send(_handle, (const char*)data, size, 0);
 #else
-		return ::read(_handle, data, size);
+		int n = ::send(_handle, data, size, MSG_NOSIGNAL);
 #endif
-	}
-}
-
-int Socket_::write(const void* data, int n)
+		if (!_blocking)
+			return n;
+		if (n < 0)
 {
-#ifndef _WIN32
-	int m = ::send(_handle, data, n, MSG_NOSIGNAL);
-	//int m = ::write(_handle, data, n);
-	if (m != n) {
-		verbose_print("socket %i wrote %i of %i\n", _handle, m, n);
+			_error = SOCKET_BAD_DATA;
+			break;
 	}
-	return m;
-#else
-	return ::send(_handle, (char*)data, n, 0);
-#endif
+		data = (char*)data + n;
+		s += n;
+		size -= n;
+	} while (s < size0);
+	return s;
 }
 
 ByteArray Socket_::read(int n)
