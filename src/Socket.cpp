@@ -694,9 +694,11 @@ PacketSocket_::PacketSocket_(int fd) : Socket_(fd)
 
 String PacketSocket_::readLine()
 {
-	String s(1000, '\0');
+	String s(1000, 0);
 	if (waitInput()) {
-		read(&s[0], 1000);
+		int m = read(&s[0], 1000);
+		if (m > 0)
+			s[m - 1] = '\0';
 		int n = s.indexOf('\n');
 		if (n >= 0)
 			s[n] = '\0';
@@ -729,7 +731,6 @@ LocalSocket_::LocalSocket_()
 {
 	_type = LOCAL;
 	_family = InetAddress::LOCAL;
-	_blocking = false;
 }
 
 LocalSocket_::LocalSocket_(int fd) : Socket_(fd)
@@ -752,8 +753,7 @@ bool LocalSocket_::bind(const String& name)
 	_pathname=name;
 	unlink(name);
 	init();
-	if(!setOption(SOL_SOCKET, SO_REUSEADDR, 1))
-		return false;
+	setOption(SOL_SOCKET, SO_REUSEADDR, 1);
 	InetAddress here(name);
 	if(::bind(_handle, (sockaddr*)here.ptr(), here.length()))
 	{

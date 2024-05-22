@@ -456,16 +456,18 @@ public:
 ASL_SMART_CLASS(MulticastSocket, PacketSocket)
 {
 	ASL_SMART_INNER_DEF(MulticastSocket);
-	MulticastSocket_();
 	bool join(const InetAddress& a);
 	bool leave(const InetAddress& a);
-	void multicast(const InetAddress& a, int ttl = 1);
-	void setOptions(bool loop, int ttl);
+	bool setLoop(bool on);
+	bool setTTL(int n);
 };
 
 /**
 A MulticastSocket is a communication socket for multicast UDP protocol. It has to
 use *class D* addresses (224.0.1.0 - 239.0.0.0) which identify *multicast groups*.
+
+Onlt supports IPv4 at the moment.
+
 \ingroup Sockets
 
 ```
@@ -486,8 +488,7 @@ And a sending side would start a multicast session to the same group and send pa
 
 ```
 MulticastSocket socket;
-socket.multicast(group);
-socket.write(data);
+socket.sendTo(group, data);
 ```
 */
 class ASL_API MulticastSocket : public PacketSocket
@@ -505,15 +506,31 @@ public:
 	{
 		return _()->leave(a);
 	}
+
+	/**
+	Enables receiving packets in the loopback interface
+	*/
+	bool setLoop(bool on) { return _()->setLoop(on); }
+
+	/**
+	Sets the multicast socket's TTL value (default 1)
+	*/
+	bool setTTL(int n) { return _()->setTTL(n); }
+
 	/** Starts a multicast session for group address `a`. Packets sent will be received by
-	all sockets that join the group. */
-	void multicast(const InetAddress& a, int ttl = 2)
+	all sockets that join the group.
+	\deprecated Use .connect() or .sendTo()
+	*/
+	ASL_DEPRECATED(void multicast(const InetAddress& a, int ttl = 1), "Use .connect() or .sendTo()")
 	{
-		_()->multicast(a, ttl);
+		connect(a);
+		setLoop(true);
+		setTTL(ttl);
 	}
-	void setOptions(bool loop, int ttl)
+
+	bool setOptions(bool loop, int ttl)
 	{
-		_()->setOptions(loop, ttl);
+		return setLoop(loop) && setTTL(ttl);
 	}
 };
 
@@ -521,7 +538,5 @@ public:
 #pragma warning(pop)
 #endif
 }
-
-#undef ASL_OTHERENDIAN
 
 #endif

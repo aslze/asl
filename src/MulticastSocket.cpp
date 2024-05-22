@@ -14,17 +14,13 @@
 
 namespace asl {
 
-MulticastSocket_::MulticastSocket_()
-{
-}
-
 bool MulticastSocket_::join(const InetAddress& a)
 {
 	init(a.type() != _family);
-	if(!setOption(SOL_SOCKET, SO_REUSEADDR, 1))
-		printf("MulticastSocket: Cannot set SO_REUSEADDR\n");
+	setOption(SOL_SOCKET, SO_REUSEADDR, 1);
 
-	bind("0.0.0.0", a.port());
+	if(!bind("0.0.0.0", a.port()))
+		return false;
 
 	struct ip_mreq mr;
 	mr.imr_multiaddr = ((sockaddr_in*)a.ptr())->sin_addr;
@@ -40,24 +36,15 @@ bool MulticastSocket_::leave(const InetAddress& a)
 	return setOption(IPPROTO_IP, IP_DROP_MEMBERSHIP, mr); // seems to fail on WSL !!
 }
 
-void MulticastSocket_::multicast(const InetAddress& a, int ttl)
-{
-	connect(a);
-	setOptions(true, ttl);
-}
-
-void MulticastSocket_::setOptions(bool loopback, int ttl)
+bool MulticastSocket_::setLoop(bool loopback)
 {
 	int c = loopback ? 1 : 0;
-	if (!setOption(IPPROTO_IP, IP_MULTICAST_LOOP, c))
-	{
-		printf("MulticastSocket: Cannot set IP_MULTICAST_LOOP\n");
+	return setOption(IPPROTO_IP, IP_MULTICAST_LOOP, c);
 	}
 
-	if (!setOption(IPPROTO_IP, IP_MULTICAST_TTL, ttl))
+bool MulticastSocket_::setTTL(int ttl)
 	{
-		printf("MulticastSocket: Cannot set IP_MULTICAST_TTL\n");
-	}
+	return setOption(IPPROTO_IP, IP_MULTICAST_TTL, ttl);
 }
 
 }
