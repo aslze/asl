@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_TESTING_H
@@ -171,7 +171,7 @@ inline String asString(const Var& x) { return x.toString(); }
 #ifdef __ANDROID__
 #define ASL_ASSERT(x) if(!(x)) { testResult << String(0, "\n%s: %i\nFailed: '%s'\n\n", __FILE__, __LINE__, #x); }
 
-#define ASL_CHECK(x, op, y) if(!((x) op (y))) { testResult << String(0, "\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, *asString(y), *asString(x)); }
+#define ASL_EXPECT(x, op, y) if(!((x) op (y))) { testResult << String(0, "\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, *asString(y), *asString(x)); }
 #else
 
 /** 
@@ -190,8 +190,9 @@ ASL_EXPECT(sqrt(x), >=, 0);
 
 #define ASL_EXPECT(x, op, y) if(!((x) op (y))) { printf("\n%s(%i): error: Expected '%s' %s '%s' but it is %s\n\n", __FILE__, __LINE__, #x, #op, *asString(y), *asString(x)); testFailed = true; }
 
-#define ASL_CHECK(x, op, y) ASL_EXPECT(x, op, y)
 #endif
+
+#define ASL_CHECK(x, op, y) ASL_EXPECT(x, op, y)
 
 #define ASL_APPROX(x, y, d) ASL_EXPECT(distance((x), (y)), <, (d))
 
