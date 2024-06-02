@@ -1,26 +1,27 @@
 #define SOCKET_CPP
 
 #ifdef _WIN32
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #define _WIN32_WINNT 0x0501
-struct IUnknown; // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here" when using /permissive-
+struct IUnknown; // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here" with /permissive-
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#ifdef ASL_SOCKETLOCAL
+#include <afunix.h>
+#endif
 #include <windows.h>
 #else
 #include <stdlib.h>
-#include <sys/ioctl.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <sys/wait.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <sys/wait.h>
 #endif
 
-#include <stdio.h>
 #include <string.h>
 #include <asl/Socket.h>
 
@@ -33,7 +34,6 @@ struct IUnknown; // Workaround for "combaseapi.h(229): error C2187: syntax error
 #ifdef ASL_IPV6
 #define AF_TYPE AF_UNSPEC
 #else
-//#define OLD_RESOLVE
 #define AF_TYPE AF_INET
 #endif
 
@@ -80,7 +80,7 @@ Sockets& Sockets::operator<<(Socket& s)
 int Sockets::waitInput(double t)
 {
 	fd_set rset;
-	struct timeval to;
+	timeval to;
 	to.tv_sec = (int)floor(t);
 	to.tv_usec = (int)((t-floor(t))*1e6);
 	FD_ZERO(&rset);
@@ -96,7 +96,8 @@ int Sockets::waitInput(double t)
 	if(r<0)
 		return -1;
 	changed.clear();
-	for (int j = 0; j < set.length(); j++) {
+	for (int j = 0; j < set.length(); j++)
+	{
 		if (set[j].handle() < 0)
 			return -1;
 		if (FD_ISSET(set[j].handle(), &rset))
@@ -138,17 +139,12 @@ inline int sockfamily(InetAddress::Type t)
 	{
 	case InetAddress::IPv4: return AF_INET;
 	case InetAddress::IPv6: return AF_INET6;
-#ifndef _WIN32
+#if !defined(_WIN32) || defined(ASL_SOCKETLOCAL)
 	case InetAddress::LOCAL: return AF_UNIX;
 #endif
 	default:;
 	}
 	return AF_INET;
-}
-
-InetAddress::InetAddress()
-{
-	_type = IPv4;
 }
 
 InetAddress::InetAddress(InetAddress::Type t)
@@ -159,23 +155,25 @@ InetAddress::InetAddress(InetAddress::Type t)
 	{
 	case IPv4: n = sizeof(sockaddr_in); break;
 	case IPv6: n = sizeof(sockaddr_in6); break;
-#ifndef _WIN32
+#if !defined(_WIN32) || defined(ASL_SOCKETLOCAL)
 	case LOCAL: n = sizeof(sockaddr_un); break;
 #endif
 	default: ;
 	}
-	_data.resize(n);
-	memset(_data.data(), 0, n);
+	resize(n);
+	memset(ptr(), 0, n);
 }
 
 int InetAddress::port() const
 {
-	if (_type == IPv6) {
-		sockaddr_in6* addr = (sockaddr_in6*)_data.data();
+	if (_type == IPv6)
+	{
+		sockaddr_in6* addr = (sockaddr_in6*)ptr();
 		return ntohs(addr->sin6_port);
 	}
-	else if (_type == IPv4) {
-		sockaddr_in* addr = (sockaddr_in*)_data.data();
+	else if (_type == IPv4)
+	{
+		sockaddr_in* addr = (sockaddr_in*)ptr();
 		return ntohs(addr->sin_port);
 	}
 	return 0;
@@ -183,12 +181,14 @@ int InetAddress::port() const
 
 InetAddress& InetAddress::setPort(int port)
 {
-	if (_type == IPv6) {
-		sockaddr_in6* addr = (sockaddr_in6*)_data.data();
+	if (_type == IPv6)
+	{
+		sockaddr_in6* addr = (sockaddr_in6*)ptr();
 		addr->sin6_port = htons((unsigned short)port);
 	}
-	else if (_type == IPv4) {
-		sockaddr_in* addr = (sockaddr_in*)_data.data();
+	else if (_type == IPv4)
+	{
+		sockaddr_in* addr = (sockaddr_in*)ptr();
 		addr->sin_port = htons((unsigned short)port);
 	}
 	return *this;
@@ -198,30 +198,32 @@ String InetAddress::host() const
 {
 	if (_type == IPv6)
 	{
-		sockaddr_in6* addr = (sockaddr_in6*)_data.data();
+		sockaddr_in6* addr = (sockaddr_in6*)ptr();
 		unsigned short* ip = (unsigned short*)&addr->sin6_addr;
-		return String(40, "%x:%x:%x:%x:%x:%x:%x:%x",
+		return String::f("%x:%x:%x:%x:%x:%x:%x:%x",
 			ntohs(ip[0]), ntohs(ip[1]), ntohs(ip[2]), ntohs(ip[3]),
 			ntohs(ip[4]), ntohs(ip[5]), ntohs(ip[6]), ntohs(ip[7]));
 	}
 	else if (_type == IPv4)
 	{
-		sockaddr_in* addr = (sockaddr_in*)_data.data();
+		sockaddr_in* addr = (sockaddr_in*)ptr();
 		byte* ip = (byte*)&addr->sin_addr;
-		return String(15, "%i.%i.%i.%i", ip[0], ip[1], ip[2], ip[3]);
+		return String::f("%i.%i.%i.%i", ip[0], ip[1], ip[2], ip[3]);
 	}
-#ifndef _WIN32
-	sockaddr_un* addr = (sockaddr_un*)_data.data();
+#if !defined(_WIN32) || defined(ASL_SOCKETLOCAL)
+	else if (_type == LOCAL)
+	{
+		sockaddr_un* addr = (sockaddr_un*)ptr();
 	return addr->sun_path;
-#else
-	return "";
+	}
 #endif
+	return String();
 }
 
 String InetAddress::toString() const
 {
 	int p = port();
-	if (p == 0)
+	if (p <= 0)
 		return host();
 	else if (_type == IPv4)
 		return host() << ':' << port();
@@ -240,31 +242,28 @@ Array<InetAddress> InetAddress::lookup(const String& host)
 	if (!g_wsaStarted) startWSA();
 #endif
 	Array<InetAddress> addresses;
-	struct addrinfo hints;
-	struct addrinfo* info;
-	memset(&hints, 0, sizeof(struct addrinfo));
+	addrinfo hints;
+	addrinfo* info;
+	memset(&hints, 0, sizeof(addrinfo));
 	hints.ai_family = host.contains(':') ? AF_INET6 : AF_TYPE;
-	hints.ai_socktype = 0;
-	hints.ai_flags = 0;
-	hints.ai_protocol = 0;
-	hints.ai_canonname = NULL;
-	hints.ai_addr = NULL;
-	hints.ai_next = NULL;
 
 	int s = getaddrinfo(host, NULL, &hints, &info);
-	if (s != 0) {
+	if (s != 0)
+	{
 		verbose_print("Cannot resolve %s\n", *host);
 		return addresses;
 	}
-	for (const struct addrinfo* ai = info; ai != NULL; ai = ai->ai_next) {
+	for (const addrinfo* ai = info; ai; ai = ai->ai_next)
+	{
 		InetAddress a;
 		if (ai->ai_family == AF_INET)
 			a._type = IPv4;
 		else
 			a._type = IPv6;
-		a._data.resize((int)ai->ai_addrlen);
-		memcpy(a._data.data(), ai->ai_addr, ai->ai_addrlen);
-		if (!addresses.contains(a)) {
+		a.resize((int)ai->ai_addrlen);
+		memcpy(a.ptr(), ai->ai_addr, ai->ai_addrlen);
+		if (!addresses.contains(a))
+		{
 			if (a._type == IPv4)
 				addresses.insert(0, a);
 			else
@@ -286,42 +285,41 @@ bool InetAddress::set(const String& host, int port)
 		memset(&hints, 0, sizeof(addrinfo));
 		hints.ai_family = host.contains(':') ? AF_INET6 : AF_TYPE;
 		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_flags = 0;
-		hints.ai_protocol = 0;
-		hints.ai_canonname = NULL;
-		hints.ai_addr = NULL;
-		hints.ai_next = NULL;
 
 		int s = getaddrinfo(host, NULL, &hints, &info);
-		if (s != 0 || !info) {
+		if (s != 0 || !info)
+		{
 			printf("Cannot resolve %s\n", *host);
-			_data.clear();
+			resize(0);
 			return false;
 		}
 		const addrinfo* inf = info;
-		for (addrinfo* ai = info; ai != NULL; ai = ai->ai_next) {
-			if (ai->ai_family == AF_INET) {
+		for (addrinfo* ai = info; ai; ai = ai->ai_next)
+		{
+			if (ai->ai_family == AF_INET)
+			{
 				inf = ai;
 				break;
 			}
 		}
-		_data.resize((int)inf->ai_addrlen);
-		memcpy(_data.data(), inf->ai_addr, inf->ai_addrlen);
+		resize((int)inf->ai_addrlen);
+		memcpy(ptr(), inf->ai_addr, inf->ai_addrlen);
 		if (inf->ai_family == AF_INET)
 		{
-			((sockaddr_in*)_data.data())->sin_port = htons(port);
+			((sockaddr_in*)ptr())->sin_port = htons(port);
 			_type = IPv4;
 		}
 		else if (inf->ai_family == AF_INET6)
 		{
-			((sockaddr_in6*)_data.data())->sin6_port = htons(port);
+			((sockaddr_in6*)ptr())->sin6_port = htons(port);
 			_type = IPv6;
 		}
 		freeaddrinfo(info);
 	}
-	else {
-		_data.resize(sizeof(sockaddr_in));
-		sockaddr_in* addr = (sockaddr_in*)_data.data();
+	else
+	{
+		resize(sizeof(sockaddr_in));
+		sockaddr_in* addr = (sockaddr_in*)ptr();
 		addr->sin_addr.s_addr = INADDR_ANY;
 		addr->sin_family = AF_INET;
 		addr->sin_port = htons(port);
@@ -371,8 +369,8 @@ bool InetAddress::set(const String& host)
 	if(!hp.port.ok() && hp.host.contains('/'))
 	{
 #ifndef _WIN32
-		_data.resize(sizeof(sockaddr_un));
-		sockaddr_un* a=(sockaddr_un*)_data.data();
+		resize(sizeof(sockaddr_un));
+		sockaddr_un* a=(sockaddr_un*)ptr();
 		a->sun_family=AF_UNIX;
 		strcpy(a->sun_path, host.substring(0, min(107, host.length())));
 		_type = LOCAL;
@@ -426,7 +424,6 @@ bool Socket_::init(bool force)
 
 void Socket_::close()
 {
-	verbose_print("socket close %i\n", _handle);
 	if(_handle >= 0)
 #ifndef _WIN32
 	::close(_handle);
@@ -439,13 +436,7 @@ void Socket_::close()
 bool Socket_::bind(const String& name)
 {
 	HostPort hp = parseHostPort(name);
-	int port = hp.port;
-	if (port < 0 || port > 65535)
-	{
-		_error = SOCKET_BAD_BIND;
-		return false;
-	}
-	return bind(hp.host, port);
+	return bind(hp.host, hp.port);
 }
 
 bool Socket_::bind(const String& ip, int port)
@@ -462,10 +453,10 @@ bool Socket_::bind(const String& ip, int port)
 
 	init(_family != here.type());
 	_family = here.type();
-	if (!setOption(SOL_SOCKET, SO_REUSEADDR, 1))
-		return false;
+	setOption(SOL_SOCKET, SO_REUSEADDR, 1);
 
-	if(::bind(_handle, (sockaddr*)here.ptr(), here.length())) {
+	if(::bind(_handle, (sockaddr*)here.ptr(), here.length()))
+	{
 		verbose_print("Can't bind to %s\n", *here.toString());
 		_error = SOCKET_BAD_BIND;
 		return false;
@@ -511,7 +502,7 @@ bool Socket_::connect(const InetAddress& addr)
 	bool force = _family != addr.type();
 	_family = addr.type();
 	init(force);
-	if (::connect(_handle, (sockaddr*)addr.ptr(), addr.length()) == 0)
+	if (::connect(_handle, (const sockaddr*)addr.ptr(), addr.length()) == 0)
 		return true;
 	_error = SOCKET_BAD_CONNECT;
 	return false;
@@ -521,7 +512,8 @@ InetAddress Socket_::remoteAddress() const
 {
 	InetAddress a(_family);
 	socklen_t n = (socklen_t)a.length();
-	getpeername(handle(), (sockaddr*)a.ptr(), (socklen_t*)&n);
+	if (getpeername(handle(), (sockaddr*)a.ptr(), &n))
+		return InetAddress();
 	return a;
 }
 
@@ -529,7 +521,7 @@ InetAddress Socket_::localAddress() const
 {
 	InetAddress a(_family);
 	socklen_t n = (socklen_t)a.length();
-	getsockname(handle(), (sockaddr*)a.ptr(), (socklen_t*)&n);
+	getsockname(handle(), (sockaddr*)a.ptr(), &n);
 	return a;
 }
 
@@ -564,12 +556,15 @@ String Socket_::readLine()
 {
 	char c;
 	String s;
-	if (available()>0 || waitInput()) {
-		while (1) {
+	if (available()>0 || waitInput())
+	{
+		while (1)
+		{
 			int n = read(&c, 1);
 			if (n <= 0 || c == '\n' || _error != 0)
 				break;
-			if (s.length() > 16000) {
+			if (s.length() > 16000)
+			{
 				_error = SOCKET_BAD_LINE;
 				s = "";
 				break;
@@ -661,7 +656,7 @@ bool Socket_::waitInput(double t)
 		return true;
 	}
 	fd_set rset;
-	struct timeval to;
+	timeval to;
 	to.tv_sec = (int)floor(t);
 	to.tv_usec = (int)((t-floor(t))*1e6);
 	FD_ZERO(&rset);
@@ -695,7 +690,8 @@ PacketSocket_::PacketSocket_(int fd) : Socket_(fd)
 String PacketSocket_::readLine()
 {
 	String s(1000, 0);
-	if (waitInput()) {
+	if (waitInput())
+	{
 		int m = read(&s[0], 1000);
 		if (m > 0)
 			s[m - 1] = '\0';
@@ -723,7 +719,7 @@ void PacketSocket_::sendTo(const InetAddress& to, const void* data, int n)
 	sendto(_handle, (const char*)data, n, 0, (sockaddr*)to.ptr(), to.length());
 }
 
-#ifndef _WIN32
+#if !defined(_WIN32) || defined(ASL_SOCKETLOCAL)
 
 // LocalSocket (UNIX)
 

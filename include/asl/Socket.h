@@ -49,14 +49,14 @@ class ASL_API InetAddress
 {
 public:
 	enum Type { ANY, IPv4, IPv6, LOCAL };
-	InetAddress();
-	InetAddress(Type t);
-	InetAddress(int port): _type(IPv4) { set("", port); }
+
+	InetAddress() : _type(IPv4) {}
+	ASL_EXPLICIT InetAddress(Type t);
 	/**
 	Creates an address with a name (to be looked up) and a port
 	*/
-	InetAddress(const String& host, int port): _type(IPv4) { set(host, port); }
-	InetAddress(const String& host_port): _type(IPv4) { set(host_port); }
+	ASL_EXPLICIT InetAddress(const String& host, int port) : _type(IPv4) { set(host, port); }
+	ASL_EXPLICIT InetAddress(const String& host_port) : _type(IPv4) { set(host_port); }
 
 	void resize(int n) { _data.resize(n); }
 
@@ -79,7 +79,7 @@ public:
 	String host() const;
 	byte* ptr() {return _data.data();}
 	const byte* ptr() const {return _data.data();}
-	unsigned length() const {return _data.length();}
+	int length() const {return _data.length();}
 	/**
 	Returns the type IPv4 or IPv6 of this address
 	*/
@@ -93,6 +93,8 @@ protected:
 	ByteArray _data;
 	Type _type;
 };
+
+typedef InetAddress NetAddress;
 
 ASL_SMART_CLASS(Socket, SmartObject)
 {
@@ -432,7 +434,7 @@ public:
 	}
 };
 
-#ifndef _WIN32
+#if !defined(_WIN32) || defined(ASL_SOCKETLOCAL)
 
 ASL_SMART_CLASS(LocalSocket, Socket)
 {
@@ -456,17 +458,17 @@ public:
 ASL_SMART_CLASS(MulticastSocket, PacketSocket)
 {
 	ASL_SMART_INNER_DEF(MulticastSocket);
-	bool join(const InetAddress& a);
-	bool leave(const InetAddress& a);
+	bool join(const InetAddress& a, int interfac);
+	bool leave(const InetAddress& a, int interfac);
 	bool setLoop(bool on);
 	bool setTTL(int n);
 };
 
 /**
-A MulticastSocket is a communication socket for multicast UDP protocol. It has to
-use *class D* addresses (224.0.1.0 - 239.0.0.0) which identify *multicast groups*.
+A MulticastSocket is a communication socket for multicast UDP protocol.
 
-Onlt supports IPv4 at the moment.
+A socket can send packets to a multicast group and port, and another socket can join the group
+so it receives packets sent to it.
 
 \ingroup Sockets
 
@@ -474,10 +476,12 @@ Onlt supports IPv4 at the moment.
 InetAddress group("224.0.1.1", 18000);
 ```
 
-A listening side would join the group, receive packets and then leave:
+A listening side would bind to the port on a local interface, join the group, receive packets and then optionally leave (on socket destruction
+the group is automatically left):
 
 ```
 MulticastSocket socket;
+socket.bind(group.port());
 socket.join(group);
 InetAddress sender;
 socket.readFrom(sender, data);
@@ -497,14 +501,14 @@ public:
 	ASL_SMART_DEF(MulticastSocket, PacketSocket);
 	
 	/** Joins a multicast group. Packets sent to the group's address will be received */
-	bool join(const InetAddress& a)
+	bool join(const InetAddress& a, int interfac = 0)
 	{
-		return _()->join(a);
+		return _()->join(a, interfac);
 	}
 	/** Leaves a multicast group and stops receiving packets from it. */
-	bool leave(const InetAddress& a)
+	bool leave(const InetAddress& a, int interfac = 0)
 	{
-		return _()->leave(a);
+		return _()->leave(a, interfac);
 	}
 
 	/**

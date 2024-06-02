@@ -9,31 +9,51 @@
 #include <ws2tcpip.h>
 #endif
 
-#include <stdlib.h>
-#include <stdio.h>
-
 namespace asl {
 
-bool MulticastSocket_::join(const InetAddress& a)
+bool MulticastSocket_::join(const InetAddress& a, int interfac)
 {
 	init(a.type() != _family);
-	setOption(SOL_SOCKET, SO_REUSEADDR, 1);
 
+	socklen_t n = (socklen_t)a.length();
+	if (getsockname(handle(), (sockaddr*)a.ptr(), &n))
+	{
 	if(!bind("0.0.0.0", a.port()))
 		return false;
+	}
 
-	struct ip_mreq mr;
+	if (_family == InetAddress::IPv6)
+	{
+		ipv6_mreq mr;
+		mr.ipv6mr_multiaddr = ((sockaddr_in6*)a.ptr())->sin6_addr;
+		mr.ipv6mr_interface = interfac;
+		return setOption(IPPROTO_IP, IPV6_ADD_MEMBERSHIP, mr);
+	}
+	else
+	{
+		ip_mreq mr;
 	mr.imr_multiaddr = ((sockaddr_in*)a.ptr())->sin_addr;
-	mr.imr_interface.s_addr = INADDR_ANY;
+		mr.imr_interface.s_addr = interfac;
 	return setOption(IPPROTO_IP, IP_ADD_MEMBERSHIP, mr);
 }
+}
 
-bool MulticastSocket_::leave(const InetAddress& a)
+bool MulticastSocket_::leave(const InetAddress& a, int interfac)
 {
-	struct ip_mreq mr;
+	if (_family == InetAddress::IPv6)
+	{
+		ipv6_mreq mr;
+		mr.ipv6mr_multiaddr = ((sockaddr_in6*)a.ptr())->sin6_addr;
+		mr.ipv6mr_interface = interfac;
+		return setOption(IPPROTO_IP, IPV6_DROP_MEMBERSHIP, mr);
+	}
+	else
+	{
+		ip_mreq mr;
 	mr.imr_multiaddr = ((sockaddr_in*)a.ptr())->sin_addr;
-	mr.imr_interface.s_addr = INADDR_ANY;
+		mr.imr_interface.s_addr = interfac;
 	return setOption(IPPROTO_IP, IP_DROP_MEMBERSHIP, mr); // seems to fail on WSL !!
+}
 }
 
 bool MulticastSocket_::setLoop(bool loopback)
