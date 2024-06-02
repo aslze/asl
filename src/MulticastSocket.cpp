@@ -9,6 +9,11 @@
 #include <ws2tcpip.h>
 #endif
 
+#ifndef IPV6_ADD_MEMBERSHIP
+#define IPV6_ADD_MEMBERSHIP IPV6_JOIN_GROUP
+#define IPV6_DROP_MEMBERSHIP IPV6_LEAVE_GROUP
+#endif
+
 namespace asl {
 
 bool MulticastSocket_::join(const InetAddress& a, int interfac)
@@ -27,7 +32,7 @@ bool MulticastSocket_::join(const InetAddress& a, int interfac)
 		ipv6_mreq mr;
 		mr.ipv6mr_multiaddr = ((sockaddr_in6*)a.ptr())->sin6_addr;
 		mr.ipv6mr_interface = interfac;
-		return setOption(IPPROTO_IP, IPV6_ADD_MEMBERSHIP, mr);
+		return setOption(IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, mr);
 	}
 	else
 	{
@@ -45,7 +50,7 @@ bool MulticastSocket_::leave(const InetAddress& a, int interfac)
 		ipv6_mreq mr;
 		mr.ipv6mr_multiaddr = ((sockaddr_in6*)a.ptr())->sin6_addr;
 		mr.ipv6mr_interface = interfac;
-		return setOption(IPPROTO_IP, IPV6_DROP_MEMBERSHIP, mr);
+		return setOption(IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, mr);
 	}
 	else
 	{
@@ -59,11 +64,17 @@ bool MulticastSocket_::leave(const InetAddress& a, int interfac)
 bool MulticastSocket_::setLoop(bool loopback)
 {
 	int c = loopback ? 1 : 0;
+	if (_family == InetAddress::IPv6)
+		return setOption(IPPROTO_IPV6, IPV6_MULTICAST_LOOP, c);
+	else
 	return setOption(IPPROTO_IP, IP_MULTICAST_LOOP, c);
 	}
 
 bool MulticastSocket_::setTTL(int ttl)
 	{
+	if (_family == InetAddress::IPv6)
+		return setOption(IPPROTO_IPV6, IPV6_MULTICAST_HOPS, ttl);
+	else
 	return setOption(IPPROTO_IP, IP_MULTICAST_TTL, ttl);
 }
 
