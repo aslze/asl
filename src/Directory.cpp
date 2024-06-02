@@ -185,6 +185,20 @@ FileInfo Directory::getInfo(const String& path)
 	return infoFor(data);
 }
 
+Array<String> Directory::roots()
+{
+	DWORD bits = GetLogicalDrives();
+	char  d = 'A';
+	Array<String> drives;
+	for (int i = 0; i < 32; i++, d++)
+	{
+		if ((bits & 1) != 0)
+			drives << String(d) + ":/";
+		bits >>= 1;
+	}
+	return drives;
+}
+
 bool Directory::createOne(const String& name)
 {
 	bool ok = CreateDirectory(name, 0) != 0;
@@ -307,6 +321,11 @@ FileInfo Directory::getInfo(const String& path)
 		return info;
 	}
 	return infoFor(data);
+}
+
+Array<String> Directory::roots()
+{
+	return array<String>("/");
 }
 
 bool Directory::createOne(const String& name)

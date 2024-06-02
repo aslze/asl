@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_DIR_H
@@ -90,6 +90,12 @@ public:
 	const Array<File> subdirs(const String& which="*") {return items(which, DIRE);}
 
 	static FileInfo getInfo(const String& path);
+
+	/**
+	Returns a list of root paths (drives on windows, like "A:/", "C:/", or only "/" elsewhere)
+	*/
+	static Array<String> roots();
+
 	/**
 	Returns the current working directory
 	*/

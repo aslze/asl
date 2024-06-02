@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_PATH
@@ -73,6 +73,10 @@ public:
 	Returns true if this path's extension is any of those given (separated by '|'), case-insensitively.
 	*/
 	bool hasExtension(const String& exts) const;
+	/**
+	Returns true if this path has a parent directory, not just a file name
+	*/
+	bool hasDir() const { return name() != _path; }
 	/**
 	Returns the directory containing this path (without a trailing '/')
 	*/
