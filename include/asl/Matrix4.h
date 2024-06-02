@@ -258,13 +258,38 @@ public:
 			(a[2][0] * p.x + a[2][1] * p.y + a[2][2] * p.z + a[2][3]) * iw);
 	}
 	/**
-	Returns vector `p` left-multiplied by this matrix without applying the translation part.
+	Returns vector `p` left-multiplied by the 3x3 top-left submatrix (no translation).
 	*/
-	Vec3_<T> operator%(const Vec3_<T>& p) const;
+	Vec3_<T> operator%(const Vec3_<T>& p) const
+	{
+		return Vec3_<T>(
+			a[0][0] * p.x + a[0][1] * p.y + a[0][2] * p.z,
+			a[1][0] * p.x + a[1][1] * p.y + a[1][2] * p.z,
+			a[2][0] * p.x + a[2][1] * p.y + a[2][2] * p.z);
+	}
+	/**
+	Returns the identity matrix
+	*/
+	static Matrix4_ identity()
+	{
+		return Matrix4_<T>(
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1);
+	}
 	/**
 	Returns a translation matrix for the given vector.
 	*/
-	static Matrix4_ translate(const Vec3_<T>&);
+	static Matrix4_ translate(const Vec3_<T>& t)
+	{
+		return Matrix4_<T>(
+			1, 0, 0, t.x,
+			0, 1, 0, t.y,
+			0, 0, 1, t.z,
+			0, 0, 0, 1);
+	}
+
 	/**
 	Returns a translation matrix for the given coordinates.
 	*/
@@ -272,7 +297,14 @@ public:
 	/**
 	Returns a scale matrix.
 	*/
-	static Matrix4_ scale(const Vec3_<T>& s);
+	static Matrix4_ scale(const Vec3_<T>& s)
+	{
+		return Matrix4_<T>(
+			s.x, 0,   0,   0,
+			0,   s.y, 0,   0,
+			0,   0,   s.z, 0,
+			0,   0,   0,   1);
+	}	
 	/**
 	Returns a uniform scale matrix.
 	*/
@@ -280,22 +312,51 @@ public:
 	/**
 	Returns a rotation matrix of the given angle in radians around the *x* axis.
 	*/
-	static Matrix4_ rotateX(T angle);
+	static Matrix4_ rotateX(T angle)
+	{
+		return Matrix4_<T>(
+			1, 0,          0,           0,
+			0, cos(angle), -sin(angle), 0,
+			0, sin(angle), cos(angle),  0,
+			0, 0,          0,           1);
+	}
 	/**
 	Returns a rotation matrix of the given angle in radians around the *y* axis.
 	*/
-	static Matrix4_ rotateY(T angle);
+	static Matrix4_ rotateY(T angle)
+	{
+		return Matrix4_<T>(
+			cos(angle),  0, sin(angle), 0,
+			0,           1, 0,          0,
+			-sin(angle), 0, cos(angle), 0,
+			0,           0, 0,          1);
+	}
 	/**
 	Returns a rotation matrix of the given angle in radians around the *z* axis.
 	*/
-	static Matrix4_ rotateZ(T angle);
+	static Matrix4_ rotateZ(T angle)
+	{
+		return Matrix4_<T>(
+			cos(angle), -sin(angle), 0, 0,
+			sin(angle), cos(angle),  0, 0,
+			0,          0,           1, 0,
+			0,          0,           0, 1);
+	}
 	/**
 	Returns a rotation matrix of an angle in radians around a given axis.
 	*/
 	static Matrix4_ rotate(const Vec3_<T>& axis, T angle);
 
-	// New, unstable API
-	static Matrix4_ rotate(int axis, T angle);
+	static Matrix4_ rotate(int axis, T angle)
+	{
+		switch (axis)
+		{
+		case 0: case 'X': return rotateX(angle);
+		case 1: case 'Y': return rotateY(angle);
+		case 2: case 'Z': return rotateZ(angle);
+		}
+		return identity();
+	}
 
 	/**
 	Returns a rotation matrix from a rotation vector (aligned with the axis and with the rotation angle as magnitude)
@@ -306,7 +367,10 @@ public:
 	Returns a rotation matrix created from Euler angles rotating the components of r in axes a0, a1, a2 (each one of 0, 1 or 2), the result
 	is R[a0](r.x) * R[a1](r.y) * R[a2](r.z)
 	*/
-	static Matrix4_ rotateE(const Vec3_<T>& r, int a0, int a1, int a2);
+	static Matrix4_ rotateE(const Vec3_<T>& r, int a0, int a1, int a2)
+	{
+		return rotate(a0, r.x) * rotate(a1, r.y) * rotate(a2, r.z);
+	}
 
 	/**
 	Same as rotateE()
@@ -319,7 +383,13 @@ public:
 	if an '*' is appended then the result is equivalent to rotations on fixed axes, while by default it is equivalent to rotations
 	on moving axes.
 	*/
-	static Matrix4_ rotateE(const Vec3_<T>& r, const char* a);
+	static Matrix4_ rotateE(const Vec3_<T>& r, const char* a)
+	{
+		if (strlen(a) < 3)
+			return Matrix4_::identity();
+		return (a[3] == '*') ? rotateE(r.zyx(), a[2] - 'X', a[1] - 'X', a[0] - 'X')
+		                     : rotateE(r, a[0] - 'X', a[1] - 'X', a[2] - 'X');
+	}
 
 	/**
 	Returns a rotation matrix created from Euler angles rotating the components of r in axes given as a string, such as
@@ -331,23 +401,25 @@ public:
 
 	/**
 	Computes the Euler angles corresponding to this rotation matrix (the top-left 3x3 submatrix) for the given axes rotation order
-	given as [0, 1, 2] indices, equivalent to the fromEuler function
+	given as [0, 1, 2] indices, equivalent to the rotateE function
 	*/
 	Vec3_<T> eulerAngles(int a0, int a1, int a2) const;
 
 	/**
 	Computes the Euler angles corresponding to this rotation matrix (the top-left 3x3 submatrix) for the given axes rotation order
-	given as a string, such as "XYZ" or "XYZ*", equivalent to the fromEuler function
+	given as a string, such as "XYZ" or "XYZ*", equivalent to the rotateE function
 	*/
-	Vec3_<T> eulerAngles(const char* a) const;
+	Vec3_<T> eulerAngles(const char* a) const
+	{
+		if (strlen(a) < 3)
+			return Vec3_<T>(0, 0, 0);
+		return (a[3] == '*') ? eulerAngles(a[2] - 'X', a[1] - 'X', a[0] - 'X').zyx()
+		                     : eulerAngles(a[0] - 'X', a[1] - 'X', a[2] - 'X');
+	}
 	/**
 	Returns the inverse of this matrix
 	*/
 	Matrix4_ inverse() const;
-	/**
-	Returns an identity matrix
-	*/
-	static Matrix4_ identity();
 	/**
 	Returns the *rotation* part of this matrix as a Quaternion
 	*/
@@ -357,6 +429,17 @@ public:
 	Returns the *rotation* part of this matrix as a rotation vector (axis-angle representation)
 	*/
 	Vec3_<T> axisAngle() const;
+
+	/**
+	Returns an orthonormal vector base using a given vector as the Z axis and creating two other unit vectors perpendicular to Z and between them
+	*/
+	static Matrix4_ orthonormalBase(const Vec3_<T>& vec)
+	{
+		Vec3_<T> w = vec.normalized();
+		Vec3_<T> u = (w ^ ((fabs(w.x) < T(0.7)) ? Vec3_<T>(1, 0, 0) : Vec3_<T>(0, 1, 0))).normalized();
+		Vec3_<T> v = (w ^ u).normalized();
+		return Matrix4_(u, v, w);
+	}
 
 	/**
 	Returns the i-th column's top 3 elements as a Vec3
@@ -383,7 +466,14 @@ public:
 	/**
 	Returns the matrix Frobenius norm squared
 	*/
-	T normSq() const;
+	T normSq() const
+	{
+		T t = 0;
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				t += a[i][j] * a[i][j];
+		return t;
+	}
 
 	/**
 	Returns the matrix Frobenius norm
@@ -425,87 +515,9 @@ asl::Matrix4_<T> orthonormalize(const asl::Matrix4_<T>& m)
 namespace asl {
 
 template<class T>
-Matrix4_<T> Matrix4_<T>::identity()
-{
-	return Matrix4_<T>(
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		0, 0, 0, 1);
-}
-
-template<class T>
-Matrix4_<T> Matrix4_<T>::translate(const Vec3_<T>& t)
-{
-	return Matrix4_<T>(
-		1, 0, 0, t.x,
-		0, 1, 0, t.y,
-		0, 0, 1, t.z,
-		0, 0, 0, 1);
-}
-
-template<class T>
-Matrix4_<T> Matrix4_<T>::scale(const Vec3_<T>& s)
-{
-	return Matrix4_<T>(
-		s.x, 0,   0,   0,
-		0,   s.y, 0,   0,
-		0,   0,   s.z, 0,
-		0,   0,   0,   1);
-}
-
-template<class T>
-Matrix4_<T> Matrix4_<T>::rotateX(T phi)
-{
-	return Matrix4_<T>(
-		1, 0,        0,         0,
-		0, cos(phi), -sin(phi), 0,
-		0, sin(phi), cos(phi),  0,
-		0, 0,        0,         1);
-}
-
-template<class T>
-Matrix4_<T> Matrix4_<T>::rotateY(T phi)
-{
-	return Matrix4_<T>(
-		cos(phi),  0, sin(phi), 0,
-		0,         1, 0,        0,
-		-sin(phi), 0, cos(phi), 0,
-		0,         0, 0,        1);
-}
-
-template<class T>
-Matrix4_<T> Matrix4_<T>::rotateZ(T phi)
-{
-	return Matrix4_<T>(
-		cos(phi), -sin(phi), 0, 0,
-		sin(phi), cos(phi),  0, 0,
-		0,        0,         1, 0,
-		0,        0,         0, 1);
-}
-
-template<class T>
 inline Matrix4_<T> Matrix4_<T>::rotate(const Vec3_<T>& axis, T angle)
 {
 	return Quaternion_<T>::fromAxisAngle(axis, angle).matrix();
-}
-
-template<class T>
-Matrix4_<T> Matrix4_<T>::rotate(int axis, T angle)
-{
-	switch (axis)
-	{
-	case 0: case 'X': return rotateX(angle);
-	case 1: case 'Y': return rotateY(angle);
-	case 2: case 'Z': return rotateZ(angle);
-	}
-	return identity();
-}
-
-template<class T>
-Matrix4_<T> Matrix4_<T>::rotateE(const Vec3_<T>& r, int a0, int a1, int a2)
-{
-	return rotate(a0, r.x) * rotate(a1, r.y) * rotate(a2, r.z);
 }
 
 template<class T>
@@ -548,32 +560,6 @@ Vec3_<T> Matrix4_<T>::eulerAngles(int a0, int a1, int a2) const
 		}
 	}
 	return Vec3_<T>(r2, r1, r0);
-}
-
-template<class T>
-inline Matrix4_<T> Matrix4_<T>::rotateE(const Vec3_<T>& r, const char* a)
-{
-	if (strlen(a) < 3)
-		return Matrix4_<T>::identity();
-	return (a[3] == '*') ? fromEuler(r.zyx(), a[2] - 'X', a[1] - 'X', a[0] - 'X') : fromEuler(r, a[0] - 'X', a[1] - 'X', a[2] - 'X');
-}
-
-template<class T>
-inline Vec3_<T> Matrix4_<T>::eulerAngles(const char* a) const
-{
-	if (strlen(a) < 3)
-		return Vec3_<T>(0, 0, 0);
-	return (a[3] == '*') ? eulerAngles(a[2] - 'X', a[1] - 'X', a[0] - 'X').zyx() : eulerAngles(a[0] - 'X', a[1] - 'X', a[2] - 'X');
-}
-
-
-template<class T>
-inline Vec3_<T> Matrix4_<T>::operator%(const Vec3_<T>& p) const
-{
-	return Vec3_<T>(
-		a[0][0] * p.x + a[0][1] * p.y + a[0][2] * p.z,
-		a[1][0] * p.x + a[1][1] * p.y + a[1][2] * p.z,
-		a[2][0] * p.x + a[2][1] * p.y + a[2][2] * p.z);
 }
 
 template<class T>
@@ -679,16 +665,6 @@ T Matrix4_<T>::det() const
 	       a[0][3] *
 	           (a[1][0] * (a[2][2] * a[3][1] - a[2][1] * a[3][2]) + a[1][1] * (a[2][0] * a[3][2] - a[2][2] * a[3][0]) +
 	            a[1][2] * (a[2][1] * a[3][0] - a[2][0] * a[3][1]));
-}
-
-template<class T>
-T Matrix4_<T>::normSq() const
-{
-	T t = 0;
-	for (int i = 0; i < 4; i++)
-		for (int j = 0; j < 4; j++)
-			t += sqr(a[i][j]);
-	return t;
 }
 
 template class Matrix4_<float>;

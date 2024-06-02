@@ -1,11 +1,10 @@
 // Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
-#include <asl/Matrix4.h>
-
 #ifndef ASL_QUATERNION_H
 #define ASL_QUATERNION_H
 
+#include <asl/Matrix4.h>
 #include <asl/Vec3.h>
 
 namespace asl {
@@ -87,7 +86,8 @@ public:
 		1 - 2 * (y*y + z*z), 2 * (x*y - w*z), 2 * (x*z + w*y), 0,
 		2 * (x*y + w*z), 1 - 2 * (x*x + z*z), 2 * (y*z - w*x), 0,
 		2 * (x*z - w*y), 2 * (y*z + w*x), 1 - 2 * (x*x + y*y), 0
-	);}
+	);
+	}
 	/**
 	Returns this quaternion negated
 	*/
