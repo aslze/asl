@@ -177,7 +177,6 @@ void HttpServer::serveFile(HttpRequest& request, HttpResponse& response)
 		response.setHeader("Content-Type", "text/plain");
 		response.put("Not implemented");
 	}
-	}
 }
 
 void HttpServer::addMethod(const String& verb)
