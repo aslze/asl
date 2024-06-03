@@ -1,12 +1,10 @@
 // Copyright(c) 1999-2024 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
-#include <asl/Socket.h>
-#include <asl/Map.h>
-#include <asl/File.h>
-#include <asl/SocketServer.h>
 #include <asl/HttpServer.h>
 #include <asl/WebSocket.h>
+#include <asl/Map.h>
+#include <asl/File.h>
 
 namespace asl {
 
@@ -72,6 +70,10 @@ void HttpServer::serve(Socket client)
 			response.setHeader("Access-Control-Allow-Origin", request.header("Origin"));
 			response.setHeader("Access-Control-Allow-Credentials", "true");
 		}
+
+		if (hconn == "keep-alive")
+			response.setHeader("Connection", "keep-alive");
+
 		if (!handleOptions(request, response))
 		{
 			serve(request, response);
@@ -88,16 +90,14 @@ void HttpServer::serve(Socket client)
 				if (!file.exists())
 				{
 					response.setCode(404);
-					response.setHeader("Content-Type", "text/html");
-					response.put("<h1>Error</h1><p>File <b>" + file.name() + "</b> not found</p>");
+					response.setHeader("Content-Type", "text/plain");
+					response.put("Error\nFile " + file.name() + " not found");
 					continue;
 				}
 
 				String mime = _mimetypes.get(file.extension(), "text/plain");
 				response.setHeader("Date", Date::now().toString(Date::HTTP));
 				response.setHeader("Content-Type", mime);
-				if (hconn == "keep-alive")
-					response.setHeader("Connection", "keep-alive");
 				if (!response.hasHeader("Cache-Control"))
 					response.setHeader("Cache-Control", "max-age=60, public");
 				if (request.hasHeader("Range"))
@@ -167,15 +167,16 @@ void HttpServer::serveFile(HttpRequest& request, HttpResponse& response)
 		else
 		{
 			response.setCode(404);
-			response.setHeader("Content-Type", "text/html");
-			response.put("<h1>Not found</h1>");
+			response.setHeader("Content-Type", "text/plain");
+			response.put("Not found");
 		}
 	}
 	else
 	{
 		response.setCode(501);
-		response.setHeader("Content-Type", "text/html");
-		response.put("<h1>Not implemented</h1>");
+		response.setHeader("Content-Type", "text/plain");
+		response.put("Not implemented");
+	}
 	}
 }
 
