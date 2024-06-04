@@ -92,6 +92,10 @@ if( ASL_USE_LOCAL8BIT )
 	list(APPEND ASL_DEFS ASL_ANSI)
 endif()
 
+if(ASL_SOCKET_LOCAL)
+	list(APPEND ASL_DEFS ASL_SOCKET_LOCAL)
+endif()
+
 if(POLICY CMP0022)
 	cmake_policy(SET CMP0022 NEW)
 endif()

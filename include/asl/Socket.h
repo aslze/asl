@@ -138,7 +138,7 @@ ASL_SMART_CLASS(Socket, SmartObject)
 };
 
 /**
-A Socket is a communication socket for TCP protocol.
+A communication socket for the TCP/IP protocol.
 \ingroup Sockets
 */
 class ASL_API Socket : public SmartObject
@@ -173,6 +173,11 @@ public:
 	Checks if the connection was lost.
 	*/
 	bool disconnected() { return _()->disconnected(); }
+
+	/**
+	Checks if the connection is open.
+	*/
+	bool connected() { return !disconnected(); }
 
 	/**
 	Binds this socket to the given IP address and port number.
@@ -369,7 +374,7 @@ ASL_SMART_CLASS(PacketSocket, Socket)
 };
 
 /**
-A PacketSocket is a communication socket for UDP protocol.
+A communication socket for UDP/IP protocol.
 \ingroup Sockets
 
 A listening side binds to a port and receives packets. The readFrom() functions also
@@ -434,7 +439,7 @@ public:
 	}
 };
 
-#if !defined(_WIN32) || defined(ASL_SOCKETLOCAL)
+#if !defined(_WIN32) || defined(ASL_SOCKET_LOCAL)
 
 ASL_SMART_CLASS(LocalSocket, Socket)
 {
@@ -442,10 +447,31 @@ ASL_SMART_CLASS(LocalSocket, Socket)
 	LocalSocket_();
 	LocalSocket_(int fd);
 	~LocalSocket_();
-	String _pathname;
 	bool bind(const String& name);
+	Socket_* accept();
 };
 
+/**
+A Local or Unix socket for inter-process communication within a machine.
+
+Works similar to a TCP socket but it is bound to a local path in the file system.
+
+Used to be Unix/Linux-only but is also supported on recent Windows 10+ versions (need to
+enable CMAKE_SOCKET_LOCAL on Windows)
+
+```
+LocalSocket server;
+server.bind("/dir/comm.sock");
+server.listen();
+LocalSocket client = server.accept();
+...
+
+LocalSocket client;
+client.connect("/dir/comm.sock");
+client << "Hello\n";
+```
+\ingroup Sockets
+*/
 class ASL_API LocalSocket : public Socket
 {
 public:
@@ -465,7 +491,7 @@ ASL_SMART_CLASS(MulticastSocket, PacketSocket)
 };
 
 /**
-A MulticastSocket is a communication socket for multicast UDP protocol.
+A communication socket for multicast UDP/IP protocol.
 
 A socket can send packets to a multicast group and port, and another socket can join the group
 so it receives packets sent to it.

@@ -12,7 +12,7 @@ struct SockServerThread;
 struct SockClientThread;
 
 /**
-This is a reusable TCP socket server that listens to incoming connections and answers them concurrently (default) or sequentially.
+This is a reusable TCP or Unix socket server that listens to incoming connections and answers them concurrently (default) or sequentially.
 To make an actual server, derive a class from it and implement the virtual function `serve()`. That function will be called
 whenever a new connection arrives.
 
@@ -46,7 +46,7 @@ For long-running connections, the recommended way of dealing with possible disco
 ~~~
 void serve(Socket client)
 {
-	while (!client.disconnected())
+	while (client.connected())
 	{
 		if (!client.waitData())
 			continue;

@@ -288,12 +288,10 @@ socket.connect(host, 80);
 socket << String(0, "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n", *path, *host);
 String response;
 char buffer[1001];
-while(true)
+while(socket.connected())
 {
-	if(!socket.waitInput())
+	if(!socket.waitData())
 		continue;
-	if(socket.disconnected())
-		break;
 	int n = socket.read(buffer, min(socket.available(), 1000));
 	if(n <= 0)
 		break;

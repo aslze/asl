@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.12...3.5)
 
 project(asl)
 
-set(ASL_VERSION 1.11.10)
+set(ASL_VERSION 1.11.11)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
@@ -38,7 +38,7 @@ option(ASL_BUILD_SHARED "Build shared library" ${ASL_BUILD_SHARED_HINT})
 option(ASL_IPV6 "Expect also IPv6 when looking up DNS names")
 option(ASL_SAMPLES "Build samples")
 option(ASL_TESTS "Build tests")
-
+option(ASL_SOCKET_LOCAL "Support Unix sockets on Windows")
 
 if(ASL_TLS)
 	if(TARGET MbedTLS::mbedtls)
