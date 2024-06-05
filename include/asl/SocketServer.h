@@ -79,7 +79,7 @@ public:
 	/** Makes the server start listening. This function blocks by default. If the `nonblocking` argument is `true`
 	the server will listen in its own thread and the call will not block. */
 	void start(bool nonblocking=false);
-	/** Assigns a Unix local socket to listen to (Only on Linux). */
+	/** Assigns a Unix local socket to listen to (where supported). */
 	bool bindPath(const String& sname);
 	/** Assigns a TCP port to listen to. */
 	bool bind(int port) { return bind("0.0.0.0", port); }

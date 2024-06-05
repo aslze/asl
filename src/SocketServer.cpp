@@ -87,7 +87,7 @@ bool SocketServer::bindTLS(const String& ip, int port)
 
 bool SocketServer::bindPath(const String& sname)
 {
-#ifndef _WIN32
+#if !defined(_WIN32) || defined(ASL_SOCKET_LOCAL)
 	LocalSocket server;
 	if(server.bind(sname))
 	{
@@ -98,6 +98,7 @@ bool SocketServer::bindPath(const String& sname)
 	_socketError = server.errorMsg();
 #else
 	(void)sname;
+	_socketError = "SOCKET_BAD_BIND";
 #endif
 	return false;
 }

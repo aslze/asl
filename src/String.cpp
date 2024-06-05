@@ -1,12 +1,11 @@
-#include <asl/defs.h>
+#include <asl/String.h>
+#include <asl/Array.h>
+#include <asl/Map.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <ctype.h>
-#include <asl/String.h>
-#include <asl/Array.h>
-#include <asl/Map.h>
-#include <wctype.h>
+#include <wchar.h>
 
 #ifdef _WIN32
 #define vsnprintf _vsnprintf
@@ -567,6 +566,12 @@ void String::append(const char* b, int n)
 	char* s = str();
 	memcpy(s+_len-n, b, n);
 	s[_len] = '\0';
+}
+
+int String::wlength() const
+{
+	const wchar_t* w(*(String*)this);
+	return (int)wcslen(w);
 }
 
 int String::count() const 

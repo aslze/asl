@@ -4,11 +4,9 @@
 #ifndef ASL_STRING_H
 #define ASL_STRING_H
 
-#include <asl/defs.h>
+#include <asl/Array.h>
 #include <string.h>
 #include <stdio.h>
-#include <wchar.h>
-#include <asl/Array.h>
 
 #if defined(MINGW) || !defined __GNUC__
 #define ASL_LONG_FMT "I64i"
@@ -532,7 +530,7 @@ public:
 	/**
 	Returns the length of this string in wchar_t wide chars (UTF16 code units)
 	*/
-	int wlength() const { const wchar_t* w(*(String*)this); return (int)wcslen(w); }
+	int wlength() const;
 	/**
 	Returns the number of full characters (code points) in the string
 	*/
