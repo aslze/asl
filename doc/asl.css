@@ -1,5 +1,5 @@
-body, table, div, p, dl {
-	--font-family-normal: sans-serif;
+body, table, table.directory, div, p, dl {
+	/*--font-family-normal: segoe UI,sans-serif;*/
 	font: 16px/22px segoe UI,sans-serif;
 	color: #1f2328;
 }
