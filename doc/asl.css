@@ -1,7 +1,7 @@
-body {
-	margin: 0;
-	font-family: sans-serif;
+body, table, div, p, dl {
 	--font-family-normal: sans-serif;
+	font: 16px/22px segoe UI,sans-serif;
+	color: #1f2328;
 }
 
 div.contents {
