@@ -49,6 +49,7 @@ To connect to a TLS secure server, use the "wss:" protocol:
 ~~~
 ws.connect("wss://some-encrypted-websocketserver:443");
 ~~~
+\ingroup HTTP
 */
 
 class ASL_API WebSocket
@@ -154,6 +155,7 @@ function in the HTTP server and only start that one.
 httpserver.link(wsserver);
 httpserver.start();
 ~~~
+\ingroup HTTP
 */
 
 class ASL_API WebSocketServer: public SocketServer

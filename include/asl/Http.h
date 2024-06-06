@@ -20,6 +20,7 @@ class File;
 
 /**
 The components of a URL plus some utility static functions
+\ingroup HTTP
 */
 struct ASL_API Url
 {
@@ -120,6 +121,7 @@ struct HttpSink
 
 /**
 Base class of HttpRequest and HttpResponse with common functionality.
+\ingroup HTTP
 */
 
 class ASL_API HttpMessage
@@ -245,7 +247,7 @@ An HTTP request that servers can read from.
 An HttpRequest has a method (such as GET or POST), optional headers, and optional body. The body can be a
 String, a ByteArray or a Var. In the case of a Var it will be encoded as JSON and the request content type
 header automatically set.
-
+\ingroup HTTP
 \sa HttpServer
 */
 class ASL_API HttpRequest : public HttpMessage
@@ -399,6 +401,7 @@ protected:
 
 /**
 An HTTP response that clients can read and servers write.
+\ingroup HTTP
 \sa HttpServer
 \sa Http
 */
@@ -516,6 +519,7 @@ Using **IPv6** addresses is supported with square brackets in the host part `[ip
 ~~~
 auto res = Http::get("http://[::1]:80/path");
 ~~~
+\ingroup HTTP
 */
 
 class ASL_API Http

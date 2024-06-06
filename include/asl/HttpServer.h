@@ -59,7 +59,7 @@ public:
 A server like that will respond to requests such as `/api/clients/132337` or `/api/icon?id=12`.
 
 Each request is handled in a separate thread. So, you should probably use mutexes for synchronization.
-
+\ingroup HTTP
 */
 
 class ASL_API HttpServer: public SocketServer
