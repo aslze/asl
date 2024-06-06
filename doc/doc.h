@@ -73,7 +73,7 @@ With CMake 3.14+, instead of using `find_package()`, you can download and build 
 
 ~~~
 include(FetchContent)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.10.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.11.zip)
 FetchContent_MakeAvailable(asl)
 ~~~
 
@@ -269,36 +269,46 @@ auto cat = Factory<Animal>::create("Cat");
 
 */
 
+/**
+\defgroup HTTP HTTP clients and servers
+
+These classes enable creating servers and clients for the HTTP 1.1 protocol. Additionally, there
+is functionality to create WebSocket clients and servers. Encrypted communication (HTTPS, TLS WebSocket) require the *mbedTLS* library
+and to enable the `ASL_TLS` Cmake option.
+
+Use Http to send HTTP requests and receive the response.
+
+~~~
+HttpResponse resp = Http::get("http://someserver/something");
+if (resp.ok())
+{
+	String text = resp.text();
+	String type = resp.header("Content-Type");
+}
+~~~
+
+Subclass HttpServer or WebSocketServer and implement the `serve()` function to create application-specific servers.
+*/
 
 /**
 \defgroup Sockets Socket communication
 
-These classes enable network communication with TCP (plain or TLS encrypted) and UDP sockets.
+These classes enable network communication with TCP (plain or TLS encrypted), UDP and Unix/Local sockets.
 
 The `SocketServer` class implements a multithreaded socket server and is easier to use than using
-`Socket` objects directly for serving.
+`Socket` objects directly for serving multiple clients in parallel.
 
-This example would get a web page from an HTTP server (just an example, you should use the
-`Http` class for that).
+This simplified example would connect to a server (at some host and TCP port), send a question and receive an answer.
 
 ~~~
-String path = "/index.html", host = "somehost.com";
 Socket socket;
-socket.connect(host, 80);
-socket << String(0, "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n", *path, *host);
-String response;
-char buffer[1001];
-while(socket.connected())
-{
-	if(!socket.waitData())
-		continue;
-	int n = socket.read(buffer, min(socket.available(), 1000));
-	if(n <= 0)
-		break;
-	response += String(buffer, n);
-}
+socket.connect("thehost", 8000);
+socket << "getname\n";
+String answer = socket.readLine();
 ~~~
 */
+
+This example reads messages as text lines, not very efficient. Sockets can read and write binary data.
 
 /**
 \defgroup Containers Containers
