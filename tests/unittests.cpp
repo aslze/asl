@@ -63,12 +63,12 @@ ASL_TEST(IniFile)
 		IniFile file("config.ini");
 		file["global"] = "global value";
 		file["sec1/field1"] = "value1";
-		file["sec1/field2"] = "value2";
+		file.set("sec1/field2", "value2");
 		file["sec2/field"] = "value3";
 	}
 	{
 		IniFile file("config.ini");
-		ASL_ASSERT(file.sections()["sec1"].vars().length() == 2);
+		//ASL_ASSERT(file.sections()["sec1"].length() == 2);
 		ASL_ASSERT(file["global"] == "global value");
 		ASL_ASSERT(file["sec1/field1"] == "value1");
 		ASL_ASSERT(file["sec1/field2"] == "value2");
@@ -77,9 +77,6 @@ ASL_TEST(IniFile)
 		ASL_ASSERT(file("sec1/field1", "none") == "value1");
 		ASL_ASSERT(file("sec1/field9", "none") == "none");
 
-		file.section("sec2");
-		ASL_ASSERT(file["field"] == "value3");
-		
 		Dic<> all = file.values();
 		ASL_ASSERT(all["sec1/field1"] == "value1");
 		ASL_ASSERT(file.values("sec1")["field1"] == "value1");

@@ -11,8 +11,7 @@ namespace asl {
 
 /**
 A utility to read and write configuration files in INI format. On destruction, if there was any variable added or modified
-the file is automatically saved. When reading a variable name, it is read from the current section. But if the name
-contains a `/` then it is considered a "section/name" pair.
+the file is automatically saved. When reading a variable name it is considered a "section/name" pair.
 
 Example:
 
@@ -29,7 +28,7 @@ Can be read and written with:
 ~~~
 IniFile config("settings.ini");
 int num_retries = config["network/num_retries"];
-config["main/color"] = "black";
+config.set("main/color", "black");
 ~~~
 
 The file in that example will be saved if the original `color` in section `main` was not "black".
@@ -57,26 +56,12 @@ int num_retries = config["network/num_retries"] | 5;
 class ASL_API IniFile
 {
 public:
-	class Section
-	{
-		String _title;
-		HashDic<String> _vars;
-	public:
-		Section() {}
-		Section(const String& t) : _title(t) {}
-		const String& title() const {return _title;}
-		String& operator[](const String& k) {return _vars[k];}
-		const String& operator[](const String& k) const { return _vars[k]; }
-		const HashDic<String>& vars() const {return _vars;}
-		Section clone() const;
-		bool has(const String& k) const { return _vars.has(k); }
-		friend class IniFile;
-	};
+	typedef HashDic<String> Section;
 
 	/**
-	Opens an INI file from the given file
+	Opens an INI file from the given path
 	*/
-	IniFile(const String& fname, bool shouldwrite = true);
+	IniFile(const String& path, bool shouldwrite = true);
 	/**
 	Destroys the object and save the file if there were modifications
 	*/
@@ -95,10 +80,16 @@ public:
 	/**
 	Returns the value associated with the key `name` in the current section
 	if the name is like `section/name` then the given section is used.
+	In the future this might return a const ref, so that modifications must be made with .set(k, v)
 	*/
 	String& operator[](const String& name);
 
 	const String operator[](const String& name) const;
+	
+	/**
+	Sets the value for a key like 'section/name'
+	*/
+	void set(const String& name, const String& value);
 	
 	/**
 	Returns the value associated with the key `name` or `defaultVal` if it was not found. 
@@ -116,8 +107,9 @@ public:
 
 	/**
 	Sets the current section to 'name' (variables will be read from here by default)
+	\deprecated Use full names like "section/key"
 	*/
-	Section& section(const String& name);
+	ASL_DEPRECATED(Section& section(const String& name), "Use full names like 'section/key'");
 
 	const Dic<Section>& sections() const { return _sections; }
 

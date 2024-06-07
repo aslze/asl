@@ -73,7 +73,7 @@ threshold=0.25
 ```cpp
 IniFile config("config.ini");
 float threshold = config["parameters/threshold"] | 0.2;
-config["parameters/threshold"] = 0.5;
+config.set("parameters/threshold", 0.5);
 ```
 
 Do HTTP requests (you can post a body or send headers, too):

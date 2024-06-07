@@ -103,7 +103,7 @@ With a recent CMake you can also build mbedTLS together with ASL as subprojects 
 set(ASL_TLS ON)
 set(ENABLE_PROGRAMS OFF CACHE BOOL "") # skip samples
 FetchContent_Declare(mbedtls URL https://github.com/Mbed-TLS/mbedtls/archive/v3.2.1.zip)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.8.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.11.zip)
 FetchContent_MakeAvailable(mbedtls asl)
 ```
 
