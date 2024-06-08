@@ -157,7 +157,8 @@ public:
 		int length() const {return j-i;}
 	};
 
-	int r() {return d().rc;}
+	int rc() const {return d().rc;}
+	int cap() const { return d().s; }
 	/**
 	Returns the number of elements in the array
 	*/
@@ -177,6 +178,8 @@ public:
 		reserve(m);
 		if (m > n)
 			asl_construct(_a + n, m - n);
+		else if (m < n)
+			asl_destroy(_a + m, n - m);
 		d().n = m;
 		return *this;
 	}
@@ -616,6 +619,8 @@ template <class T>
 Array<T>& Array<T>::reserve(int m)
 {
 	int s=d().s;
+	if (m <= s)
+		return *this;
 	int s1 = (m > s)? max(8*s/4, m) : s;
 	T* b = _a;
 	int n=d().n;
@@ -630,18 +635,16 @@ Array<T>& Array<T>::reserve(int m)
 	}
 	else if(s1 != s)
 	{
+		int   rc = d().rc;
 		char* p = (char*) realloc( (char*)_a-sizeof(Data), s1*sizeof(T)+sizeof(Data) );
 		if(!p)
 			ASL_BAD_ALLOC();
 		b = (T*) ( p + sizeof(Data) );
 		_a = b;
-		s1 = s;
+		d().rc = rc;
 		d().s = s1;
-	}
-	if (m < n)
-	{
-		asl_destroy(_a + m, n - m);
-		d().n = m;
+		d().n = n;
+		s1 = s;
 	}
 	if(s1 != s)
 	{

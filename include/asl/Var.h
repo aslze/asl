@@ -675,6 +675,7 @@ Var::Var(const VDic<T>& x)
 {
 	_type=DIC;
 	NEW_DIC(_o);
+	_o->reserve(x.length());
 	foreach2(String& k, T& v, x)
 		_o->set(k, v);
 }
@@ -696,6 +697,7 @@ void Var::operator=(const VDic<T>& x)
 	free();
 	_type=DIC;
 	NEW_DIC(_o);
+	_o->reserve(x.length());
 	foreach2(String& k, T& v, x)
 		_o->set(k, v);
 }
