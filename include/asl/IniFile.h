@@ -137,6 +137,10 @@ public:
 	{
 		return _sections[_currentTitle][String(index + 1) << '\\' << field];
 	}
+	/**
+	Returns the names of sections in the file
+	*/
+	Array<String> sectionNames() const { return _sections.keys(); }
 
 	/**
 	Returns all keys and values as a map with keys as "section/key"

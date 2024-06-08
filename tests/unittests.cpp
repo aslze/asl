@@ -60,11 +60,12 @@ ASL_TEST(File)
 ASL_TEST(IniFile)
 {
 	{
+		TextFile("config.ini").write(""); // clear before
 		IniFile file("config.ini");
 		file["global"] = "global value";
 		file["sec1/field1"] = "value1";
 		file.set("sec1/field2", "value2");
-		file["sec2/field"] = "value3";
+		file.set("sec2/field", "value3");
 	}
 	{
 		IniFile file("config.ini");
@@ -80,6 +81,8 @@ ASL_TEST(IniFile)
 		Dic<> all = file.values();
 		ASL_ASSERT(all["sec1/field1"] == "value1");
 		ASL_ASSERT(file.values("sec1")["field1"] == "value1");
+
+		ASL_ASSERT(file.sectionNames().length() == 3);
 	}
 }
 
@@ -192,6 +195,8 @@ String join(const Array<String>& a)
 ASL_TEST(Array)
 {
 	Array<int> a;
+	a.reserve(4);
+	ASL_ASSERT(a.length() == 0);
 	a << 3 << -5 << 10 << 0;
 
 	ASL_ASSERT(a.length() == 4);
