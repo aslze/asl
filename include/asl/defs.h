@@ -10,7 +10,7 @@
 Main definitions.
 */
 
-#define ASL_VERSION 11110
+#define ASL_VERSION 11111
 
 #ifdef _WIN32
 #ifndef _CRT_SECURE_NO_DEPRECATE
