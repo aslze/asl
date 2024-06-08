@@ -439,8 +439,6 @@ public:
 	}
 };
 
-#if !defined(_WIN32) || defined(ASL_SOCKET_LOCAL)
-
 ASL_SMART_CLASS(LocalSocket, Socket)
 {
 	ASL_SMART_INNER_DEF(LocalSocket);
@@ -478,8 +476,6 @@ public:
 	ASL_SMART_DEF(LocalSocket, Socket);
 	ASL_EXPLICIT LocalSocket(int fd) : ASL_SMART_INIT(fd) {}
 };
-
-#endif
 
 ASL_SMART_CLASS(MulticastSocket, PacketSocket)
 {

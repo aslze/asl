@@ -289,10 +289,10 @@ bool InetAddress::set(const String& host, int port)
 		hints.ai_family = host.contains(':') ? AF_INET6 : AF_TYPE;
 		hints.ai_socktype = SOCK_STREAM;
 
-		int s = getaddrinfo(host, NULL, &hints, &info);
+		int s = getaddrinfo(*host, NULL, &hints, &info);
 		if (s != 0 || !info)
 		{
-			printf("Cannot resolve %s\n", *host);
+			_type = ANY;
 			resize(0);
 			return false;
 		}
@@ -726,8 +726,6 @@ void PacketSocket_::sendTo(const InetAddress& to, const void* data, int n)
 	sendto(_handle, (const char*)data, n, 0, (sockaddr*)to.ptr(), to.length());
 }
 
-#ifdef ASL_SOCKET_LOCAL
-
 // LocalSocket (UNIX)
 
 LocalSocket_::LocalSocket_()
@@ -744,6 +742,7 @@ LocalSocket_::LocalSocket_(int fd) : Socket_(fd)
 
 LocalSocket_::~LocalSocket_()
 {
+#ifdef ASL_SOCKET_LOCAL
 	String path = localAddress().toString();
 	if (path)
 	{
@@ -754,10 +753,12 @@ LocalSocket_::~LocalSocket_()
 		unlink(path);
 #endif
 	}
+#endif
 }
 
 bool LocalSocket_::bind(const String& name)
 {
+#ifdef ASL_SOCKET_LOCAL
 #ifdef _WIN32
 	DeleteFileW(name);
 #else
@@ -767,18 +768,21 @@ bool LocalSocket_::bind(const String& name)
 	InetAddress here(name);
 	if (::bind(_handle, (sockaddr*)here.ptr(), sizeof(sockaddr_un)))
 	{
-		verbose_print("Can't bind to %s\n", *name);
+		_error = SOCKET_BAD_BIND;
 		return false;
 	}
 	return true;
+#else
+	asl_error("Unix sockets not supported");
+	_error = SOCKET_BAD_BIND;
+	return false;
+#endif
 }
 
 Socket_* LocalSocket_::accept()
 {
 	return new LocalSocket_((int)::accept(_handle, (sockaddr*)0, (socklen_t*)0));
 }
-
-#endif
 
 }
 

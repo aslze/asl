@@ -82,6 +82,7 @@ set( ASL_SRC
 )
 
 set(ASL_DEFS "")
+set(ASL_DEFSP "")
 
 if(ASL_TLS)
 	list(APPEND ASL_SRC TlsSocket.cpp)
@@ -93,7 +94,7 @@ if( ASL_USE_LOCAL8BIT )
 endif()
 
 if(ASL_SOCKET_LOCAL)
-	list(APPEND ASL_DEFS ASL_SOCKET_LOCAL)
+	list(APPEND ASL_DEFSP ASL_SOCKET_LOCAL)
 endif()
 
 if(POLICY CMP0022)
@@ -119,6 +120,7 @@ set(TARGETS "")
 if(ASL_BUILD_STATIC)
 	add_library( asls STATIC ${ASL_SRC} )
 	target_compile_definitions(asls PUBLIC ${ASL_DEFS} ASL_STATIC)
+	target_compile_definitions(asls PRIVATE ${ASL_DEFSP})
 	target_include_directories(asls PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include> $<INSTALL_INTERFACE:include> )
 	if( WIN32 )
 		target_link_libraries(asls ws2_32 shell32 advapi32)
@@ -142,6 +144,7 @@ if(ASL_BUILD_SHARED)
 	add_library( asl SHARED ${ASL_SRC} )
 	target_include_directories(asl PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include> $<INSTALL_INTERFACE:include> )
 	target_compile_definitions(asl PUBLIC ${ASL_DEFS})
+	target_compile_definitions(asl PRIVATE ${ASL_DEFSP})
 
 	if( WIN32 )
 		target_link_libraries(asl LINK_PRIVATE ws2_32 shell32 advapi32) # PRIVATE
