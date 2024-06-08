@@ -365,9 +365,7 @@ inline bool myisalnum(char c)
 
 
 void asl_die(const char* msg, int line = 0);
-
 void asl_error(const char* msg);
-
 void os_error(const char* msg);
 
 template <class T>
@@ -398,17 +396,10 @@ inline T max(T a, T b) {if(a>b) return a; else return b;}
 template <class T>
 inline T min(T a, T b) {if(a<b) return a; else return b;}
 
-}
-
-inline void* operator new (size_t, int* p) { return p; }
-inline void operator delete(void*, int*) {}
-
-namespace asl {
-
 // Placement constructors
 
 template <class T>
-inline void asl_construct(T* p) {new (p) T;}
+inline void asl_construct(T* p) {new (p) T();}
 
 template <class T>
 inline void asl_construct_copy(T* p, const T& x) {new (p) T(x);}
@@ -422,41 +413,10 @@ inline void asl_destroy(T* p) {p->~T();}
 template <class T>
 inline void asl_destroy(T* p, int n) {T* q=p+n; while(p!=q) {p->~T(); p++;}}
 
-// Placement constructors for pointers
-#if !defined _MSC_VER || _MSC_VER > 11600
-
-template <class T>
-inline void asl_construct(T**) {}
-
-template <class T>
-inline void asl_construct(T**, int) {}
-
-template <class T>
-inline void asl_destroy(T**) {}
-
-template <class T>
-inline void asl_destroy(T**, int) {}
-#endif
-
-#define ASL_POD_CONSTRUCT(T) \
-inline void asl_construct(T*) {}\
-inline void asl_construct(T*, int) {}\
-inline void asl_destroy(T*) {}\
-inline void asl_destroy(T*, int) {}\
-inline void asl_construct_copy(T* p, const T& x) {*p = x;} \
-inline void bswap(T& a, T& b) {swap(a, b);}
-
-ASL_POD_CONSTRUCT(byte)
-ASL_POD_CONSTRUCT(signed char)
-ASL_POD_CONSTRUCT(char)
-ASL_POD_CONSTRUCT(int)
-ASL_POD_CONSTRUCT(unsigned int)
-ASL_POD_CONSTRUCT(float)
-ASL_POD_CONSTRUCT(double)
-ASL_POD_CONSTRUCT(short)
-ASL_POD_CONSTRUCT(unsigned short)
-ASL_POD_CONSTRUCT(Long)
-ASL_POD_CONSTRUCT(ULong)
+inline void asl_construct(byte*, int) {}
+inline void asl_destroy(byte*, int) {}
+inline void asl_construct(char*, int) {}
+inline void asl_destroy(char*, int) {}
 
 template<class T, class F>
 struct IsLess {
@@ -477,6 +437,8 @@ struct Pair
 {
 	T1 first;
 	T2 second;
+	bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
+	bool operator!=(const Pair& b) const { return !(*this == b); }
 };
 
 }
