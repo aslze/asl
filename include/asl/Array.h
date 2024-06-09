@@ -165,8 +165,7 @@ public:
 	int length() const {return d().n;}
 
 	/**
-	Reserves space for m elements without increasing actual length (to make appending faster),
-	but decreases length if m is less than current size
+	Reserves space for m elements without increasing actual length (to make appending faster)
 	*/
 	Array& reserve(int m);
 	/**

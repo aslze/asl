@@ -274,6 +274,29 @@ ASL_TEST(Array)
 	}
 	ASL_ASSERT(s == 26);
 #endif
+
+	for (int i = 1, n = 1; i < 10; i++, n*=4)
+	{
+		int s = 0;
+		Array<int> a;
+		for (int j = 0; j < n; j++)
+		{
+			if (i % 2 == 0)
+			{
+				a.resize(a.length() + 1);
+				a.last() = j;
+			}
+			else
+				a << j;
+			s += j;
+		}
+		Array<int> b = a.clone();
+		int s2 = 0;
+		foreach (int x, b)
+			s2 += x;
+
+		ASL_EXPECT(s2, ==, s);
+	}
 }
 
 
