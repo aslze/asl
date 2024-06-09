@@ -288,16 +288,21 @@ ASL_TEST(Path)
 
 ASL_TEST(HashMap)
 {
-	HashDic<int> dic;
-	for(int i=0; i<10; i++)
-		dic[10-i] = i;
-	ASL_ASSERT(dic.length() == 10);
+	HashDic<int> map;
+	for(int i=0; i<100; i++)
+		map[100 - i] = i;
+	ASL_ASSERT(map.length() == 100);
 
-	for(int i=0; i<10; i++)
-		ASL_ASSERT(dic[10-i] == i);
-	dic.clear();
+	for(int i=0; i<100; i++)
+		ASL_ASSERT(map[100 - i] == i);
 
-	ASL_ASSERT(dic.length() == 0);
+	int* p = map.find(50);
+	ASL_ASSERT(map.has(50) && p != NULL && *p == 50);
+	ASL_ASSERT(!map.has(-5) && !map.find(-5));
+
+	map.clear();
+
+	ASL_ASSERT(map.length() == 0);
 
 	HashMap<int, float> m;
 	m[100] = 125.0f;
@@ -324,6 +329,23 @@ String join(const Dic<int>& a)
 
 ASL_TEST(Map)
 {
+	Map<int, int> map;
+	for (int i = 0; i < 100; i++)
+		map[100 - i] = i;
+	
+	ASL_ASSERT(map.length() == 100);
+
+	for (int i = 0; i < 100; i++)
+		ASL_ASSERT(map[100 - i] == i);
+
+	int* p = map.find(50);
+	ASL_ASSERT(map.has(50) && p != NULL && *p == 50);
+	ASL_ASSERT(!map.has(-5) && !map.find(-5));
+
+	map.clear();
+
+	ASL_ASSERT(map.length() == 0);
+
 	Map<int, String> numbers;
 	numbers[12] = "twelve";
 	numbers[-2] = "minus two";
