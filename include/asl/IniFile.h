@@ -56,7 +56,7 @@ int num_retries = config["network/num_retries"] | 5;
 class ASL_API IniFile
 {
 public:
-	typedef HashDic<String> Section;
+	typedef Dic<String> Section;
 
 	/**
 	Opens an INI file from the given path

@@ -40,6 +40,8 @@ IniFile::IniFile(const String& fname, bool shouldwrite)
 				continue;
 			String name = line.substring(1, end);
 			cursection = &_sections[name];
+			if (_currentTitle == NOSECTION)
+				_currentTitle = name;
 		}
 		else if(line[i0] != '#' && line[i0] > 47 && line[i0] != ';')
 		{
@@ -63,13 +65,15 @@ IniFile::IniFile(const String& fname, bool shouldwrite)
 			(*cursection)[key.trim().replaceme('/', '\\')] = value.trim();
 		}
 	}
-	_currentTitle = NOSECTION;
+	
 	for(int i=_lines.length()-1; i>0 && _lines[i][0] == '\0'; i--)
 	{
 		_lines.resize(_lines.length()-1);
 	}
 	if (_sections[NOSECTION].length() == 0)
 		_sections.remove(NOSECTION);
+	else
+		_currentTitle = NOSECTION;
 }
 
 IniFile::Section& IniFile::section(const String& name)
