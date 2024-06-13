@@ -45,7 +45,7 @@ void HttpServer::addMimeType(const String& ext, const String& type)
 void HttpServer::serve(Socket client)
 {
 	double t1 = now();
-	while(!client.disconnected() && now() - t1 < 10.0 && !_requestStop)
+	while(client.connected() && now() - t1 < 10.0 && !_requestStop)
 	{
 		if (!client.waitData(5))
 			continue;
@@ -87,19 +87,22 @@ void HttpServer::serve(Socket client)
 			if (response.containsFile())
 			{
 				File file(response.text());
-				if (!file.exists())
+				if (!file.isFile())
 				{
 					response.setCode(404);
 					response.setHeader("Content-Type", "text/plain");
-					response.put("Error\nFile " + file.name() + " not found");
+					response.put("Not found");
+					response.write();
 					continue;
 				}
 
 				String mime = _mimetypes.get(file.extension(), "text/plain");
 				response.setHeader("Date", Date::now().toString(Date::HTTP));
 				response.setHeader("Content-Type", mime);
+				
 				if (!response.hasHeader("Cache-Control"))
 					response.setHeader("Cache-Control", "max-age=60, public");
+				
 				if (request.hasHeader("Range"))
 				{
 					String range = request.header("Range");
@@ -109,13 +112,14 @@ void HttpServer::serve(Socket client)
 						int begin = parts[0];
 						int end = parts[1];
 						response.setCode(206);
-						response.setHeader("Content-Range", "");
+						response.setHeader("Content-Range", "+");
 						response.putFile(file.path(), begin, end);
 					}
 				}
 				else
 					response.putFile(file.path());
-				if (response.header("Content-Range").contains('*'))
+
+				if (response.hasHeader("Content-Range") && response.header("Content-Range").contains('*'))
 				{
 					response.setCode(416);
 					response.write();

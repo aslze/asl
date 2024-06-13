@@ -112,6 +112,12 @@ public:
 	Tests if this WebSocket is closed, possibly by the other end
 	*/
 	bool closed();
+
+	/**
+	Tests if this WebSocket is connected
+	*/
+	bool connected() { return !closed(); }
+
 protected:
 	Socket _socket;
 	ByteArray _buffer;

@@ -187,6 +187,7 @@ Var HttpMessage::json() const
 void HttpMessage::put(const ByteArray& data)
 {
 	_body = data;
+	_fileBody = false;
 	setHeader("Content-Length", _body.length());
 }
 
@@ -212,26 +213,39 @@ void HttpMessage::put(const File& body)
 	_fileBody = true;
 }
 
-void HttpMessage::setHeader(const String& header, const String& value)
+String capitalized(const String& name) 
 {
-	String name;// = capitalize(header);
+	String cname = name;
+	char*  pname = cname.data();
 	bool capitalize = true;
-	for (int i = 0; i < header.length(); i++)
+	for (int i = 0; i < cname.length(); i++)
 	{
-		name << char(capitalize ? toupper(header[i]) : tolower(header[i]));
-		capitalize = !isalnum(header[i]);
+		pname[i] = capitalize ? toupper(pname[i]) : tolower(pname[i]);
+		capitalize = pname[i] == '-';
 	}
-	_headers[name] = value;
+
+	return cname;
+}
+
+void HttpMessage::setHeader(const String& name, const String& value)
+{
+	String cname = capitalized(name);
+	if (!value.ok())
+		_headers.remove(cname);
+	else
+		_headers[cname] = value;
 }
 
 String HttpMessage::header(const String& name) const
 {
-	return _headers.has(name) ? _headers[name] : String();
+	String cname = capitalized(name);
+	const String* pvalue = _headers.find(cname);
+	return pvalue ? *pvalue : String();
 }
 
 bool HttpMessage::hasHeader(const String& name) const
 {
-	return _headers.has(name);
+	return _headers.has(capitalized(name));
 }
 
 void HttpMessage::readHeaders()
@@ -442,6 +456,15 @@ void HttpRequest::read()
 	_proto = _command.substring(j + 1).trim();
 
 	readHeaders();
+	
+	if (header("Expect") == "100-continue")
+	{
+		if ((Long)header("Content-Length") < 128000000)
+			*_socket << "HTTP/1.1 100 Continue\r\n\r\n";
+		else
+			*_socket << "HTTP/1.1 417 Too big\r\n\r\n";
+	}
+
 	readBody();
 	/*
 	if(_body.length() > 0) // dump
@@ -535,8 +558,14 @@ void HttpResponse::setCode(int code)
 		msg = "Not Found";
 	else if (code == 206)
 		msg = "Partial Content";
+	else if (code >= 500)
+		msg = "Server error";
+	else if (code >= 400)
+		msg = "Request error";
+	else if (code >= 300)
+		msg = "Redirect";
 	else
-		msg = "Not found";
+		msg = "OK";
 
 	_command = String::f("%s %i %s", *_proto, code, *msg);
 }
@@ -567,11 +596,12 @@ bool HttpMessage::sendHeaders()
 	}
 	s << "\r\n";
 	int sent = _socket->write(*s, s.length());
-	if (sent <= 0)
+	if (sent < s.length())
 		return false;
 	_headersSent = true;
-	_chunked = !_headers.has("Content-Length");
-	_status->totalSend = _chunked ? 0 : int(_headers["Content-Length"]);
+	String contentlength = header("Content-Length");
+	_chunked = !contentlength.ok();
+	_status->totalSend = _chunked ? 0 : int(contentlength);
 	return true;
 }
 
@@ -652,7 +682,8 @@ bool HttpMessage::putFile(const String& path, int begin, int end)
 	if (!file.exists())
 	{
 		printf("file to upload not found %s\n", *path);
-		setHeader("Content-Length", "0");
+		put("");
+		write();
 		return false;
 	}
 	if (begin == 0 && end == 0 && !hasHeader("Content-Range"))
@@ -661,7 +692,7 @@ bool HttpMessage::putFile(const String& path, int begin, int end)
 	{
 		Long size = file.size();
 		if (end == 0)
-			end = (int)size - 1;
+			end = int(size - 1);
 		if (end <= begin || begin < 0 || end > size)
 		{
 			setHeader("Content-Length", "0");
