@@ -143,7 +143,7 @@ void HttpServer::serveFile(HttpRequest& request, HttpResponse& response)
 {
 	if (request.method() == "GET")
 	{
-		String path = Url::decode(request.path());
+		String path = request.path();
 
 		if (path.endsWith("/"))
 			path += "index.html";

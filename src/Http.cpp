@@ -485,11 +485,17 @@ void HttpRequest::read()
 		_querystring = _res.substring(q + 1, h > 0 ? h : pathend);
 		pathend = q;
 	}
-	_path = _res.substring(0, pathend);
-	_parts = _path.split('/');
-	if (_parts.length() > 0) {
+
+	_path = Url::decode(_res.substring(0, pathend));
+
+	if(_path.contains(".."))
+		_path = _path.replace("..", "");
+
+	_path.split('/', _parts);
+	if (_parts.length() > 0)
+	{
 		if (_parts.last() == "")
-			_parts.remove(_parts.length() - 1);
+			_parts.removeLast();
 		if (_parts.length() > 0 && _parts[0] == "")
 			_parts.remove(0);
 	}

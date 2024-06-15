@@ -371,7 +371,9 @@ public:
 	*/
 	const String& query(const String& key);
 	friend class HttpResponse;
-	const Array<String>& parts() const;
+
+	// [deprecated]
+	ASL_DEPRECATED(const Array<String>& parts() const, "?");
 
 	void setRecursion(int n) { _recursion = n; }
 
