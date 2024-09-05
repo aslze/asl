@@ -12,7 +12,7 @@ inline bool myisdigit(char c)
 	return c >= '0' && c <= '9';
 }
 
-inline bool isnumber(const String& s, char dec)
+inline bool myisnumber(const String& s, char dec)
 {
 	const char* p = s.data();
 	int n = s.length();
@@ -331,7 +331,7 @@ bool TabularDataFile::nextRow()
 		}
 		else
 		{
-			if (isnumber(v, decimal))
+			if (myisnumber(v, decimal))
 			{
 				if (decimal != '.')
 					v.replaceme(decimal, '.');
