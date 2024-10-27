@@ -343,11 +343,11 @@ DateData Date::calc(double t)
 	}
 	date.day = yd - month_days[leap][date.month] + 1;
 
-	double dt = ((t / 86400.0) - floor(t / 86400.0)) + 1e-6;
+	double dt = ((t / 86400.0) - floor(t / 86400.0)) + 5.7e-9;
 	int    h = (int)floor(24 * dt);
 	int    m = (int)floor((24 * dt - h) * 60);
 	int    s = (int)floor(((24 * dt - h) * 60 - m) * 60.0);
-	// Added bias to avoid numeric error. check when counting subseconds
+	
 	date.hours = h;
 	date.minutes = m;
 	date.seconds = s;
@@ -366,11 +366,11 @@ String Date::toString(Date::Format fmt, bool utc) const
 	switch (fmt)
 	{
 	case LONG:
-		s = String(0, "%04i-%02i-%02iT%02i:%02i:%02i", d.year, d.month, d.day, d.hours, d.minutes, d.seconds);
+		s = String::f("%04i-%02i-%02iT%02i:%02i:%02i", d.year, d.month, d.day, d.hours, d.minutes, d.seconds);
 		break;
 	case FULL:
-		s = String(0, "%04i-%02i-%02iT%02i:%02i:%02i.%03i", d.year, d.month, d.day, d.hours, d.minutes, d.seconds,
-		           int(1000 * fract(_t)));
+		s = String::f("%04i-%02i-%02iT%02i:%02i:%02i.%03i", d.year, d.month, d.day, d.hours, d.minutes, d.seconds,
+		              int(1000 * fract(_t) + 0.5) % 1000);
 		break;
 	case SHORT:
 		s = String(15, "%04i%02i%02iT%02i%02i%02i", d.year, d.month, d.day, d.hours, d.minutes, d.seconds);
