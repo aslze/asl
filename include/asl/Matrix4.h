@@ -16,9 +16,6 @@ class String;
 /**
 A Matrix4 is a 4x4 matrix useful for representing affine transformations in 3D space.
 
-Warning: the inverse() method assumes the bottom row is [0, 0, 0, 1] as in affine transform matrices, so
-it is not a general 4x4 matrix inverse.
-
 ~~~
 Matrix4 a = Matrix4::translate(10, 4, 0) * Matrix4::rotateX(PI/2);
 Vec3 v = a.inverse().transposed() * Vec3(1, 0, 0);
