@@ -51,7 +51,7 @@ void HttpServer::serve(Socket client)
 			continue;
 
 		HttpRequest request(client);
-		if (client.error())
+		if (client.error() || !request.method().ok() || !request.path().ok() || !request.protocol().ok())
 			break;
 
 		String hconn = request.header("Connection").toLowerCase();

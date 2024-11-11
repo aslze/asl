@@ -384,7 +384,7 @@ A Lock is an automatic locker/unlocker of a Mutex. Locks the mutex on constructi
 Mutex mutex;
 void do_something_sync()
 {
-	Lock lock(mutex);
+	Lock _(mutex);
 	do_something();
 }
 ~~~

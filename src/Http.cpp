@@ -298,7 +298,7 @@ void HttpMessage::readBody()
 	while (!end)
 	{
 		int av = _socket->available();
-		if (av < 0 || !_socket->waitInput()) {
+		if (av < 0 || !_socket->waitInput(10)) {
 			break;
 		}
 		byte buffer[RECV_BLOCK_SIZE];

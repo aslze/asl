@@ -326,9 +326,8 @@ public:
 
 	/**
 	Changes the tag name of this element
-	\deprecated Why would anyone do this?
 	*/
-	ASL_DEPRECATED(void setTag(const String& tag), "Seems unneeded")
+	void setTag(const String& tag)
 	{
 		_()->tag = tag;
 	}
