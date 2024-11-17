@@ -343,7 +343,8 @@ DateData Date::calc(double t)
 	}
 	date.day = yd - month_days[leap][date.month] + 1;
 
-	double dt = ((t / 86400.0) - floor(t / 86400.0)) + 5.7e-9;
+	t += 0.0005;
+	double dt = ((t / 86400.0) - floor(t / 86400.0));
 	int    h = (int)floor(24 * dt);
 	int    m = (int)floor((24 * dt - h) * 60);
 	int    s = (int)floor(((24 * dt - h) * 60 - m) * 60.0);
@@ -351,7 +352,7 @@ DateData Date::calc(double t)
 	date.hours = h;
 	date.minutes = m;
 	date.seconds = s;
-	date.weekDay = ((int)floor(t / 86400.0 + 1e-6) - 3) % 7;
+	date.weekDay = ((int)floor(t / 86400.0) - 3) % 7;
 	if (date.weekDay < 0)
 		date.weekDay += 7;
 	return date;
