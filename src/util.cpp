@@ -121,10 +121,12 @@ Random::Random(bool autoseed, bool fast)
 
 void Random::seed(ULong s)
 {
-	if (s == 0)
-		s = 0x7a12345fb678ce93ull;
+	s ^= 0x7a12345fb678ce93ull;
 	for (int i = 0; i < _size; i++)
 		_state[i] = s ^ (s << (i + 2));
+
+	for (int i = 0; i < 6; i++)
+		unsigned x = get();
 }
 
 void Random::init(bool fast)
