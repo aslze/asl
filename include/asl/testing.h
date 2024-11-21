@@ -105,9 +105,9 @@ Create a test named Name.
 @hideinitializer
 */
 #define ASL_TEST(Name) \
-void asl_test##Name();\
-int asl_xx##Name = asl::addTest(#Name, &asl_test##Name); \
-void asl_test##Name()
+void asl_test_##Name();\
+int asl_xx_##Name = asl::addTest(#Name, &asl_test_##Name); \
+void asl_test_##Name()
 
 
 template<class T>
@@ -169,16 +169,16 @@ inline String asString(const Var& x) { return x.toString(); }
 #undef ASL_ASSERT
 
 #ifdef __ANDROID__
-#define ASL_ASSERT(x) if(!(x)) { testResult << String(0, "\n%s: %i\nFailed: '%s'\n\n", __FILE__, __LINE__, #x); }
+#define ASL_ASSERT(x) if(!(x)) { asl::testResult << asl::String::f("\n%s: %i\nFailed: '%s'\n\n", __FILE__, __LINE__, #x); }
 
-#define ASL_EXPECT(x, op, y) if(!((x) op (y))) { testResult << String(0, "\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, *asString(y), *asString(x)); }
+#define ASL_EXPECT(x, op, y) if(!((x) op (y))) { asl::testResult << asl::String::f("\n%s: %i\n\n* Expected '%s' %s '%s' but it is: %s\n\n", __FILE__, __LINE__, #x, #op, *asl::asString(y), *asl::asString(x)); }
 #else
 
 /** 
 Check that the argument is true.
 @hideinitializer
 */
-#define ASL_ASSERT(x) if(!(x)) { printf("\n%s(%i): error: '%s'\n\n", __FILE__, __LINE__, #x); testFailed = true;}
+#define ASL_ASSERT(x) if(!(x)) { printf("\n%s(%i): error: '%s'\n\n", __FILE__, __LINE__, #x); asl::testFailed = true; }
 
 /** 
 Check a condition with the given operator and operands.
@@ -188,23 +188,21 @@ ASL_EXPECT(sqrt(x), >=, 0);
 @hideinitializer
 */
 
-#define ASL_EXPECT(x, op, y) if(!((x) op (y))) { printf("\n%s(%i): error: Expected '%s' %s '%s' but it is %s\n\n", __FILE__, __LINE__, #x, #op, *asString(y), *asString(x)); testFailed = true; }
+#define ASL_EXPECT(x, op, y) if(!((x) op (y))) { printf("\n%s(%i): error: Expected '%s' %s '%s' but it is %s\n\n", __FILE__, __LINE__, #x, #op, *asl::asString(y), *asl::asString(x)); asl::testFailed = true; }
 
 #endif
 
 #define ASL_CHECK(x, op, y) ASL_EXPECT(x, op, y)
 
-#define ASL_APPROX(x, y, d) ASL_EXPECT(distance((x), (y)), <, (d))
+#define ASL_APPROX(x, y, d) ASL_EXPECT(asl::distance((x), (y)), <, (d))
 
 /** 
 Check that `x` and `y` are approximately equal (within distance `d`).
 @hideinitializer
 */
-#define ASL_EXPECT_NEAR(x, y, d) ASL_EXPECT(distance((x), (y)), <, (d))
+#define ASL_EXPECT_NEAR(x, y, d) ASL_EXPECT(asl::distance((x), (y)), <, (d))
 
 /**@}*/
 }
 
 #endif
-
-

@@ -11,23 +11,33 @@
 #include <stdio.h>
 #include <asl/testing.h>
 
-using namespace asl;
-
 #define EPS 1e-6
 #define EPSf 1e-5f
 
 
 ASL_TEST(Vec3)
 {
-	Vec3 a(1, 2.5f, 3), b(1, 0, 0);
-	a += Vec3::zeros();
-	ASL_APPROX(a*b, 1.0f, EPS);
+	asl::Vec3 a(1, 2.5f, 3), b(1, 0, 0);
+	a += asl::Vec3::zeros();
 
-	Vec3d a2 = a, b2 = b;
-	Vec3 a3 = a2.with<float>();
-	ASL_APPROX(a2 + b2, Vec3d(2, 2.5, 3), EPS);
-	ASL_APPROX(a3 + b2.with<float>(), Vec3(2, 2.5, 3), (float)EPS);
+	ASL_APPROX(a*b, 1.0f, EPS);
+	ASL_EXPECT_NEAR(a * b, 1.0f, EPS);
+	ASL_EXPECT(a * b, <, 1.5f);
+
+	asl::Vec3d a2 = a, b2 = b;
+	asl::Vec3  a3 = a2.with<float>();
+	ASL_APPROX(a2 + b2, asl::Vec3d(2, 2.5, 3), EPS);
+	ASL_APPROX(a3 + b2.with<float>(), asl::Vec3(2, 2.5, 3), (float)EPS);
+
+	asl::Array<int> aa;
+	aa << 2 << 1;
+	foreach (int x, aa)
+		ASL_ASSERT(x >= 0);
+	foreach2 (int i, int x, aa)
+		ASL_ASSERT(i + x >= 0);
 }
+
+using namespace asl;
 
 ASL_TEST(Matrix4)
 {

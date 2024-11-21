@@ -32,7 +32,7 @@ inline EnumWrapper<C>& enumData(C*, const EnumWrapper_& e) { return *(EnumWrappe
 template<class T>
 const T* ref2nulp(const T&) { return 0; } // avoid warning with temporary Enumerators
 
-#define ASL_TY(x) (true?0:ref2nulp(x))
+#define ASL_TY(x) (true?0 : asl::ref2nulp(x))
 
 /**
 \defgroup Containers Containers
