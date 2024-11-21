@@ -307,7 +307,7 @@ With CMmake 3.14+, instead of using `find_package()`, you can download and build
 
 ```cmake
 include(FetchContent)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.11.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.12.zip)
 FetchContent_MakeAvailable(asl)
 ```
 
@@ -345,7 +345,7 @@ With a recent CMake (3.14+) you can also build mbedTLS together with ASL as subp
 set(ASL_TLS ON)
 set(ENABLE_PROGRAMS OFF CACHE BOOL "") # skip samples
 FetchContent_Declare(mbedtls URL https://github.com/Mbed-TLS/mbedtls/archive/v3.2.1.zip)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.11.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.12.zip)
 FetchContent_MakeAvailable(mbedtls asl)
 ```
 
