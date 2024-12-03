@@ -9,7 +9,8 @@
 namespace asl {
 
 /**
- * A matrix supporting basic arithmetic operations. With two predefined specializations: `Matrix` for doubles and `Matrixf` for floats.
+ * A matrix supporting basic arithmetic operations. With two predefined specializations:
+ * `Matrix` for float and `Matrixd` for double.
  * 
  * ~~~
  * Matrix A = {   // this makes a 2x2 matrix
@@ -95,6 +96,9 @@ public:
 		return *this;
 	}
 
+	/**
+	 * Returns the i-th element in memory: useful to treat column or row matrices as vectors
+	 */
 	T& operator[](int i) { return this->_a[i]; }
 
 	const T& operator[](int i) const { return this->_a[i]; }

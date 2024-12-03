@@ -38,7 +38,7 @@ __Utilities__:
 - Binary buffer reading/writing (endian-aware)
 - Random number and UUID generators
 - Elapsed time measurement
-- Linear and nonlinear systems solving
+- Linear and nonlinear equations systems solving
 - Basic testing functionality
 
 __Basic data types__:
