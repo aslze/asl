@@ -40,6 +40,17 @@ option(ASL_SAMPLES "Build samples")
 option(ASL_TESTS "Build tests")
 option(ASL_SOCKET_LOCAL "Support Unix sockets on Windows")
 
+set(ASL_BIGENDIAN OFF)
+
+if(DEFINED CMAKE_CXX_BYTE_ORDER)
+	if(CMAKE_CXX_BYTE_ORDER STREQUAL BIG_ENDIAN)
+		set(ASL_BIGENDIAN ON)
+	endif()
+else()
+	include(TestBigEndian)
+	test_big_endian(ASL_BIGENDIAN)
+endif()
+
 if(ASL_TLS)
 	if(TARGET MbedTLS::mbedtls)
 		set(mbedTLS_LIB MbedTLS::mbedtls)

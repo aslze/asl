@@ -35,15 +35,21 @@ ASL_TEST(File)
 	bfile << int(-3) << 3.5f;
 	bfile.setEndian(ENDIAN_BIG);
 	bfile << 0x10203040;
+	bfile << 0x10203040;
 	bfile.close();
 
 	bfile.open(File::READ);
-	bfile.setEndian(ENDIAN_LITTLE);
+	bfile.setEndian(ENDIAN_NATIVE);
 	int n;
 	float x;
 	bfile >> n >> x;
 	ASL_ASSERT(n == -3 && x == 3.5f);
-	ASL_ASSERT(bfile.read<unsigned>() == 0x40302010);
+	bfile.setEndian(ENDIAN_LITTLE);
+	byte b[4];
+	bfile >> b[0] >> b[1] >> b[2] >> b[3];
+	ASL_ASSERT(b[0] == 0x10 && b[1] == 0x20 && b[2] == 0x30 && b[3] == 0x40);
+	bfile.setEndian(ENDIAN_BIG);
+	ASL_ASSERT(bfile.read<unsigned>() == 0x10203040);
 	
 	TextFile tfile("lines.txt", File::WRITE);
 	String line1 = "123";

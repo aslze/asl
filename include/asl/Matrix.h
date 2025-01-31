@@ -83,6 +83,9 @@ public:
 	*/
 	T trace() const { if (this->_rows != this->_cols) return 0; T t = 0; for (int i = 0; i < this->rows(); i++) t += (*this)(i, i); return t; }
 
+	/**
+	 * copies the contents of matrix b into this
+	 */
 	void copy(const Matrix_& b)
 	{
 		this->resize(b.rows(), b.cols());
