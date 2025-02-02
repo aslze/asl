@@ -17,8 +17,8 @@
 //#define TLS_DEBUG 3
 
 #ifdef _WIN32
-#include <windows.h>
-#include <winsock2.h>
+#include <windows.h>  // NOLINT
+#include <winsock2.h> // NOLINT
 #else
 #include <stdlib.h>
 #include <unistd.h>
@@ -214,7 +214,7 @@ TlsSocket_::TlsSocket_()
 
 TlsSocket_::~TlsSocket_()
 {
-	close();
+	TlsSocket_::close();
 	mbedtls_net_free(&_core->net);
 	mbedtls_x509_crt_free(&_core->cacert);
 	mbedtls_ssl_free(&_core->ssl);

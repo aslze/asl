@@ -126,7 +126,7 @@ void Random::seed(ULong s)
 		_state[i] = s ^ (s << (i + 2));
 
 	for (int i = 0; i < 6; i++)
-		unsigned x = get();
+		get();
 }
 
 void Random::init(bool fast)

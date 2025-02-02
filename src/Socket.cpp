@@ -5,6 +5,12 @@
 struct IUnknown; // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here" with /permissive-
 #include <winsock2.h>
 #include <ws2tcpip.h>
+
+#ifdef __has_include
+#if __has_include(<afunix.h>) && !defined(ASL_SOCKET_LOCAL)
+#define ASL_SOCKET_LOCAL
+#endif
+#endif
 #ifdef ASL_SOCKET_LOCAL
 #include <afunix.h>
 #endif
@@ -415,7 +421,7 @@ Socket_::Socket_(int fd)
 
 Socket_::~Socket_()
 {
-	close();
+	Socket_::close();
 }
 
 bool Socket_::init(bool force)
