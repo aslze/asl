@@ -80,6 +80,7 @@ public:
 	Array2(std::initializer_list<std::initializer_list<T> > a)
 	{
 		_rows = (int)a.size();
+		_cols = 0;
 		if (_rows == 0)
 			return;
 		const std::initializer_list<T>* p = a.begin();

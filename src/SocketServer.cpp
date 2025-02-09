@@ -15,6 +15,7 @@ struct SockClientThread : public Thread
 	SockClientThread(SocketServer* svr, const Socket& cli):
 		_server(svr), _client(cli)
 	{
+		detach();
 		start();
 	}
 	void run()

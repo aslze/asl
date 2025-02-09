@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2025 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_ARRAY_H
@@ -70,7 +70,8 @@ class Array
 protected:
 	T* _a;
 	struct Data{int n, s; AtomicCount rc; int pad;}; // n=num. elems, s=allocated size
-	Data& d() const {return *((Data*)_a-1);}
+	const Data& d() const { return *((const Data*)_a - 1); } // NOLINT
+	Data&       d() { return *((Data*)_a - 1); } // NOLINT
 	void alloc(int m);
 	void free();
 	ASL_EXPLICIT Array(T* p) {}
@@ -95,6 +96,7 @@ public:
 	Creates an array of n elements and gives them the value x
 	*/
 	ASL_EXPLICIT Array(int n, const T& x) { alloc(n); for (int i = 0; i<n; i++) _a[i] = x; }
+
 	template<class K>
 	Array(const Array<K>& b)
 	{
@@ -102,7 +104,11 @@ public:
 		for(int i=0; i<length(); i++)
 			_a[i]=(T)b[i];
 	}
-	Array(const Array& b) {_a=b._a; ++d().rc;}
+	Array(const Array& b)
+	{
+		_a = b._a;
+		++d().rc;
+	}
 #ifdef ASL_HAVE_MOVE
 	Array(Array&& b)
 	{
@@ -215,12 +221,12 @@ public:
 	/**
 	Returns a pointer to the first element
 	*/
-	T* data() { return &_a[0]; }
+	T* data() { return &_a[0]; } // NOLINT
 
 	/**
 	Returns a pointer to the first element
 	*/
-	const T* data() const { return &_a[0]; }
+	const T* data() const { return &_a[0]; } // NOLINT
 
 	bool operator!() const { return d().n == 0; }
 
@@ -261,7 +267,7 @@ public:
 #ifdef ASL_DEBUG_ARRAY
 		if(i>=length()) {_a[i]=_a[0];return *(const T*)0;}
 #endif
-		return _a[i];
+		return _a[i]; // NOLINT
 	}
 	/**
 	Returns the element at index i
@@ -270,7 +276,7 @@ public:
 #ifdef ASL_DEBUG_ARRAY
 		if(i>=length()) {_a[i]=_a[0]; return *(T*)0;}
 #endif
-		return _a[i];
+		return _a[i]; // NOLINT
 	}
 
 	/**
@@ -292,7 +298,8 @@ public:
 	*/
 	int indexOf(const T& x, int j=0) const
 	{
-		for(int i=j; i<length(); i++) {if(_a[i]==x) return i;}
+		int n = length();
+		for(int i=j; i<n; i++) {if(_a[i]==x) return i;}
 		return -1;
 	}
 	/**
@@ -305,19 +312,15 @@ public:
 	Array& dup()
 	{
 		if(d().rc==1) return *this;
-		Array b(d().n);
-		for(int i=0; i<d().n; i++)
-			b._a[i]=_a[i];
-		(*this)=b;
-		return *this;
+		return (*this = clone());
 	}
 	/**
 	Returns an independent copy of this array
 	*/
 	Array clone() const
 	{
-		Array b(*this);
-		return b.dup();
+		Array b(_a, length());
+		return b;
 	}
 	/**
 	Copies another array's contents into this array
@@ -358,7 +361,7 @@ public:
 	*/
 	Array& operator=(const Array& b)
 	{
-		if(this==&b) return *this;
+		if(_a==b._a) return *this;
 		if(--d().rc==0) free();
 		_a=b._a;
 		++d().rc;

@@ -146,7 +146,7 @@ class ASL_API Socket : public SmartObject
 public:
 	enum { TCP, PACKET, LOCAL };
 
-	ASL_SMART_DEF(Socket, SmartObject);
+	ASL_SMART_DEF(Socket, SmartObject); // NOLINT
 	ASL_EXPLICIT Socket(int fd) : ASL_SMART_INIT(fd) {}
 
 	bool operator==(const Socket& s) const { return ptr() == s.ptr(); }

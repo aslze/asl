@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2025 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_THREAD_H
@@ -106,8 +106,9 @@ class Thread
 	typedef pthread_t Handle_;
 #endif
 	Handle_ _thread;
+	bool _detached;
 	volatile bool _threadFinished;
-private:
+
 	template<class F>
 	struct Context {
 		F f;
@@ -146,7 +147,9 @@ private:
 	static ASL_THREADFUNC_RET ASL_THREADFUNC_API begin(void* p)
 	{
 		Thread* t = (Thread*)p;
+		bool    detached = t->_detached;
 		t->run();
+		if (!detached)
 		t->_threadFinished = true;
 		return 0;
 	}
@@ -156,7 +159,9 @@ private:
 	{
 		Context<Func> s = *(Context<Func>*)p;
 		((Context<Func>*)p)->ready = true;
+		bool detached = s.t->_detached;
 		s.f();
+		if (!detached)
 		s.t->_threadFinished = true;
 	}
 	template<class Func>
@@ -165,28 +170,34 @@ private:
 		if (!p) return;
 		Context<Func> s = *(Context<Func>*)p;
 		((Context<Func>*)p)->ready = true;
+		bool detached = s.t->_detached;
 		for (int i = s.i0; i < s.i1; i += s.s)
 		{
 			s.f(i);
 		}
+		if (!detached)
 		s.t->_threadFinished = true;
 	}
 #endif
+
 public:
 	Thread()
 	{
 		_thread = 0;
 		_threadFinished = false;
+		_detached = false;
 	}
 	Thread(const Thread& t) : _thread(t._thread)
 	{
 		_threadFinished = false;
+		_detached = t._detached;
 		const_cast<Thread&>(t)._thread = 0;
 	}
 	void operator=(const Thread& t)
 	{
 		_threadFinished = t._threadFinished;
 		_thread = t._thread;
+		_detached = t._detached;
 		const_cast<Thread&>(t)._thread = 0;
 	}
 	virtual ~Thread()
@@ -240,6 +251,9 @@ public:
 	Returns true if this thread has finished
 	*/
 	bool finished() const { return _threadFinished; }
+
+	void detach() { _detached = true; }
+
 	/**
 	Returns the number of logical processors or cores
 	*/
@@ -258,8 +272,9 @@ public:
 	Starts a thread given a function or lambda expression as the run() function.
 	*/
 	template<class F>
-	Thread(const F& f)
+	Thread(const F& f, bool detached = false)
 	{
+		_detached = detached;
 		_thread = 0;
 		_threadFinished = false;
 		*this = start(f, this);
