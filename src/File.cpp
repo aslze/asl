@@ -112,22 +112,34 @@ bool File::open(const String& name, File::OpenMode mode)
 {
 	if(name == "")
 		return false;
-	const CHART* fopen_mode;
-	if(!(mode & TEXT))
+	CHART fopen_mode[8];
+	int   i = 0;
+	switch (mode & (READ | WRITE | APPEND | RW))
 	{
-		fopen_mode = (mode==READ)? STR_PREFIX("rb"):
-			(mode==WRITE)? STR_PREFIX("wb"):
-			(mode==APPEND)? STR_PREFIX("ab"):
-			STR_PREFIX("rb+");
+	case WRITE:
+		fopen_mode[i++] = STR_PREFIX('w');
+		break;
+	case APPEND:
+		fopen_mode[i++] = STR_PREFIX('a');
+		break;
+	default:
+		fopen_mode[i++] = STR_PREFIX('r');
+		break;
 	}
-	else
-	{
-		mode = (OpenMode) (mode & ~TEXT);
-		fopen_mode = (mode==READ)? STR_PREFIX("rt"):
-			(mode==WRITE)? STR_PREFIX("wt"):
-			(mode==APPEND)? STR_PREFIX("at"):
-			STR_PREFIX("rt+");
-	}
+
+	if (mode & TEXT)
+		fopen_mode[i++] = (mode & TEXT) ? STR_PREFIX('t') : STR_PREFIX('b');
+
+	if ((mode & (READ | WRITE | APPEND | RW)) == RW)
+		fopen_mode[i++] = STR_PREFIX('+');
+
+#if !defined _MSC_VER || _MSC_VER >= 1900
+	if (mode & CREATE)
+		fopen_mode[i++] = STR_PREFIX('x');
+#endif
+
+	fopen_mode[i] = 0;
+
 	_file = fopenX(name, fopen_mode);
 
 	_path = name;

@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2025 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_FILE_H
@@ -58,7 +58,7 @@ protected:
 	mutable FileInfo _info;
 	Endian _endian;
 public:
-	enum OpenMode{READ, WRITE, APPEND, RW, TEXT=8};
+	enum OpenMode{READ, WRITE, APPEND, RW, CREATE=4, TEXT=8};
 	enum SeekMode{START, HERE, END};
 	static const char SEP;
 	friend class Directory;
@@ -319,6 +319,12 @@ public:
 	template <class T>
 	T read() { T x; *this >> x; return x; }
 };
+
+inline File::OpenMode operator|(File::OpenMode a, File::OpenMode b)
+{
+	return File::OpenMode(int(a) | int(b));
+}
+
 
 template<> template<>
 Array<String> Array<File>::with<String>() const;
