@@ -4,7 +4,6 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#include <io.h>
 #undef WIN32_FIND_DATA
 #undef FindFirstFile
 #ifdef ASL_ANSI
@@ -14,7 +13,6 @@
 #define WIN32_FIND_DATA WIN32_FIND_DATAW
 #define FindFirstFile FindFirstFileW
 #endif
-#define dup _dup
 #else
 #include <sys/stat.h>
 #include <sys/types.h>

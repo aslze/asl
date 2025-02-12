@@ -450,22 +450,23 @@ ASL_TEST(AtomicCount)
 {
 	AThread::n = 0;
 	A2Thread< Atomic<double> >::n = 0;
-	ThreadGroup<AThread> threads1;
+	Array<AThread> threads1;
 	for (int i = 0; i < 30; i++)
 		threads1 << AThread();
-	threads1.start();
-	//int n = AThread::n;
-	threads1.join();
+	foreach(Thread& t, threads1)
+		t.start();
+	foreach(Thread& t, threads1)
+		t.join();
 	ASL_ASSERT(AThread::n == 0);
 
 	typedef Atomic<double> ItemType;
-	ThreadGroup<A2Thread<ItemType> > threads2;
+	Array<A2Thread<ItemType> > threads2;
 	for (int i = 0; i < 20; i++)
 		threads2 << A2Thread<ItemType>();
-	threads2.start();
-	//sleep(0.001);
-	//double bn = A2Thread<ItemType>::n;
-	threads2.join();
+	foreach(Thread& t, threads2)
+		t.start();
+	foreach(Thread& t, threads2)
+		t.join();
 	ASL_ASSERT(A2Thread<ItemType>::n == ItemType(20.0 * A2Thread<ItemType>::N));
 }
 

@@ -49,6 +49,15 @@ File file("data.bin", File::WRITE);   // opened in constructor
 file.seek(16);
 file.write(buffer, sizeof(buffer));   // closed in destructor
 ~~~
+
+`File(name, mode)` or `File::open(name, mode)` now support additional flag that fails if the file exists
+(only where the OS runtime library supports the "x" fopen flag):
+
+~~~
+File file("data.bin", File::WRITE | File::CREATE);
+if(!file)
+	file_existed();
+~~~
 */
 class ASL_API File
 {
@@ -74,7 +83,7 @@ public:
 	/**
 	Constructs a File object with the given path name and opens it with the given access mode.
 	\param name File name optionally including path
-	\param mode Access mode: READ, WRITE, APPEND, RW (read+write)
+	\param mode Access mode: READ, WRITE, APPEND, RW (read+write), WRITE|CREATE (open or fail if file exists)
 	*/
 	ASL_EXPLICIT File(const String& name, OpenMode mode) : _path(name), _endian(ENDIAN_NATIVE)
 	{

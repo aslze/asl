@@ -5,8 +5,6 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#include <io.h>
-#define dup _dup
 #else
 #include <sys/stat.h>
 #include <sys/types.h>

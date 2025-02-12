@@ -89,6 +89,8 @@ Thread thread([&]() {
 thread.join();
 ~~~
 
+The static functions `Thread::parallel_for()` and `Thread::parallel_invoke()` are **deprecated**. You can probably just use OpenMP.
+
 See also Mutex, Semaphore and Lock.
 \ingroup Threading
 */
@@ -306,9 +308,10 @@ public:
 	~~~
 	
 	but with iterations run in `nth` parallel threads.
+	\deprecated Use OpenMP
 	*/
 	template<class F>
-	static void parallel_for(int i0, int i1, const F& f, int nth = 8)
+	ASL_DEPRECATED(static void parallel_for(int i0, int i1, const F& f, int nth = 8), "Use OpenMP")
 	{
 		Array<Thread*> threads;
 		int n = min(nth, i1 - i0);
@@ -327,9 +330,10 @@ public:
 	}
 	/**
 	Runs the two functions/lambdas in parallel and returns when both are finished.
+	\deprecated Use OpenMP
 	*/
 	template<class F1, class F2>
-	static void parallel_invoke(const F1& f1, const F2& f2)
+	ASL_DEPRECATED(static void parallel_invoke(const F1& f1, const F2& f2), "Use OpenMP")
 	{
 		Thread t2(f2);
 		f1();
@@ -337,9 +341,10 @@ public:
 	}
 	/**
 	Runs the 3 functions/lambdas in parallel and returns when all are finished.
+	\deprecated Use OpenMP
 	*/
 	template<class F1, class F2, class F3>
-	static void parallel_invoke(const F1& f1, const F2& f2, const F3& f3)
+	ASL_DEPRECATED(static void parallel_invoke(const F1& f1, const F2& f2, const F3& f3), "Use OpenMP")
 	{
 		Array<Thread> threads;
 		Thread t2(f2), t3(f3);
@@ -350,9 +355,10 @@ public:
 	}
 	/**
 	Runs the 4 functions/lambdas in parallel and returns when all are finished.
+	\deprecated Use OpenMP
 	*/
 	template<class F1, class F2, class F3, class F4>
-	static void parallel_invoke(const F1& f1, const F2& f2, const F3& f3, const F4& f4)
+	ASL_DEPRECATED(static void parallel_invoke(const F1& f1, const F2& f2, const F3& f3, const F4& f4), "Use OpenMP")
 	{
 		Array<Thread> threads;
 		Thread t2(f2), t3(f3), t4(f4);
@@ -367,7 +373,7 @@ public:
 /**
 A ThreadGroup is a set of threads that start at the same time and can be waited for termination.
 
-**experimental: API may change**
+**experimental and deprecated API**
 
 In this example there is an array of `task`s to do. Each `Worker` is a thread that performs a subset
 of the tasks: one does the first half and the other the second half.
@@ -379,15 +385,16 @@ threads << Worker(tasks.slice(tasks.length()/2, tasks.length()));
 threads.start();
 threads.join();
 ~~~
+\deprecated
 */
-
 template<class Thread>
 class ThreadGroup
 {
 public:
 	Array<Thread> _threads;
 public:
-	ThreadGroup() {}
+	ASL_DEPRECATED(ThreadGroup(), "Use an array of threads or OpenMP")
+	{}
 	/** Add a thread to the group */
 	ThreadGroup& operator<<(const Thread& thread)
 	{

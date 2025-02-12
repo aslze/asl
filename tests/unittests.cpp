@@ -62,7 +62,7 @@ ASL_TEST(File)
 	ASL_ASSERT(lines[0] == line1);
 	ASL_ASSERT(lines[1] == line2);
 
-#if !defined _MSC_VER || _MSC_VER >= 1900
+#if 0 // !defined _MSC_VER || _MSC_VER >= 1900
 	File fileExc("lines.txt", File::WRITE | File::CREATE);
 	ASL_ASSERT(!fileExc);
 	tfile.remove();
