@@ -634,6 +634,7 @@ XdlParser::XdlParser()
 	_prevState = _state;
 	_unicode[0] = '\0';
 	_unicodeCount = 0;
+	_wchar = 0;
 }
 
 XdlParser::~XdlParser()

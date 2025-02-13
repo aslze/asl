@@ -14,7 +14,7 @@ namespace asl {
 void Random::getBytes(void* buffer, int n)
 {
 #ifdef _WIN32
-	HCRYPTPROV cp;
+	HCRYPTPROV cp = 0;
 	if (CryptAcquireContextW(&cp, NULL, NULL, PROV_RSA_FULL, 0))
 	{
 		if (CryptGenRandom(cp, n, (BYTE*)buffer))

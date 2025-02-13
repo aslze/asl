@@ -22,7 +22,7 @@ inline bool myisalpha(char c)
 CmdArgs::CmdArgs(const String& spec)
 {
 #ifdef _WIN32
-	int nArgs;
+	int nArgs = 0;
 	LPWSTR* wargs = CommandLineToArgvW(GetCommandLineW(), &nArgs);
 	if (wargs == NULL)
 		return;
@@ -107,7 +107,7 @@ void CmdArgs::parse(int argc, char* argv[], const String& spec)
 		else if (_args[i] != '-')
 			_rest << _args[i];
 	}
-}
+} // NOLINT
 
 void CmdArgs::use(const String& opt) const
 {

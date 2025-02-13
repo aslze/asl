@@ -228,6 +228,7 @@ typename Array_<T, N>::Enumerator end(const Array_<T, N>& a)
 /**
 Creates an array with the 2 elements given as arguments (there are overloads from 1 to 6 elements)
 \ingroup Containers
+\deprecated
 */
 template <class T>
 Array_<T,2> array_(const T& a0, const T& a1)
@@ -240,6 +241,7 @@ Array_<T,2> array_(const T& a0, const T& a1)
 
 /*
 Creates an array with the 3 elements given as arguments
+\deprecated
 */
 template <class T>
 Array_<T,3> array_(const T& a0, const T& a1, const T& a2) {

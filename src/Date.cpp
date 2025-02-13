@@ -363,6 +363,7 @@ String Date::toString(Date::Format fmt, bool utc) const
 	if (_t != _t)
 		return "?";
 	DateData d = calc(_t + (utc ? 0 : localOffset()));
+	d.month = clamp(d.month, 1, 12);
 	String   s;
 	switch (fmt)
 	{

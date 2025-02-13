@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2025 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_BUFFER_H
@@ -207,7 +207,7 @@ socket << *buffer;
 \ingroup Binary
 */
 
-class StreamBuffer : public Array<byte>
+class StreamBuffer : public ByteArray
 {
 public:
 	ASL_EXPLICIT StreamBuffer(Endian e = ENDIAN_LITTLE) : _endian(e) {}

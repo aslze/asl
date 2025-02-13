@@ -1,5 +1,5 @@
 // ASL - All-purpose Simple Library
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2025 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_DEFS_H
@@ -10,7 +10,7 @@
 Main definitions.
 */
 
-#define ASL_VERSION 11112
+#define ASL_VERSION 11113
 
 #ifdef _WIN32
 #ifndef _CRT_SECURE_NO_DEPRECATE
