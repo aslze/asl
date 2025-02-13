@@ -125,8 +125,7 @@ bool File::open(const String& name, File::OpenMode mode)
 		break;
 	}
 
-	if (mode & TEXT)
-		fopen_mode[i++] = (mode & TEXT) ? STR_PREFIX('t') : STR_PREFIX('b');
+	fopen_mode[i++] = (mode & TEXT) ? STR_PREFIX('t') : STR_PREFIX('b');
 
 	if ((mode & (READ | WRITE | APPEND | RW)) == RW)
 		fopen_mode[i++] = STR_PREFIX('+');
