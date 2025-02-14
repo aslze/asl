@@ -98,7 +98,8 @@ void HttpServer::serve(Socket client)
 
 				String mime = _mimetypes.get(file.extension(), "text/plain");
 				response.setHeader("Date", Date::now().toString(Date::HTTP));
-				response.setHeader("Content-Type", mime);
+				if (!response.hasHeader("Content-Type"))
+					response.setHeader("Content-Type", mime);
 				
 				if (!response.hasHeader("Cache-Control"))
 					response.setHeader("Cache-Control", "max-age=60, public");
