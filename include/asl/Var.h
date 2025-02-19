@@ -197,13 +197,13 @@ class ASL_API Var
 	Var(Type t);
 	Var(const Var& v)
 	{
-		memcpy(this, &v, sizeof(v));
+		memcpy((byte*)this, &v, sizeof(v));
 		if(!isPod())
 			copy(v);
 	}
 	void copy(const Var& v);
 #ifdef ASL_HAVE_MOVE
-	Var(Var&& v) {memcpy(this, &v, sizeof(Var)); v._type = NONE;}
+	Var(Var&& v) {memcpy((byte*)this, &v, sizeof(Var)); v._type = NONE;}
 	void operator=(Var&& v) {bswap(*this, v);}
 #endif
 #ifdef ASL_HAVE_INITLIST

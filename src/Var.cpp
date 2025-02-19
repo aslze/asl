@@ -330,7 +330,7 @@ void Var::operator=(const Var& v)
 	
 	if(!isPod())
 		free();
-	memcpy(this, &v, sizeof(v));
+	memcpy((byte*)this, &v, sizeof(v));
 	switch(_type)
 	{
 	case STRING:

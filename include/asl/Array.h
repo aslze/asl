@@ -19,6 +19,9 @@
 #pragma warning(disable : 4251)
 #pragma warning(push)
 #pragma warning(disable : 4284 26451)
+#else
+#pragma GCC diagnostic push
+//#pragma GCC diagnostic ignored "-Wnontrivial-memcall"
 #endif
 
 namespace asl {
@@ -401,7 +404,7 @@ public:
 		if (i + n > m)
 			return *this;
 		asl_destroy(_a+i, n);
-		memmove(_a+i, _a+i+n, (m-i-n)*sizeof(T));
+		memmove((char*)(_a + i), _a + i + n, (m - i - n)*sizeof(T));
 		d().n -= n;
 		resize(m - n);
 		return *this;
@@ -590,7 +593,7 @@ public:
 				n--;
 			}
 			else
-				memcpy(&_a[j++], &_a[i], sizeof(T));
+				memcpy((char*)&_a[j++], &_a[i], sizeof(T));
 		d().n = n;
 		return *this;
 	}
@@ -633,7 +636,7 @@ Array<T>& Array<T>::reserve(int m)
 			ASL_BAD_ALLOC();
 		b = (T*) ( p + sizeof(Data) );
 		int i = min(m,n), j = sizeof(T), k = i*j;
-		memcpy(b, _a, k);
+		memcpy((char*)b, _a, k);
 	}
 	else if(s1 != s)
 	{
@@ -684,7 +687,7 @@ Array<T>& Array<T>::insert(int k, const T& x)
 		h->s=s1;
 	}
 	if (k < n) {
-		memmove((char*)_a + (k + 1) * sizeof(T), (void*)(_a + k), (n - k) * sizeof(T));
+		memmove((char*)(_a + k + 1), (char*)(_a + k), (n - k) * sizeof(T));
 	}
 	asl_construct_copy(_a + k, x);
 	h->n = n+1;
@@ -836,6 +839,8 @@ static asl::Array<T> rad2deg(const asl::Array<T>& a)
 }
 #ifdef _MSC_VER
 #pragma warning(pop)
+#else
+#pragma GCC diagnostic pop
 #endif
 
 #endif

@@ -233,8 +233,8 @@ inline void bswap(T& a, T& b)
 {
 	char t[sizeof(T)];
 	memcpy(t, &a, sizeof(T));
-	memcpy(&a, &b, sizeof(T));
-	memcpy(&b, t, sizeof(T));
+	memcpy((char*)&a, &b, sizeof(T));
+	memcpy((char*)&b, t, sizeof(T));
 }
 
 
