@@ -12,7 +12,7 @@
 namespace asl {
 
 /**
-This class allows enumerating the contents of a directory: its files and subdirectories.
+This class allows enumerating the contents of a directory, its files and subdirectories, and doing file system actions (copy, move, delete).
 
 This example lists the files of the c:/windows directory modified in the last 10 days:
 
@@ -79,15 +79,15 @@ public:
 	/**
 	Returns the contents of a directory, optionally matching a wildcard
 	*/
-	const Array<File> items(const String& which="*", ItemType t=ALL);
+	Array<File> items(const String& which="*", ItemType t=ALL);
 	/**
 	Returns the files in a directory, optionally matching a wildcard
 	*/
-	const Array<File> files(const String& which="*") {return items(which, FILE);}
+	Array<File> files(const String& which="*") {return items(which, FILE);}
 	/**
 	Returns the subdirectories of a directory, optionally matching a wildcard
 	*/
-	const Array<File> subdirs(const String& which="*") {return items(which, DIRE);}
+	Array<File> subdirs(const String& which="*") {return items(which, DIRE);}
 
 	static FileInfo getInfo(const String& path);
 

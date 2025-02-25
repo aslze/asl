@@ -1,7 +1,9 @@
+// Copyright(c) 1999-2025 aslze
+// Licensed under the MIT License (http://opensource.org/licenses/MIT)
+
 #ifndef ASL_ATOMIC_H
 #define ASL_ATOMIC_H
 #include "defs.h"
-#define ASL_VOLATILE volatile
 
 #ifndef __has_builtin
  #define __has_builtin(X) 0
@@ -45,8 +47,11 @@ public:
 	AtomicCount() : n(0) {}
 	AtomicCount(int m) : n(m) {}
 #ifdef ASL_NO_ATOMIC_OPS
-	int operator++() { Lock l(mutex); return ++n; }
-	int operator--() { Lock l(mutex); return --n; }
+	AtomicCount(const AtomicCount& a) : n(a.n) {}
+	void operator=(const AtomicCount& a) { n = a.n; }
+	void operator=(int m) { n = m; }
+	int operator++() { Lock _(mutex); return ++n; }
+	int operator--() { Lock _(mutex); return --n; }
 #else
 	int operator++() { return atomicInc(&n); }
 	int operator--() { return atomicDec(&n); }

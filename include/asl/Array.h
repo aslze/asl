@@ -19,9 +19,6 @@
 #pragma warning(disable : 4251)
 #pragma warning(push)
 #pragma warning(disable : 4284 26451)
-#else
-#pragma GCC diagnostic push
-//#pragma GCC diagnostic ignored "-Wnontrivial-memcall"
 #endif
 
 namespace asl {
@@ -32,6 +29,14 @@ class Array;
 template<class T, int N>
 class Array_;
 class Var;
+
+#ifdef ASL_NO_ATOMIC_OPS
+#define ASL_RC_INIT() asl_construct(&d().rc);
+#define ASL_RC_FREE() asl_destroy(&d().rc);
+#else
+#define ASL_RC_INIT()
+#define ASL_RC_FREE()
+#endif
 
 /**
 An Array is a contiguous and resizable array of any type of elements.
@@ -134,7 +139,11 @@ public:
 			_a[i] = p[i];
 	}
 #endif
-	~Array() {if(_a && --d().rc==0) free();}
+	~Array()
+	{
+		if (--d().rc == 0)
+			free();
+	}
 
 	/**
 	Returns a copy of this array with all element converted to another type
@@ -364,9 +373,10 @@ public:
 	*/
 	Array& operator=(const Array& b)
 	{
-		if(_a==b._a) return *this;
+		if (_a == b._a)
+			return *this;
 		if(--d().rc==0) free();
-		_a=b._a;
+		_a = b._a;
 		++d().rc;
 		return *this;
 	}
@@ -640,12 +650,15 @@ Array<T>& Array<T>::reserve(int m)
 	}
 	else if(s1 != s)
 	{
+		dup();
 		int   rc = d().rc;
+		ASL_RC_FREE();
 		char* p = (char*) realloc( (char*)_a-sizeof(Data), s1*sizeof(T)+sizeof(Data) );
 		if(!p)
 			ASL_BAD_ALLOC();
 		b = (T*) ( p + sizeof(Data) );
 		_a = b;
+		ASL_RC_INIT();
 		d().rc = rc;
 		d().s = s1;
 		d().n = n;
@@ -653,10 +666,13 @@ Array<T>& Array<T>::reserve(int m)
 	}
 	if(s1 != s)
 	{
+		dup();
 		int rc = d().rc;
+		ASL_RC_FREE();
 		char* p = (char*)_a - sizeof(Data);
 		::free(p);
 		_a = b;
+		ASL_RC_INIT();
 		d().rc = rc;
 		d().s = s1;
 		d().n = n;
@@ -670,21 +686,27 @@ Array<T>& Array<T>::insert(int k, const T& x)
 	Data* h = &d();
 	int n = h->n;
 	int s = h->s;
-	if (k == -1)
+	if (k < 0)
 		k = n;
 	if (n < s) {}
 	else
 	{
+		s++;
 		if (n == 2147483647)
 			ASL_BAD_ALLOC();
+		dup();
+		int rc = d().rc;
+		ASL_RC_FREE();
 		int s1 = s < 1073741823 ? 2 * s : 2147483647;
 		char* p = (char*)realloc((char*)_a - sizeof(Data), s1 * sizeof(T) + sizeof(Data));
 		if(!p)
 			ASL_BAD_ALLOC();
 		T* b = (T*) ( p + sizeof(Data) );
 		_a = b;
+		ASL_RC_INIT();
 		h = &d();
 		h->s=s1;
+		h->rc = rc;
 	}
 	if (k < n) {
 		memmove((char*)(_a + k + 1), (char*)(_a + k), (n - k) * sizeof(T));
@@ -702,6 +724,7 @@ void Array<T>::alloc(int m)
 	if(!p)
 		ASL_BAD_ALLOC();
 	_a = (T*) ( p + sizeof(Data) );
+	ASL_RC_INIT();
 	d().s = s;
 	d().n = m;
 	d().rc=1;
@@ -712,6 +735,7 @@ template<class T>
 void Array<T>::free()
 {
 	asl_destroy(_a, d().n);
+	ASL_RC_FREE();
 	::free( (char*)_a - sizeof(Data) );
 	_a=0;
 }
@@ -839,8 +863,9 @@ static asl::Array<T> rad2deg(const asl::Array<T>& a)
 }
 #ifdef _MSC_VER
 #pragma warning(pop)
-#else
-#pragma GCC diagnostic pop
 #endif
+
+#undef ASL_RC_INIT
+#undef ASL_RC_FREE
 
 #endif

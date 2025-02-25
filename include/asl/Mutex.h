@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2025 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_MUTEX_H
@@ -38,6 +38,10 @@ public:
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
+	Mutex(const Mutex& m)
+	{
+		InitializeCriticalSection(&_mutex);
+	}
 	~Mutex()
 	{
 		DeleteCriticalSection(&_mutex);
@@ -215,6 +219,8 @@ class Mutex
 	pthread_mutex_t _mutex;
 public:
 	Mutex(): _mutex(mutex_init)
+	{}
+	Mutex(const Mutex& m): _mutex(mutex_init)
 	{}
 	~Mutex()
 	{

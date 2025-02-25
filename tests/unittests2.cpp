@@ -413,12 +413,17 @@ ASL_TEST(StaticSpace)
 struct AThread : public Thread
 {
 	static AtomicCount n;
-	static const int N = 20000;
+	static const int N = 50000;
 	void run()
 	{
+		sleep(0.001);
 		for (int i = 0; i < N; i++)
+		{
+			if (i % 1000 == 0)
+				sleep(0.001);
 			++n;
-
+		}
+		sleep(0.001);
 		for (int i = 0; i < N; i++)
 			--n;
 	}
@@ -451,7 +456,7 @@ ASL_TEST(AtomicCount)
 	AThread::n = 0;
 	A2Thread< Atomic<double> >::n = 0;
 	Array<AThread> threads1;
-	for (int i = 0; i < 30; i++)
+	for (int i = 0; i < 40; i++)
 		threads1 << AThread();
 	foreach(Thread& t, threads1)
 		t.start();

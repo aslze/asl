@@ -227,6 +227,10 @@ ASL_TEST(Array)
 
 	ASL_ASSERT(a[0] == -5 && a[1] == 0 && a[2] == 3 && a[3] == 10);
 
+	a.insert(1, 123);
+
+	ASL_ASSERT(a[0] == -5 && a[1] == 123 && a[2] == 0 && a[3] == 3 && a[4] == 10);
+
 	ASL_ASSERT(a);
 	a.clear();
 	ASL_ASSERT(!a);
@@ -693,7 +697,7 @@ int main(int narg, char* argv[])
 		printf("Unknown test\n");
 		return EXIT_FAILURE;
 	}
-	if (testFailed)
+	if (asl::testFailed)
 		return EXIT_FAILURE;
 	
 	return EXIT_SUCCESS;

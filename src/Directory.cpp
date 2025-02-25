@@ -149,11 +149,12 @@ static FileInfo infoFor(const WIN32_FIND_DATA& data)
 	return info;
 }
 
-const Array<File> Directory::items(const String& which, Directory::ItemType t)
+Array<File> Directory::items(const String& which, Directory::ItemType t)
 {
 	_files.clear();
 	WIN32_FIND_DATA data;
 	String basedir = (_path.endsWith('/') || _path.endsWith('\\'))? nat(_path) : nat(_path) + '/';
+	String name;
 	HANDLE hdir = FindFirstFile(basedir + which, &data);
 	if(hdir == INVALID_HANDLE_VALUE)
 		return _files;
@@ -163,9 +164,9 @@ const Array<File> Directory::items(const String& which, Directory::ItemType t)
 			continue;
 		if(t==DIRE && (!strcmpX(data.cFileName, STR_PREFIX(".")) || !strcmpX(data.cFileName, STR_PREFIX(".."))))
 			continue;
-		String filename = basedir;
-		filename << (String)data.cFileName;
-		_files << File(filename, infoFor(data));
+		name = basedir;
+		name += String(data.cFileName);
+		_files << File(name, infoFor(data));
 	}
 	while(FindNextFile(hdir, &data));
 	FindClose(hdir);
@@ -283,13 +284,14 @@ static bool match(const String& a, const String& patt)
 	return a.startsWith(patt.substring(0,i)) && a.endsWith(patt.substring(i+1));
 }
 
-const Array<File> Directory::items(const String& which, Directory::ItemType t)
+Array<File> Directory::items(const String& which, Directory::ItemType t)
 {
 	_files.clear();
-	DIR* d = opendir(_path != ""? _path : "/");
+	DIR* d = opendir(_path != ""? *_path : "/");
 	if(!d)
 		return _files;
-	String dir = _path.endsWith('/')? _path : _path+'/';
+	String dir = _path.endsWith('/')? _path : (_path+'/');
+	String name;
 	bool wildcard = which.contains('*') && which != "*";
 	
 	while(dirent* entry=readdir(d))
@@ -299,7 +301,7 @@ const Array<File> Directory::items(const String& which, Directory::ItemType t)
 			continue;
 		if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
 			continue;
-		String name = dir;
+		name = dir;
 		name += (const char*)entry->d_name;
 		if(!stat(name, &data)) {
 			if( (t==DIRE && !S_ISDIR(data.st_mode)) ||

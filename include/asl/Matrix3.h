@@ -231,17 +231,20 @@ public:
 		                0, 1, y);
 	}
 	/**
-	Returns a 2D scale matrix for factor t
+	Returns a 2D scale matrix with factor s
 	*/
-	static Matrix3_ scale(T t)
+	static Matrix3_ scale(T s)
 	{
-		return Matrix3_(t, 0, 0,
-		                0, t, 0);
+		return Matrix3_(s, 0, 0,
+		                0, s, 0);
 	}
-	static Matrix3_ scale(T x, T y)
+	/**
+	Returns a 2D scale matrix with factor sx, sy
+	*/
+	static Matrix3_ scale(T sx, T sy)
 	{
-		return Matrix3_(x, 0, 0,
-		                0, y, 0);
+		return Matrix3_(sx, 0, 0,
+		                0, sy, 0);
 	}
 
 	/**
