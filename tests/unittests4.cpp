@@ -96,6 +96,8 @@ ASL_TEST(Matrix4)
 	h(2, 1) = -0.15f;
 	Vec2 v2(1, 3);
 	ASL_APPROX((h ^ v2), (h * Vec3(v2, 1)).h2c(), EPS);
+
+	ASL_CHECK((h.inverse() * h - Matrix3::identity()).norm(), <, EPS);
 }
 
 ASL_TEST(Uuid)

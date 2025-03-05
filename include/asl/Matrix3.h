@@ -167,7 +167,7 @@ public:
 		return m * t;
 	}
 	/**
-	Returns the sum of this matrix and B
+	Returns this matrix plus B
 	*/
 	Matrix3_ operator+(const Matrix3_& B) const
 	{
@@ -175,6 +175,17 @@ public:
 		for(int i=0; i<3; i++)
 			for(int j=0; j<3; j++)
 				C(i,j) = a[i][j] + B(i,j);
+		return C;
+	}
+	/**
+	Returns this matrix minus B
+	*/
+	Matrix3_ operator-(const Matrix3_& B) const
+	{
+		Matrix3_ C;
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 3; j++)
+				C(i, j) = a[i][j] - B(i, j);
 		return C;
 	}
 	/**
