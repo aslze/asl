@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2025 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_MATRIX3_H
@@ -182,20 +182,18 @@ public:
 	*/
 	Matrix3_ operator*(const Matrix3_& B) const
 	{
-		int i, j, k;
 		Matrix3_ C;
 		const Matrix3_& A = *this;
-		T ab;
 
-		for(i=0; i<3; i++)
+		for(int i=0; i<3; i++)
 		{
-			for(j=0; j<3; j++)
+			for(int j=0; j<3; j++)
 			{
-				for(ab=0, k=0; k<2; k++)
+				T ab = 0;
+				for(int k=0; k<3; k++)
 					ab += A(i,k)*B(k,j);
 				C(i,j) = ab;
 	  		}
-			C(i,2) += A(i,2);
 		}
 		return C;
 	}
