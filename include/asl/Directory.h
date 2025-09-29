@@ -38,6 +38,13 @@ Each File object returned has the following members:
 - `creationDate()`: a Date indicating the item's creation time
 
 In fact they are File objects and any function of that class can be used on them.
+
+File system operations are available here or in the `File` class:
+
+```
+Directory::create("/some_other_dir");
+Directory::move("/path/file.txt", "/some_other_dir");
+```
 */
 
 class ASL_API Directory
@@ -132,6 +139,17 @@ public:
 	Removes the given directory with all its content recursively and returns true on success (USE WITH CARE!)
 	*/
 	static bool removeRecursive(const String& path);
+
+	struct Space
+	{
+		Long free;
+		Long total;
+	};
+
+	/**
+	Returns free space and total size of a file system
+	*/
+	static Space freeSpace(const String& dir);
 };
 
 }

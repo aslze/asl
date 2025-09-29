@@ -245,6 +245,18 @@ bool Directory::remove(const String& path)
 		return DeleteFileW(path) != 0;
 }
 
+Directory::Space Directory::freeSpace(const String& dir)
+{
+	Space          space = { 0, 0 };
+	ULARGE_INTEGER freeBytesToCaller, totalBytes, totalFreeBytes;
+	if (!GetDiskFreeSpaceExW(dir, &freeBytesToCaller, &totalBytes, &totalFreeBytes))
+		return space;
+
+	space.free = (Long)totalFreeBytes.QuadPart;
+	space.total = (Long)totalBytes.QuadPart;
+
+	return space;
+}
 
 }
 #else // Linux
@@ -400,6 +412,18 @@ bool Directory::remove(const String& path)
 		return unlink(path)==0;
 }
 
+Directory::Space Directory::freeSpace(const String& dir)
+{
+	Space space = { 0, 0 };
+	struct statvfs buf;
+	if(statvfs(dir, &buf) != 0)
+		return space;
+
+	space.free = (Long)buf.f_bsize * buf.f_bavail;
+	space.total = (Long)buf.f_bsize * buf.f_blocks;
+
+	return space;
+}
 
 }
 #endif
