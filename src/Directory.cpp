@@ -263,6 +263,7 @@ Directory::Space Directory::freeSpace(const String& dir)
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/statvfs.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <errno.h>
