@@ -161,6 +161,11 @@ ASL_TEST(TabularDataFile)
 
 ASL_TEST(CmdArgs)
 {
+#if defined _WIN32 || defined __linux__ || defined __APPLE__
+	CmdArgs defaultArgs;
+	ASL_ASSERT(defaultArgs[0] == "CmdArgs");
+#endif
+
 	Array<const char*> argv;
 	argv << "convert" << "-format" << "jpeg" << "-fast" << "-q" << "85" <<
 		"-k" << "k1" << "-k" << "k2" << "-gray" << "on" << "-rgb" << "no" << "-progressive!" << "-scale" << "-1.0" << "image1.png" << "image2.bmp";

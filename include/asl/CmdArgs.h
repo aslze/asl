@@ -82,7 +82,7 @@ String name = args["name"];
 class ASL_API CmdArgs
 {
 public:
-#if defined _WIN32 || defined __linux__
+#if defined _WIN32 || defined __linux__ || defined __APPLE__
 	/**
 	Constructs a CmdArgs object with the arguments of the current process (only on Windows and Linux).
 	*/

@@ -4,6 +4,9 @@
 #ifdef _WIN32
 #include <shellapi.h>
 #endif
+#ifdef __APPLE__
+#include <crt_externs.h>
+#endif
 
 namespace asl {
 
@@ -17,7 +20,7 @@ inline bool myisalpha(char c)
 	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
-#if defined _WIN32 || defined __linux__
+#if defined _WIN32 || defined __linux__ || defined __APPLE__
 
 CmdArgs::CmdArgs(const String& spec)
 {
@@ -32,6 +35,10 @@ CmdArgs::CmdArgs(const String& spec)
 
 	LocalFree(wargs);
 	parse(-nArgs, (char**)(a.with<const char*>()).data(), spec);
+#elif defined __APPLE__
+	int    argc = *_NSGetArgc();
+	char** argv = *_NSGetArgv();
+	parse(argc, argv, spec);
 #else
 	File file("/proc/self/cmdline", File::READ);
 	if (!file)
