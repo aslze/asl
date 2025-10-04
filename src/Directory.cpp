@@ -305,7 +305,7 @@ Array<File> Directory::items(const String& which, Directory::ItemType t)
 		return _files;
 	String dir = _path.endsWith('/')? _path : (_path+'/');
 	String name;
-	bool wildcard = which.contains('*') && which != "*";
+	bool wildcard = (which.contains('*') && which != "*") || !which.contains('*');
 	
 	while(dirent* entry=readdir(d))
 	{
