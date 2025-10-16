@@ -439,6 +439,7 @@ struct Pair
 	T2 second;
 	bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
 	bool operator!=(const Pair& b) const { return !(*this == b); }
+	bool operator<(const Pair& b) const { return first < b.first || (first == b.first && second < b.second); }
 };
 
 }

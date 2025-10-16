@@ -445,6 +445,26 @@ class ASL_API Var
 	{
 		return !(*this == other);
 	}
+	bool operator<(const Var& other) const {
+		if(_type == NUMBER || _type == FLOAT || _type == INT)
+		{
+			double x = *this;
+			if (other._type == NUMBER || other._type == FLOAT || other._type == INT)
+				return x < (double)other;
+			else
+				return false;
+		}
+		else if(_type != other._type) return false;
+		switch(_type){
+			case STRING: return strcmp(_s->data(), other._s->data()) < 0;
+			case SSTRING: return strcmp(_ss, other._ss) < 0;
+			case BOOL: return _b < other._b;
+			case INT: return _i < other._i;
+			case NUMBER: return _d < other._d;
+			case FLOAT: return _d < other._d;
+			default: return false;
+		}
+	}
 	bool operator==(bool other) const
 	{
 		return _type == BOOL && _b==other;
