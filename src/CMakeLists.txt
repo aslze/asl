@@ -107,7 +107,7 @@ endif()
 
 if( ANDROID )
 	list(APPEND ASL_DEFS ASL_NOEXCEPT)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fno-exceptions ") # -fno-rtti
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fno-exceptions ")
 endif()
 
 if(ASL_IPV6)
@@ -168,8 +168,12 @@ if(ASL_BUILD_SHARED)
 	list(APPEND TARGETS asl)
 endif()
 
-if(ASL_TLS AND TARGET mbedtls)
+
+if(ASL_TLS AND TARGET mbedtls AND NOT mbedtls_FOUND)
 	list(APPEND TARGETS mbedtls mbedx509 mbedcrypto)
+	if(TARGET everest AND TARGET p256m)
+		list(APPEND TARGETS everest p256m)
+	endif()
 endif()
 
 install( TARGETS ${TARGETS} EXPORT asl RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib )
