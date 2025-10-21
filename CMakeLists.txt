@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.12...3.10)
 
 project(asl)
 
-set(ASL_VERSION 1.11.13)
+set(ASL_VERSION 1.11.14)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
@@ -63,7 +63,7 @@ if(ASL_TLS)
 		set(mbedTLSx509_LIB MbedTLS::mbedx509)
 		set(mbedTLScrypto_LIB MbedTLS::mbedcrypto)
 	else()
-		find_package(mbedtls)
+		find_package(mbedtls QUIET)
 		if(mbedtls_FOUND)
 		set(mbedTLS_LIB MbedTLS::mbedtls)
 		set(mbedTLSx509_LIB MbedTLS::mbedx509)

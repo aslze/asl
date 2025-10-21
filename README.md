@@ -112,9 +112,17 @@ server.start();
 Decode XML:
 
 ```cpp
-Xml html = Xml::decode( "<html><head><meta charset='utf8'/></head></html>" );
+Xml html = Xml::decode("<html><head><meta charset='utf8'/></head></html>");
 String charset = html("head")("meta")["charset"];   // -> "utf8"
 String rootTag = html.tag();                        // -> "html"
+```
+
+Or read and write from files:
+
+```cpp
+Xml html = Xml::read("doc.xhtml");
+html("head").setAttr("lang", "en");
+Xml.write(html, "doc.html");
 ```
 
 Read or write a file in one line:
@@ -149,6 +157,13 @@ Var particle = Var{
     {"position", {x, y, z}}
 };
 String json = Json::encode(particle);
+```
+
+Or read and write from files:
+
+```cpp
+Var data = Json::read("data.json");
+Json::write(particle, "particle.json");
 ```
 
 Write to the console with colors:
@@ -307,7 +322,7 @@ With CMmake 3.14+, instead of using `find_package()`, you can download and build
 
 ```cmake
 include(FetchContent)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.13.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.14.zip)
 FetchContent_MakeAvailable(asl)
 ```
 
@@ -323,9 +338,7 @@ asl::Directory dir;
 
 ## SSL/TLS sockets and HTTPS support
 
-HTTPS, TLS WebSockets and TlsSocket require the [mbedTLS](https://github.com/Mbed-TLS/mbedtls) library (up to v3.2.1). Download and compile
-the library, enable `ASL_TLS` in CMake and provide the *mbedTLS* install directory (and library locations, which should
-normally be automatically found).
+HTTPS, TLS WebSockets and TlsSocket require the [mbedTLS](https://github.com/Mbed-TLS/mbedtls) library (3.6.4+ or <=v3.2.1). Download and build the library, enable `ASL_TLS` in CMake and provide the *mbedTLS* install directory. On Windows you can use `vcpkg install mbedtls`. 
 
 On Ubuntu Linux you can just install package **libmbedtls-dev** with:
 
@@ -343,10 +356,10 @@ With a recent CMake (3.14+) you can also build mbedTLS together with ASL as subp
 
 ```
 set(ASL_TLS ON)
-set(ENABLE_PROGRAMS OFF CACHE BOOL "") # skip samples
-FetchContent_Declare(mbedtls URL https://github.com/Mbed-TLS/mbedtls/archive/v3.2.1.zip)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.13.zip)
-FetchContent_MakeAvailable(mbedtls asl)
+set(ENABLE_PROGRAMS OFF CACHE BOOL "") # skip mbedtls samples
+FetchContent_Declare(mtls URL https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.4/mbedtls-3.6.4.tar.bz2)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.14.zip)
+FetchContent_MakeAvailable(mtls asl)
 ```
 
 Then just link your project to `asls` after that block.

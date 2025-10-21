@@ -10,7 +10,7 @@
 Main definitions.
 */
 
-#define ASL_VERSION 11113
+#define ASL_VERSION 11114
 
 #ifdef _WIN32
 #ifndef _CRT_SECURE_NO_DEPRECATE
@@ -437,6 +437,8 @@ struct Pair
 {
 	T1 first;
 	T2 second;
+	Pair() : first(), second() {}
+	Pair(const T1& a, const T2& b) : first(a), second(b) {}
 	bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
 	bool operator!=(const Pair& b) const { return !(*this == b); }
 	bool operator<(const Pair& b) const { return first < b.first || (first == b.first && second < b.second); }

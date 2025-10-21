@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2025 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_XML_H
@@ -112,7 +112,7 @@ public:
 class XmlText;
 
 /**
-\defgroup XDL XML, XDL, and JSON
+\defgroup XDL XML and JSON
 @{
 */
 

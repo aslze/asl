@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2025 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_XDL_H
@@ -13,7 +13,7 @@
 namespace asl {
 
 /**
- * \defgroup XDL XML, XDL, and JSON
+ * \defgroup XDL XML and JSON
  * @{
  */
 

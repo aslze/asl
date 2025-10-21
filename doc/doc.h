@@ -73,7 +73,7 @@ With CMake 3.14+, instead of using `find_package()`, you can download and build 
 
 ~~~
 include(FetchContent)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.13.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.14.zip)
 FetchContent_MakeAvailable(asl)
 ~~~
 
@@ -88,65 +88,37 @@ asl::Directory dir;
 
 ## SSL/TLS sockets and HTTPS support
 
-This requires the [mbedTLS](https://github.com/Mbed-TLS/mbedtls) library (up to v3.2.1). Download and compile the library, enable `ASL_TLS` in CMake
-and provide the *mbedTLS* install directory (and library locations, which should normally be automatically found).
+HTTPS, TLS WebSockets and TlsSocket require the [mbedTLS](https://github.com/Mbed-TLS/mbedtls) library (3.6.4+ or
+<=v3.2.1). Download and build the library, enable `ASL_TLS` in CMake and provide the *mbedTLS* install directory. On
+Windows you can use `vcpkg install mbedtls`.
 
-In Ubuntu Linux you can just install package **libmbedtls-dev** with:
+On Ubuntu Linux you can just install package **libmbedtls-dev** with:
 
 ```
 sudo apt-get install libmbedtls-dev
 ```
 
-With a recent CMake you can also build mbedTLS together with ASL as subprojects (e.g. using `FetchContent`):
+On FreeBSD use:
+
+```
+pkg install mbedtls
+```
+
+With a recent CMake (3.14+) you can also build mbedTLS together with ASL as subprojects (e.g. using `FetchContent`):
 
 ```
 set(ASL_TLS ON)
-set(ENABLE_PROGRAMS OFF CACHE BOOL "") # skip samples
-FetchContent_Declare(mbedtls URL https://github.com/Mbed-TLS/mbedtls/archive/v3.2.1.zip)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.13.zip)
-FetchContent_MakeAvailable(mbedtls asl)
+set(ENABLE_PROGRAMS OFF CACHE BOOL "") # skip mbedtls samples
+FetchContent_Declare(mtls URL https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.4/mbedtls-3.6.4.tar.bz2)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.14.zip)
+FetchContent_MakeAvailable(mtls asl)
 ```
+
 
 Then just link your project to `asls` after that block.
 */
 
-/**
-\defgroup XDL XML, XDL, and JSON
-
-These functions allow parsing and writing data in XML, XDL and JSON formats.
-
-Data can be decoded and encoded from/to a text **string** with:
-
-~~~
-Var data = Json::decode(json);
-String json = Json::encode(data);
-
-Var data = Xdl::decode(xdl);
-String xdl = Xdl::encode(data, true); // optional flag to indent code
-
-Xml root = Xml::decode(xmlstring);
-String xmlstring = Xml::encode(root);
-~~~
-
-The recommended way to load and parse a **file** is:
-
-~~~
-Var data = Json::read("file.json");
-Var data = Xdl::read("file.xdl");
-if(!data.ok()) {...} // incorrect format
-
-Xml xml = Xml::read("file.xml");
-if(!xml) {...} // incorrect format
-~~~
-
-And the recommended way to encode and write data in these formats to a file is:
-
-~~~
-Json::write(data, "file.json");
-Xdl::write(data, "file.xdl");
-Xml::write(xml, "file.xml");
-~~~
-
+/*
 __XDL__, *eXtensible Data Language*, is a format for describing structured data 
 as text. It has some similarities with the *VRML* syntax and with the *JSON* 
 semantics.
@@ -183,11 +155,45 @@ That code represents an object of class `Garage` with 3 properties: an integer
 contains two objects of different classes. If that fragment is stored in String 
 `garagex` it could be read like this:
 
+*/
+
+/**
+\defgroup XDL XML and JSON
+
+These functions allow parsing and writing data in XML and JSON formats.
+
+Data can be decoded and encoded from/to a text **string** with:
 
 ~~~
-Var garage = Xdl::decode(garagex);
+Var data = Json::decode(json);
+String json = Json::encode(data);
 
-if(!garage.is("Garage"))
+Xml root = Xml::decode(xmlstring);
+String xmlstring = Xml::encode(root);
+~~~
+
+The recommended way to load and parse a **file** is:
+
+~~~
+Var data = Json::read("file.json");
+if(!data.ok()) {...} // incorrect format
+
+Xml xml = Xml::read("file.xml");
+if(!xml) {...} // incorrect format
+~~~
+
+And the recommended way to encode and write data in these formats to a file is:
+
+~~~
+Json::write(data, "file.json");
+Xml::write(xml, "file.xml");
+~~~
+
+
+~~~
+Var garage = Json::read("garage.json");
+
+if(!garage)
 	return;
 	
 int capacity = garage["capacity"];
@@ -201,25 +207,18 @@ for(auto& vehicle : garage["vehicles"])
 	double length = vehicle.has("length", Var::NUMBER) ? vehicle["length"] : 0.0;
 	String brand = vehicle["brand"];
 	
-	my_garage << vehicle.is("Car") ? new Car(brand, length) : new Truck(brand, length);
+	my_garage << vehicle["$type"] == "Car" ? new Car(brand, length) : new Truck(brand, length);
 }
 ~~~
 
-We may construct a new Var or modify the one just parsed, and rewrite it as an XDL string.
+We may construct a new Var or modify the one just parsed, and rewrite it as a JSON string.
 
 ~~~~
-garage["vehicles"] << Var{{ASL_XDLCLASS, "Car"}, {"brand", "Limo"}, {"length", 8.34}};
+garage["vehicles"] << Var{{"$type", "Car"}, {"brand", "Limo"}, {"length", 8.34}};
 garage["open"] = false;
 
-garagex = Xdl::encode(garage, true);
+Json::write(garage, "garage.json");
 ~~~~
-
-The `true` parameter makes the function write the code with new lines and indentations. By default
-the result is compact.
-
-The **JSON** functions `Json::encode()`, `Json::decode()`do the same using JSON syntax. Class names are represented 
-by a propery named `$type` in this case (actually, the macro ASL_XDLCLASS). All of JSON syntax is supported.
-
 */
 
 

@@ -28,6 +28,9 @@ for (File& file : dir.files("*.dll"))
 In a Directory object, `files()` enumerates files, `subdirs()` enumerates subdirectories, and
 `items()` enumerates both. In all three a wildcard can be given as argument to filter the search.
 
+The wildcard can contain more than one pattern separated by `|`, like `dir.files("*.txt|*.doc")`. If the *directory* actually refers
+to a file, then only that file is returned.
+
 Each File object returned has the following members:
 
 - `path()`: the full path of this item
@@ -39,7 +42,7 @@ Each File object returned has the following members:
 
 In fact they are File objects and any function of that class can be used on them.
 
-File system operations are available here or in the `File` class:
+__File system operations__ are available here or in the `File` class:
 
 ```
 Directory::create("/some_other_dir");
@@ -88,7 +91,7 @@ public:
 	*/
 	Array<File> items(const String& which="*", ItemType t=ALL);
 	/**
-	Returns the files in a directory, optionally matching a wildcard
+	Returns the files in a directory, optionally matching a wildcard or several separated by '|'
 	*/
 	Array<File> files(const String& which="*") {return items(which, FILE);}
 	/**

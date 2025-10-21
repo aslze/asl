@@ -152,6 +152,23 @@ static FileInfo infoFor(const WIN32_FIND_DATA& data)
 Array<File> Directory::items(const String& which, Directory::ItemType t)
 {
 	_files.clear();
+	
+	if (File(_path).isFile()) // if path is a file, return that file only
+	{
+		return _files << File(_path);
+	}
+	
+	if (which.contains('|')) // handle multiple patterns separated by '|'
+	{
+		Array<File> all;
+		Array<String> parts = which.split('|');
+		foreach(const String& part, parts)
+		{
+			all.append(items(part, t));
+		}
+		_files = all;
+		return all;
+	}
 	WIN32_FIND_DATA data;
 	String basedir = (_path.endsWith('/') || _path.endsWith('\\'))? nat(_path) : nat(_path) + '/';
 	String name;
@@ -300,6 +317,22 @@ static bool match(const String& a, const String& patt)
 Array<File> Directory::items(const String& which, Directory::ItemType t)
 {
 	_files.clear();
+	if (File(_path).isFile())
+	{
+		return _files << File(_path);
+	}
+
+	if (which.contains('|'))
+	{
+		Array<File>   all;
+		Array<String> parts = which.split('|');
+		foreach (const String& part, parts)
+		{
+			all.append(items(part, t));
+		}
+		_files = all;
+		return all;
+	}
 	DIR* d = opendir(_path != ""? *_path : "/");
 	if(!d)
 		return _files;
