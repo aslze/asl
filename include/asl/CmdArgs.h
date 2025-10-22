@@ -1,8 +1,8 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2025 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
-#ifndef CMDLINE_H
-#define CMDLINE_H
+#ifndef ASL_CMDLINE_H
+#define ASL_CMDLINE_H
 
 #include <asl/String.h>
 #include <asl/Map.h>
@@ -69,7 +69,7 @@ CmdArgs(argc, argv, "q:,fast,format:");
 ~~~
 
 This object can be created without arguments and anywhere in a program (but this is less portable,
-currently working on Windows and Linux).
+currently on Windows, Linux and Mac).
 
 ~~~
 CmdArgs args;
@@ -77,7 +77,6 @@ String name = args["name"];
 ~~~
 
 */
-
 
 class ASL_API CmdArgs
 {

@@ -87,17 +87,7 @@ person["name"] = "John";  // person.type() = OBJ
 person["age"] = 21;
 ~~~
 
-Alternatively, objects can be created in one statement with a **pseudo-literal syntax**:
-
-~~~
-Var particle = Var("name", "particle1")
-                  ("x", 15.0)
-                  ("y", -1.25)
-                  ("visible", true)
-                  ("color", array<Var>(255, 0, 255));
-~~~
-
-Or in C++11:
+Objects can be created with an **initializer list** in C++11
 
 ~~~
 		Var particle {
@@ -109,7 +99,15 @@ Or in C++11:
 		};
 ~~~
 
-Any combination of the above can be used to create complex structured vars.
+Or with a **pseudo-literal syntax** in older compilers:
+
+~~~
+Var particle = Var("name", "particle1")
+                  ("x", 15.0)
+                  ("y", -1.25)
+                  ("visible", true)
+                  ("color", array<Var>(255, 0, 255));
+~~~
 
 A var can be checked for its type with the `is()` function or whether it contains a given key (if it is a Map),
 or if it contains a given item (if it is an Array):
