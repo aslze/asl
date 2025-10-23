@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2025 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_VAR_H
@@ -380,6 +380,16 @@ class ASL_API Var
 		}
 		else if(_type==ARRAY)
 			_a->resize(n);
+	}
+	void reserve(int n)
+	{
+		if(_type==NONE) {
+			_type=ARRAY;
+			NEW_ARRAY(_a);
+			_a->reserve(n);
+		}
+		else if(_type==ARRAY)
+			_a->reserve(n);
 	}
 	/** Returns the element at index `i` if this var is an array */
 	const Var& operator[](int i) const;

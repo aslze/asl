@@ -8,7 +8,7 @@
 #include <asl/Process.h>
 #include <stdarg.h>
 
-#define ASL_LOG_MAX_SIZE 1000000
+#define ASL_LOG_MAX_SIZE 2000000
 
 #ifdef _MSC_VER
 #pragma warning(disable : 26812)

@@ -151,7 +151,7 @@ static FileInfo infoFor(const WIN32_FIND_DATA& data)
 
 Array<File> Directory::items(const String& which, Directory::ItemType t)
 {
-	_files.clear();
+	_files = Array<File>();
 	
 	if (File(_path).isFile()) // if path is a file, return that file only
 	{
@@ -316,7 +316,7 @@ static bool match(const String& a, const String& patt)
 
 Array<File> Directory::items(const String& which, Directory::ItemType t)
 {
-	_files.clear();
+	_files = Array<File>();
 	if (File(_path).isFile())
 	{
 		return _files << File(_path);
