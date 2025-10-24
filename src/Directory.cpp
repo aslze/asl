@@ -453,8 +453,8 @@ Directory::Space Directory::freeSpace(const String& dir)
 	if(statvfs(dir, &buf) != 0)
 		return space;
 
-	space.free = (Long)buf.f_bsize * buf.f_bavail;
-	space.total = (Long)buf.f_bsize * buf.f_blocks;
+	space.free = (Long)buf.f_frsize * buf.f_bavail;
+	space.total = (Long)buf.f_frsize * buf.f_blocks;
 
 	return space;
 }
