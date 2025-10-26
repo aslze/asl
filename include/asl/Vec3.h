@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2025 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_VECTOR3_H
@@ -70,9 +70,14 @@ class Vec3_
 	T length2() const {return x*x+y*y+z*z;}
 	/** Returns the length of the vector */
 	T operator!() const {return length();}
+	/** Returns the 1-norm of this vector */
+	T norm1() const { return T(fabs(x) + fabs(y) + fabs(z)); }
+	/** Returns the infinity-norm of this vector */
+	T normInf() const { return (T)max(fabs(x), fabs(y), fabs(z)); }
+	/** Returns this vector with absolute coordinates */
 	Vec3_ abs() const {return Vec3_(fabs(x), fabs(y), fabs(z));}
 	/** Returns the angle between this vector and `b` */
-	T angle(const Vec3_& b) const {return acos(clamp((*this) * b / (!(*this)*!b), T(-1), T(1)) );}
+	T angle(const Vec3_& b) const {return acos(clamp(((*this) * b) / ((*this).length() * b.length()), T(-1), T(1)) );}
 
 	/** Returns this plus `b` */
 	Vec3_ operator+(const Vec3_& b) const {return Vec3_(x+b.x, y+b.y, z+b.z);}
@@ -94,6 +99,10 @@ class Vec3_
 	bool operator==(const Vec3_& b) const {return x==b.x && y==b.y && z==b.z;}
 	/** Checks if this vector is not equal to `b` */
 	bool operator!=(const Vec3_& b) const {return x!=b.x || y!=b.y || z!=b.z;}
+	bool operator<(const Vec3_& b) const
+	{
+		return (x < b.x) ? true : ((x == b.x && y < b.y) ? true : (x == b.x && y == b.y && z < b.z) ? true : false);
+	}
 	/** Adds vector `b` to this vector */
 	void operator+=(const Vec3_& b) {x += b.x; y += b.y; z += b.z;}
 	/** Subtracts vector `b` from this vector */
@@ -107,13 +116,17 @@ class Vec3_
 	/** Returns this vector negated */
 	Vec3_ operator-() const {return Vec3_(-x,-y,-z);}
 
-	/** Returns true if this vector's length is less than a given threshold (almost zero) */
-	bool isNull( T tol=(T)0.000001) const {return length2() < tol;}
+	/** Returns true if this vector is almost null (norm1 less than given threshold)
+	 * \deprecated Use other methods
+	 */
+	ASL_DEPRECATED(bool isNull(T tol = T(0.000001)) const, "Use other methods") { return norm1() < tol; }
 
-	/** Returns true if this vector is nearly parallel to vector `v2` with a given tolerance */
-	bool isParallelToVector(const Vec3_& v2, T tol=(T)0.000001)
+	/** Returns true if this vector is nearly parallel to vector `v2` with a given tolerance
+	 * \deprecated Use dot product
+	 */
+	ASL_DEPRECATED(bool isParallelToVector(const Vec3_& v2, T tol = (T)0.000001), "Use dot product")
 	{
-		return fabs( ((*this) * v2)/(length() * v2.length()) ) > ((T)1-tol);
+		return fabs( ((*this) * v2)/(length() * v2.length()) ) > (T(1)-tol);
 	}
 
 public:

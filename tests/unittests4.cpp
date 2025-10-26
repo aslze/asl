@@ -20,14 +20,14 @@ ASL_TEST(Vec3)
 	asl::Vec3 a(1, 2.5f, 3), b(1, 0, 0);
 	a += asl::Vec3::zeros();
 
-	ASL_APPROX(a*b, 1.0f, EPS);
+	ASL_EXPECT_NEAR(a*b, 1.0f, EPS);
 	ASL_EXPECT_NEAR(a * b, 1.0f, EPS);
 	ASL_EXPECT(a * b, <, 1.5f);
 
 	asl::Vec3d a2 = a, b2 = b;
 	asl::Vec3  a3 = a2.with<float>();
-	ASL_APPROX(a2 + b2, asl::Vec3d(2, 2.5, 3), EPS);
-	ASL_APPROX(a3 + b2.with<float>(), asl::Vec3(2, 2.5, 3), (float)EPS);
+	ASL_EXPECT_NEAR(a2 + b2, asl::Vec3d(2, 2.5, 3), EPS);
+	ASL_EXPECT_NEAR(a3 + b2.with<float>(), asl::Vec3(2, 2.5, 3), (float)EPS);
 
 	asl::Array<int> aa;
 	aa << 2 << 1;
@@ -35,6 +35,25 @@ ASL_TEST(Vec3)
 		ASL_ASSERT(x >= 0);
 	foreach2 (int i, int x, aa)
 		ASL_ASSERT(i + x >= 0);
+
+	ASL_EXPECT_NEAR(b.angle(asl::Vec3(0, 1, 0)), asl::PIf / 2, EPSf);
+	ASL_EXPECT_NEAR(asl::Vec3(-1, 0.2f, -3).abs(), asl::Vec3(1, 0.2f, 3), EPSf);
+	ASL_EXPECT_NEAR(asl::Vec3(1, 2, 3).zyx(), asl::Vec3(3, 2, 1), EPSf);
+}
+
+ASL_TEST(Vec2)
+{
+	asl::Vec2 a(1, 2.5f), b(1, 0);
+	a += asl::Vec2::zeros();
+	ASL_EXPECT_NEAR(a * b, 1.0f, EPSf);
+	ASL_EXPECT_NEAR(a * b, 1.0f, EPSf);
+	asl::Vec2d a2 = a.with<double>(), b2 = b.with<double>();
+	asl::Vec2  a3 = a2.with<float>();
+	ASL_EXPECT_NEAR(a2 + b2, asl::Vec2d(2, 2.5), EPS);
+	ASL_EXPECT_NEAR(a3 + b2.with<float>(), asl::Vec2(2, 2.5f), (float)EPS);
+	asl::Vec2 p = asl::Vec2::polar(2.0f, asl::PIf / 4); // (sqrt(2), sqrt(2))
+	ASL_EXPECT_NEAR(p, asl::Vec2(1.4142135f, 1.4142135f), EPSf);
+	ASL_EXPECT_NEAR(p.angle(), asl::PIf / 4, EPSf);
 }
 
 using namespace asl;
@@ -42,13 +61,13 @@ using namespace asl;
 ASL_TEST(Matrix4)
 {
 	double angle = deg2rad(90);
-	ASL_APPROX(rad2deg(angle), 90.0, 0.01);
+	ASL_EXPECT_NEAR(rad2deg(angle), 90.0, 0.01);
 
 	Matrix4d m1 = Matrix4d::rotate(Vec3d(1, 0, 0), PI / 2);
 	Matrix4d m2 = Matrix4d::rotateX(PI / 2);
 	Vec3d a(0, 1, 0);
-	ASL_APPROX(m1 * a, Vec3d(0, 0, 1), EPS);
-	ASL_APPROX(m2 * a, Vec3d(0, 0, 1), EPS);
+	ASL_EXPECT_NEAR(m1 * a, Vec3d(0, 0, 1), EPS);
+	ASL_EXPECT_NEAR(m2 * a, Vec3d(0, 0, 1), EPS);
 
 	Quaterniond q1 = Quaterniond::fromAxisAngle(Vec3d(1, 0.5f, -1.25f), 0.25f);
 	Matrix4d mrot = Matrix4d::rotate(Vec3d(1, 0.5f, -1.25f), 0.25f);
@@ -56,13 +75,13 @@ ASL_TEST(Matrix4)
 
 	Vec3d rv1 = mrot.axisAngle();
 	Vec3d rv2 = mrot.rotation().axisAngle();
-	ASL_APPROX(rv1, rv2, EPS);
+	ASL_EXPECT_NEAR(rv1, rv2, EPS);
 	Matrix4d mrot2 = Matrix4d::rotate(rv1);
-	ASL_APPROX(mrot, mrot2, EPS);
+	ASL_EXPECT_NEAR(mrot, mrot2, EPS);
 
-	ASL_APPROX(q1, q2, EPS);
-	ASL_APPROX(q1.matrix(), mrot, EPS);
-	ASL_APPROX(q1.matrix(), q2.matrix(), EPS);
+	ASL_EXPECT_NEAR(q1, q2, EPS);
+	ASL_EXPECT_NEAR(q1.matrix(), mrot, EPS);
+	ASL_EXPECT_NEAR(q1.matrix(), q2.matrix(), EPS);
 
 	for (double x = -1; x <= 1; x+=0.5)
 		for (double y = -1; y <= 1; y += 0.5)
@@ -74,14 +93,14 @@ ASL_TEST(Matrix4)
 					Quaterniond q1 = Quaterniond::fromAxisAngle(Vec3d(x, y, z), a);
 					Matrix4d m = q1.matrix();
 					Quaterniond q2 = m.rotation();
-					ASL_APPROX(q1, q2, EPS);
-					ASL_APPROX(q1.matrix(), q2.matrix(), EPS);
+					ASL_EXPECT_NEAR(q1, q2, EPS);
+					ASL_EXPECT_NEAR(q1.matrix(), q2.matrix(), EPS);
 				}
 
 	m1 = Matrix4d::translate(1, 2, 3) * mrot;
 	Matrix4d mi = m1.inverse();
-	ASL_APPROX(mi * m1, Matrix4d::identity(), EPS);
-	ASL_APPROX(mi.inverse(), m1, EPS);
+	ASL_EXPECT_NEAR(mi * m1, Matrix4d::identity(), EPS);
+	ASL_EXPECT_NEAR(mi.inverse(), m1, EPS);
 
 	m1(3, 0) = 0.5;
 	m1(3, 1) = -0.1;
@@ -89,13 +108,13 @@ ASL_TEST(Matrix4)
 
 	Vec3d v3(1, 2, 3);
 
-	ASL_APPROX((m1 ^ v3), (m1 * Vec4d(v3, 1)).h2c(), EPS);
+	ASL_EXPECT_NEAR((m1 ^ v3), (m1 * Vec4d(v3, 1)).h2c(), EPS);
 
 	Matrix3 h = Matrix3::translate(1.0f, -2.0f) * Matrix3::rotate(0.5f);
 	h(2, 0) = 0.2f;
 	h(2, 1) = -0.15f;
 	Vec2 v2(1, 3);
-	ASL_APPROX((h ^ v2), (h * Vec3(v2, 1)).h2c(), EPS);
+	ASL_EXPECT_NEAR((h ^ v2), (h * Vec3(v2, 1)).h2c(), EPS);
 
 	ASL_CHECK((h.inverse() * h - Matrix3::identity()).norm(), <, EPS);
 }

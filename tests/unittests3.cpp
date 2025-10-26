@@ -141,24 +141,24 @@ ASL_TEST(SmartObject)
 		Array<Shape> shapes;
 		shapes << shape << shape2 << Circle(4.0f) << Rect(2, 3);
 
-		ASL_ASSERT(Shape::count() == 4);
+		ASL_EXPECT(Shape::count(), ==, 4);
 
 		ASL_ASSERT(shapes.last().area() == 6);
 
 		Shape empty((Shape::Ptr)0);
 
-		ASL_ASSERT(Shape::count() == 4);
+		ASL_EXPECT(Shape::count(), ==, 4);
 		ASL_ASSERT(!empty);
 
 		shapes.clear();
 
-		ASL_ASSERT(Shape::count() == 2);
+		ASL_EXPECT(Shape::count(), ==, 2);
 
 		shapes << shape.clone();
 
-		ASL_ASSERT(Shape::count() == 3);
+		ASL_EXPECT(Shape::count(), ==, 3);
 	}
-	ASL_ASSERT(Shape::count() == 0);
+	ASL_EXPECT(Shape::count(), ==, 0);
 }
 
 ASL_TEST(Date)
@@ -190,6 +190,13 @@ struct Adder
 	int operator()(int x, int y) { return x + y + z; }
 };
 
+struct Incrementer
+{
+	int& z;
+	Incrementer(int& p) : z(p) {}
+	void operator()() { z++; }
+};
+
 ASL_TEST(Function)
 {
 #ifdef ASL_HAVE_LAMBDA
@@ -198,6 +205,10 @@ ASL_TEST(Function)
 
 	ASL_ASSERT(isMultiple(15));
 	ASL_ASSERT(!isMultiple(7));
+
+	Function<void> increase = [&]() { base++; };
+	increase();
+	ASL_ASSERT(base == 6);
 #endif
 
 	Function<int, int, int> sum2 = &add;
@@ -209,4 +220,9 @@ ASL_TEST(Function)
 	Function<int, int, int> sum3 = adder;
 
 	ASL_CHECK(sum3(3, 5), == , 18);
+
+	int n = 0;
+	Function<void> inc = Incrementer(n);
+	inc();
+	ASL_CHECK(n, ==, 1);
 }

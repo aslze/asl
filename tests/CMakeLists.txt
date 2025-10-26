@@ -27,6 +27,7 @@ set(TESTS
 	SmartObject
 	Date
 	AtomicCount
+	Vec2
 	Vec3
 	Matrix4
 	Uuid

@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2025 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_VECTOR4_H
@@ -49,8 +49,9 @@ class Vec4_
 	T length() const {return sqrt(x*x+y*y+z*z+w*w);}
 	/** Returns the length of the vector squared */
 	T length2() const {return x*x+y*y+z*z+w*w;}
-	/** Returns the length of the vector */
+	/** Returns the length of the vector \deprecated */
 	T operator!() const {return length();}
+	/** Returns this vector with absolute coordinates */
 	Vec4_ abs() const {return Vec4_(fabs(x), fabs(y), fabs(z), fabs(w));}
 
 	/** Returns this plus `b` */
@@ -84,12 +85,16 @@ class Vec4_
 	/** Returns this vector negated */
 	Vec4_ operator-() const {return Vec4_(-x,-y,-z, -w);}
 
+	bool operator<(const Vec4_& b) const
+	{
+		return (x < b.x) ? true : ((x == b.x && y < b.y) ? true : (x == b.x && y == b.y && z < b.z) ? true
+			: (x == b.x && y == b.y && z == b.z && w < b.w) ? true : false);
+	}
+
 public:
 	/** The x, y, z, w components */
 	T x, y, z, w;
 };
-
-// CHECK
 
 template<class T>
 inline int compare(const Vec4_<T>& a, const Vec4_<T>& b)

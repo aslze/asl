@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2025 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_VECTOR2_H
@@ -51,15 +51,19 @@ class Vec2_
 	/** Returns the angle between this vector and the +X axis in the [-PI, PI] range */
 	T angle()     const {return (T) atan2(y, x);}
 	/** Returns the angle between this vector and `b` */
-	T angle(const Vec2_& b) const { return acos(clamp((*this) * b / (!(*this) * !b), T(-1), T(1))); }
+	T angle(const Vec2_& b) const { return acos(clamp(((*this) * b) / ((*this).length() * b.length()), T(-1), T(1))); }
 	/** Returns the length of this vector */
 	T operator!() const {return sqrt(x*x+y*y);}
 	/** Returns the length of this vector */
 	T length()    const {return sqrt(x*x+y*y);}
 	/** Returns the length of this vector squared */
 	T length2()   const {return x*x+y*y;}
-	T norm1()     const {return (T)(fabs(x)+fabs(y));}
-	T normInf()   const {return (T)max(fabs((T)x), fabs((T)y));}
+	/** Returns the 1-norm of this vector */
+	T norm1()     const {return T(fabs(x) + fabs(y));}
+	/** Returns the infinity-norm of this vector */
+	T normInf()   const {return (T)max(fabs(x), fabs(y));}
+	/** Returns this vector with absolute coordinates */
+	Vec2_ abs() const { return Vec2_(fabs(x), fabs(y)); }
 
 	/** Returns this vector plus `b` */
 	Vec2_ operator+(const Vec2_& b) const {return Vec2_(x+b.x, y+b.y);}
@@ -81,6 +85,7 @@ class Vec2_
 	bool operator==(const Vec2_& b) const {return x==b.x && y==b.y;}
 	/** Compares this vector and `b` (warning: test equality of floats with care) */
 	bool operator!=(const Vec2_& b) const {return x!=b.x || y!=b.y;}
+	bool operator<(const Vec2_& b) const { return (x < b.x) ? true : ((x == b.x && y < b.y) ? true : false); }
 	/** Adds `b` to this vector */
 	void operator+=(const Vec2_& b) {x += b.x; y += b.y;}
 	/** Subtracts `b` from this vector */
@@ -128,6 +133,18 @@ template<class T>
 inline Vec2_<T> max(const Vec2_<T>& a, const Vec2_<T>& b, const Vec2_<T>& c)
 {
 	return max(max(a, b), c);
+}
+
+template<class T>
+inline Vec2_<T> deg2rad(const Vec2_<T>& v)
+{
+	return Vec2_<T>(deg2rad(v.x), deg2rad(v.y));
+}
+
+template<class T>
+inline Vec2_<T> rad2deg(const Vec2_<T>& v)
+{
+	return Vec2_<T>(rad2deg(v.x), rad2deg(v.y));
 }
 
 typedef Vec2_<float> Vec2;
