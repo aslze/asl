@@ -96,10 +96,12 @@ int Sockets::waitInput(double t)
 	int m=0;
 	for(int i=0; i<set.length(); i++)
 	{
-		if (set[i].handle() < 0)
+		int sockh = set[i].handle();
+		if (sockh < 0)
 			return -1;
-		if (set[i].handle() > m) m = set[i].handle();
-		FD_SET(set[i].handle(), &rset);
+		if (sockh > m)
+			m = sockh;
+		FD_SET(sockh, &rset);
 	}
 	int r=select(m+1, &rset, 0, 0, &to);
 	if(r<0)
@@ -107,9 +109,10 @@ int Sockets::waitInput(double t)
 	changed.clear();
 	for (int j = 0; j < set.length(); j++)
 	{
-		if (set[j].handle() < 0)
+		int sockh = set[j].handle();
+		if (sockh < 0)
 			return -1;
-		if (FD_ISSET(set[j].handle(), &rset))
+		if (FD_ISSET(sockh, &rset))
 			changed << set[j];
 	}
 	return changed.length();
@@ -369,10 +372,12 @@ HostPort parseHostPort(const String& u)
 
 bool InetAddress::set(const String& host)
 {
-	String thehost = host;
+	String thehost;
 	int c = host.indexOf(':');
 	if (host[0] != '[' && c >= 0 && host.indexOf(':', c + 1) > 0)
-		thehost = '[' + host + ']';
+		thehost << '[' << host << ']';
+	else
+		thehost = host;
 
 	HostPort hp = parseHostPort(thehost);
 	if (!hp.port.ok() && (hp.host.contains('/') || hp.host.contains('\\')))
