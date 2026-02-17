@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_SOCKETSERVER_H
