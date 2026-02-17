@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_MATRIX4_H
@@ -265,16 +265,29 @@ public:
 			a[2][0] * p.x + a[2][1] * p.y + a[2][2] * p.z);
 	}
 	/**
-	Returns the identity matrix
+	Returns an identity matrix
 	*/
 	static Matrix4_ identity()
 	{
-		return Matrix4_<T>(
+		return Matrix4_(
 			1, 0, 0, 0,
 			0, 1, 0, 0,
 			0, 0, 1, 0,
 			0, 0, 0, 1);
 	}
+
+	/**
+	Returns a zero matrix
+	*/
+	static Matrix4_ zeros()
+	{
+		return Matrix4_(
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0);
+	}
+
 	/**
 	Returns a translation matrix for the given vector.
 	*/

@@ -39,7 +39,12 @@ class Vec2_
 	{
 		return Vec2_<T2>(T2(x), T2(y));
 	}
-	operator const T* () const { return (T*)this; }
+	T*       data() { return &x; }
+	const T* data() const { return &x; }
+
+	T&       operator[](int i) { return i == 0 ? x : y; }
+	const T& operator[](int i) const { return i == 0 ? x : y; }
+
 	/** Returns a vector constructed from polar coordinates */
 	static Vec2_ polar(T r, T a) {return Vec2_(r*cos(a), r*sin(a));}
 	/** Returns this vector rotated 90 degrees counterclockwise. */

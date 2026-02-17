@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2025 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_MATRIX3_H
@@ -209,13 +209,23 @@ public:
 		return C;
 	}
 	/**
-	Returns the 3x3 identity matrix
+	Returns a 3x3 identity matrix
 	*/
 	static Matrix3_ identity()
 	{
 		return Matrix3_(1, 0, 0,
 		                0, 1, 0,
 		                0, 0, 1);
+	}
+
+	/**
+	Returns a zero matrix
+	*/
+	static Matrix3_ zeros()
+	{
+		return Matrix3_(0, 0, 0,
+						0, 0, 0,
+						0, 0, 0);
 	}
 	/**
 	Returns a 2D rotation matrix for angle t

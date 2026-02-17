@@ -42,7 +42,13 @@ class Vec3_
 	
 	Vec3_(const T* v) : x(v[0]), y(v[1]), z(v[2]) {}
 	static Vec3_ zeros() { return Vec3_(0, 0, 0); }
-	operator const T*() const {return (T*)this;}
+	
+	T*       data() { return &x; }
+	const T* data() const { return &x; }
+
+	T&       operator[](int i) { return i == 0 ? x : i == 1 ? y : z; }
+	const T& operator[](int i) const { return i == 0 ? x : i == 1 ? y : z; }
+
 	/** Returns the *x* and *y* components as a Vec2 */
 	Vec2_<T> xy() const {return Vec2_<T>(x, y);}
 	/**
@@ -57,8 +63,6 @@ class Vec3_
 	{
 		return Vec3_<T2>(T2(x), T2(y), T2(z));
 	}
-
-	ASL_DEPRECATED(void set(T X, T Y, T Z), "Set components separately") {x=X; y=Y; z=Z;}
 
 	/** Returns a normalized version of this vector */
 	Vec3_ normalized() const {

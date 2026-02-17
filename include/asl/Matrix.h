@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_MATRIX_H
@@ -39,7 +39,6 @@ template <class T>
 class Matrix_ : public Array2<T>
 {
 public:
-
 	Matrix_() {}
 
 	/**
@@ -81,7 +80,15 @@ public:
 	/**
 	 * Returns the trace of this matrix
 	*/
-	T trace() const { if (this->_rows != this->_cols) return 0; T t = 0; for (int i = 0; i < this->rows(); i++) t += (*this)(i, i); return t; }
+	T trace() const
+	{
+		if (this->_rows != this->_cols)
+			return 0;
+		T t = 0;
+		for (int i = 0; i < this->rows(); i++)
+			t += (*this)(i, i);
+		return t;
+	}
 
 	/**
 	 * copies the contents of matrix b into this
@@ -119,6 +126,11 @@ public:
 				I(i, j) = (i == j) ? T(1) : T(0);
 		return I;
 	}
+
+	/**
+	Returns a zero matrix of the given size
+	*/
+	static Matrix_ zeros(int rows, int cols) { return Matrix_(rows, cols, T(0)); }
 
 	void swapRows(int i1, int i2)
 	{

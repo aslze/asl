@@ -35,7 +35,12 @@ class Vec4_
 	{
 		return Vec4_<T2>(T2(x), T2(y), T2(z), T2(w));
 	}
-	operator const T*() const {return &x;}
+	T*       data() { return &x; }
+	const T* data() const { return &x; }
+
+	T&       operator[](int i) { return i == 0 ? x : i == 1 ? y : i == 2 ? z : w; }
+	const T& operator[](int i) const { return i == 0 ? x : i == 1 ? y : i == 2 ? z : w; }
+
 	/** Returns the *x*, *y*, *z* components as a Vec3 */
 	Vec3_<T> xyz() const {return Vec3_<T>(x, y, z);}
 	/** Returns the cartesian coordinates vector corresponding to this homogenous coordinates */

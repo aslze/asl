@@ -20,6 +20,7 @@ ASL_TEST(Vec3)
 	asl::Vec3 a(1, 2.5f, 3), b(1, 0, 0);
 	a += asl::Vec3::zeros();
 
+	ASL_EXPECT_NEAR(a[0] + a[1] + a[2], 6.5f, EPSf);
 	ASL_EXPECT_NEAR(a*b, 1.0f, EPS);
 	ASL_EXPECT_NEAR(a * b, 1.0f, EPS);
 	ASL_EXPECT(a * b, <, 1.5f);
@@ -45,6 +46,7 @@ ASL_TEST(Vec2)
 {
 	asl::Vec2 a(1, 2.5f), b(1, 0);
 	a += asl::Vec2::zeros();
+	ASL_EXPECT_NEAR(a[0] + a[1], 3.5f, EPSf);
 	ASL_EXPECT_NEAR(a * b, 1.0f, EPSf);
 	ASL_EXPECT_NEAR(a * b, 1.0f, EPSf);
 	asl::Vec2d a2 = a.with<double>(), b2 = b.with<double>();
