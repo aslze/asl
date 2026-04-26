@@ -79,19 +79,16 @@ Var Xdl::read(const String& file)
 	TextFile tfile(file, File::READ);
 	if (!tfile)
 		return Var();
-	int size = int(clamp(tfile.size(), 0ll, 100000ll));
-	if (size == 0)
-		return Var();
-	Array<char> buffer(min(16382, size) + 1);
+	char buffer[1000];
 	byte bom[3];
 	if(tfile.read(bom, 3) == 3 && !(bom[0] == 0xef && bom[1] == 0xbb && bom[2] == 0xbf))
 		tfile.seek(0);
 	while (1)
 	{
-		int n = tfile.read(buffer.data(), buffer.length() - 1);
+		int n = tfile.read(buffer, sizeof(buffer) - 1);
 		buffer[n] = '\0';
-		parser.parse(buffer.data());
-		if (n < buffer.length() - 1)
+		parser.parse(buffer);
+		if (n < sizeof(buffer) - 1)
 			break;
 	}
 	parser.parse(" ");
