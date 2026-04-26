@@ -112,6 +112,17 @@ public:
 	T& operator()(int i, int j) { return a[i][j]; }
 	const T& operator()(int i, int j) const { return a[i][j]; }
 
+	bool operator==(const Matrix3_& B) const
+	{
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 3; j++)
+				if (a[i][j] != B(i, j))
+					return false;
+		return true;
+	}
+
+	bool operator!=(const Matrix3_& B) const { return !(*this == B); }
+
 	/**
 	Returns vector `v` left-multiplied by this matrix (only two components, to apply an affine transform).
 	*/

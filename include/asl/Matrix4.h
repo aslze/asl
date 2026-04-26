@@ -155,6 +155,17 @@ public:
 
 	ASL_DEPRECATED(bool isColmajor() const, "Use isRowMajor()") { return !isRowMajor(); }
 
+	bool operator==(const Matrix4_& B) const
+	{
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				if (a[i][j] != B(i, j))
+					return false;
+		return true;
+	}
+
+	bool operator!=(const Matrix4_& B) const { return !(*this == B); }
+
 	/**
 	Returns this matrix plus `B`
 	*/

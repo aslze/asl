@@ -249,6 +249,20 @@ public:
 		return c;
 	}
 
+	bool operator==(const Matrix_& b) const
+	{
+		const Matrix_& a = *this;
+		if (a.rows() != b.rows() || a.cols() != b.cols())
+			return false;
+		for (int i = 0; i < a.rows(); i++)
+			for (int j = 0; j < a.cols(); j++)
+				if (a(i, j) != b(i, j))
+					return false;
+		return true;
+	}
+
+	bool operator!=(const Matrix_& b) const { return !(*this == b); }
+
 	/**
 	 * Computes the sum of this matrix and b
 	 */
