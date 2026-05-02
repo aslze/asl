@@ -20,8 +20,9 @@ jobs:
         cd ../..
         git clone -b gh-pages https://github.com/aslze/asl-doc
         cd asl-doc
-        git config user.name "aslze"
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
         cp -rf ../asl/build/doc/* .
         git add --all
-        git commit -m "Update documentation" -a && git push https://aslze:$DOCTOK@github.com/aslze/asl-doc.git || echo "Documentation already up-to-date"
+        git commit -m "Update documentation" -a && git push https://x-access-token:$DOCTOK@github.com/aslze/asl-doc.git || echo "Documentation already up-to-date"
         
