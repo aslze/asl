@@ -38,10 +38,10 @@ if( p.success() )
 	text = p.output();
 ~~~
 
-In Windows you can append a '*' to program names (e.g. "notepad.exe*") to show their window if they are Win32 GUI apps. Or to
+In Windows you can append a '\*' to program names (e.g. "notepad.exe*") to show their window if they are Win32 GUI apps. Or to
 show their console. Otherwise they run in the background with no window.
 
-* **Warning**: If a process is run with the run() method and we will not read its output, the process can hang if it writes
+__Warning__: If a process is run with the run() method and we will not read its output, the process can hang if it writes
 a lot to its output stream (because it will fill a buffer that no one will free). To avoid that, call detach() before calling
 run().
 */

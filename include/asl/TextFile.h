@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2023 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_TEXTFILE_H
@@ -13,7 +13,7 @@ Class TextFile represents a text file in the filesystem. It can be used to get i
 a file (its size, its modification date, whether it exists), to read or write in it in one step, or to
 open it and perform typical read/write operations as text, just like `File`.
 
-Functions text()`, `lines()`, `write()`, `append()`, `printf()`, etc. read or write in the file by first opening it.
+Functions `text()`, `lines()`, `write()`, `append()`, `printf()`, etc. read or write in the file by first opening it.
 Intended as a short-hand for one-line operations.
 
 ~~~
@@ -21,7 +21,7 @@ TextFile("info.log").printf("Error connecting to port %i\n", port);
 
 String text = TextFile("data.txt").text();
 
-TextFile("data.json").write(Json::encode(data));
+TextFile("data.json").write("Some content\n");
 
 String last_entry = TextFile("errors.log").lines().last();
 ~~~
@@ -56,7 +56,7 @@ public:
 
 	bool open(const String& name, OpenMode mode = READ)
 	{
-		return File::open(name, OpenMode(mode | TEXT)) && _file != 0;
+		return File::open(name, mode | TEXT) && _file != 0;
 	}
 	bool open(OpenMode mode = READ)
 	{
