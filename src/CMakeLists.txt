@@ -2,7 +2,7 @@ project(asl)
 
 include_directories(../include)
 
-set( ASL_SRC
+set(ASL_SRC
 	String.cpp
 	Socket.cpp
 	SocketServer.cpp
@@ -89,7 +89,7 @@ if(ASL_TLS)
 	list(APPEND ASL_DEFS ASL_TLS)
 endif()
 
-if( ASL_USE_LOCAL8BIT )
+if(ASL_USE_LOCAL8BIT)
 	list(APPEND ASL_DEFS ASL_ANSI)
 endif()
 
@@ -105,7 +105,7 @@ if(POLICY CMP0022)
 	cmake_policy(SET CMP0022 NEW)
 endif()
 
-if( ANDROID )
+if(ANDROID)
 	list(APPEND ASL_DEFS ASL_NOEXCEPT)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fno-exceptions ")
 endif()
@@ -125,12 +125,12 @@ if(ASL_BUILD_STATIC)
 	add_library( asls STATIC ${ASL_SRC} )
 	target_compile_definitions(asls PUBLIC ${ASL_DEFS} ASL_STATIC)
 	target_compile_definitions(asls PRIVATE ${ASL_DEFSP})
-	target_include_directories(asls PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include> $<INSTALL_INTERFACE:include> )
-	if( WIN32 )
-		target_link_libraries(asls ws2_32 shell32 advapi32)
-	elseif( ANDROID )
+	target_include_directories(asls PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include> $<INSTALL_INTERFACE:include>)
+	if(WIN32)
+		target_link_libraries(asls ws2_32 shell32 advapi32 psapi)
+	elseif(ANDROID)
 		target_link_libraries(asls dl log c m)
-		link_directories( "${ANDROID_SYSROOT}/usr/lib" )
+		link_directories("${ANDROID_SYSROOT}/usr/lib")
 	else()
 		target_link_libraries(asls pthread dl)
 		if(NOT APPLE)
@@ -139,22 +139,22 @@ if(ASL_BUILD_STATIC)
 	endif()
 
 	if( ASL_TLS )
-		target_link_libraries(asls ${mbedTLS_LIB} ${mbedTLSx509_LIB} ${mbedTLScrypto_LIB})
+		target_link_libraries(asls ${mbedTLS_LIB} ${mbedTLSx509_LIB})# ${mbedTLScrypto_LIB})
 	endif()
 	list(APPEND TARGETS asls)
 endif()
 
 if(ASL_BUILD_SHARED)
 	add_library( asl SHARED ${ASL_SRC} )
-	target_include_directories(asl PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include> $<INSTALL_INTERFACE:include> )
+	target_include_directories(asl PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include> $<INSTALL_INTERFACE:include>)
 	target_compile_definitions(asl PUBLIC ${ASL_DEFS})
 	target_compile_definitions(asl PRIVATE ${ASL_DEFSP})
 
-	if( WIN32 )
-		target_link_libraries(asl LINK_PRIVATE ws2_32 shell32 advapi32) # PRIVATE
-	elseif( ANDROID )
+	if(WIN32)
+		target_link_libraries(asl LINK_PRIVATE ws2_32 shell32 advapi32 psapi) # PRIVATE
+	elseif(ANDROID)
 		target_link_libraries(asl dl log c m)
-		link_directories( ${ANDROID_SYSROOT}/usr/lib )
+		link_directories(${ANDROID_SYSROOT}/usr/lib)
 	else()
 		target_link_libraries(asl LINK_PUBLIC pthread dl)
 		if(NOT APPLE)
@@ -162,21 +162,26 @@ if(ASL_BUILD_SHARED)
 		endif()
 	endif()
 
-	if( ASL_TLS )
-		target_link_libraries(asl LINK_PRIVATE ${mbedTLS_LIB} ${mbedTLSx509_LIB} ${mbedTLScrypto_LIB})
+	if(ASL_TLS)
+		target_link_libraries(asl LINK_PRIVATE ${mbedTLS_LIB} ${mbedTLSx509_LIB})# ${mbedTLScrypto_LIB}) # bcrypt
 	endif()
 	list(APPEND TARGETS asl)
 endif()
 
 
 if(ASL_TLS AND TARGET mbedtls AND NOT mbedtls_FOUND)
-	list(APPEND TARGETS mbedtls mbedx509 mbedcrypto)
+	list(APPEND TARGETS mbedtls mbedx509)
+	if(TARGET mbedcrypto)
+		list(APPEND TARGETS mbedcrypto)
+	elseif(TARGET tfpsacrypto)
+		list(APPEND TARGETS tfpsacrypto)
+	endif()
 	if(TARGET everest AND TARGET p256m)
 		list(APPEND TARGETS everest p256m)
 	endif()
 endif()
 
-install( TARGETS ${TARGETS} EXPORT asl RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib )
-install( DIRECTORY ../include/ DESTINATION include )
+install(TARGETS ${TARGETS} EXPORT asl RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+install(DIRECTORY ../include/ DESTINATION include)
 
 set(TARGETS ${TARGETS} PARENT_SCOPE)
