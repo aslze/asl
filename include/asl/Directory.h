@@ -47,6 +47,7 @@ __File system operations__ are available here or in the `File` class:
 ```
 Directory::create("/some_other_dir");
 Directory::move("/path/file.txt", "/some_other_dir");
+Directory::copy("/path/dir", "/some_other_dir");      // copies the whole directory with all its content
 ```
 */
 
@@ -127,11 +128,11 @@ public:
 	*/
 	static String createTemp();
 	/**
-	Copies file `from` to `to` which can be a full name or a destination directory
+	Copies file or directory `from` to `to` which can be a full name or a destination directory
 	*/
 	static bool copy(const String& from, const String& to);
 	/**
-	Moves or renames file `from` to `to` which can be a full name or a destination directory
+	Moves or renames file or directory `from` to `to` which can be a full name or a destination directory
 	*/
 	static bool move(const String& from, const String& to);
 	/**

@@ -240,7 +240,23 @@ bool Directory::copy(const String& from, const String& to)
 	String dst = to;
 	File tofile(to);
 	if(tofile.isDirectory())
-		dst << '\\' << File(from).name();
+		dst << '/' << File(from).name();
+	if (File(from).isDirectory())
+	{
+		bool ok = true;
+		if (!Directory(dst).exists())
+			Directory::create(dst);
+		Array<File> items = Directory(from).items();
+		foreach (File& item, items)
+		{
+			if(item.name() == "." || item.name() == "..")
+				continue;
+			String itemDst = dst + '/' + item.name();
+			ok &= copy(item.path(), itemDst);
+		}
+		return ok;
+	}
+	
 	return CopyFileW(from, dst, FALSE) != 0;
 }
 
@@ -399,13 +415,28 @@ bool Directory::copy(const String& from, const String& to)
 	File src(from, File::READ);
 	if(!src)
 		return false;
-	String topath = to;
+	String dst = to;
 	File tofile(to);
 	if(tofile.isDirectory())
-		topath = to + '/' + File(from).name();
+		dst << '/' << File(from).name();
+	if (File(from).isDirectory())
+	{
+		bool ok = true;
+		if (!Directory(dst).exists())
+			Directory::create(dst);
+		Array<File> items = Directory(from).items();
+		foreach (File& item, items)
+		{
+			if (item.name() == "." || item.name() == "..")
+				continue;
+			String itemDst = dst + '/' + item.name();
+			ok &= copy(item.path(), itemDst);
+		}
+		return ok;
+	}
 
-	File dst(topath, File::WRITE);
-	if(!dst)
+	tofile = File(dst);
+	if(!tofile.open(File::WRITE))
 		return false;
 
 	byte buffer[65536];
@@ -414,7 +445,7 @@ bool Directory::copy(const String& from, const String& to)
 		n = src.read(buffer, sizeof(buffer));
 		if( n < 0)
 			return false;
-		int m = dst.write(buffer, n);
+		int m = tofile.write(buffer, n);
 		if( m != n)
 			return false;
 	}while (n == sizeof(buffer));
