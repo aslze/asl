@@ -437,6 +437,25 @@ public:
 		return (a[3] == '*') ? eulerAngles(a[2] - 'X', a[1] - 'X', a[0] - 'X').zyx()
 		                     : eulerAngles(a[0] - 'X', a[1] - 'X', a[2] - 'X');
 	}
+
+	/**
+	 * Computes a rotation matrix that aligns vector v1 with vector v2.
+	 */
+	static Matrix4_ rotateAlign(const Vec3_<T>& v1, const Vec3_<T>& v2)
+	{
+		Vec3_<T>  v = v1 ^ v2;
+		T c = v1 * v2;
+		T k = T(1) / (1 + c);
+		if (c < T(-0.999999)) // vectors are opposite
+		{
+			return orthonormalBase(-v1) * orthonormalBase(v1).inverse() * rotateAlign(v1, -v2);
+		}
+		return Matrix4_(v.x * v.x * k + c, v.y * v.x * k - v.z, v.z * v.x * k + v.y, 0,
+		                v.x * v.y * k + v.z, v.y * v.y * k + c, v.z * v.y * k - v.x, 0,
+		                v.x * v.z * k - v.y, v.y * v.z * k + v.x, v.z * v.z * k + c, 0,
+		                0, 0, 0, 1);
+	}
+
 	/**
 	Returns the inverse of this matrix
 	*/

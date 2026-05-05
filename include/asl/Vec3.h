@@ -73,7 +73,10 @@ class Vec3_
 	/** Returns the length of the vector squared */
 	T length2() const {return x*x+y*y+z*z;}
 	/** Returns the length of the vector */
-	T operator!() const {return length();}
+	ASL_DEPRECATED(T operator!() const, "Use length() instead") { return length(); }
+	/** Returns the length of this vector */
+	T norm() const { return length(); }
+	T normSq() const { return length2(); }
 	/** Returns the 1-norm of this vector */
 	T norm1() const { return T(fabs(x) + fabs(y) + fabs(z)); }
 	/** Returns the infinity-norm of this vector */

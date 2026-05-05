@@ -58,11 +58,13 @@ class Vec2_
 	/** Returns the angle between this vector and `b` */
 	T angle(const Vec2_& b) const { return acos(clamp(((*this) * b) / ((*this).length() * b.length()), T(-1), T(1))); }
 	/** Returns the length of this vector */
-	T operator!() const {return sqrt(x*x+y*y);}
+	ASL_DEPRECATED(T operator!() const, "Use length() instead") {return sqrt(x*x+y*y);}
 	/** Returns the length of this vector */
 	T length()    const {return sqrt(x*x+y*y);}
 	/** Returns the length of this vector squared */
 	T length2()   const {return x*x+y*y;}
+	T norm() const { return length(); }
+	T normSq() const { return length2(); }
 	/** Returns the 1-norm of this vector */
 	T norm1()     const {return T(fabs(x) + fabs(y));}
 	/** Returns the infinity-norm of this vector */
