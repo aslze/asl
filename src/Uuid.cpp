@@ -1,4 +1,5 @@
 #include <asl/Uuid.h>
+#include <asl/Mutex.h>
 
 namespace asl {
 
@@ -46,6 +47,8 @@ Uuid UuidGenerator::generate()
 Uuid Uuid::generate()
 {
 	static UuidGenerator gen;
+	static Mutex m;
+	Lock _(m);
 	return gen.generate();
 }
 

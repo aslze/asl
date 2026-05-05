@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2018 ASL author
+// Copyright(c) 1999-2026 ASL author
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_UUID_H
@@ -40,11 +40,13 @@ public:
 	*/
 	byte& operator[](int i) { return _u[i]; }
 	byte operator[](int i) const { return _u[i]; }
+	int   length() const { return 16; }
+	const byte* data() const { return _u; }
 	bool operator==(const Uuid& u) const { return memcmp(_u, u._u, 16) == 0; }
 	bool operator<(const Uuid& u) const { return memcmp(_u, u._u, 16) < 0; };
 	bool operator!=(const Uuid& u) const { return !(*this == u); }
 	/**
-	Generates an UUID (version 4).
+	Generates an UUID (version 4) with a global generator.
 	*/
 	static Uuid generate();
 
@@ -60,6 +62,7 @@ class ASL_API UuidGenerator
 public:
 	UuidGenerator();
 	Uuid generate();
+
 private:
 	Random _random1;
 	Random _random2;
