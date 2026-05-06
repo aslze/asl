@@ -144,7 +144,22 @@ Console::Size Console::size()
 	return s;
 }
 
-
+void Console::show(bool on)
+{
+	if (on)
+	{
+		if (AttachConsole(ATTACH_PARENT_PROCESS) || AllocConsole())
+		{
+			(void)freopen("CONOUT$", "w", stdout);
+			(void)freopen("CONOUT$", "w", stderr);
+		}
+	}
+	else
+	{
+		ShowWindow(GetConsoleWindow(), 0);
+		FreeConsole();
+	}
+}
 #else
 
 }
@@ -271,6 +286,8 @@ Console::Size Console::size()
 	}
 	return s;
 }
+
+void Console::show(bool) {}
 
 #endif
 

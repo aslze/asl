@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_CONSOLE_H
@@ -155,6 +155,7 @@ public:
 	Returns the size of the console window in characters {width, height}
 	*/
 	Size size();
+	void show(bool on);
 };
 
 #ifndef __ANDROID__

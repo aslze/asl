@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2025 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_VECTOR4_H
@@ -55,7 +55,9 @@ class Vec4_
 	/** Returns the length of the vector squared */
 	T length2() const {return x*x+y*y+z*z+w*w;}
 	/** Returns the length of the vector \deprecated */
-	T operator!() const {return length();}
+	ASL_DEPRECATED(T operator!() const, "Use length() instead") { return length(); }
+	T norm() const { return length(); }
+	T normSq() const { return length2(); }
 	/** Returns this vector with absolute coordinates */
 	Vec4_ abs() const {return Vec4_(fabs(x), fabs(y), fabs(z), fabs(w));}
 
