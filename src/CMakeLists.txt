@@ -139,7 +139,7 @@ if(ASL_BUILD_STATIC)
 	endif()
 
 	if( ASL_TLS )
-		target_link_libraries(asls ${mbedTLS_LIB} ${mbedTLSx509_LIB})# ${mbedTLScrypto_LIB})
+		target_link_libraries(asls ${mbedTLS_LIB} ${mbedTLSx509_LIB} ${mbedTLScrypto_LIB})
 	endif()
 	list(APPEND TARGETS asls)
 endif()
@@ -163,7 +163,7 @@ if(ASL_BUILD_SHARED)
 	endif()
 
 	if(ASL_TLS)
-		target_link_libraries(asl LINK_PRIVATE ${mbedTLS_LIB} ${mbedTLSx509_LIB})# ${mbedTLScrypto_LIB}) # bcrypt
+		target_link_libraries(asl LINK_PRIVATE ${mbedTLS_LIB} ${mbedTLSx509_LIB} ${mbedTLScrypto_LIB}) # bcrypt
 	endif()
 	list(APPEND TARGETS asl)
 endif()

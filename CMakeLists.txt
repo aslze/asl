@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.12...3.10)
 
 project(asl)
 
-set(ASL_VERSION 1.11.14)
+set(ASL_VERSION 1.11.15)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
@@ -41,6 +41,11 @@ option(ASL_IPV6 "Expect also IPv6 when looking up DNS names")
 option(ASL_SAMPLES "Build samples")
 option(ASL_TESTS "Build tests")
 option(ASL_SOCKET_LOCAL "Support Unix sockets on Windows")
+set(ASL_MBEDTLS_VER 3.6.4 CACHE STRING "Version of mbedTLS to fetch")
+
+if(ASL_TESTS)
+	option(ASL_TEST_NET "Run network tests (requires internet connection)")
+endif()
 
 set(ASL_BIGENDIAN OFF)
 
@@ -54,6 +59,13 @@ else()
 endif()
 
 if(ASL_TLS)
+	option(ASL_FETCH "Fetch and build mbedTLS (if ASL_TLS is ON)")
+	if(ASL_FETCH AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.14)
+		include(FetchContent)
+		FetchContent_Declare(mbedtls URL https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${ASL_MBEDTLS_VER}/mbedtls-${ASL_MBEDTLS_VER}.tar.bz2)
+		FetchContent_MakeAvailable(mbedtls)
+	endif()
+
 	if(TARGET mbedtls)
 		set(mbedTLS_LIB mbedtls)
 		set(mbedTLSx509_LIB mbedx509)

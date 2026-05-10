@@ -1,0 +1,48 @@
+name: Build and test extended
+
+on:
+  workflow_dispatch:
+    inputs:
+      use_tls:
+        description: "Use TLS"
+        type: boolean
+        default: false
+      mbedtls_version:
+        description: "MbedTLS version"
+        type: string
+        required: false
+        default: "3.4.6"
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-14]
+
+    steps:
+    - uses: actions/checkout@v6
+    - name: configure
+      shell: bash
+      env:
+        USE_TLS: ${{ inputs.use_tls }}
+        MBEDTLS_VER: ${{ mbedtls_version }}
+      run: |
+        ARGS=()
+        if [[ "$USE_TLS" == "true" ]]; then
+          ARGS+=(-DASL_TLS=ON)
+          ARGS+=(-DASL_MBEDTLS_VER=$MBEDTLS_VER)
+        fi
+        cd ${{ github.workspace }}
+        mkdir build
+        cd build
+        cmake -DASL_TESTS=ON -DASL_BUILD_SHARED=OFF -DASL_TEST_NET=ON ${{ TLS }} -DASL_FETCH=ON "${ARGS[@]}" ..
+    - name: make
+      run: |
+        cd build
+        cmake --build .
+    - name: test
+      run: |
+        cd build
+        ctest --output-on-failure
