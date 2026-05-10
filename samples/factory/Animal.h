@@ -11,7 +11,7 @@ are added to the same factory used in the executable.
 #ifndef _WIN32
 #define DEMO_API
 #else
-#ifdef lib_EXPORTS
+#ifdef alib_EXPORTS
 #define DEMO_API __declspec(dllexport)
 #else
 #define DEMO_API __declspec(dllimport)

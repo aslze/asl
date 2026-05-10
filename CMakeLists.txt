@@ -60,7 +60,7 @@ endif()
 
 if(ASL_TLS)
 	option(ASL_FETCH "Fetch and build mbedTLS (if ASL_TLS is ON)")
-	if(ASL_FETCH AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.14)
+	if(ASL_FETCH AND NOT CMAKE_VERSION VERSION_LESS 3.14)
 		cmake_minimum_required(VERSION 3.14...3.24)
 		include(FetchContent)
 		set(ENABLE_PROGRAMS OFF CACHE BOOL "")
