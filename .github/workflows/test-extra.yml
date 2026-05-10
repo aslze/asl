@@ -34,7 +34,6 @@ jobs:
           ARGS+=(-DASL_TLS=ON)
           ARGS+=(-DASL_MBEDTLS_VER=$MBEDTLS_VER)
         fi
-        cd ${{ github.workspace }}
         mkdir build
         cd build
         cmake -DASL_TESTS=ON -DASL_BUILD_SHARED=OFF -DASL_TEST_NET=ON -DASL_FETCH=ON "${ARGS[@]}" ..
