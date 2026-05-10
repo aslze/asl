@@ -11,7 +11,7 @@ on:
         description: "MbedTLS version"
         type: string
         required: false
-        default: "3.4.6"
+        default: "3.6.4"
 
 jobs:
   build:
