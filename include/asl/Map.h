@@ -250,7 +250,15 @@ public:
 			a[i].value = value;
 			return *this;
 		}
-		a.insert(-i-1, KeyVal(key, value));
+		//a.insert(-i-1, KeyVal(key, value));
+		else if(i > -2147483648)
+		{
+			a.insert(-i-1, KeyVal(key, value));
+		}
+		else
+		{
+			a.insert(0, KeyVal(key, value));
+		}
 		return *this;
 	}
 	/** Removes the element named key */
@@ -339,10 +347,15 @@ T& Map<K,T>::operator[](const K& key)
 	int i = indexOf(key);
 	if(i >= 0)
 		return a[i].value;
-	else
+	else if(i > -2147483648)
 	{
 		a.insert(-i-1, KeyVal(key, T()));
 		return a[-i-1].value;
+	}
+	else
+	{
+		a.insert(0, KeyVal(key, T()));
+		return a[0].value;
 	}
 }
 

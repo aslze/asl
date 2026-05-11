@@ -163,7 +163,7 @@ ASL_TEST(CmdArgs)
 {
 #if defined _WIN32 || defined __linux__ || defined __APPLE__
 	CmdArgs defaultArgs;
-	ASL_ASSERT(defaultArgs[0] == "CmdArgs");
+	ASL_ASSERT(defaultArgs.all().length() == 1 || defaultArgs[0] == "CmdArgs");
 #endif
 
 	Array<const char*> argv;

@@ -338,9 +338,12 @@ asl::Directory dir;
 
 ## SSL/TLS sockets and HTTPS support
 
-HTTPS, TLS WebSockets and TlsSocket require the [mbedTLS](https://github.com/Mbed-TLS/mbedtls) library (3.6.4+ or <=v3.2.1). Download and build the library, enable `ASL_TLS` in CMake and provide the *mbedTLS* install directory. On Windows you can use `vcpkg install mbedtls`. 
+HTTPS, TLS WebSockets and TlsSocket require the [mbedTLS](https://github.com/Mbed-TLS/mbedtls) library (3.6.4+ or <=v3.2.1). Download and build the library, enable `ASL_TLS` in CMake and provide the *mbedTLS* install directory.
 
-On Ubuntu Linux you can just install package **libmbedtls-dev** with:
+**Since ASL 1.11.15 and with CMake 3.14+, mbedTLS can be automatically downloaded and built**. For this, enable `ASL_FETCH` together with `ASL_TLS` and nothing more will be needed. The `ASL_MBEDTLS_VER` cache variable can specify a version to download (default is "3.6.4").
+
+On Windows you can use `vcpkg install mbedtls`.
+On Ubuntu Linux you can just install package `libmbedtls-dev` with:
 
 ```
 sudo apt-get install libmbedtls-dev
@@ -352,7 +355,7 @@ On FreeBSD use:
 pkg install mbedtls
 ```
 
-With a recent CMake (3.14+) you can also build mbedTLS together with ASL as subprojects (e.g. using `FetchContent`):
+With a recent CMake (3.14+) you can also build mbedTLS together with ASL as subprojects (e.g. using `FetchContent`) (this is basically what `ASL_FETCH` does):
 
 ```
 set(ASL_TLS ON)

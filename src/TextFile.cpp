@@ -112,7 +112,7 @@ Array<String> TextFile::lines()
 	if(!_file && !open(READ))
 		return lines;
 	while (!end()) {
-		lines << String();
+		lines.resize(lines.length() + 1);
 		readLine(lines.last());
 	}
 	return lines;
