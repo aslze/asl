@@ -360,6 +360,7 @@ struct Span
 }
 
 #include "time.h"
+#include "Random.h"
 #include "atomic.h"
 
 #endif
