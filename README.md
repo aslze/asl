@@ -1,6 +1,6 @@
 # ASL - All-purpose Simple Library #
 
-_**An old, bad and outdated C++ utility library**_
+_**An old-style C++ utility library**_
 
 ASL is a collection of multiplatform general purpose classes and utilities focused on simplicity and ease of use. Builds in seconds and facilitates writing code that works on different operating systems and compilers.
 
@@ -322,10 +322,9 @@ With CMmake 3.14+, instead of using `find_package()`, you can download and build
 
 ```cmake
 include(FetchContent)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.14.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.15.zip)
 FetchContent_MakeAvailable(asl)
 ```
-
 
 Remember that all header files have the `asl/` prefix directory and are named like the class they define
 (case-sensitively), and that all symbols are in the `asl` namespace. So, for example, to use the `Directory` class:
@@ -338,9 +337,11 @@ asl::Directory dir;
 
 ## SSL/TLS sockets and HTTPS support
 
-HTTPS, TLS WebSockets and TlsSocket require the [mbedTLS](https://github.com/Mbed-TLS/mbedtls) library (3.6.4+ or <=v3.2.1). Download and build the library, enable `ASL_TLS` in CMake and provide the *mbedTLS* install directory.
+HTTPS, TLS WebSockets and TlsSocket require the [mbedTLS](https://github.com/Mbed-TLS/mbedtls) library (<=v3.2.1 or 3.6.4+). Download and build the library, enable `ASL_TLS` in CMake and provide the *mbedTLS* install directory.
 
 **Since ASL 1.11.15 and with CMake 3.14+, mbedTLS can be automatically downloaded and built**. For this, enable `ASL_FETCH` together with `ASL_TLS` and nothing more will be needed. The `ASL_MBEDTLS_VER` cache variable can specify a version to download (default is "3.6.4").
+
+You can also link to an existing mbedTLS installation:
 
 On Windows you can use `vcpkg install mbedtls`.
 On Ubuntu Linux you can just install package `libmbedtls-dev` with:
@@ -355,15 +356,26 @@ On FreeBSD use:
 pkg install mbedtls
 ```
 
-With a recent CMake (3.14+) you can also build mbedTLS together with ASL as subprojects (e.g. using `FetchContent`) (this is basically what `ASL_FETCH` does):
+If you don't want the ASL_FETCH functionality, with CMake 3.14+ a project can build mbedTLS together with ASL (this is basically what `ASL_FETCH` does):
 
 ```
 set(ASL_TLS ON)
 set(ENABLE_PROGRAMS OFF CACHE BOOL "") # skip mbedtls samples
 FetchContent_Declare(mtls URL https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.4/mbedtls-3.6.4.tar.bz2)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.14.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.15.zip)
 FetchContent_MakeAvailable(mtls asl)
 ```
 
 Then just link your project to `asls` after that block.
+
+Which is equivalent to:
+
+```cmake
+set(ASL_TLS ON)
+set(ASL_FETCH ON)
+include(FetchContent)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.15.zip)
+FetchContent_MakeAvailable(asl)
+```
+
 

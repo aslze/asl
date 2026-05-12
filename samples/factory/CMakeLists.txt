@@ -17,5 +17,8 @@ target_link_libraries(fdemo LINK_PRIVATE asls alib)
 
 set_target_properties(fdemo alib pluginA pluginB PROPERTIES FOLDER samples/factory)
 
-add_custom_command(TARGET pluginA POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pluginA> $<TARGET_FILE_DIR:fdemo>)
-add_custom_command(TARGET pluginB POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pluginB> $<TARGET_FILE_DIR:fdemo>)
+if(NOT WIN32)
+	add_custom_command(TARGET pluginA POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pluginA> $<TARGET_FILE_DIR:fdemo>)
+	add_custom_command(TARGET pluginB POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pluginB> $<TARGET_FILE_DIR:fdemo>)
+endif()
+

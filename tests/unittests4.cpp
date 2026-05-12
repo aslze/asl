@@ -21,7 +21,6 @@ ASL_TEST(Vec3)
 	a += asl::Vec3::zeros();
 
 	ASL_EXPECT_NEAR(a[0] + a[1] + a[2], 6.5f, EPSf);
-	ASL_EXPECT_NEAR(a*b, 1.0f, EPS);
 	ASL_EXPECT_NEAR(a * b, 1.0f, EPS);
 	ASL_EXPECT(a * b, <, 1.5f);
 

@@ -150,7 +150,7 @@ ASL_TEST(TabularDataFile)
 			double y = file[2];
 			String s = file[3];
 			ASL_ASSERT(i == k++);
-			ASL_APPROX(x, 0.5, 1e-9);
+			ASL_EXPECT_NEAR(x, 0.5, 1e-9);
 			ASL_ASSERT(y == -3.0*i);
 			ASL_ASSERT(s == "neg");
 			ASL_ASSERT(file[0] == file["i"] && file[1] == file["x"] && file[2] == file["y"] && file[3] == file["sign"]);

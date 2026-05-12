@@ -31,6 +31,7 @@ set(ASL_SRC
 	SHA1.cpp
 	Uuid.cpp
 	../include/asl/defs.h
+	../include/asl/Random.h
 	../include/asl/String.h
 	../include/asl/Array.h
 	../include/asl/Array_.h

@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_MAP_H
@@ -246,19 +246,11 @@ public:
 	{
 		int i=indexOf(key);
 		if(i >= 0)
-		{
 			a[i].value = value;
-			return *this;
-		}
-		//a.insert(-i-1, KeyVal(key, value));
-		else if(i > -2147483648)
-		{
+		else if (i > (-2147483647 - 1))
 			a.insert(-i-1, KeyVal(key, value));
-		}
 		else
-		{
 			a.insert(0, KeyVal(key, value));
-		}
 		return *this;
 	}
 	/** Removes the element named key */
@@ -347,7 +339,7 @@ T& Map<K,T>::operator[](const K& key)
 	int i = indexOf(key);
 	if(i >= 0)
 		return a[i].value;
-	else if(i > -2147483648)
+	else if (i > (-2147483647 - 1))
 	{
 		a.insert(-i-1, KeyVal(key, T()));
 		return a[-i-1].value;
@@ -387,9 +379,9 @@ public:
 	}
 #ifdef ASL_HAVE_INITLIST
 	struct KV { const char* key; const T& value; };
-	Dic(std::initializer_list< KeyVal > b) :
-		Map < String, T>(b) {}
-	void operator=(std::initializer_list< KV > b)
+	Dic(std::initializer_list<KeyVal> b) :
+		Map<String, T>(b) {}
+	void operator=(std::initializer_list<KV> b)
 	{
 		this->clear();
 		this->reserve((int)b.size());

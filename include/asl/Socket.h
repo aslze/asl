@@ -12,12 +12,14 @@ namespace asl {
 
 struct SocketException : public Exception
 {
+	virtual const char* what() const { return "asl::SocketException"; }
 };
 
 struct SocketOptionException : public Exception
 {
 	const char* option;
 	SocketOptionException(const char* opt) : option(opt) {}
+	virtual const char* what() const { return "asl::SocketOptionException"; }
 };
 
 class Socket;

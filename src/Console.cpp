@@ -1,11 +1,12 @@
+#ifdef _WIN32
+#define _WIN32_WINNT 0x0501
+#endif
 #include <asl/Console.h>
-#include <asl/defs.h>
 #ifdef _WIN32
 #include <locale.h>
 #endif
 
 namespace asl {
-
 
 #ifndef __ANDROID__
 ASL_API Console console;

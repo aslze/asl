@@ -613,9 +613,9 @@ int Socket_::read(void* data, int size)
 		data = (char*)data + n;
 		s += n;
 		size -= n;
-		} while (s < size0);
+	} while (s < size0);
 	return s;
-	}
+}
 
 int Socket_::write(const void* data, int size)
 {
@@ -632,10 +632,10 @@ int Socket_::write(const void* data, int size)
 		if (!_blocking)
 			return n;
 		if (n < 0)
-{
+		{
 			_error = SOCKET_BAD_DATA;
 			break;
-	}
+		}
 		data = (char*)data + n;
 		s += n;
 		size -= n;
