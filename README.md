@@ -358,7 +358,7 @@ pkg install mbedtls
 
 If you don't want the ASL_FETCH functionality, with CMake 3.14+ a project can build mbedTLS together with ASL (this is basically what `ASL_FETCH` does):
 
-```
+```cmake
 set(ASL_TLS ON)
 set(ENABLE_PROGRAMS OFF CACHE BOOL "") # skip mbedtls samples
 FetchContent_Declare(mtls URL https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.4/mbedtls-3.6.4.tar.bz2)

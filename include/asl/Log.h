@@ -106,8 +106,8 @@ public:
 	void log(const String& cat, Log::Level level, const String& message);
 };
 
-	/**
-	Writes a log message with the given category and log level.
+/**
+Writes a log message with the given category and log level.
 \ingroup Logging
 	*/
 ASL_API void log(const String& cat, Log::Level level, const String& message);

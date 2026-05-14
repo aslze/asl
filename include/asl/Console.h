@@ -155,6 +155,10 @@ public:
 	Returns the size of the console window in characters {width, height}
 	*/
 	Size size();
+
+	/**
+	Shows or hides the console window (Windows GUI apps only)
+	*/
 	void show(bool on);
 };
 
