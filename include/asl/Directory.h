@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2025 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_DIR_H
@@ -128,9 +128,10 @@ public:
 	*/
 	static String createTemp();
 	/**
-	Copies file or directory `from` to `to` which can be a full name or a destination directory
+	Copies file or directory `from` to `to` which can be a full name or a destination directory. If `onlyContent` is true, the
+	content of the directory is copied but not the directory itself.
 	*/
-	static bool copy(const String& from, const String& to);
+	static bool copy(const String& from, const String& to, bool onlyContent = false);
 	/**
 	Moves or renames file or directory `from` to `to` which can be a full name or a destination directory
 	*/
@@ -142,7 +143,13 @@ public:
 	/**
 	Removes the given directory with all its content recursively and returns true on success (USE WITH CARE!)
 	*/
-	static bool removeRecursive(const String& path);
+	static bool removeRecursive(const String& path, bool onlyContent = false);
+
+	/**
+	Removes all content in the given directory (recursively) but not the directory itself, and returns true on success (USE
+	WITH CARE!)
+	*/
+	static bool clear(const String& path) { return removeRecursive(path, true); }
 
 	struct Space
 	{

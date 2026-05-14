@@ -235,11 +235,11 @@ bool Directory::change(const String& dir)
 	return SetCurrentDirectory(dir) != 0;
 }
 
-bool Directory::copy(const String& from, const String& to)
+bool Directory::copy(const String& from, const String& to, bool onlyContent)
 {
 	String dst = to;
 	File tofile(to);
-	if(tofile.isDirectory())
+	if(!onlyContent && tofile.isDirectory())
 		dst << '/' << File(from).name();
 	if (File(from).isDirectory())
 	{
@@ -410,14 +410,14 @@ bool Directory::change(const String& dir)
 	return chdir(dir) == 0;
 }
 
-bool Directory::copy(const String& from, const String& to)
+bool Directory::copy(const String& from, const String& to, bool onlyContent)
 {
 	File src(from, File::READ);
 	if(!src)
 		return false;
 	String dst = to;
 	File tofile(to);
-	if(tofile.isDirectory())
+	if (!onlyContent && tofile.isDirectory())
 		dst << '/' << File(from).name();
 	if (File(from).isDirectory())
 	{
