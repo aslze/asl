@@ -63,7 +63,7 @@ String Directory::createTemp()
 	return dir;
 }
 
-bool Directory::removeRecursive(const String& path)
+bool Directory::removeRecursive(const String& path, bool onlyContent)
 {
 	if (!path.ok())
 		return false;
@@ -80,8 +80,8 @@ bool Directory::removeRecursive(const String& path)
 		ok = ok && file.remove();
 	foreach(File& d, dir.subdirs())
 		ok = ok && removeRecursive(d.path());
-	
-	ok = ok && remove(path);
+	if (!onlyContent)
+		ok = ok && remove(path);
 	return ok;
 }
 
