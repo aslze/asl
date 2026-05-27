@@ -473,12 +473,12 @@ public:
 	/**
 	Returns an orthonormal vector base using a given vector as the Z axis and creating two other unit vectors perpendicular to Z and between them
 	*/
-	static Matrix4_ orthonormalBase(const Vec3_<T>& vec)
+	static Matrix4_ orthonormalBase(const Vec3_<T>& vec, const Vec3_<T>& origin = Vec3_<T>(0, 0, 0))
 	{
 		Vec3_<T> w = vec.normalized();
 		Vec3_<T> u = (w ^ ((fabs(w.x) < T(0.7)) ? Vec3_<T>(1, 0, 0) : Vec3_<T>(0, 1, 0))).normalized();
 		Vec3_<T> v = (w ^ u).normalized();
-		return Matrix4_(u, v, w);
+		return Matrix4_(u, v, w, origin);
 	}
 
 	/**
