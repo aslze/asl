@@ -132,6 +132,8 @@ protected:
 	};
 	void alloc(int n)
 	{
+		if (n < 0)
+			n = 0;
 		if (n < ASL_STR_SPACE)
 			_size = 0;
 		else
