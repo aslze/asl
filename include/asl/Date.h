@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_DATE_H
@@ -99,10 +99,15 @@ public:
 	/**
 	Creates a date-time from the given components, from year to seconds.
 	*/
-	Date(int y, int m, int d, int h=0, int mn=0, int s=0);
+	Date(int y, int m, int d, int h = 0, int mn = 0, int s = 0) { construct(LOCAL, y, m, d, h, mn, s); }
+
 	/**
 	Creates a date-time from the given components, from year to seconds, in LOCAL or UTC time, depending on specified zone
-	*/	Date(Zone z, int y, int m, int d, int h = 0, int mn = 0, int s = 0);
+	*/
+	Date(Zone z, int y, int m, int d, int h = 0, int mn = 0, int s = 0)
+	{
+		construct(z, y, m, d, h, mn, s);
+	}
 	/**
 	Returns a string representation of this date in ISO-8601 format
 	*/

@@ -70,33 +70,6 @@ struct ASL_API Url
 	static String decode(const String& s);
 };
 
-inline ASL_DEPRECATED(Url parseUrl(const String& url), "Use Url(url)")
-{
-	return Url(url);
-}
-
-/**
-\defgroup Global Global functions
-@{
-*/
-
-/**
-Encodes a string with percent encoding for use in a URL.
-\deprecated Use Url::encode()
-*/
-inline ASL_DEPRECATED(String encodeUrl(const String& s), "Use Url::encode()")
-{
-	return Url::encode(s);
-}
-
-/**
-Decodes a string with percent encoding.
-\deprecated Use Url::decode()
-*/
-inline ASL_DEPRECATED(String decodeUrl(const String& s), "Use Url::decode()")
-{
-	return Url::decode(s);
-}
 
 /**@}*/
 
@@ -186,7 +159,7 @@ public:
 	/**
 	Returns the message body as text
 	*/
-	String text() const;
+	String text() const { return String(_body); }
 	/**
 	Returns the message body interpreted as JSON
 	*/
@@ -373,7 +346,7 @@ public:
 	friend class HttpResponse;
 
 	// [deprecated]
-	ASL_DEPRECATED(const Array<String>& parts() const, "?");
+	ASL_DEPRECATED(const Array<String>& parts() const, "?") { return _parts; }
 
 	void setRecursion(int n) { _recursion = n; }
 
@@ -432,7 +405,8 @@ public:
 	/**
 	Returns true if the response status code belongs to the type given (2xx, 3xx, 4xx or 5xx).
 	*/
-	bool is(StatusType code) const;
+	bool is(StatusType code) const { return _code / 100 == code; }
+
 	/**
 	Returns true if the response is OK (code 2xx)
 	*/
@@ -444,7 +418,7 @@ public:
 	/**
 	Returns a string representation of the last socket error
 	*/
-	String socketError() const;
+	String socketError() const { return _socketError; }
 
 protected:
 	int _code;

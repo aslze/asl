@@ -50,7 +50,7 @@ file.seek(16);
 file.write(buffer, sizeof(buffer));   // closed in destructor
 ~~~
 
-`File(name, mode)` or `File::open(name, mode)` now support additional flag that fails if the file exists
+`File(name, mode)` or `File::open(name, mode)` now support additional flag CREATE that fails if the file exists
 (only where the OS runtime library supports the "x" fopen flag):
 
 ~~~
@@ -66,6 +66,8 @@ protected:
 	String _path;
 	mutable FileInfo _info;
 	Endian _endian;
+	static FileInfo getFileInfo(const String& path);
+
 public:
 	enum OpenMode{READ, WRITE, APPEND, RW, CREATE=4, TEXT=8};
 	enum SeekMode{START, HERE, END};
@@ -125,11 +127,21 @@ public:
 	/**
 	Returns the file's last modification date
 	*/
-	Date lastModified() const;
+	Date lastModified() const
+	{
+		if (!_info)
+			_info = getFileInfo(_path);
+		return _info.lastModified;
+	}
 	/**
 	Returns the file's creation date
 	*/
-	Date creationDate() const;
+	Date creationDate() const
+	{
+		if (!_info)
+			_info = getFileInfo(_path);
+		return _info.creationDate;
+	}
 	/**
 	Sets the file's last modification date
 	*/
@@ -137,7 +149,12 @@ public:
 	/**
 	Returns the file size
 	*/
-	Long size() const;
+	Long size() const
+	{
+		if (!_info)
+			_info = getFileInfo(_path);
+		return _info.size;
+	}
 	/**
 	Returns the file's name (without its directory)
 	*/
@@ -197,7 +214,7 @@ public:
 	/**
 	Returns the binary content of the file as an array of bytes
 	*/
-	ByteArray content();
+	ByteArray content() { return firstBytes((int)size()); }
 	/**
 	Writes the binary content of the file from an array of bytes. Returns false on failure
 	*/

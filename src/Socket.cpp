@@ -80,12 +80,6 @@ static const char* messages[] = {
 	"SOCKET_BAD_BIND"
 };
 
-Sockets& Sockets::operator<<(Socket& s)
-{
-	set << s;
-	return *this;
-}
-
 int Sockets::waitInput(double t)
 {
 	fd_set rset;
@@ -94,9 +88,9 @@ int Sockets::waitInput(double t)
 	to.tv_usec = (int)((t-floor(t))*1e6);
 	FD_ZERO(&rset);
 	int m=0;
-	for(int i=0; i<set.length(); i++)
+	for(int i=0; i<_set.length(); i++)
 	{
-		int sockh = set[i].handle();
+		int sockh = _set[i].handle();
 		if (sockh < 0)
 			return -1;
 		if (sockh > m)
@@ -106,29 +100,16 @@ int Sockets::waitInput(double t)
 	int r=select(m+1, &rset, 0, 0, &to);
 	if(r<0)
 		return -1;
-	changed.clear();
-	for (int j = 0; j < set.length(); j++)
+	_changed.clear();
+	for (int j = 0; j < _set.length(); j++)
 	{
-		int sockh = set[j].handle();
+		int sockh = _set[j].handle();
 		if (sockh < 0)
 			return -1;
 		if (FD_ISSET(sockh, &rset))
-			changed << set[j];
+			_changed << _set[j];
 	}
-	return changed.length();
-}
-
-bool Sockets::hasInput(const Socket& s)
-{
-	return set.contains(s);
-}
-
-void Sockets::close()
-{
-	foreach(Socket& s, set)
-	{
-		s.close();
-	}
+	return _changed.length();
 }
 
 #ifdef _WIN32
@@ -241,11 +222,6 @@ String InetAddress::toString() const
 		return host() << ':' << port();
 	else
 		return (String) '[' << host() << "]:" << p;
-}
-
-bool InetAddress::operator==(const InetAddress& a) const
-{
-	return _type == a._type && _data == a._data;
 }
 
 Array<InetAddress> InetAddress::lookup(const String& host)
@@ -650,17 +626,6 @@ ByteArray Socket_::read(int n)
 	return a.resize(max(0, n));
 }
 
-void Socket_::skip(int n)
-{
-	ByteArray a(n);
-	read(a.data(), a.length());
-}
-
-bool Socket_::disconnected()
-{
-	return _handle < 0 || _error != 0 || (waitInput(0) && available() <= 0);
-}
-
 bool Socket_::waitInput(double t)
 {
 	if (_handle < 0)
@@ -692,18 +657,6 @@ String Socket_::errorMsg() const
 
 
 // PacketSocket (UDP)
-
-PacketSocket_::PacketSocket_()
-{
-	_type = PACKET;
-	_blocking = false;
-}
-
-PacketSocket_::PacketSocket_(int fd) : Socket_(fd)
-{
-	_type = PACKET;
-	_blocking = false;
-}
 
 String PacketSocket_::readLine()
 {
@@ -738,18 +691,6 @@ void PacketSocket_::sendTo(const InetAddress& to, const void* data, int n)
 }
 
 // LocalSocket (UNIX)
-
-LocalSocket_::LocalSocket_()
-{
-	_type = LOCAL;
-	_family = InetAddress::LOCAL;
-}
-
-LocalSocket_::LocalSocket_(int fd) : Socket_(fd)
-{
-	_type = LOCAL;
-	_family = InetAddress::LOCAL;
-}
 
 LocalSocket_::~LocalSocket_()
 {

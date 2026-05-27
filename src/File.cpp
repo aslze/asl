@@ -61,9 +61,10 @@ static FileInfo infoFor(const WIN32_FIND_DATA& data)
 	return info;
 }
 
-static FileInfo getFileInfo(const String& path)
+FileInfo File::getFileInfo(const String& path)
 {
 	WIN32_FIND_DATA data;
+	memset(&data, 0, sizeof(data));
 	HANDLE hdir = FindFirstFile(nat(path), &data);
 	if (hdir == INVALID_HANDLE_VALUE)
 	{
@@ -93,7 +94,7 @@ static FileInfo infoFor(const struct stat& data)
 	return info;
 }
 
-FileInfo getFileInfo(const String& path)
+FileInfo File::getFileInfo(const String& path)
 {
 	struct stat data;
 	if (stat(path, &data))
@@ -237,27 +238,6 @@ String File::directory() const
 	return (n>=0)? _path.substring(0, n) : String(".");
 }
 
-Long File::size() const
-{
-	if(!_info)
-		_info = getFileInfo(_path);
-	return _info.size;
-}
-
-Date File::creationDate() const
-{
-	if(!_info)
-		_info = getFileInfo(_path);
-	return _info.creationDate;
-}
-
-Date File::lastModified() const
-{
-	if(!_info)
-		_info = getFileInfo(_path);
-	return _info.lastModified;
-}
-
 bool File::setLastModified(const Date& t)
 {
 #ifdef _WIN32
@@ -281,11 +261,6 @@ bool File::setLastModified(const Date& t)
 	times.modtime = (time_t)t.time();
 	return utime(_path, &times) == 0;
 #endif
-}
-
-ByteArray File::content()
-{
-	return firstBytes((int)size());
 }
 
 bool File::put(const ByteArray& data)

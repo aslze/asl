@@ -43,7 +43,12 @@ public:
 	/**
 	Removes the topmost item and returns it
 	*/
-	T popget() {T y; (*this)>> y; return y;}
+	T popget()
+	{
+		T y = top();
+		pop();
+		return y;
+	}
 	/**
 	Returns a reference to the topmost item in the stack.
 	*/

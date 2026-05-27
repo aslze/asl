@@ -51,13 +51,6 @@ int TextFile::scanf(const String& fmt, void* p1, void* p2, void* p3, void* p4)
 	return fscanf(_file, fmt, p1, p2, p3, p4);
 }
 
-String TextFile::readLine()
-{
-	String s;
-	readLine(s);
-	return s;
-}
-
 String TextFile::readLine(char newline)
 {
 	String s(1000, 0);
@@ -104,18 +97,6 @@ bool TextFile::readLine(String& s)
 	} while (1);
 	s.fix(n);
 	return true;
-}
-
-Array<String> TextFile::lines()
-{
-	Array<String> lines;
-	if(!_file && !open(READ))
-		return lines;
-	while (!end()) {
-		lines.resize(lines.length() + 1);
-		readLine(lines.last());
-	}
-	return lines;
 }
 
 String TextFile::text()

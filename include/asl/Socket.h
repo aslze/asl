@@ -26,16 +26,21 @@ class Socket;
 
 class ASL_API Sockets
 {
-	Array<Socket> set, changed;
+	Array<Socket> _set, _changed;
 public:
 	Sockets() {}
-	int length() const { return set.length(); }
-	Socket& operator[](int i) { return set[i]; }
-	const Socket& operator[](int i) const { return set[i]; }
-	Sockets& operator<<(Socket& s);
+	int length() const { return _set.length(); }
+	Socket& operator[](int i) { return _set[i]; }
+	const Socket& operator[](int i) const { return _set[i]; }
+	Sockets&      operator<<(Socket& s)
+	{
+		_set << s;
+		return *this;
+	}
 	int waitInput(double t=60);
-	bool hasInput(const Socket& s);
-	Socket& activeAt(int i) {return changed[i];}
+	bool hasInput(const Socket& s) { return _set.contains(s); }
+
+	Socket& activeAt(int i) { return _changed[i]; }
 	void close();
 };
 
@@ -68,7 +73,8 @@ public:
 	Returns a string representation of this address
 	*/
 	String toString() const;
-	bool operator==(const InetAddress& a) const;
+	bool   operator==(const InetAddress& a) const { return _type == a._type && _data == a._data; }
+
 	bool operator!=(const InetAddress& a) const {return !(*this==a);}
 	/**
 	Returns the port
@@ -119,7 +125,11 @@ ASL_SMART_CLASS(Socket, SmartObject)
 	void setBlocking(bool b) { _blocking = b; }
 	virtual int handle() const { return _handle; }
 	void setEndian(Endian e) { _endian = e; }
-	virtual bool disconnected();
+	virtual bool disconnected()
+	{
+		return _handle < 0 || _error != 0 || (waitInput(0) && available() <= 0);
+	}
+
 	virtual bool bind(const String& ip, int port);
 	virtual bool bind(const String& path);
 	virtual void listen(int n = 5);
@@ -133,7 +143,11 @@ ASL_SMART_CLASS(Socket, SmartObject)
 	virtual int read(void* data, int size);
 	virtual int write(const void* data, int n);
 	ByteArray read(int n = -1);
-	void skip(int n);
+	void skip(int n)
+	{
+		ByteArray a(n);
+		read(a.data(), a.length());
+	}
 	virtual bool waitInput(double timeout = 60);
 	int error() const { return _error; }
 	virtual String errorMsg() const;
@@ -368,8 +382,16 @@ public:
 ASL_SMART_CLASS(PacketSocket, Socket)
 {
 	ASL_SMART_INNER_DEF(PacketSocket);
-	PacketSocket_();
-	PacketSocket_(int fd);
+	PacketSocket_()
+	{
+		_type = PACKET;
+		_blocking = false;
+	}
+	PacketSocket_(int fd) : Socket_(fd)
+	{
+		_type = PACKET;
+		_blocking = false;
+	}
 	String readLine();
 	void sendTo(const InetAddress& addr, const void* data, int n);
 	int readFrom(InetAddress& addr, void* data, int n);
@@ -444,8 +466,16 @@ public:
 ASL_SMART_CLASS(LocalSocket, Socket)
 {
 	ASL_SMART_INNER_DEF(LocalSocket);
-	LocalSocket_();
-	LocalSocket_(int fd);
+	LocalSocket_()
+	{
+		_type = LOCAL;
+		_family = InetAddress::LOCAL;
+	}
+	LocalSocket_(int fd) : Socket_(fd)
+	{
+		_type = LOCAL;
+		_family = InetAddress::LOCAL;
+	}
 	~LocalSocket_();
 	bool bind(const String& name);
 	Socket_* accept();
@@ -561,6 +591,14 @@ public:
 		return setLoop(loop) && setTTL(ttl);
 	}
 };
+
+inline void Sockets::close()
+{
+	foreach (Socket& s, _set)
+	{
+		s.close();
+	}
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

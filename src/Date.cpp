@@ -122,7 +122,7 @@ Date::Date(const String& t)
 			int i = 1;
 			while (myisdigit(p[i]))
 				i++;
-			ms = parseInt(p + 1, i - 1) * pow(10.0, 1-i);
+			ms = parseInt(p + 1, i - 1) * pow(10.0, 1 - i);
 			p += i;
 		}
 
@@ -206,16 +206,6 @@ Date::Date(const String& str, const String& fmt)
 		}
 	}
 	construct(LOCAL, year, month, day, hour, minute, second);
-}
-
-Date::Date(int y, int m, int d, int h, int mn, int s)
-{
-	construct(LOCAL, y, m, d, h, mn, s);
-}
-
-Date::Date(Zone z, int y, int m, int d, int h, int mn, int s)
-{
-	construct(z, y, m, d, h, mn, s);
 }
 
 #define secsInDay        86400.0

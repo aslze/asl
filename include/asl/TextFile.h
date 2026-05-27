@@ -70,14 +70,32 @@ public:
 	/** Reads formatted text as with the regular scanf up to 4 items only! */
 	int scanf(const String& fmt, void* p1, void* p2 = 0, void* p3 = 0, void* p4 = 0);
 	/** Reads and returns a line from the file */
-	String readLine();
+	String readLine()
+	{
+		String s;
+		readLine(s);
+		return s;
+	}
+
 	bool readLine(String& s);
 	String readLine(char newline);
 
 	/** Returns the textual content of the file as a string. The file does not need to be opened. */
 	String text();
 	/** Returns all the lines contained in the file as an array of strings. The file does not need to be opened. */
-	Array<String> lines();
+	Array<String> lines()
+	{
+		Array<String> lines;
+		if (!_file && !open(READ))
+			return lines;
+		while (!end())
+		{
+			lines << String();
+			readLine(lines.last());
+		}
+		return lines;
+	}
+
 	/** Writes the given string at the end of the file, opening in append mode if the file was not opened. Returns false on failure. */
 	bool append(const String& line);
 	/** Writes the given string at the end of the file, opening in write mode if the file was not opened. Returns false on failure. */

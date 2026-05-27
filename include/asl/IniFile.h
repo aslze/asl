@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_INIFILE_H
@@ -145,12 +145,33 @@ public:
 	/**
 	Returns all keys and values as a map with keys as "section/key"
 	*/
-	Dic<> values() const;
+	Dic<> values() const
+	{
+		Dic<> vals;
+		foreach2 (String title, const Section& sec, _sections)
+		{
+			String prefix = title == '%' ? String() : (title + '/');
+			foreach2 (String& k, const String& v, sec)
+			{
+				vals[prefix + k] = v;
+			}
+		}
+		return vals;
+	}
 
 	/**
 	Returns a section's keys and values as a map
 	*/
-	Dic<> values(const String& secname) const;
+	Dic<> values(const String& secname) const
+	{
+		Dic<> vals;
+		if (!_sections.has(secname))
+			return vals;
+		const Section& sec = _sections[secname];
+		foreach2 (String& k, const String& v, sec)
+			vals[k] = v;
+		return vals;
+	}
 
 protected:
 	Dic<Section> _sections;

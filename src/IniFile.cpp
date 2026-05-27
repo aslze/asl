@@ -1,7 +1,7 @@
 #include <asl/IniFile.h>
 #include <asl/TextFile.h>
 
-#define NOSECTION "-"
+#define NOSECTION "%"
 
 namespace asl {
 
@@ -262,30 +262,6 @@ IniFile::~IniFile()
 {
 	if(_shouldwrite)
 		write(_filename);
-}
-
-Dic<> IniFile::values() const
-{
-	Dic<> vals;
-	foreach2 (String title, const Section& sec, _sections)
-	{
-		foreach2 (String& k, const String& v, sec)
-		{
-			vals[title + "/" + k] = v;
-		}
-	}
-	return vals;
-}
-
-Dic<> IniFile::values(const String& secname) const
-{
-	Dic<> vals;
-	if (!_sections.has(secname))
-		return vals;
-	const Section& sec = _sections[secname];
-	foreach2 (String& k, const String& v, sec)
-		vals[k] = v;
-	return vals;
 }
 
 }

@@ -172,11 +172,6 @@ HttpMessage::HttpMessage() : _proto("HTTP/1.1"), _socket(NULL), _fileBody(false)
 	memset(&*_status, 0, sizeof(*_status));
 }
 
-String HttpMessage::text() const
-{
-	return String(_body);
-}
-
 Var HttpMessage::json() const
 {
 	String str = _body;
@@ -514,11 +509,6 @@ const String& HttpRequest::query(const String& key)
 	return query()[key];
 }
 
-const Array<String>& HttpRequest::parts() const
-{
-	return _parts;
-}
-
 bool HttpRequest::is(const String& pat)
 {
 	int i = pat.indexOf('*');
@@ -574,16 +564,6 @@ void HttpResponse::setCode(int code)
 		msg = "OK";
 
 	_command = String::f("%s %i %s", *_proto, code, *msg);
-}
-
-bool HttpResponse::is(HttpResponse::StatusType code) const
-{
-	return _code / 100 == code;
-}
-
-String HttpResponse::socketError() const
-{
-	return _socketError;
 }
 
 void HttpMessage::useSink(const Shared<HttpSink>& s)
