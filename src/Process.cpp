@@ -135,6 +135,24 @@ namespace asl {
 		SetEnvironmentVariableA(var, value);
 	}
 
+	Dic<> Process::environment()
+	{
+		Dic<> envvars;
+		LPTCH  envStrings = GetEnvironmentStringsA();
+		if (envStrings)
+		{
+			for (LPTCH env = envStrings; *env; env += strlen(env) + 1)
+			{
+				String s = env;
+				int    i = s.indexOf('=');
+				if (i > 0)
+				    envvars[s.substr(0, i)] = s.substr(i + 1);
+			}
+			FreeEnvironmentStringsA(envStrings);
+		}
+	    return envvars;
+	}
+
 	Process::Process()
 	{
 	    _pipe_err[0] = 0;
@@ -383,6 +401,21 @@ String Process::env(const String& var)
 void Process::setEnv(const String& var, const String& value)
 {
 	setenv(var, value, 1);
+}
+
+Dic<> Process::environment()
+{
+	char** env = environ;
+	Dic<>        vars;
+	while (*env)
+	{
+		String s = *env;
+		int    i = s.indexOf('=');
+		if (i != -1)
+			vars[s.substring(0, i)] = s.substring(i + 1);
+		env++;
+	}
+	return vars;
 }
 
 Process::Process()

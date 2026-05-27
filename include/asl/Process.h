@@ -5,6 +5,7 @@
 #define ASL_PROCESS
 
 #include <asl/String.h>
+#include <asl/Map.h>
 
 namespace asl {
 
@@ -198,6 +199,11 @@ public:
 	Sets the value of an environment variable.
 	*/
 	static void setEnv(const String& var, const String& value);
+
+	/**
+	Returns the current environment variables as a Dic
+	*/
+	static Dic<> environment();
 	/**
 	Executes `command` and returns the process' output (written to *stdout*) as a `String`. Add a '*' at the end
 	of the command name to show the program's window in case of Win32 apps.
