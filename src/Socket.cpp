@@ -33,6 +33,7 @@ struct IUnknown; // Workaround for "combaseapi.h(229): error C2187: syntax error
 
 #include <string.h>
 #include <asl/Socket.h>
+#include <asl/File.h>
 
 #ifndef ASL_NOEXCEPT
 #define NET_ERROR(o) throw SocketException()
@@ -400,11 +401,6 @@ Socket_::Socket_(int fd)
 	_endian = ENDIAN_NATIVE;
 }
 
-Socket_::~Socket_()
-{
-	Socket_::close();
-}
-
 bool Socket_::init(bool force)
 {
 	if (_handle >= 0 && force)
@@ -658,21 +654,6 @@ String Socket_::errorMsg() const
 
 // PacketSocket (UDP)
 
-String PacketSocket_::readLine()
-{
-	String s(1000, 0);
-	if (waitInput())
-	{
-		int m = read(&s[0], 1000);
-		if (m > 0)
-			s[m - 1] = '\0';
-		int n = s.indexOf('\n');
-		if (n >= 0)
-			s[n] = '\0';
-	}
-	return s.fix();
-}
-
 int PacketSocket_::readFrom(InetAddress& a, void* data, int n)
 {
 	if (_handle < 0)
@@ -699,11 +680,7 @@ LocalSocket_::~LocalSocket_()
 	if (path)
 	{
 		close();
-#ifdef _WIN32
-		DeleteFileW(path);
-#else
-		unlink(path);
-#endif
+		File(path).remove();
 	}
 #endif
 }
@@ -711,11 +688,7 @@ LocalSocket_::~LocalSocket_()
 bool LocalSocket_::bind(const String& name)
 {
 #ifdef ASL_SOCKET_LOCAL
-#ifdef _WIN32
-	DeleteFileW(name);
-#else
-	unlink(name);
-#endif
+	File(name).remove();
 	init();
 	InetAddress here(name);
 	if (::bind(_handle, (sockaddr*)here.ptr(), sizeof(sockaddr_un)))

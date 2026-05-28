@@ -65,7 +65,11 @@ public:
 	/**
 	Destroys the object and save the file if there were modifications
 	*/
-	~IniFile();
+	~IniFile()
+	{
+		if (_shouldwrite)
+			write(_filename);
+	}
 
 	/**
 	Returns true if the file was read correctly
@@ -106,37 +110,11 @@ public:
 	void write(const String& fname="");
 
 	/**
-	Sets the current section to 'name' (variables will be read from here by default)
-	\deprecated Use full names like "section/key"
-	*/
-	ASL_DEPRECATED(Section& section(const String& name), "Use full names like 'section/key'");
-
-	const Dic<Section>& sections() const { return _sections; }
-
-	/**
 	Returns true if the file contains a key named `name`. If the name is like
 	`section/name` then function tests a variable `name` in section `section`.
 	*/
 	bool has(const String& name) const;
 
-	/**
-	Returns the length of an "array" named `name` as written by the Qt library and enables reading its values.
-	\deprecated Use ini[name/size]
-	*/
-	ASL_DEPRECATED(int arraysize(const String& name) const, "Use ini[name/size]")
-	{
-		return _sections[_currentTitle = name]["size"];
-	}
-
-	/**
-	Returns the value associated with field `name` at the array position `index` of the array last specified
-	with `arraysize()`.
-	\deprecated Use ini[name/index\\field]
-	*/
-	ASL_DEPRECATED(String array(const String& field, int index) const, "Use ini[name/index\\field]")
-	{
-		return _sections[_currentTitle][String(index + 1) << '\\' << field];
-	}
 	/**
 	Returns the names of sections in the file
 	*/

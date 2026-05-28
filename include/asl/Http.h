@@ -114,7 +114,7 @@ public:
 	/**
 	Returns true if the message includes the given header name
 	*/
-	bool hasHeader(const String& name) const;
+	bool hasHeader(const String& name) const { return _headers.has(capitalized(name)); }
 
 	bool containsFile() const { return _fileBody; }
 
@@ -137,7 +137,13 @@ public:
 	/**
 	Sets the body of the message as a binary blob.
 	*/
-	void put(const ByteArray& data);
+	void put(const ByteArray& data)
+	{
+		_body = data;
+		_fileBody = false;
+		setHeader("Content-Length", _body.length());
+	}
+
 	/**
 	Sets the body of the message as a text string.
 	*/
@@ -173,7 +179,8 @@ public:
 	/**
 	Writes the given text string to the message body.
 	*/
-	void write(const String& text);
+	void write(const String& text) { write(*text, text.length()); }
+
 	/**
 	Writes the given buffer to the message body.
 	*/
@@ -337,12 +344,18 @@ public:
 	Returns the query converted to a Dic, assuming that it consists of keys and values like
 	`key1=value1&key2=value2`.
 	*/
-	const Dic<>& query();
+	const Dic<>& query()
+	{
+		if (_querystring.length() != 0 && _query.length() == 0)
+			_query = Url::parseQuery(_querystring);
+
+		return _query;
+	}
 	/**
 	Returns the unescaped value associated with the named key in the query; For example if the query was
 	`key1=value1&key2=value2%26`, then `request.query("key2")` would return "value1&".
 	*/
-	const String& query(const String& key);
+	const String& query(const String& key) { return query()[key]; }
 	friend class HttpResponse;
 
 	// [deprecated]
@@ -391,7 +404,12 @@ public:
 		SERVER_ERROR = 5  //!< Status 5xx Server Error
 	};
 
-	HttpResponse();
+	HttpResponse()
+	{
+		_headersSent = true;
+		setCode(0);
+	}
+
 	HttpResponse(const HttpRequest& r);
 	/**
 	Sets the response status code (such as 200 [default] for OK)

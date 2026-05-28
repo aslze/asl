@@ -636,8 +636,6 @@ XdlParser::XdlParser()
 
 XdlParser::~XdlParser()
 {
-	while(_lists.length() > 0)
-		_lists.pop();
 }
 
 Var XdlParser::value() const
@@ -666,9 +664,7 @@ void XdlParser::begin_array()
 
 void XdlParser::end_array()
 {
-	Var v = _lists.top();
-	_lists.pop();
-	put(v);
+	put(_lists.popget());
 }
 
 void XdlParser::begin_object(const char* _class)
@@ -680,9 +676,7 @@ void XdlParser::begin_object(const char* _class)
 
 void XdlParser::end_object()
 {
-	Var v = _lists.top();
-	_lists.pop();
-	put(v);
+	put(_lists.popget());
 }
 
 void XdlParser::new_property(const String& name)
@@ -699,8 +693,7 @@ void XdlParser::put(const Var& x)
 		top << x;
 		break;
 	case Var::OBJ: {
-		top[_props.top()] = x;
-		_props.pop();
+		top[_props.popget()] = x;
 		break;
 	}
 	default: break;
@@ -752,7 +745,6 @@ String XdlEncoder::encode(const Var& v, Json::Mode mode)
 	_sink->write(_out);
 	return data();
 }
-
 
 void XdlEncoder::_encode(const Var& v)
 {

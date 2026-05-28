@@ -109,7 +109,7 @@ FileInfo File::getFileInfo(const String& path)
 
 bool File::open(const String& name, File::OpenMode mode)
 {
-	if(name == "")
+	if(!name.ok())
 		return false;
 	CHART fopen_mode[8];
 	int   i = 0;
@@ -175,6 +175,15 @@ void File::seek(Long offset, SeekMode from)
 	_fseeki64(_file, offset, (from==START)? SEEK_SET :(from==HERE)? SEEK_CUR: SEEK_END);
 #else
 	fseek(_file, offset, (from==START)? SEEK_SET :(from==HERE)? SEEK_CUR: SEEK_END);
+#endif
+}
+
+bool File::remove()
+{
+#ifdef _WIN32
+	return DeleteFileW(_path) != 0;
+#else
+	return unlink(_path) == 0;
 #endif
 }
 

@@ -186,7 +186,7 @@ void HttpServer::serveFile(HttpRequest& request, HttpResponse& response)
 
 void HttpServer::addMethod(const String& verb)
 {
-	if (_methods == "")
+	if (!_methods.ok())
 		_methods = "GET, POST, OPTIONS, PUT, DELETE, PATCH, HEAD";
 	Array<String> methods = _methods.split(", ");
 	if (!methods.contains(verb))

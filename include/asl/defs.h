@@ -41,9 +41,9 @@ namespace asl {
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#ifndef ASL_NOEXCEPT
 #include <new>
+
+#ifndef ASL_NOEXCEPTIONS
 #define ASL_BAD_ALLOC() throw std::bad_alloc()
 #else
 #define ASL_BAD_ALLOC() asl::asl_die("Out of memory in " __FILE__, __LINE__)

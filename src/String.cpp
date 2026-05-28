@@ -290,16 +290,16 @@ const wchar_t* String::dataw() const
 
 String::String(const wchar_t* s)
 {
-	init(4*(int)wcslen(s));
-	_len = to8bit(s, str(), cap());
+	char* p = alloc(4*(int)wcslen(s));
+	_len = to8bit(s, p, cap());
 }
 
 String::String(const Array<wchar_t>& txt)
 {
-	init(4 * txt.length());
+	char* p = alloc(4 * txt.length());
 	Array<wchar_t> a = txt.clone(); // hack to append a nul
 	a << 0;
-	_len = to8bit(a.data(), str(), cap());
+	_len = to8bit(a.data(), p, cap());
 }
 
 String String::fromCodes(const Array<int>& codes)
@@ -467,52 +467,47 @@ String& String::resize(int n, bool keep, bool newlen)
 
 String::String(Long x)
 {
-	alloc((x < 1000000000000000ll && x > -100000000000000ll) ? ASL_STR_SPACE-1 : 21);
-	_len = myltoa(x, str());
+	char* p = alloc((x < 1000000000000000ll && x > -100000000000000ll) ? ASL_STR_SPACE-1 : 21);
+	_len = myltoa(x, p);
 }
 
 String::String(ULong x)
 {
-	alloc(x < 1000000000000000ll ? ASL_STR_SPACE - 1 : 21);
-	_len = snprintf(str(), cap(), "%llu", x);
+	char* p = alloc(x < 1000000000000000ll ? ASL_STR_SPACE - 1 : 21);
+	_len = snprintf(p, cap(), "%llu", x);
 }
 
 String::String(int x)
 {
-	alloc(11);
-	_len = myitoa(x, str());
+	char* p = alloc(11);
+	_len = myitoa(x, p);
 }
 
 String::String(unsigned x)
 {
-	alloc(10);
-	_len = snprintf(str(), cap(), "%u", x);
+	char* p = alloc(10);
+	_len = snprintf(p, cap(), "%u", x);
 }
 
 String::String(float x)
 {
-	alloc(15);
-	_len = snprintf(str(), cap(), "%.7g", x);
+	char* p = alloc(15);
+	_len = snprintf(p, cap(), "%.7g", x);
 }
 
 String::String(double x)
 {
 	char s[32];
 	_len = snprintf(s, 32, "%.15g", x);
-	alloc(_len);
-	strcpy(str(), s);
+	char* p = alloc(_len);
+	strcpy(p, s);
 }
 
 String::String(bool x)
 {
-	alloc(5);
-	strcpy(str(), x ? "true" : "false");
-	_len = (int)strlen(str());
-}
-
-Long String::toLong() const
-{
-	return myatol(str());
+	char* p = alloc(5);
+	strcpy(p, x ? "true" : "false");
+	_len = x ? 4 : 5;
 }
 
 String String::toLocal() const
@@ -606,14 +601,6 @@ int String::count() const
 	return count_;
 }
 
-String String::substring(int i, int j) const
-{
-	String s(j-i, j-i);
-	memcpy(s.str(), str()+i, j-i);
-	s.str()[j-i]='\0';
-	return s;
-}
-
 String String::substr(int i, int n) const
 {
 	if (i < 0) i += _len;
@@ -622,10 +609,7 @@ String String::substr(int i, int n) const
 	int j = i + n;
 	if (j > _len)
 		j = _len;
-	String s(j - i, j - i);
-	memcpy(s.str(), str() + i, j - i);
-	s.str()[j - i] = '\0';
-	return s;
+	return String(str() + i, j - i);
 }
 
 int String::indexOf(char c, int i0) const

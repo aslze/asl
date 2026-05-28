@@ -109,7 +109,7 @@ Url::Url(const String& url)
 		pathstart = url.length();
 	host = url.substring(hoststart, pathstart);
 	path = url.substring(pathstart);
-	if (path == "")
+	if (!path.ok())
 		path = '/';
 	int hostend = pathstart, portstart = 0;
 	if (url[hoststart] == '[') // IPv6
@@ -177,13 +177,6 @@ Var HttpMessage::json() const
 	String str = _body;
 	Var data = Json::decode(str);
 	return data.ok() ? data : Var(Url::parseQuery(str));
-}
-
-void HttpMessage::put(const ByteArray& data)
-{
-	_body = data;
-	_fileBody = false;
-	setHeader("Content-Length", _body.length());
 }
 
 void HttpMessage::put(const Var& body)
@@ -489,24 +482,11 @@ void HttpRequest::read()
 	_path.split('/', _parts);
 	if (_parts.length() > 0)
 	{
-		if (_parts.last() == "")
+		if (!_parts.last().ok())
 			_parts.removeLast();
-		if (_parts.length() > 0 && _parts[0] == "")
+		if (_parts.length() > 0 && !_parts[0].ok())
 			_parts.remove(0);
 	}
-}
-
-const Dic<>& HttpRequest::query()
-{
-	if(_querystring.length() != 0 && _query.length() == 0)
-		_query = Url::parseQuery(_querystring);
-
-	return _query;
-}
-
-const String& HttpRequest::query(const String& key)
-{
-	return query()[key];
 }
 
 bool HttpRequest::is(const String& pat)
@@ -524,12 +504,6 @@ bool HttpRequest::is(const String& pat)
 		_argument = "";
 		return false;
 	}
-}
-
-HttpResponse::HttpResponse()
-{
-	_headersSent = true;
-	setCode(0);
 }
 
 HttpResponse::HttpResponse(const HttpRequest& r)
@@ -597,11 +571,6 @@ bool HttpMessage::write()
 		return putFile(_body);
 	else
 		return write((const char*)_body.data(), _body.length()) > 0;
-}
-
-void HttpMessage::write(const String& text)
-{
-	write(*text, text.length());
 }
 
 int HttpMessage::write(const char* buffer, int n)

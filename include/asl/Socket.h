@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_SOCKET_H
@@ -119,7 +119,7 @@ ASL_SMART_CLASS(Socket, SmartObject)
 	bool init(bool force = false);
 	Socket_();
 	Socket_(int fd);
-	virtual ~Socket_();
+	virtual ~Socket_() { Socket_::close(); }
 	template <class T>
 	bool setOption(int level, int opt, const T& val) { return setOption(level, opt, &val, sizeof(T)); }
 	void setBlocking(bool b) { _blocking = b; }
@@ -363,18 +363,6 @@ public:
 		return s.fix();
 	}
 
-	/**
-	Reads a string from the socket that is preceded by its length as an int32 (the sender must send the byte length before)
-	\deprecated Too specific
-	*/
-	ASL_DEPRECATED(Socket& operator>>(String& x), "Use your own logic to read strings")
-	{
-		int n = 0;
-		*this >> n;
-		x = readString(n);
-		return *this;
-	}
-
 	template <class T>
 	T read() { T x; *this >> x; return x; }
 };
@@ -392,7 +380,22 @@ ASL_SMART_CLASS(PacketSocket, Socket)
 		_type = PACKET;
 		_blocking = false;
 	}
-	String readLine();
+	String readLine()
+	{
+		char buf[4000];
+		if (waitInput())
+		{
+			int n = read(buf, sizeof(buf));
+			if (n < 0)
+				n = 0;
+			const char* nl = (const char*)memchr(buf, '\n', n);
+			if (nl)
+				n = (int)(nl - buf);
+
+			return String(buf, n);
+		}
+		return String();
+	}
 	void sendTo(const InetAddress& addr, const void* data, int n);
 	int readFrom(InetAddress& addr, void* data, int n);
 };
@@ -455,7 +458,7 @@ public:
 	Reads an incoming packet of at most n bytes and returns it, and gets the address
 	of the sending peer.
 	*/
-	ByteArray readFrom(InetAddress& addr, int n = 1000)
+	ByteArray readFrom(InetAddress& addr, int n = 2048)
 	{
 		ByteArray data(n);
 		n = _()->readFrom(addr, data.data(), n);

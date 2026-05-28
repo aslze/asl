@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_STRING_H
@@ -130,22 +130,28 @@ protected:
 		char _space[ASL_STR_SPACE];
 		char* _str;
 	};
-	void alloc(int n)
+	char* alloc(int n)
 	{
-		if (n < 0)
-			n = 0;
 		if (n < ASL_STR_SPACE)
+		{
 			_size = 0;
+			return _space;
+		}
 		else
 		{
 			_size = max(++n, 20);
 			_str = (char*)malloc(_size);
 			if (!_str)
 				ASL_BAD_ALLOC();
+			return _str;
 		}
 	}
 	void free();
-	void init(int n) {alloc(n); _len=n;}
+	char* init(int n)
+	{
+		_len = n;
+		return alloc(n);
+	}
 	char* str() { return (_size == 0) ? (char*)_space : (char*)_str; }
 	const char* str() const {return (_size==0)? (const char*)_space : (const char*)_str;}
 	String(void*) : _size(0), _len(0), _str(0) {} // avoid accidental construction from arbitrary pointers
@@ -163,26 +169,29 @@ public:
 	*/
 	ASL_EXPLICIT String(int cap, int n)
 	{
-		init(max(cap, n));
+		alloc(max(cap, n))[n] ='\0';
 		_len=n;
-		str()[n] = '\0';
 	}
 	/**
 	Constructs a string from a C string (pointer to null-terminated string)
 	*/
 	String(const char* txt)
 	{
-		init((int)strlen(txt));
-		memcpy(str(), txt, _len+1);
+		int n = (int)strlen(txt);
+		char* s = init(n);
+		memcpy(s, txt, n);
+		s[n] = '\0';
 	}
 	/**
 	Constructs a string from the first `n` characters of a character buffer pointed by `txt`
 	*/
 	ASL_EXPLICIT String(const char* txt, int n)
 	{
-		init(n);
-		memcpy(str(), txt, n);
-		str()[n] = '\0';
+		if (n < 0)
+			n = 0;
+		char* s = init(n);
+		memcpy(s, txt, n);
+		s[n] = '\0';
 	}
 	/**
 	Constructs a string from a char array
@@ -190,17 +199,21 @@ public:
 	String(const Array<char>& txt)
 	{
 		int n = txt.length();
-		init(n);
-		memcpy(str(), txt.data(), n);
-		str()[n] = '\0';
+		if (n < 0)
+			n = 0;
+		char* s = init(n);
+		memcpy(s, txt.data(), n);
+		s[n] = '\0';
 	}
 	
 	String(const ByteArray& txt)
 	{
 		int n = txt.length();
-		init(n);
-		memcpy(str(), txt.data(), n);
-		str()[n] = '\0';
+		if (n < 0)
+			n = 0;
+		char* s = init(n);
+		memcpy(s, txt.data(), n);
+		s[n] = '\0';
 	}
 	/**
 	Constructs a string from an array of wide chars (UTF16)
@@ -227,9 +240,9 @@ public:
 	*/
 	String(char c)
 	{
-		init(1);
-		str()[0] = c;
-		str()[1] = '\0';
+		char* s = init(1);
+		s[0] = c;
+		s[1] = '\0';
 	}
 	/**
 	Constructs a string consisting of character `c` repeated `n` times.
@@ -238,10 +251,9 @@ public:
 	ASL_DEPRECATED(ASL_EXPLICIT String(char c, int n), "Use String::repeat()")
 	{
 		if (n < 0) n = 0;
-		init(n);
-		char* p = str();
-		memset(p, c, n);
-		p[n] = '\0';
+		char* s = init(n);
+		memset(s, c, n);
+		s[n] = '\0';
 	}
 	/**
 	Constructs a string consisting of character `c` repeated `n` times
@@ -260,8 +272,8 @@ public:
 	*/
 	String(const String& s)
 	{
-		init(s._len);
-		memcpy(str(), s.str(), _len + 1);
+		char* p = init(s._len);
+		memcpy(p, s.str(), _len + 1);
 	}
 #ifdef ASL_HAVE_MOVE
 	String(String&& s) {
@@ -323,8 +335,8 @@ public:
 	String(const QString& s)
 	{
 		QByteArray a = s.ASL_QTTO();
-		init(a.size());
-		memcpy(str(), a.data(), _len+1);
+		char* p = init(a.size());
+		memcpy(p, a.data(), _len+1);
 	}
 	void operator=(const QString& s)
 	{
@@ -416,7 +428,7 @@ public:
 	Returns true if this string represents a non-false value (e.g. none of: "", "0", "false", "False", "FALSE", "no", "NO")
 	*/
 	bool isTrue() const;
-	Long toLong() const;
+	Long toLong() const { return myatol(str()); }
 
 	/**
 	Returns a local charset version of this string (which is UTF8 or ANSI)
@@ -540,7 +552,7 @@ public:
 	/**
 	Return the substring starting at position `i` and up to but not including position `j`
 	*/
-	String substring(int i, int j) const;
+	String substring(int i, int j) const { return String(str() + i, j - i); }
 	/**
 	Return the substring starting at position `i` and up to the end
 	*/

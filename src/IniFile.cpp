@@ -76,12 +76,6 @@ IniFile::IniFile(const String& fname, bool shouldwrite)
 		_currentTitle = NOSECTION;
 }
 
-IniFile::Section& IniFile::section(const String& name)
-{
-	_currentTitle = name;
-	return _sections[name];
-}
-
 String& IniFile::operator[](const String& name)
 {
 	int slash = name.indexOf('/');
@@ -188,7 +182,7 @@ void IniFile::write(const String& fname)
 		bool empty = true;
 		foreach(String& value, section)
 		{
-			if(value != "")
+			if (value.ok())
 			{
 				empty = false;
 				break;
@@ -256,12 +250,6 @@ void IniFile::write(const String& fname)
 	}
 
 	_lines = oldlines;
-}
-
-IniFile::~IniFile()
-{
-	if(_shouldwrite)
-		write(_filename);
 }
 
 }

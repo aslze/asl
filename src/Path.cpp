@@ -59,7 +59,7 @@ Path& Path::removeDDots()
 	Array<String> parts = _path.split('/');
 	bool unc = _path.startsWith("//");
 	for (int i = 1; i < parts.length(); i++)
-		if (parts[i] == "" || parts[i] == ".")
+		if (!parts[i].ok() || parts[i] == ".")
 			parts.remove(i--);
 
 	for(int i=1; i<parts.length(); i++)

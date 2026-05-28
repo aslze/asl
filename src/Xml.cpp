@@ -126,7 +126,7 @@ Xml& Xml::operator<<(const String& t)
 
 Xml Xml::decode(const String& x)
 {
-	if (x == "")
+	if (!x.ok())
 		return Xml();
 	Dic<char> entities;
 	entities["amp"] = '&';

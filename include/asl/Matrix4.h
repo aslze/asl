@@ -153,8 +153,6 @@ public:
 
 	Matrix4_ t() const { return transposed(); }
 
-	ASL_DEPRECATED(bool isColmajor() const, "Use isRowMajor()") { return !isRowMajor(); }
-
 	bool operator==(const Matrix4_& B) const
 	{
 		for (int i = 0; i < 4; i++)
