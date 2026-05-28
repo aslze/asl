@@ -114,7 +114,7 @@ public:
 	/**
 	Returns true if the message includes the given header name
 	*/
-	bool hasHeader(const String& name) const { return _headers.has(capitalized(name)); }
+	bool hasHeader(const String& name) const;
 
 	bool containsFile() const { return _fileBody; }
 
