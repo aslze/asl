@@ -224,7 +224,8 @@ void IniFile::write(const String& fname)
 			j++;
 			if (_lines.length() > 0)
 			_lines.insert(j++, "");
-			_lines.insert(j++, String::f("[%s]", *title));
+			if (!notitle)
+				_lines.insert(j++, String::f("[%s]", *title));
 		}
 
 		String line;
