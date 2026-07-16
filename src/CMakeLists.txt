@@ -81,7 +81,7 @@ set(ASL_SRC
 	../include/asl/SHA1.h
 	../include/asl/StreamBuffer.h
 	../include/asl/testing.h
-	../include/asl/StackTrace.cpp
+	../include/asl/StackTrace.h
 )
 
 set(ASL_DEFS "")
