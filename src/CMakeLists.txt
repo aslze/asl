@@ -26,6 +26,7 @@ set(ASL_SRC
 	CmdArgs.cpp
 	SerialPort.cpp
 	SharedMem.cpp
+	StackTrace.cpp
 	unicodedata.cpp
 	util.cpp
 	SHA1.cpp
@@ -80,6 +81,7 @@ set(ASL_SRC
 	../include/asl/SHA1.h
 	../include/asl/StreamBuffer.h
 	../include/asl/testing.h
+	../include/asl/StackTrace.cpp
 )
 
 set(ASL_DEFS "")
