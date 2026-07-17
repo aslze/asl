@@ -1,5 +1,6 @@
 #include <asl/StackTrace.h>
 #include <asl/Process.h>
+#include <asl/Path.h>
 
 namespace asl
 {
