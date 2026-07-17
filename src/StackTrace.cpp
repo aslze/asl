@@ -97,13 +97,6 @@ LONG StackTrace::crashHandler(EXCEPTION_POINTERS* ep)
 }
 }
 
-#elif defined(__APPLE__)
-
-namespace asl
-{
-
-}
-
 #else
 
 #ifndef _GNU_SOURCE
@@ -113,6 +106,10 @@ namespace asl
 #include <signal.h>
 #include <unistd.h>
 #include <stdlib.h>
+
+#ifdef __APPLE__
+#include <dlfcn.h>
+#endif
 
 namespace asl
 {
@@ -141,7 +138,8 @@ void StackTrace::segv_handler(int sig)
 	Dl_info info;
 	dladdr((void*)&onCrash, &info);
 	void* baseaddr = info.dli_fbase;
-	args << "-o" << Process::myPath() << "-l" << String::f("%p", baseaddr);
+	String path = Process::myPath();
+	args << "-o" << path << "-l" << String::f("%p", baseaddr);
 	for (size_t i = 1; i < n; i++)
 	{
 		args << String::f("%p", frames[i]);
@@ -151,6 +149,16 @@ void StackTrace::segv_handler(int sig)
 	if (out.exitStatus() == 0 && out.output())
 	{
 		_message << out.output();
+	}
+	else
+	{
+		path = path + ".dSYM/Contents/Resources/DWARF/" + Path(path).name();
+		args[1] = path;
+		Process out = Process::execute("atos", args);
+		if (out.exitStatus() == 0 && out.output())
+		{
+			_message << out.output();
+		}
 	}
 #else
 	args << "-e" << Process::myPath() << "-f" << "-p" << "-C";
