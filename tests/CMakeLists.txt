@@ -29,7 +29,7 @@ set(TESTS
 	Base64
 	XML
 	Process
-	SHA1
+	SHA
 	SmartObject
 	Date
 	AtomicCount

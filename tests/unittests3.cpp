@@ -45,12 +45,16 @@ ASL_TEST(Process)
 
 #endif
 
-ASL_TEST(SHA1)
+ASL_TEST(SHA)
 {
 	SHA1::Hash h1 = SHA1::hash("abc");
 	ASL_ASSERT(encodeHex(h1, 20) == "a9993e364706816aba3e25717850c26c9cd0d89d");
 	SHA1::Hash h2 = SHA1::hash("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
 	ASL_ASSERT(encodeHex(h2, 20) == "84983e441c3bd26ebaae4aa1f95129e5e54670f1");
+	SHA256::Hash h3 = SHA256::hash("abc");
+	ASL_CHECK(encodeHex(h3, 32), ==, "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+	SHA256::Hash h4 = SHA256::hash("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
+	ASL_CHECK(encodeHex(h4), ==, "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1");
 }
 
 //#define TRACE() for(int i=0; i<count; i++) printf(" "); printf("%s\n", __FUNCTION__)
