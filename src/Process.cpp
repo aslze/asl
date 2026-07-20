@@ -466,6 +466,8 @@ bool Process::kill(int pid)
 #define ASL_OS_BSD
 #endif
 
+extern char** environ;
+
 namespace asl {
 
 String Process::env(const String& var)
