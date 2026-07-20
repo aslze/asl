@@ -818,7 +818,7 @@ Array<ProcessInfo> Process::list()
 
 	Array<kinfo_proc> procs(count);
 
-	if (sysctl(mib, 4, procs, &size, NULL, 0) < 0)
+	if (sysctl(mib, 4, procs.data(), &size, NULL, 0) < 0)
 	{
 		return a;
 	}
