@@ -341,7 +341,7 @@ SHA256::Hash SHA256::end()
 
 	for (int i = 7; i >= 0; i--)
 	{
-		byte b = (nbits >> 8 * i) & 0xff;
+		byte b = byte((nbits >> 8 * i) & 0xff);
 		add(b);
 	}
 

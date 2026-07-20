@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_PROCESS
@@ -8,6 +8,21 @@
 #include <asl/Map.h>
 
 namespace asl {
+
+class ASL_API Process;
+
+class ASL_API ProcessInfo
+{
+	friend class Process;
+	int    _pid;
+	String _path;
+
+public:
+	ProcessInfo(int pid = 0) : _pid(pid) {}
+	int    pid() const { return _pid; }
+	String name() const;
+	String path() const { return _path; }
+};
 
 /**
 A class allowing running subprocesses and communicating with them through stdin/stdout/stderr. The
@@ -63,7 +78,7 @@ class ASL_API Process
 	String _output, _errors;
 	bool _detached;
 
-	static int exec(const String& command, const Array<String>& args = Array<String>());
+	static int exec(const String& command, const Array<String>& args = Array<String>(), const Dic<>& env = Dic<>());
 
 public:
 	Process();
@@ -141,9 +156,9 @@ public:
 	static String loadedLibPath(const String& lib);
 	static void makeDaemon();
 	/**
-	Starts executing a program by a command line
+	Starts executing a program with optional command line arguments and environment variables.
 	*/
-	void run(const String& command, const Array<String>& args = Array<String>());
+	void run(const String& command, const Array<String>& args = Array<String>(), const Dic<>& env = Dic<>());
 
 	void run(const String& command, const String& arg1)
 	{
@@ -201,14 +216,15 @@ public:
 	static void setEnv(const String& var, const String& value);
 
 	/**
-	Returns the current environment variables as a Dic
+	Returns a dictionary of all environment variables of the current process.
 	*/
 	static Dic<> environment();
 	/**
-	Executes `command` and returns the process' output (written to *stdout*) as a `String`. Add a '*' at the end
-	of the command name to show the program's window in case of Win32 apps.
+	Executes `command` with optional arguments and environment vars, and returns the process' data (including output (written to *stdout* and *stderr*);
+	Add a '*' at the end of the command name to show the program's window in case of Win32 apps.
 	*/
-	static Process execute(const String& command, const Array<String>& args = Array<String>());
+	static Process execute(const String& command, const Array<String>& args = Array<String>(),
+	                       const Dic<>& env = Dic<>());
 
 	static Process execute(const String& command, const String& arg1)
 	{
@@ -230,6 +246,20 @@ public:
 		return execute(command, array<String>(arg1, arg2, arg3, arg4));
 	}
 
+	/**
+	Returns a list of all running processes in the system, with their PID and executable path.
+	*/
+	static Array<ProcessInfo> list();
+
+	/**
+	Kills the process with the given PID. Returns true if the process was killed successfully.
+	*/
+	static bool kill(int pid);
+
+	/**
+	Kills all processes with the given name. Returns the number of processes killed.
+	*/
+	static int killAll(const String& name);
 };
 
 }

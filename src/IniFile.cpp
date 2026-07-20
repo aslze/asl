@@ -223,7 +223,7 @@ void IniFile::write(const String& fname)
 				while(_lines[j][0]=='\0') j--;
 			j++;
 			if (_lines.length() > 0)
-			_lines.insert(j++, "");
+				_lines.insert(j++, "");
 			if (!notitle)
 				_lines.insert(j++, String::f("[%s]", *title));
 		}

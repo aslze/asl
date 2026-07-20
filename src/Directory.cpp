@@ -1,14 +1,20 @@
+#ifdef _WIN32
+#define _WIN32_WINNT 0x0501
+#endif
 #include <asl/Directory.h>
-#include <asl/Path.h>
+#include <asl/Process.h>
+#include <asl/TextFile.h>
+#include <asl/Set.h>
 #include <stdio.h>
 #ifdef __APPLE__
 #include <sys/syslimits.h>
 #endif
-#ifndef _WIN32
+#ifdef _WIN32
+#include <shlobj.h>
+#else
 #include <sys/types.h>
 #include <unistd.h>
 #endif
-
 
 namespace asl {
 
@@ -16,7 +22,6 @@ String Directory::name() const
 {
 	return Path(_path).name();
 }
-
 
 String Directory::directory() const
 {
@@ -29,14 +34,14 @@ bool Directory::create(const String& name)
 		return false;
 	if (createOne(name))
 		return true;
-	Path path = Path(name).absolute();
+	Path   path = Path(name).absolute();
 	String parent = path.directory();
 	if (Directory(parent).directory().ok())
-	if (parent.ok() && !Directory(parent).exists())
-	{
-		create(parent);
-	}
-	
+		if (parent.ok() && !Directory(parent).exists())
+		{
+			create(parent);
+		}
+
 	return createOne(name);
 }
 
@@ -73,18 +78,17 @@ bool Directory::removeRecursive(const String& path, bool onlyContent)
 		abs.resize(abs.length() - 1);
 	if (abs.length() == 2 && abs[1] == ':')
 		return false;
-	if (((abs.length() > 3 && abs.substr(3) == "windows") || abs.substr(3) == "program files") || abs == "")
+	if (((abs.length() > 3 && abs.substr(3) == "windows") || abs.substr(3) == "program files") || !abs.ok())
 		return false;
 	Directory dir(path);
-	foreach(File& file, dir.files())
+	foreach (File& file, dir.files())
 		ok = ok && file.remove();
-	foreach(File& d, dir.subdirs())
+	foreach (File& d, dir.subdirs())
 		ok = ok && removeRecursive(d.path());
 	if (!onlyContent)
 		ok = ok && remove(path);
 	return ok;
 }
-
 
 bool File::copy(const String& to)
 {
@@ -105,31 +109,32 @@ bool File::move(const String& to)
 #undef CreateDirectory
 #undef SetCurrentDirectory
 #ifndef ASL_ANSI
-#define WIN32_FIND_DATA WIN32_FIND_DATAW
-#define FindFirstFile FindFirstFileW
-#define FindNextFile FindNextFileW
-#define CreateDirectory CreateDirectoryW
+#define WIN32_FIND_DATA     WIN32_FIND_DATAW
+#define FindFirstFile       FindFirstFileW
+#define FindNextFile        FindNextFileW
+#define CreateDirectory     CreateDirectoryW
 #define SetCurrentDirectory SetCurrentDirectoryW
-#define STR_PREFIX(x) L##x
-#define strcmpX wcscmp
+#define STR_PREFIX(x)       L##x
+#define strcmpX             wcscmp
 #else
-#define WIN32_FIND_DATA WIN32_FIND_DATAA
-#define FindFirstFile FindFirstFileA
-#define FindNextFile FindNextFileA
-#define CreateDirectory CreateDirectoryA
+#define WIN32_FIND_DATA     WIN32_FIND_DATAA
+#define FindFirstFile       FindFirstFileA
+#define FindNextFile        FindNextFileA
+#define CreateDirectory     CreateDirectoryA
 #define SetCurrentDirectory SetCurrentDirectoryA
-#define STR_PREFIX(x) x
-#define strcmpX strcmp
+#define STR_PREFIX(x)       x
+#define strcmpX             strcmp
 #endif
 
-namespace asl {
+namespace asl
+{
 
 inline double ft2t(const FILETIME& ft)
 {
 	LARGE_INTEGER t;
 	t.HighPart = ft.dwHighDateTime;
 	t.LowPart = ft.dwLowDateTime;
-	return t.QuadPart*100e-9 - 11644473600.0;
+	return t.QuadPart * 100e-9 - 11644473600.0;
 }
 
 #define nat(x) x
@@ -147,17 +152,17 @@ static FileInfo infoFor(const WIN32_FIND_DATA& data)
 Array<File> Directory::items(const String& which, Directory::ItemType t)
 {
 	_files = Array<File>();
-	
+
 	if (File(_path).isFile()) // if path is a file, return that file only
 	{
 		return _files << File(_path);
 	}
-	
+
 	if (which.contains('|')) // handle multiple patterns separated by '|'
 	{
-		Array<File> all;
+		Array<File>   all;
 		Array<String> parts = which.split('|');
-		foreach(const String& part, parts)
+		foreach (const String& part, parts)
 		{
 			all.append(items(part, t));
 		}
@@ -165,22 +170,22 @@ Array<File> Directory::items(const String& which, Directory::ItemType t)
 		return all;
 	}
 	WIN32_FIND_DATA data;
-	String basedir = (_path.endsWith('/') || _path.endsWith('\\'))? nat(_path) : nat(_path) + '/';
-	String name;
-	HANDLE hdir = FindFirstFile(basedir + which, &data);
-	if(hdir == INVALID_HANDLE_VALUE)
+	String          basedir = (_path.endsWith('/') || _path.endsWith('\\')) ? nat(_path) : nat(_path) + '/';
+	String          name;
+	HANDLE          hdir = FindFirstFile(basedir + which, &data);
+	if (hdir == INVALID_HANDLE_VALUE)
 		return _files;
-	do {
-		if( (t==DIRE && (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) ||
-			(t==FILE && (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) )
+	do
+	{
+		if ((t == DIRE && (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) ||
+		    (t == FILE && (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0))
 			continue;
-		if(t==DIRE && (!strcmpX(data.cFileName, STR_PREFIX(".")) || !strcmpX(data.cFileName, STR_PREFIX(".."))))
+		if (t == DIRE && (!strcmpX(data.cFileName, STR_PREFIX(".")) || !strcmpX(data.cFileName, STR_PREFIX(".."))))
 			continue;
 		name = basedir;
 		name += String(data.cFileName);
 		_files << File(name, infoFor(data));
-	}
-	while(FindNextFile(hdir, &data));
+	} while (FindNextFile(hdir, &data));
 	FindClose(hdir);
 	return _files;
 }
@@ -188,8 +193,8 @@ Array<File> Directory::items(const String& which, Directory::ItemType t)
 FileInfo Directory::getInfo(const String& path)
 {
 	WIN32_FIND_DATA data;
-	HANDLE hdir = FindFirstFile(nat(path), &data);
-	if(hdir == INVALID_HANDLE_VALUE)
+	HANDLE          hdir = FindFirstFile(nat(path), &data);
+	if (hdir == INVALID_HANDLE_VALUE)
 	{
 		FileInfo info;
 		return info;
@@ -200,8 +205,8 @@ FileInfo Directory::getInfo(const String& path)
 
 Array<String> Directory::roots()
 {
-	DWORD bits = GetLogicalDrives();
-	char  d = 'A';
+	DWORD         bits = GetLogicalDrives();
+	char          d = 'A';
 	Array<String> drives;
 	for (int i = 0; i < 32; i++, d++)
 	{
@@ -233,8 +238,8 @@ bool Directory::change(const String& dir)
 bool Directory::copy(const String& from, const String& to, bool onlyContent)
 {
 	String dst = to;
-	File tofile(to);
-	if(!onlyContent && tofile.isDirectory())
+	File   tofile(to);
+	if (!onlyContent && tofile.isDirectory())
 		dst << '/' << File(from).name();
 	if (File(from).isDirectory())
 	{
@@ -244,22 +249,22 @@ bool Directory::copy(const String& from, const String& to, bool onlyContent)
 		Array<File> items = Directory(from).items();
 		foreach (File& item, items)
 		{
-			if(item.name() == "." || item.name() == "..")
+			if (item.name() == "." || item.name() == "..")
 				continue;
 			String itemDst = dst + '/' + item.name();
 			ok &= copy(item.path(), itemDst);
 		}
 		return ok;
 	}
-	
+
 	return CopyFileW(from, dst, FALSE) != 0;
 }
 
 bool Directory::move(const String& from, const String& to)
 {
 	String dst = to;
-	File tofile(to);
-	if(tofile.isDirectory())
+	File   tofile(to);
+	if (tofile.isDirectory())
 		dst = to + '/' + File(from).name();
 
 	return MoveFileW(from, dst) != 0;
@@ -267,10 +272,150 @@ bool Directory::move(const String& from, const String& to)
 
 bool Directory::remove(const String& path)
 {
-	if(File(path).isDirectory())
+	if (File(path).isDirectory())
 		return RemoveDirectoryW(path) != 0;
 	else
 		return DeleteFileW(path) != 0;
+}
+
+struct WaitData
+{
+	HANDLE    hdir;
+	ByteArray buffer;
+	Set<File> items;
+};
+
+String Directory::special(Place p)
+{
+	switch (p)
+	{
+	case TEMP:
+		return createTemp();
+	case DESKTOP:
+	{
+		wchar_t path[MAX_PATH];
+		if (SHGetSpecialFolderPathW(NULL, path, CSIDL_DESKTOP, FALSE))
+			return path;
+		break;
+	}
+	case DOCUMENTS:
+	{
+		wchar_t path[MAX_PATH];
+		if (SHGetSpecialFolderPathW(NULL, path, CSIDL_MYDOCUMENTS, FALSE))
+			return path;
+		else
+			return special(HOME) + "/Documents"; // ?
+		break;
+	}
+	case DOWNLOAD:
+	{
+		// wchar_t path[MAX_PATH];
+		// if (SHGetSpecialFolderPathW(NULL, path, CSIDL_DOWNLOADS, FALSE))
+		//	return path;
+		return special(HOME) + "/Downloads"; // TODO use newer API
+		break;
+	}
+	case APPS:
+	{
+		wchar_t path[MAX_PATH];
+		if (SHGetSpecialFolderPathW(NULL, path, CSIDL_PROGRAM_FILES, FALSE))
+			return path;
+		break;
+	}
+	case APPDATA:
+	{
+		wchar_t path[MAX_PATH];
+		if (SHGetSpecialFolderPathW(NULL, path, CSIDL_LOCAL_APPDATA, FALSE))
+			return path;
+		break;
+	}
+	case APPCONFIG:
+	{
+		wchar_t path[MAX_PATH];
+		if (SHGetSpecialFolderPathW(NULL, path, CSIDL_APPDATA, FALSE))
+			return path;
+		break;
+	}
+	case APPDATA_ALL:
+	{
+		wchar_t path[MAX_PATH];
+		if (SHGetSpecialFolderPathW(NULL, path, CSIDL_COMMON_APPDATA, FALSE))
+			return path;
+		break;
+	}
+	case HOME:
+	{
+		wchar_t path[MAX_PATH];
+		if (SHGetSpecialFolderPathW(NULL, path, CSIDL_PROFILE, FALSE))
+			return path;
+		break;
+	}
+	case PROGRAMDATA:
+	{
+		String p = Process::env("ProgramData") | "C:/ProgramData";
+		return p;
+	}
+	default:
+		break;
+	}
+	return String();
+}
+
+Array<DirEvent> Directory::wait()
+{
+	Array<DirEvent> items;
+
+	if (!_waitdata)
+	{
+		_waitdata = new WaitData;
+		_waitdata->hdir = CreateFileW(_path, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_DELETE | FILE_SHARE_WRITE, NULL,
+		                              OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+		_waitdata->buffer.resize(1000);
+	}
+
+	DWORD n = 0;
+	ReadDirectoryChangesW(_waitdata->hdir, _waitdata->buffer.data(), _waitdata->buffer.length(), FALSE,
+	                      FILE_NOTIFY_CHANGE_FILE_NAME, &n, NULL, NULL);
+
+	DWORD c = 0;
+	while (n == 0 && c++ < 10)
+	{
+		ReadDirectoryChangesW(_waitdata->hdir, _waitdata->buffer.data(), _waitdata->buffer.length(), FALSE,
+		                      FILE_NOTIFY_CHANGE_FILE_NAME, &n, NULL, NULL);
+		if (n == 0)
+			_waitdata->buffer.resize(_waitdata->buffer.length() * 2);
+	};
+
+	FILE_NOTIFY_INFORMATION* info = (FILE_NOTIFY_INFORMATION*)_waitdata->buffer.data();
+
+	// RENAME => FILE_ACTION_RENAMED_OLD_NAME followed by FILE_ACTION_RENAMED_NEW_NAME
+
+	while (1)
+	{
+		int            action = info->Action;
+		Array<wchar_t> wname(info->FileName, info->FileNameLength / sizeof(wchar_t));
+		wname << 0;
+		String name = wname.data();
+
+		DirEvent item;
+		item.name = name;
+		item.type = action == FILE_ACTION_ADDED     ? DirEvent::NEW_FILE
+		            : action == FILE_ACTION_REMOVED ? DirEvent::DELETED
+		                                            : DirEvent::MODIFIED;
+
+		if (action == FILE_ACTION_RENAMED_OLD_NAME)
+			item.type = DirEvent::DELETED;
+		else if (action == FILE_ACTION_RENAMED_NEW_NAME)
+			item.type = DirEvent::NEW_FILE;
+
+		items << item;
+
+		if (info->NextEntryOffset == 0)
+			break;
+		info = (FILE_NOTIFY_INFORMATION*)((byte*)info + info->NextEntryOffset);
+	}
+
+	return items;
 }
 
 Directory::Space Directory::freeSpace(const String& dir)
@@ -292,6 +437,13 @@ Directory::Space Directory::freeSpace(const String& dir)
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/statvfs.h>
+#ifdef __linux__
+#include <features.h>
+#if (__GLIBC__ * 1000 + __GLIBC_MINOR__) > 2004
+#define ASL_HAVE_INOTIFY
+#include <sys/inotify.h>
+#endif
+#endif
 #include <unistd.h>
 #include <dirent.h>
 #include <errno.h>
@@ -300,7 +452,16 @@ Directory::Space Directory::freeSpace(const String& dir)
 #define PATH_MAX 255
 #endif
 
-namespace asl {
+namespace asl
+{
+
+struct WaitData
+{
+	int       inotfd;
+	int       watch_desc;
+	ByteArray buffer;
+	Set<File> items;
+};
 
 inline double ft2t(const time_t& ft)
 {
@@ -320,9 +481,9 @@ static FileInfo infoFor(const struct stat& data)
 static bool match(const String& a, const String& patt)
 {
 	int i = patt.indexOf('*');
-	if (i==-1)
-		return a==patt;
-	return a.startsWith(patt.substring(0,i)) && a.endsWith(patt.substring(i+1));
+	if (i == -1)
+		return a == patt;
+	return a.startsWith(patt.substring(0, i)) && a.endsWith(patt.substring(i + 1));
 }
 
 Array<File> Directory::items(const String& which, Directory::ItemType t)
@@ -344,25 +505,25 @@ Array<File> Directory::items(const String& which, Directory::ItemType t)
 		_files = all;
 		return all;
 	}
-	DIR* d = opendir(_path != ""? *_path : "/");
-	if(!d)
+	DIR* d = opendir(_path.ok() ? *_path : "/");
+	if (!d)
 		return _files;
-	String dir = _path.endsWith('/')? _path : (_path+'/');
+	String dir = _path.endsWith('/') ? _path : (_path + '/');
 	String name;
-	bool wildcard = (which.contains('*') && which != "*") || !which.contains('*');
-	
-	while(dirent* entry=readdir(d))
+	bool   wildcard = (which.contains('*') && which != "*") || !which.contains('*');
+
+	while (dirent* entry = readdir(d))
 	{
 		struct stat data;
-		if(wildcard && !match(entry->d_name, which))
+		if (wildcard && !match(entry->d_name, which))
 			continue;
-		if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+		if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
 			continue;
 		name = dir;
 		name += (const char*)entry->d_name;
-		if(!stat(name, &data)) {
-			if( (t==DIRE && !S_ISDIR(data.st_mode)) ||
-				(t==FILE && S_ISDIR(data.st_mode)) )
+		if (!stat(name, &data))
+		{
+			if ((t == DIRE && !S_ISDIR(data.st_mode)) || (t == FILE && S_ISDIR(data.st_mode)))
 				continue;
 			_files << File(name, infoFor(data));
 		}
@@ -374,7 +535,7 @@ Array<File> Directory::items(const String& which, Directory::ItemType t)
 FileInfo Directory::getInfo(const String& path)
 {
 	struct stat data;
-	if(stat(path, &data))
+	if (stat(path, &data))
 	{
 		FileInfo info;
 		return info;
@@ -396,8 +557,8 @@ bool Directory::createOne(const String& name)
 String Directory::current()
 {
 	String dir;
-	char* d = getcwd(SafeString(dir, PATH_MAX), PATH_MAX);
-	return d? dir : "";
+	char*  d = getcwd(SafeString(dir, PATH_MAX), PATH_MAX);
+	return d ? dir : "";
 }
 
 bool Directory::change(const String& dir)
@@ -408,10 +569,10 @@ bool Directory::change(const String& dir)
 bool Directory::copy(const String& from, const String& to, bool onlyContent)
 {
 	File src(from, File::READ);
-	if(!src)
+	if (!src)
 		return false;
 	String dst = to;
-	File tofile(to);
+	File   tofile(to);
 	if (!onlyContent && tofile.isDirectory())
 		dst << '/' << File(from).name();
 	if (File(from).isDirectory())
@@ -431,32 +592,33 @@ bool Directory::copy(const String& from, const String& to, bool onlyContent)
 	}
 
 	tofile = File(dst);
-	if(!tofile.open(File::WRITE))
+	if (!tofile.open(File::WRITE))
 		return false;
 
 	byte buffer[65536];
-	int n=0;
-	do {
+	int  n = 0;
+	do
+	{
 		n = src.read(buffer, sizeof(buffer));
-		if( n < 0)
+		if (n < 0)
 			return false;
 		int m = tofile.write(buffer, n);
-		if( m != n)
+		if (m != n)
 			return false;
-	}while (n == sizeof(buffer));
+	} while (n == sizeof(buffer));
 	return true;
 }
 
 bool Directory::move(const String& from, const String& to)
 {
 	String dst = to;
-	File tofile(to);
-	if(tofile.isDirectory())
+	File   tofile(to);
+	if (tofile.isDirectory())
 		dst = to + '/' + File(from).name();
 
-	if(rename(from, dst) == 0)
+	if (rename(from, dst) == 0)
 		return true;
-	if(errno == EXDEV) // different file systems: copy and del
+	if (errno == EXDEV) // different file systems: copy and del
 	{
 		copy(from, dst);
 		remove(from);
@@ -466,17 +628,17 @@ bool Directory::move(const String& from, const String& to)
 
 bool Directory::remove(const String& path)
 {
-	if(File(path).isDirectory())
-		return rmdir(path)==0;
+	if (File(path).isDirectory())
+		return rmdir(path) == 0;
 	else
-		return unlink(path)==0;
+		return unlink(path) == 0;
 }
 
 Directory::Space Directory::freeSpace(const String& dir)
 {
-	Space space = { 0, 0 };
+	Space          space = { 0, 0 };
 	struct statvfs buf;
-	if(statvfs(dir, &buf) != 0)
+	if (statvfs(dir, &buf) != 0)
 		return space;
 
 	space.free = (Long)buf.f_frsize * buf.f_bavail;
@@ -485,6 +647,166 @@ Directory::Space Directory::freeSpace(const String& dir)
 	return space;
 }
 
+String Directory::special(Place p)
+{
+	String home = Process::env("HOME");
+	if (p == HOME)
+		return home;
+
+	String xdg = home + "/.config/user-dirs.dirs";
+	Dic<String> dirs;
+	if (File(xdg).isFile())
+	{
+		TextFile f(xdg, File::READ);
+		while (!f.end())
+		{
+			String        line = f.readLine();
+			if (line.startsWith("#"))
+				continue;
+			Array<String> parts = line.split('=');
+			if (parts.length() == 2)
+				dirs[parts[0]] = parts[1].replace('"', "").replace("$HOME", home);
+		}
+	}
+
+	switch (p)
+	{
+	case DESKTOP:
+		return dirs["XDG_DESKTOP_DIR"] | (home + "/Desktop");
+	case DOCUMENTS:
+		return dirs["XDG_DOCUMENTS_DIR"] | (home + "/Documents");
+	case DOWNLOAD:
+		return dirs["XDG_DOWNLOAD_DIR"] | (home + "/Downloads");
+	case APPS:
+		return dirs["XDG_APPLICATIONS_DIR"] | (home + "/Applications");
+	case APPDATA:
+		return home + "/.local/share";
+		break;
+	case APPCONFIG:
+		return home + "/.config";
+	case APPDATA_ALL:
+		return "/var/lib";
+	default:
+		break;
+	}
+	return String();
+}
+
+Array<DirEvent> Directory::wait()
+{
+#ifdef ASL_HAVE_INOTIFY
+	if (!File(_path).isDirectory())
+		return Array<DirEvent>();
+	if (_path.startsWith("/proc") || _path.startsWith("/sys") || _path.startsWith("/mnt"))
+		return waitPoll();
+	Array<DirEvent> items;
+
+	if (!_waitdata)
+	{
+		_waitdata = new WaitData;
+		int bufsiz = 4 * (sizeof(inotify_event) + PATH_MAX + 1);
+		_waitdata->buffer.resize(bufsiz);
+		_waitdata->inotfd = inotify_init();
+		_waitdata->watch_desc = inotify_add_watch(_waitdata->inotfd, *_path, /*IN_MODIFY |*/ IN_CREATE | IN_DELETE | IN_MOVE);
+	}
+
+	inotify_event* event = (inotify_event*)_waitdata->buffer.data();
+	unsigned       lastmask = 0;
+	while (1)
+	{
+		int n = read(_waitdata->inotfd, event, _waitdata->buffer.length());
+		if (n <= 0)
+		{
+			break;
+		}
+		
+		for (byte* ptr = _waitdata->buffer.data(); ptr < _waitdata->buffer.data() + n; ptr += sizeof(struct inotify_event) + event->len)
+		{
+			inotify_event* event = (inotify_event*)ptr;
+			// printf("inotify: cookie %u mask %u name %s\n", event->cookie, event->mask, event->name);
+			DirEvent item;
+			lastmask = event->mask;
+			item.name = event->name;
+			item.type = event->mask == IN_CREATE   ? DirEvent::NEW_FILE
+			            : event->mask == IN_DELETE ? DirEvent::DELETED
+			                                       : DirEvent::MODIFIED;
+			if (event->mask == IN_MOVED_FROM)
+				item.type = DirEvent::DELETED;
+			else if (event->mask == IN_MOVED_TO)
+				item.type = DirEvent::NEW_FILE;
+			items << item;
+		}
+		break;
+	}
+	return items;
+#else
+	return waitPoll();
+#endif
+}
+
 }
 #endif
 
+namespace asl
+{
+Array<DirEvent> Directory::waitPoll()
+{
+	if (!_waitdata)
+	{
+		_waitdata = new WaitData;
+		_waitdata->items = files();
+	}
+
+	Array<DirEvent> itemschanged;
+
+	while (1)
+	{
+		Set<File> items = files();
+
+		if (items != _waitdata->items)
+		{
+			Set<File> newfiles = items - _waitdata->items;
+
+			foreach (File& file, newfiles)
+			{
+				DirEvent item;
+				item.name = file.name();
+				item.type = DirEvent::NEW_FILE;
+				itemschanged << item;
+			}
+
+			newfiles = _waitdata->items - items;
+			foreach (File& file, newfiles)
+			{
+				DirEvent item;
+				item.name = file.name();
+				item.type = DirEvent::DELETED;
+				itemschanged << item;
+			}
+		}
+
+		_waitdata->items = items;
+
+		if (itemschanged.length() > 0)
+			return itemschanged;
+
+		sleep(0.1);
+	}
+
+	return itemschanged;
+}
+
+Directory::~Directory()
+{
+	if (_waitdata)
+	{
+#ifdef _WIN32
+		CloseHandle(_waitdata->hdir);
+#elif defined(ASL_HAVE_INOTIFY)
+		inotify_rm_watch(_waitdata->inotfd, _waitdata->watch_desc);
+		close(_waitdata->inotfd);
+#endif
+	}
+	delete _waitdata;
+}
+}

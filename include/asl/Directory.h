@@ -9,10 +9,26 @@
 #include <asl/File.h>
 #include <asl/Path.h>
 
-namespace asl {
+namespace asl
+{
+
+struct DirEvent
+{
+	String name;
+	enum Type
+	{
+		NONE,
+		NEW_FILE,
+		DELETED,
+		MODIFIED
+	} type;
+};
+
+struct WaitData;
 
 /**
-This class allows enumerating the contents of a directory, its files and subdirectories, and doing file system actions (copy, move, delete).
+This class allows enumerating the contents of a directory, its files and subdirectories, and doing file system actions
+(copy, move, delete).
 
 This example lists the files of the c:/windows directory modified in the last 10 days:
 
@@ -20,16 +36,16 @@ This example lists the files of the c:/windows directory modified in the last 10
 Directory dir("c:/windows");
 for (File& file : dir.files("*.dll"))
 {
-	if (file.lastModified() > Date::now() - 10*Date::DAY)
-		cout << *file.name() << " size: " file.size() << endl;
+    if (file.lastModified() > Date::now() - 10*Date::DAY)
+        cout << *file.name() << " size: " file.size() << endl;
 }
 ~~~
 
 In a Directory object, `files()` enumerates files, `subdirs()` enumerates subdirectories, and
 `items()` enumerates both. In all three a wildcard can be given as argument to filter the search.
 
-The wildcard can contain more than one pattern separated by `|`, like `dir.files("*.txt|*.doc")`. If the *directory* actually refers
-to a file, then only that file is returned.
+The wildcard can contain more than one pattern separated by `|`, like `dir.files("*.txt|*.doc")`. If the *directory*
+actually refers to a file, then only that file is returned.
 
 Each File object returned has the following members:
 
@@ -54,19 +70,28 @@ Directory::copy("/path/dir", "/some_other_dir");      // copies the whole direct
 class ASL_API Directory
 {
 protected:
-	String _path;
+	String      _path;
 	Array<File> _files;
-	enum ItemType { FILE, DIRE, ALL };
+	enum ItemType
+	{
+		FILE,
+		DIRE,
+		ALL
+	};
+	WaitData* _waitdata;
 
 public:
-	Directory() {}
+	Directory() : _waitdata(0) {}
+
 	/**
 	Constructs a directory from a relative or absolute path
 	*/
-	Directory(const String& name) : _path(name) {}
-	Directory(const File& file) : _path(file.path()) {}
-	Directory(const Path& file) : _path(file.string()) {}
-	Directory(const char* file) : _path(file) {}
+	Directory(const String& name) : _path(name), _waitdata(0) {}
+	Directory(const File& file) : _path(file.path()), _waitdata(0) {}
+	Directory(const Path& file) : _path(file.string()), _waitdata(0) {}
+	Directory(const char* file) : _path(file), _waitdata(0) {}
+
+	~Directory();
 
 	/**
 	Returns the name of the directory
@@ -75,7 +100,7 @@ public:
 	/**
 	Returns the full path of the directory
 	*/
-	String path() const {return _path;}
+	String path() const { return _path; }
 	/**
 	Returns the parent directory containing this directory
 	*/
@@ -83,22 +108,19 @@ public:
 	/**
 	Returns true if this directory exists, or false if it does not exist or refers to a file
 	*/
-	bool exists() const
-	{
-		return File(_path).isDirectory();
-	}
+	bool exists() const { return File(_path).isDirectory(); }
 	/**
 	Returns the contents of a directory, optionally matching a wildcard
 	*/
-	Array<File> items(const String& which="*", ItemType t=ALL);
+	Array<File> items(const String& which = "*", ItemType t = ALL);
 	/**
 	Returns the files in a directory, optionally matching a wildcard or several separated by '|'
 	*/
-	Array<File> files(const String& which="*") {return items(which, FILE);}
+	Array<File> files(const String& which = "*") { return items(which, FILE); }
 	/**
 	Returns the subdirectories of a directory, optionally matching a wildcard
 	*/
-	Array<File> subdirs(const String& which="*") {return items(which, DIRE);}
+	Array<File> subdirs(const String& which = "*") { return items(which, DIRE); }
 
 	static FileInfo getInfo(const String& path);
 
@@ -150,6 +172,17 @@ public:
 	WITH CARE!)
 	*/
 	static bool clear(const String& path) { return removeRecursive(path, true); }
+
+	enum Place
+	{
+		HOME, APPDATA, APPCONFIG, APPDATA_ALL, APPS, DOCUMENTS, DOWNLOAD, DESKTOP, PROGRAMDATA, TEMP
+	};
+
+	static String special(Place p);
+
+	Array<DirEvent> wait();
+
+	Array<DirEvent> waitPoll();
 
 	struct Space
 	{

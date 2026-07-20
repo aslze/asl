@@ -5,10 +5,15 @@
 
 namespace asl {
 
-Process Process::execute(const String& command, const Array<String>& args)
+String ProcessInfo::name() const
+{
+	return Path(_path).name();
+}
+
+Process Process::execute(const String& command, const Array<String>& args, const Dic<>& env)
 {
 	Process p;
-	p.run(command, args);
+	p.run(command, args, env);
 	int n, i = 0;
 	char buffer[8000];
 	while (p.running())
@@ -75,6 +80,22 @@ String Process::myDir()
 	return Path(myPath()).directory().string();
 }
 
+int Process::killAll(const String& name)
+{
+	Array<ProcessInfo> procs = list();
+	int                killed = 0;
+	foreach (const ProcessInfo& info, procs)
+	{
+		if (info.name() == name)
+		{
+			if (kill(info._pid))
+				killed++;
+		}
+	}
+
+	return killed;
+}
+
 void Process::ignoreOutput()
 {
 	_detached = true;
@@ -88,309 +109,362 @@ void Process::ignoreOutput()
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
+#include <psapi.h>
 
 namespace asl {
 
-	static String joinCmdArgs(const Array<String> args)
+static String joinCmdArgs(const Array<String> args)
+{
+	String cmdline;
+	foreach(const String & arg, args)
 	{
-		String cmdline;
-		foreach(const String & arg, args)
+		cmdline << '"';
+		for (int i = 0; i < arg.length(); i++)
 		{
-			cmdline << '"';
-			for (int i = 0; i < arg.length(); i++)
+			int nbs = 0;
+			while (i < arg.length() && arg[i] == '\\')
 			{
-				int nbs = 0;
-				while (i < arg.length() && arg[i] == '\\')
-				{
-					++i;
-					++nbs;
-				}
-				if (i == arg.length())
-					cmdline << String::repeat('\\', 2 * nbs);
-				else
-					cmdline << String::repeat('\\', (arg[i] == '"') ? 2 * nbs + 1 : nbs) << arg[i];
+				++i;
+				++nbs;
 			}
-			cmdline << "\" ";
+			if (i == arg.length())
+				cmdline << String::repeat('\\', 2 * nbs);
+			else
+				cmdline << String::repeat('\\', (arg[i] == '"') ? 2 * nbs + 1 : nbs) << arg[i];
 		}
-
-		return cmdline;
+		cmdline << "\" ";
 	}
 
-	String Process::env(const String& var)
-	{
-		String value;
-		DWORD len = 15;
-		do {
-			value.resize(len, false);
-			len = GetEnvironmentVariableA(var, value.data(), value.length() + 1);
-			if (!len)
-				value = "";
-		} while ((int)len > value.length() + 1);
-		value.fix(len);
-		return value;
-	}
+	return cmdline;
+}
 
-	void Process::setEnv(const String& var, const String& value)
-	{
-		SetEnvironmentVariableA(var, value);
-	}
+String Process::env(const String& var)
+{
+	String value;
+	DWORD len = 15;
+	do {
+		value.resize(len, false);
+		len = GetEnvironmentVariableA(var, value.data(), value.length() + 1);
+		if (!len)
+			value = "";
+	} while ((int)len > value.length() + 1);
+	value.fix(len);
+	return value;
+}
 
-	Dic<> Process::environment()
+void Process::setEnv(const String& var, const String& value)
+{
+	SetEnvironmentVariableA(var, value);
+}
+
+Dic<> Process::environment()
+{
+	Dic<> envvars;
+	LPTCH  envStrings = GetEnvironmentStringsA();
+	if (envStrings)
 	{
-		Dic<> envvars;
-		LPTCH  envStrings = GetEnvironmentStringsA();
-		if (envStrings)
+		for (LPTCH env = envStrings; *env; env += strlen(env) + 1)
 		{
-			for (LPTCH env = envStrings; *env; env += strlen(env) + 1)
-			{
-				String s = env;
-				int    i = s.indexOf('=');
-				if (i > 0)
-				    envvars[s.substr(0, i)] = s.substr(i + 1);
-			}
-			FreeEnvironmentStringsA(envStrings);
+			String s = env;
+			int    i = s.indexOf('=');
+			if (i > 0)
+				envvars[s.substr(0, i)] = s.substr(i + 1);
 		}
-	    return envvars;
+		FreeEnvironmentStringsA(envStrings);
 	}
+	return envvars;
+}
 
-	Process::Process()
-	{
-	    _pipe_err[0] = 0;
-	    _pipe_err[1] = 0;
-	    _pipe_in[0] = 0;
-	    _pipe_in[1] = 0;
-		_ok = false;
-		_ready = false;
-		_exitstat = 0;
-		_pid = -1;
-		_detached = false;
-		_hasExited = false;
-		_stderr = _stdin = _stdout = 0;
-		_hProcess = NULL;
+Process::Process()
+{
+	_pipe_err[0] = 0;
+	_pipe_err[1] = 0;
+	_pipe_in[0] = 0;
+	_pipe_in[1] = 0;
+	_ok = false;
+	_ready = false;
+	_exitstat = 0;
+	_pid = -1;
+	_detached = false;
+	_hasExited = false;
+	_stderr = _stdin = _stdout = 0;
+	_hProcess = NULL;
 
-		SECURITY_ATTRIBUTES sec;
-		sec.nLength = sizeof(SECURITY_ATTRIBUTES);
-		sec.bInheritHandle = TRUE;
-		sec.lpSecurityDescriptor = NULL;
+	SECURITY_ATTRIBUTES sec;
+	sec.nLength = sizeof(SECURITY_ATTRIBUTES);
+	sec.bInheritHandle = TRUE;
+	sec.lpSecurityDescriptor = NULL;
 
-		if (!CreatePipe(&_pipe_out[0], &_pipe_out[1], &sec, 5000))
-			return;
-		if (!CreatePipe(&_pipe_in[0], &_pipe_in[1], &sec, 5000))
-			return;
-		if (!CreatePipe(&_pipe_err[0], &_pipe_err[1], &sec, 5000))
-			return;
-		_ready = true;
-	}
+	if (!CreatePipe(&_pipe_out[0], &_pipe_out[1], &sec, 5000))
+		return;
+	if (!CreatePipe(&_pipe_in[0], &_pipe_in[1], &sec, 5000))
+		return;
+	if (!CreatePipe(&_pipe_err[0], &_pipe_err[1], &sec, 5000))
+		return;
+	_ready = true;
+}
 
-	Process::~Process()
-	{
-		if (_ready) {
-			if (!_ok)
-			{
-				CloseHandle(_pipe_in[0]);
-				CloseHandle(_pipe_out[1]);
-				CloseHandle(_pipe_err[1]);
-			}
-			CloseHandle(_pipe_in[1]);
-			CloseHandle(_pipe_out[0]);
-			CloseHandle(_pipe_err[0]);
+Process::~Process()
+{
+	if (_ready) {
+		if (!_ok)
+		{
+			CloseHandle(_pipe_in[0]);
+			CloseHandle(_pipe_out[1]);
+			CloseHandle(_pipe_err[1]);
 		}
-		if(_hProcess)
-			CloseHandle(_hProcess);
+		CloseHandle(_pipe_in[1]);
+		CloseHandle(_pipe_out[0]);
+		CloseHandle(_pipe_err[0]);
 	}
+	if(_hProcess)
+		CloseHandle(_hProcess);
+}
 
-	int Process::myPid()
-	{
-		return (int)GetCurrentProcessId();
-	}
+int Process::myPid()
+{
+	return (int)GetCurrentProcessId();
+}
 
-	String Process::myPath()
-	{
-		String path;
-		GetModuleFileNameW(NULL, SafeString(path, 1000), 1000);
+String Process::myPath()
+{
+	String path;
+	GetModuleFileNameW(NULL, SafeString(path, 1000), 1000);
+	return path;
+}
+
+String Process::loadedLibPath(const String& lib)
+{
+	String path;
+	HMODULE handle = GetModuleHandleW(lib);
+	if(handle == 0 && (handle = GetModuleHandleW("lib" + lib)) == 0)
 		return path;
+	GetModuleFileNameW(handle, SafeString(path, 1000), 1000);
+	return path;
+}
+
+void Process::makeDaemon()
+{
+	// does this make sense on Windows?
+}
+
+void Process::run(const String& command, const Array<String>& args, const Dic<>& env)
+{
+	if (!_ready)
+		return;
+
+	_hasExited = false;
+	STARTUPINFOW startInfo;
+	memset(&startInfo, 0, sizeof(startInfo));
+	startInfo.cb = sizeof(startInfo);
+	startInfo.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
+	startInfo.wShowWindow = SW_HIDE;
+	startInfo.hStdInput = !_detached ? _pipe_in[0] : 0;
+	startInfo.hStdOutput = !_detached ? _pipe_out[1] : 0;
+	startInfo.hStdError = !_detached ? _pipe_err[1] : 0;
+
+	String cmd = command;
+	if (command.endsWith('*')) {
+		startInfo.wShowWindow = SW_SHOWNORMAL;
+		cmd = cmd.substr(0, cmd.length() - 1);
 	}
-
-	String Process::loadedLibPath(const String& lib)
-	{
-		String path;
-		HMODULE handle = GetModuleHandleW(lib);
-		if(handle == 0 && (handle = GetModuleHandleW("lib" + lib)) == 0)
-			return path;
-		GetModuleFileNameW(handle, SafeString(path, 1000), 1000);
-		return path;
-	}
-
-	void Process::makeDaemon()
-	{
-		// does this make sense on Windows?
-	}
-
-	void Process::run(const String& command, const Array<String>& args)
-	{
-		if (!_ready)
-			return;
-
-		_hasExited = false;
-		STARTUPINFOW startInfo;
-		ZeroMemory(&startInfo, sizeof(startInfo));
-		startInfo.cb = sizeof(startInfo);
-		startInfo.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
-		startInfo.wShowWindow = SW_HIDE;
-		startInfo.hStdInput = !_detached ? _pipe_in[0] : 0;
-		startInfo.hStdOutput = !_detached ? _pipe_out[1] : 0;
-		startInfo.hStdError = !_detached ? _pipe_err[1] : 0;
-
-		String cmd = command;
-		if (command.endsWith('*')) {
-			startInfo.wShowWindow = SW_SHOWNORMAL;
-			cmd = cmd.substr(0, cmd.length() - 1);
-		}
 	
-		String commandline;
-		commandline << '"' << cmd << "\" " << joinCmdArgs(args);
+	String commandline;
+	commandline << '"' << cmd << "\" " << joinCmdArgs(args);
+	String theenv;
+	if (env.length() > 0)
+	{
+		theenv = env.join('\0', '=');
+		theenv << '\0';
+	}
 
-		PROCESS_INFORMATION procInfo;
-		_ok = CreateProcessW(NULL,
-			commandline.dataw(),    // application name
-			NULL,                   // process security attributes
-			NULL,                   // primary thread security attributes
-			TRUE,                   // handles are inherited
-			CREATE_NEW_CONSOLE,     // creation flags DETACHED_PROCESS
-			NULL,                   // use parent's environment
-			NULL,
-			&startInfo,
-			&procInfo) != 0;
+	PROCESS_INFORMATION procInfo;
+	_ok = CreateProcessW(NULL,
+		commandline.dataw(),    // application name
+		NULL,                   // process security attributes
+		NULL,                   // primary thread security attributes
+		TRUE,                   // handles are inherited
+		CREATE_NEW_CONSOLE,     // creation flags DETACHED_PROCESS
+	    theenv ? LPVOID(*theenv) : LPVOID(NULL), // use parent's environment
+		NULL,
+		&startInfo,
+		&procInfo) != 0;
 
-		if (_ok)
+	if (_ok)
+	{
+		_pid = procInfo.dwProcessId;
+		_hProcess = procInfo.hProcess;
+		CloseHandle(procInfo.hThread);
+	}
+	else
+	{
+		_pid = -1;
+		return;
+	}
+	CloseHandle(_pipe_in[0]);
+	CloseHandle(_pipe_out[1]);
+	CloseHandle(_pipe_err[1]);
+	_stdout = _pipe_out[0];
+	_stderr = _pipe_err[0];
+	_stdin = _pipe_in[1];
+}
+
+int Process::outputAvailable()
+{
+	if (!_ready)
+		return 0;
+	DWORD n;
+	return PeekNamedPipe(_stdout, 0, 0, 0, &n, 0) ? n : 0;
+}
+
+int Process::errorsAvailable()
+{
+	if (!_ready)
+		return 0;
+	DWORD n;
+	return PeekNamedPipe(_stderr, 0, 0, 0, &n, 0) ? n : 0;
+}
+
+int Process::readOutput(void* p, int n)
+{
+	if(!_ready)
+		return 0;
+	DWORD read;
+	int ok = ReadFile(_stdout, p, n, &read, NULL);
+	return ok? read : -1;
+}
+
+int Process::readErrors(void* p, int n)
+{
+	if(!_ready)
+		return 0;
+	DWORD  read;
+	int ok = ReadFile(_stderr, p, n, &read, NULL);
+	return ok? read : -1;
+}
+
+int Process::writeInput(const void* p, int n)
+{
+	if(!_ready)
+		return 0;
+	DWORD written;
+	WriteFile(_stdin, p, n, &written, NULL);
+	return written;
+}
+
+void Process::signal(int)
+{
+	//kill(_pid, s);
+}
+
+int Process::wait()
+{
+	if(!_ready)
+		return 0;
+	HANDLE process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, _pid);
+	WaitForSingleObject(process, INFINITE);
+	DWORD exitCode;
+	GetExitCodeProcess(process, &exitCode);
+	CloseHandle(process);
+	_hasExited = true;
+	_exitstat = exitCode;
+	return _exitstat;
+}
+
+bool Process::finished()
+{
+	if(!_ready)
+		return true;
+
+	if (_pid != -1)
+	{
+		DWORD exitCode = 1;
+
+		if (GetExitCodeProcess(_hProcess, &exitCode))
 		{
-			_pid = procInfo.dwProcessId;
-			_hProcess = procInfo.hProcess;
-			CloseHandle(procInfo.hThread);
+			_exitstat = exitCode;
+			_hasExited = (exitCode != STILL_ACTIVE);
+		}
+	}
+	return _hasExited;
+}
+
+bool Process::started()
+{
+	return _pid != -1;
+}
+
+Array<ProcessInfo> Process::list()
+{
+	DWORD              pids[1024], n;
+	Array<ProcessInfo> a;
+
+	if (!EnumProcesses(pids, sizeof(pids), &n))
+		return a;
+
+	n = n / sizeof(DWORD);
+
+	for (DWORD i = 0; i < n; i++)
+	{
+		ProcessInfo info(pids[i]);
+		HANDLE      hprocess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pids[i]);
+		if (hprocess)
+		{
+			wchar_t processName[MAX_PATH];
+			GetProcessImageFileNameW(hprocess, processName, sizeof(processName) / sizeof(wchar_t));
+			info._path = processName;
+			CloseHandle(hprocess);
 		}
 		else
-		{
-			_pid = -1;
-			return;
-		}
-		CloseHandle(_pipe_in[0]);
-		CloseHandle(_pipe_out[1]);
-		CloseHandle(_pipe_err[1]);
-		_stdout = _pipe_out[0];
-		_stderr = _pipe_err[0];
-		_stdin = _pipe_in[1];
-	}
+			continue;
 
-	int Process::outputAvailable()
+		a << info;
+	}
+	return a;
+}
+
+bool Process::kill(int pid)
+{
+	HANDLE hprocess = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
+	if (hprocess)
 	{
-		if (!_ready)
-			return 0;
-		DWORD n;
-		return PeekNamedPipe(_stdout, 0, 0, 0, &n, 0) ? n : 0;
+		TerminateProcess(hprocess, 0);
+		CloseHandle(hprocess);
+		return true;
 	}
-
-	int Process::errorsAvailable()
-	{
-		if (!_ready)
-			return 0;
-		DWORD n;
-		return PeekNamedPipe(_stderr, 0, 0, 0, &n, 0) ? n : 0;
-	}
-
-	int Process::readOutput(void* p, int n)
-	{
-		if(!_ready)
-			return 0;
-		DWORD read;
-		int ok = ReadFile(_stdout, p, n, &read, NULL);
-		return ok? read : -1;
-	}
-
-	int Process::readErrors(void* p, int n)
-	{
-		if(!_ready)
-			return 0;
-		DWORD  read;
-		int ok = ReadFile(_stderr, p, n, &read, NULL);
-		return ok? read : -1;
-	}
-
-	int Process::writeInput(const void* p, int n)
-	{
-		if(!_ready)
-			return 0;
-		DWORD written;
-		WriteFile(_stdin, p, n, &written, NULL);
-		return written;
-	}
-
-	void Process::signal(int)
-	{
-		//kill(_pid, s);
-	}
-
-	int Process::wait()
-	{
-		if(!_ready)
-			return 0;
-		HANDLE process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, _pid);
-		WaitForSingleObject(process, INFINITE);
-		DWORD exitCode;
-		GetExitCodeProcess(process, &exitCode);
-		CloseHandle(process);
-		_hasExited = true;
-		_exitstat = exitCode;
-		return _exitstat;
-	}
-
-	bool Process::finished()
-	{
-		if(!_ready)
-			return true;
-
-		if (_pid != -1)
-		{
-			DWORD exitCode = 1;
-
-			if (GetExitCodeProcess(_hProcess, &exitCode))
-			{
-				_exitstat = exitCode;
-				_hasExited = (exitCode != STILL_ACTIVE);
-			}
-		}
-		return _hasExited;
-	}
-
-	bool Process::started()
-	{
-		return _pid != -1;
-	}
-
+	return false;
+}
 }
 
 #else
+
 //#include <asl/File.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <signal.h>
+#include <dirent.h>
+#ifdef __linux__
+#include <features.h>
+#endif
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
 #include <limits.h>
 #include <stdio.h>
+#include <sys/user.h>
+#include <sys/sysctl.h>
 //#include <dlfcn.h>
 #include <stdint.h>
 #endif
 #if __FreeBSD__
+#include <sys/user.h>
 #include <sys/sysctl.h>
 #endif
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined (__bsdi__) || defined (__DragonFly__)
 #define ASL_OS_BSD
 #endif
-
-extern char** environ;
 
 namespace asl {
 
@@ -536,7 +610,7 @@ void Process::makeDaemon()
 	}
 }
 
-void Process::run(const String& command, const Array<String>& args)
+void Process::run(const String& command, const Array<String>& args, const Dic<>& env)
 {
 	if(!_ready)
 		return;
@@ -563,7 +637,7 @@ void Process::run(const String& command, const Array<String>& args)
 			//::signal (SIGHUP, SIG_IGN);
 			//pid_t sid = setsid();
 		}
-		exec(command, args);
+		exec(command, args, env);
 		_exit(0);
         break;
 
@@ -615,7 +689,7 @@ int Process::writeInput(const void* p, int n)
 
 void Process::signal(int s)
 {
-	kill(_pid, s);
+	::kill(_pid, s);
 }
 
 int Process::wait()
@@ -653,14 +727,29 @@ bool Process::finished()
 	return true;
 }
 
-int Process::exec(const String& command, const Array<String>& args)
+int Process::exec(const String& command, const Array<String>& args, const Dic<>& env)
 {
 	Array<const char*> argv;
 	argv << command;
 	for(int i=0; i<args.length(); i++)
 		argv << args[i];
 	argv << 0;
-	return execvp(command, (char* const*)argv.data());
+	Array<const char*> theenv;
+	Array<String> theenvs;
+	foreach2 (String& k, String & v, env)
+	{
+		theenvs << (k + '=' + v);
+		theenv << *theenvs.last();
+	}
+	theenv << NULL;
+#if (__GLIBC__ * 1000 +  __GLIBC_MINOR__) > 2011
+	if (theenvs.length() > 0)
+	{
+		return execvpe(command, (char* const*)argv.data(), (char* const*)theenv.data());
+	}
+	else
+#endif
+		return execvp(command, (char* const*)argv.data());
 }
 
 bool Process::started()
@@ -668,7 +757,82 @@ bool Process::started()
 	return !finished()? (_pid != -1) : (_pid != -1 && _exitstat != 126 && _exitstat != 127);
 }
 
+bool Process::kill(int pid)
+{
+	return ::kill(pid, SIGKILL) == 0;
+}
+
+#ifndef __APPLE__
+
+Array<ProcessInfo> Process::list()
+{
+	Array<ProcessInfo> a;
+	DIR*               dir = opendir("/proc");
+	if (!dir)
+		return a;
+	struct dirent* entry;
+	while ((entry = readdir(dir)) != NULL)
+	{
+		if (entry->d_type == DT_DIR)
+		{
+			int pid = atoi(entry->d_name);
+			if (pid > 0)
+			{
+				ProcessInfo info(pid);
+				String cmdline;
+				FILE*  cmdfile = fopen(*("/proc/" + String(entry->d_name) + "/cmdline"), "rt");
+				if (cmdfile)
+				{
+					char c = 0;
+					while (fread(&c, 1, 1, cmdfile) == 1 && c != 0)
+						cmdline << c;
+					fclose(cmdfile);
+				}
+
+				info._path = cmdline;
+				a << info;
+			}
+		}
+	}
+	closedir(dir);
+	return a;
+}
+
+#else
+
+Array<ProcessInfo> Process::list()
+{
+	Array<ProcessInfo> a;
+
+	int    mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL, 0 };
+	size_t size;
+
+	if (sysctl(mib, 4, NULL, &size, NULL, 0) < 0)
+	{
+		return a;
+	}
+
+	int count = (int)(size / sizeof(kinfo_proc));
+
+	Array<kinfo_proc> procs(count);
+
+	if (sysctl(mib, 4, procs, &size, NULL, 0) < 0)
+	{
+		return a;
+	}
+
+	count = (int)(size / sizeof(kinfo_proc));
+
+	for (int i = 0; i < count; i++)
+	{
+		ProcessInfo info(procs[i].kp_proc.p_pid);
+		info._path = procs[i].kp_proc.p_comm;
+		a << info;
+	}
+
+	return a;
+}
+#endif
 }
 
 #endif
-

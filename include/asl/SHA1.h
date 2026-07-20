@@ -9,6 +9,7 @@
 
 #if (defined( _MSC_VER ) && _MSC_VER < 1600)
 typedef unsigned int uint32_t;
+typedef asl::ULong uint64_t;
 #else
 #include <stdint.h>
 #endif
