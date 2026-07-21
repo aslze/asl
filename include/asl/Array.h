@@ -181,6 +181,10 @@ public:
 	Returns the number of elements in the array
 	*/
 	int length() const {return d().n;}
+	/**
+	Returns true if the queue is empty
+	*/
+	bool empty() const { return length() == 0; }
 
 	/**
 	Reserves space for m elements without increasing actual length (to make appending faster)

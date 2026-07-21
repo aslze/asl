@@ -173,16 +173,31 @@ public:
 	*/
 	static bool clear(const String& path) { return removeRecursive(path, true); }
 
+	/**
+	 * Type of special directories that can be obtained with `Directory::special()`
+	 */
 	enum Place
 	{
-		HOME, APPDATA, APPCONFIG, APPDATA_ALL, APPS, DOCUMENTS, DOWNLOAD, DESKTOP, PROGRAMDATA, TEMP
+		HOME, APPDATA, APPCONFIG, APPDATA_ALL, APPS, DOCUMENTS, DOWNLOAD, DESKTOP, TEMP, MYTEMP
 	};
 
+	/**
+	 * Returns the path of a special directory, like the user's home directory, desktop, documents, downloads, etc.
+	 */
 	static String special(Place p);
 
-	Array<DirEvent> wait();
+	/**
+	 * Waits for changes in the directory and returns the next event (new file, deleted file). This function blocks
+	 * until an event occurs.
+	 */
+	DirEvent wait();
 
-	Array<DirEvent> waitPoll();
+	DirEvent waitPoll();
+
+	/**
+	 * Returns the number of events that have occurred in the directory since the last call to `wait()`
+	 */
+	int numEvents() const;
 
 	struct Space
 	{

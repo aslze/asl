@@ -5,6 +5,7 @@
 #include <asl/Process.h>
 #include <asl/TextFile.h>
 #include <asl/Set.h>
+#include <asl/Queue.h>
 #include <stdio.h>
 #ifdef __APPLE__
 #include <sys/syslimits.h>
@@ -51,8 +52,8 @@ String Directory::createTemp()
 	unsigned num = (unsigned)(2e9 * fract(0.01 * now()));
 	unsigned p = (unsigned int)(size_t)&dir;
 #ifdef _WIN32
-	TCHAR tmpdir[MAX_PATH];
-	DWORD ret = GetTempPath(MAX_PATH, tmpdir);
+	wchar_t tmpdir[MAX_PATH];
+	DWORD ret = GetTempPathW(MAX_PATH, tmpdir);
 	String tmpDir = tmpdir;
 	if (ret > MAX_PATH || ret == 0)
 		return dir;
@@ -280,9 +281,10 @@ bool Directory::remove(const String& path)
 
 struct WaitData
 {
-	HANDLE    hdir;
-	ByteArray buffer;
-	Set<File> items;
+	HANDLE          hdir;
+	ByteArray       buffer;
+	Set<File>       items;
+	Queue<DirEvent> events;
 };
 
 String Directory::special(Place p)
@@ -290,7 +292,12 @@ String Directory::special(Place p)
 	switch (p)
 	{
 	case TEMP:
-		return createTemp();
+	case MYTEMP:
+	{
+		wchar_t tmpdir[MAX_PATH];
+		DWORD   ret = GetTempPathW(MAX_PATH, tmpdir);
+		return tmpdir;
+	}
 	case DESKTOP:
 	{
 		wchar_t path[MAX_PATH];
@@ -301,10 +308,10 @@ String Directory::special(Place p)
 	case DOCUMENTS:
 	{
 		wchar_t path[MAX_PATH];
-		if (SHGetSpecialFolderPathW(NULL, path, CSIDL_MYDOCUMENTS, FALSE))
+		if (SHGetSpecialFolderPathW(NULL, path, CSIDL_PERSONAL, FALSE) && path[0] != 0)
 			return path;
 		else
-			return special(HOME) + "/Documents"; // ?
+			return special(HOME) + "/Documents";
 		break;
 	}
 	case DOWNLOAD:
@@ -339,8 +346,9 @@ String Directory::special(Place p)
 	case APPDATA_ALL:
 	{
 		wchar_t path[MAX_PATH];
-		if (SHGetSpecialFolderPathW(NULL, path, CSIDL_COMMON_APPDATA, FALSE))
+		if (SHGetSpecialFolderPathW(NULL, path, CSIDL_COMMON_APPDATA, FALSE) && path[0] != 0)
 			return path;
+		return Process::env("ProgramData") | "C:/ProgramData";
 		break;
 	}
 	case HOME:
@@ -350,21 +358,14 @@ String Directory::special(Place p)
 			return path;
 		break;
 	}
-	case PROGRAMDATA:
-	{
-		String p = Process::env("ProgramData") | "C:/ProgramData";
-		return p;
-	}
 	default:
 		break;
 	}
 	return String();
 }
 
-Array<DirEvent> Directory::wait()
+DirEvent Directory::wait()
 {
-	Array<DirEvent> items;
-
 	if (!_waitdata)
 	{
 		_waitdata = new WaitData;
@@ -372,6 +373,9 @@ Array<DirEvent> Directory::wait()
 		                              OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 		_waitdata->buffer.resize(1000);
 	}
+
+	if (!_waitdata->events.empty())
+		return _waitdata->events.get();
 
 	DWORD n = 0;
 	ReadDirectoryChangesW(_waitdata->hdir, _waitdata->buffer.data(), _waitdata->buffer.length(), FALSE,
@@ -408,14 +412,14 @@ Array<DirEvent> Directory::wait()
 		else if (action == FILE_ACTION_RENAMED_NEW_NAME)
 			item.type = DirEvent::NEW_FILE;
 
-		items << item;
+		_waitdata->events.put(item);
 
 		if (info->NextEntryOffset == 0)
 			break;
 		info = (FILE_NOTIFY_INFORMATION*)((byte*)info + info->NextEntryOffset);
 	}
 
-	return items;
+	return !_waitdata->events.empty() ? _waitdata->events.get() : DirEvent();
 }
 
 Directory::Space Directory::freeSpace(const String& dir)
@@ -457,10 +461,11 @@ namespace asl
 
 struct WaitData
 {
-	int       inotfd;
-	int       watch_desc;
-	ByteArray buffer;
-	Set<File> items;
+	int             inotfd;
+	int             watch_desc;
+	ByteArray       buffer;
+	Set<File>       items;
+	Queue<DirEvent> events;
 };
 
 inline double ft2t(const time_t& ft)
@@ -505,6 +510,7 @@ Array<File> Directory::items(const String& which, Directory::ItemType t)
 		_files = all;
 		return all;
 	}
+
 	DIR* d = opendir(_path.ok() ? *_path : "/");
 	if (!d)
 		return _files;
@@ -649,6 +655,13 @@ Directory::Space Directory::freeSpace(const String& dir)
 
 String Directory::special(Place p)
 {
+	if (p == TEMP)
+	{
+		String tmp = Process::env("TMPDIR");
+		if (!tmp.ok())
+			tmp = "/tmp";
+		return tmp;
+	}
 	String home = Process::env("HOME");
 	if (p == HOME)
 		return home;
@@ -686,20 +699,22 @@ String Directory::special(Place p)
 		return home + "/.config";
 	case APPDATA_ALL:
 		return "/var/lib";
+	case MYTEMP:
+		return dirs["XDG_RUNTIME_DIR"] | ("/tmp");
+		break;
 	default:
 		break;
 	}
 	return String();
 }
 
-Array<DirEvent> Directory::wait()
+DirEvent Directory::wait()
 {
 #ifdef ASL_HAVE_INOTIFY
 	if (!File(_path).isDirectory())
-		return Array<DirEvent>();
+		return DirEvent();
 	if (_path.startsWith("/proc") || _path.startsWith("/sys") || _path.startsWith("/mnt"))
 		return waitPoll();
-	Array<DirEvent> items;
 
 	if (!_waitdata)
 	{
@@ -709,6 +724,9 @@ Array<DirEvent> Directory::wait()
 		_waitdata->inotfd = inotify_init();
 		_waitdata->watch_desc = inotify_add_watch(_waitdata->inotfd, *_path, /*IN_MODIFY |*/ IN_CREATE | IN_DELETE | IN_MOVE);
 	}
+	
+	if (!_waitdata->events.empty())
+		return _waitdata->events.get();
 
 	inotify_event* event = (inotify_event*)_waitdata->buffer.data();
 	unsigned       lastmask = 0;
@@ -734,11 +752,11 @@ Array<DirEvent> Directory::wait()
 				item.type = DirEvent::DELETED;
 			else if (event->mask == IN_MOVED_TO)
 				item.type = DirEvent::NEW_FILE;
-			items << item;
+			_waitdata->events.put(item);
 		}
 		break;
 	}
-	return items;
+	return !_waitdata->events.empty() ? _waitdata->events.get() : DirEvent();
 #else
 	return waitPoll();
 #endif
@@ -749,7 +767,8 @@ Array<DirEvent> Directory::wait()
 
 namespace asl
 {
-Array<DirEvent> Directory::waitPoll()
+
+DirEvent Directory::waitPoll()
 {
 	if (!_waitdata)
 	{
@@ -757,7 +776,8 @@ Array<DirEvent> Directory::waitPoll()
 		_waitdata->items = files();
 	}
 
-	Array<DirEvent> itemschanged;
+	if (!_waitdata->events.empty())
+		return _waitdata->events.get();
 
 	while (1)
 	{
@@ -765,35 +785,38 @@ Array<DirEvent> Directory::waitPoll()
 
 		if (items != _waitdata->items)
 		{
-			Set<File> newfiles = items - _waitdata->items;
+			Set<File> diff = _waitdata->items - items;
 
-			foreach (File& file, newfiles)
-			{
-				DirEvent item;
-				item.name = file.name();
-				item.type = DirEvent::NEW_FILE;
-				itemschanged << item;
-			}
-
-			newfiles = _waitdata->items - items;
-			foreach (File& file, newfiles)
+			foreach (File& file, diff)
 			{
 				DirEvent item;
 				item.name = file.name();
 				item.type = DirEvent::DELETED;
-				itemschanged << item;
+				_waitdata->events.put(item);
+			}
+			
+			diff = items - _waitdata->items;
+
+			foreach (File& file, diff)
+			{
+				DirEvent item;
+				item.name = file.name();
+				item.type = DirEvent::NEW_FILE;
+				_waitdata->events.put(item);
 			}
 		}
 
 		_waitdata->items = items;
 
-		if (itemschanged.length() > 0)
-			return itemschanged;
-
-		sleep(0.1);
+		sleep(0.2);
 	}
 
-	return itemschanged;
+	return !_waitdata->events.empty() ? _waitdata->events.get() : DirEvent();
+}
+
+int Directory::numEvents() const
+{
+	return _waitdata ? _waitdata->events.length() : 0;
 }
 
 Directory::~Directory()

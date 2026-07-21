@@ -1,3 +1,6 @@
+// Copyright(c) 1999-2026 aslze
+// Licensed under the MIT License (http://opensource.org/licenses/MIT)
+
 #ifndef ASL_QUEUE_H
 #define ASL_QUEUE_H
 
@@ -39,6 +42,7 @@ public:
 		this->remove(0);
 		return *this;
 	}
+
 	/**
 	Appends an item at the end
 	*/

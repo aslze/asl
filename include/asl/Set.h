@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_SET_H
@@ -176,11 +176,15 @@ public:
 		b << *this << s;
 		return b;
 	}
+
+	/**
+	Returns true if the set is empty
+	*/
 	bool empty() const {return this->length()==0;}
 	
-	struct Enumerator : public MAP<T,int>::Enumerator
+	struct Enumerator : public MAP<T, int>::Enumerator
 	{
-		Enumerator(){}
+		Enumerator() {}
 		Enumerator(Set& s) : MAP<T, int>::Enumerator(s) {}
 		Enumerator(const Set& s) : MAP<T, int>::Enumerator((Set&)s) {}
 		T& operator*() { return (T&)~(*this); }
