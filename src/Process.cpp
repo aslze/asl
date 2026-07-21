@@ -14,6 +14,8 @@ Process Process::execute(const String& command, const Array<String>& args, const
 {
 	Process p;
 	p.run(command, args, env);
+	if (p._pid < 0)
+		return p;
 	int n, i = 0;
 	char buffer[8000];
 	while (p.running())
@@ -640,7 +642,7 @@ void Process::run(const String& command, const Array<String>& args, const Dic<>&
 			//pid_t sid = setsid();
 		}
 		exec(command, args, env);
-		_exit(0);
+		_exit(127);
         break;
 
 	default: // parent

@@ -79,13 +79,12 @@ LONG StackTrace::crashHandler(EXCEPTION_POINTERS* ep)
 			}
 			else
 			{
-				_message << String::f("%s() + 0x%llx [0x%llx]\n", symbol->Name, (unsigned long long)displacement,
-				                      (unsigned long long)addr);
+				_message << String::f("%s() + 0x%llx [0x%llx]\n", symbol->Name, (ULong)displacement, (ULong)addr);
 			}
 		}
 		else
 		{
-			_message << String::f("[0x%llx]\n", (unsigned long long)addr);
+			_message << String::f("[0x%llx]\n", (ULong)addr);
 		}
 	}
 
@@ -141,13 +140,13 @@ void StackTrace::segv_handler(int sig)
 	void* baseaddr = info.dli_fbase;
 	String path = Process::myPath();
 	args << "-o" << path << "-l" << String::f("%p", baseaddr);
-	for (size_t i = 1; i < n; i++)
+	for (int i = 1; i < n; i++)
 	{
 		args << String::f("%p", frames[i]);
 	}
 
 	Process out = Process::execute("atos", args);
-	if (out.exitStatus() == 0 && out.output())
+	if (out.success() && out.output())
 	{
 		_message << out.output();
 	}
@@ -156,14 +155,14 @@ void StackTrace::segv_handler(int sig)
 		path = path + ".dSYM/Contents/Resources/DWARF/" + Path(path).name();
 		args[1] = path;
 		Process out = Process::execute("atos", args);
-		if (out.exitStatus() == 0 && out.output())
+		if (out.success() && out.output())
 		{
 			_message << out.output();
 		}
 	}
 #else
 	args << "-e" << Process::myPath() << "-f" << "-p" << "-C";
-	for (size_t i = 1; i < n; i++)
+	for (int i = 1; i < n; i++)
 	{
 		args << String::f("%p", frames[i]);
 	}
