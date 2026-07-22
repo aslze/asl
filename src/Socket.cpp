@@ -316,15 +316,10 @@ bool InetAddress::set(const String& host, int port)
 	return true;
 }
 
-struct HostPort
+Pair<String> parseHostPort(const String& u)
 {
-	String host, port;
-};
-
-HostPort parseHostPort(const String& u)
-{
-	HostPort hp;
-	int hoststart = 0, hostend = u.length(), portstart = 0;
+	Pair<String> hp;
+	int          hoststart = 0, hostend = u.length(), portstart = 0;
 	if (u[0] == '[') // IPv6
 	{
 		hoststart++;
@@ -334,16 +329,18 @@ HostPort parseHostPort(const String& u)
 		if (u[hostend + 1] == ':')
 			portstart = hostend + 2;
 	}
-	else {
+	else
+	{
 		int i = u.lastIndexOf(':');
-		if (i > 1) {
+		if (i > 1)
+		{
 			hostend = i;
 			portstart = i + 1;
 		}
 	}
-	hp.host = u.substring(hoststart, hostend);
+	hp.first = u.substring(hoststart, hostend);
 	if (portstart > 0)
-		hp.port = u.substring(portstart);
+		hp.second = u.substring(portstart);
 	return hp;
 }
 
@@ -356,8 +353,8 @@ bool InetAddress::set(const String& host)
 	else
 		thehost = host;
 
-	HostPort hp = parseHostPort(thehost);
-	if (!hp.port.ok() && (hp.host.contains('/') || hp.host.contains('\\')))
+	Pair<String> hp = parseHostPort(thehost);
+	if (!hp.second.ok() && (hp.first.contains('/') || hp.first.contains('\\')))
 	{
 #ifdef ASL_SOCKET_LOCAL
 		resize(sizeof(sockaddr_un));
@@ -369,7 +366,7 @@ bool InetAddress::set(const String& host)
 		return true;
 #endif
 	}
-	return set(hp.host, hp.port);
+	return set(hp.first, hp.second);
 }
 
 // Socket
@@ -377,7 +374,8 @@ bool InetAddress::set(const String& host)
 Socket_::Socket_()
 {
 #ifdef _WIN32
-	if(!g_wsaStarted) startWSA();
+	if (!g_wsaStarted)
+		startWSA();
 #endif
 	_handle = -1;
 	_family = InetAddress::IPv4;
@@ -416,17 +414,11 @@ void Socket_::close()
 {
 	if(_handle >= 0)
 #ifndef _WIN32
-	::close(_handle);
+		::close(_handle);
 #else
-	closesocket(_handle);
+		closesocket(_handle);
 #endif
 	_handle = -1;
-}
-
-bool Socket_::bind(const String& name)
-{
-	HostPort hp = parseHostPort(name);
-	return bind(hp.host, hp.port);
 }
 
 bool Socket_::bind(const String& ip, int port)
@@ -709,5 +701,67 @@ Socket_* LocalSocket_::accept()
 	return new LocalSocket_((int)::accept(_handle, (sockaddr*)0, (socklen_t*)0));
 }
 
+// MulticastSocket
+
+bool MulticastSocket_::join(const InetAddress& a, int interfac)
+{
+	init(a.type() != _family);
+
+	socklen_t n = (socklen_t)a.length();
+	if (getsockname(handle(), (sockaddr*)a.ptr(), &n))
+	{
+		if (!bind("0.0.0.0", a.port()))
+			return false;
+	}
+
+	if (_family == InetAddress::IPv6)
+	{
+		ipv6_mreq mr;
+		mr.ipv6mr_multiaddr = ((sockaddr_in6*)a.ptr())->sin6_addr;
+		mr.ipv6mr_interface = interfac;
+		return setOption(IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, mr);
+	}
+	else
+	{
+		ip_mreq mr;
+		mr.imr_multiaddr = ((sockaddr_in*)a.ptr())->sin_addr;
+		mr.imr_interface.s_addr = interfac;
+		return setOption(IPPROTO_IP, IP_ADD_MEMBERSHIP, mr);
+	}
 }
 
+bool MulticastSocket_::leave(const InetAddress& a, int interfac)
+{
+	if (_family == InetAddress::IPv6)
+	{
+		ipv6_mreq mr;
+		mr.ipv6mr_multiaddr = ((sockaddr_in6*)a.ptr())->sin6_addr;
+		mr.ipv6mr_interface = interfac;
+		return setOption(IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, mr);
+	}
+	else
+	{
+		ip_mreq mr;
+		mr.imr_multiaddr = ((sockaddr_in*)a.ptr())->sin_addr;
+		mr.imr_interface.s_addr = interfac;
+		return setOption(IPPROTO_IP, IP_DROP_MEMBERSHIP, mr); // seems to fail on WSL !!
+	}
+}
+
+bool MulticastSocket_::setLoop(bool loopback)
+{
+	int c = loopback ? 1 : 0;
+	if (_family == InetAddress::IPv6)
+		return setOption(IPPROTO_IPV6, IPV6_MULTICAST_LOOP, c);
+	else
+		return setOption(IPPROTO_IP, IP_MULTICAST_LOOP, c);
+}
+
+bool MulticastSocket_::setTTL(int ttl)
+{
+	if (_family == InetAddress::IPv6)
+		return setOption(IPPROTO_IPV6, IPV6_MULTICAST_HOPS, ttl);
+	else
+		return setOption(IPPROTO_IP, IP_MULTICAST_TTL, ttl);
+}
+}

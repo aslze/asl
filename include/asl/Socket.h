@@ -48,6 +48,7 @@ public:
 #pragma warning(push)
 #pragma warning(disable : 26812)
 #endif
+
 /**
 Represents an endpoint of a socket which is ususally an IP address and a port. Both IPv4 and IPv6 are supported.
 \ingroup Sockets
@@ -102,6 +103,8 @@ protected:
 	Type _type;
 };
 
+Pair<String> ASL_API parseHostPort(const String& u);
+
 typedef InetAddress NetAddress;
 
 ASL_SMART_CLASS(Socket, SmartObject)
@@ -131,7 +134,11 @@ ASL_SMART_CLASS(Socket, SmartObject)
 	}
 
 	virtual bool bind(const String& ip, int port);
-	virtual bool bind(const String& path);
+	virtual bool bind(const String& name)
+	{
+		Pair<String> hp = parseHostPort(name);
+		return bind(hp.first, hp.second);
+	}
 	virtual void listen(int n = 5);
 	virtual Socket_* accept();
 	InetAddress remoteAddress() const;

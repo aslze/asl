@@ -6,7 +6,6 @@ set(ASL_SRC
 	String.cpp
 	Socket.cpp
 	SocketServer.cpp
-	MulticastSocket.cpp
 	HttpServer.cpp
 	Http.cpp
 	WebSocket.cpp
@@ -25,9 +24,9 @@ set(ASL_SRC
 	TabularDataFile.cpp
 	CmdArgs.cpp
 	SerialPort.cpp
-	SharedMem.cpp
-	StackTrace.cpp
+	#SharedMem.cpp
 	unicodedata.cpp
+	StackTrace.cpp
 	util.cpp
 	SHA1.cpp
 	Uuid.cpp

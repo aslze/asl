@@ -155,6 +155,7 @@ public:
 	*/
 	static String loadedLibPath(const String& lib);
 	static void makeDaemon();
+
 	/**
 	Starts executing a program with optional command line arguments and environment variables.
 	*/
@@ -165,17 +166,17 @@ public:
 		run(command, array<String>(arg1));
 	}
 
-	void run(const String& command, const String& arg1, const String& arg2)
+	ASL_DEPRECATED(void run(const String& command, const String& arg1, const String& arg2), "Pass arguments as array")
 	{
 		run(command, array<String>(arg1, arg2));
 	}
 
-	void run(const String& command, const String& arg1, const String& arg2, const String& arg3)
+	ASL_DEPRECATED(void run(const String& command, const String& arg1, const String& arg2, const String& arg3), "Pass arguments as array")
 	{
 		run(command, array<String>(arg1, arg2, arg3));
 	}
 
-	void run(const String& command, const String& arg1, const String& arg2, const String& arg3, const String& arg4)
+	ASL_DEPRECATED(void run(const String& command, const String& arg1, const String& arg2, const String& arg3, const String& arg4), "Pass arguments as array")
 	{
 		run(command, array<String>(arg1, arg2, arg3, arg4));
 	}
@@ -231,17 +232,21 @@ public:
 		return execute(command, array<String>(arg1));
 	}
 
-	static Process execute(const String& command, const String& arg1, const String& arg2)
+	static ASL_DEPRECATED(Process execute(const String& command, const String& arg1, const String& arg2),
+	                      "Pass arguments as array")
 	{
 		return execute(command, array<String>(arg1, arg2));
 	}
 
-	static Process execute(const String& command, const String& arg1, const String& arg2, const String& arg3)
+	static ASL_DEPRECATED(Process execute(const String& command, const String& arg1, const String& arg2, const String& arg3),
+	                      "Pass arguments as array")
 	{
 		return execute(command, array<String>(arg1, arg2, arg3));
 	}
 
-	static Process execute(const String& command, const String& arg1, const String& arg2, const String& arg3, const String& arg4)
+	static ASL_DEPRECATED(Process execute(const String& command, const String& arg1, const String& arg2,
+	                                      const String& arg3, const String& arg4),
+	                      "Pass arguments as array")
 	{
 		return execute(command, array<String>(arg1, arg2, arg3, arg4));
 	}

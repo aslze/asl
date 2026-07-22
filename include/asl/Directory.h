@@ -65,6 +65,21 @@ Directory::create("/some_other_dir");
 Directory::move("/path/file.txt", "/some_other_dir");
 Directory::copy("/path/dir", "/some_other_dir");      // copies the whole directory with all its content
 ```
+
+Monitoring a directory for changes is also possible with the `wait()` function, which blocks until a change occurs and
+returns.
+
+```
+Directory dir("/watch-dir");
+while (true)
+{
+	DirEvent event = dir.wait();
+	if (event.type == DirEvent::NEW_FILE)
+		printf("New file: %s\n", *event.name);
+	else if(event.type == DirEvent::DELETED)
+        printf("Deleted: %s\n", *event.name);
+}
+```
 */
 
 class ASL_API Directory

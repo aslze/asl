@@ -9,14 +9,15 @@ with **Windows**, **Linux**, **macOS** and **Android**, 32 and 64 bits.
 __Operating system functionalities__:
 
 - Threads, mutexes and semaphores
-- Processes (run programs and read their output)
+- Processes: run programs and read their output or write input, list processes
 - Binary and text files
-- %Directory enumeration and file system operations (copy, move, delete)
+- %Directory enumeration, file system operations (copy, move, delete), wait for changes
 - Sockets TCP, UDP, Unix and SSL/TLS encrypted sockets, IPv4/IPv6
 - Runtime dynamically loadable libraries (DLLs/shared libraries)
 - %Console attributes: text color and cursor position
 - Serial ports
 - Shared memory
+- Crash handler with stack trace
 
 __Utilities__:
 
@@ -73,7 +74,7 @@ With CMake 3.14+, instead of using `find_package()`, you can download and build 
 
 ~~~
 include(FetchContent)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.15.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.12.0.zip)
 FetchContent_MakeAvailable(asl)
 ~~~
 
@@ -113,7 +114,7 @@ If you don't want the ASL_FETCH functionality, with CMake 3.14+ a project can bu
 set(ASL_TLS ON)
 set(ENABLE_PROGRAMS OFF CACHE BOOL "") # skip mbedtls samples
 FetchContent_Declare(mtls URL https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.4/mbedtls-3.6.4.tar.bz2)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.15.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.12.0.zip)
 FetchContent_MakeAvailable(mtls asl)
 ```
 
@@ -125,7 +126,7 @@ Which is equivalent to:
 set(ASL_TLS ON)
 set(ASL_FETCH ON)
 include(FetchContent)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.11.15.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.12.0.zip)
 FetchContent_MakeAvailable(asl)
 ```
 */

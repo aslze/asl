@@ -4,7 +4,7 @@
 #ifndef ASL_SET_H
 #define ASL_SET_H
 
-#define MAP HashMap
+#define ASL_SET_MAP HashMap
 
 #include <asl/HashMap.h>
 
@@ -42,10 +42,10 @@ if(even.containsAny(powers)) // true, even numbers have (some) numbers from the 
 \ingroup Containers
 */
 template <class T>
-class Set: public MAP<T,int>
+class Set: public ASL_SET_MAP<T,int>
 {
 public:
-	Set(int size): MAP<T,int>(size) {}
+	Set(int size): ASL_SET_MAP<T,int>(size) {}
 	Set() {}
 	Set(const Array<T>& a)
 	{
@@ -182,11 +182,11 @@ public:
 	*/
 	bool empty() const {return this->length()==0;}
 	
-	struct Enumerator : public MAP<T, int>::Enumerator
+	struct Enumerator : public ASL_SET_MAP<T, int>::Enumerator
 	{
 		Enumerator() {}
-		Enumerator(Set& s) : MAP<T, int>::Enumerator(s) {}
-		Enumerator(const Set& s) : MAP<T, int>::Enumerator((Set&)s) {}
+		Enumerator(Set& s) : ASL_SET_MAP<T, int>::Enumerator(s) {}
+		Enumerator(const Set& s) : ASL_SET_MAP<T, int>::Enumerator((Set&)s) {}
 		T& operator*() { return (T&)~(*this); }
 		T* operator->() { return &(~(*this)); }
 	};
@@ -194,8 +194,8 @@ public:
 	Enumerator all() { return Enumerator(*this); }
 	Enumerator all() const { return Enumerator(*this); }
 };
-#undef MAP
 
+#undef ASL_SET_MAP
 
 #ifdef ASL_HAVE_RANGEFOR
 

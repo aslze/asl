@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2025 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_LOGGER
@@ -109,7 +109,7 @@ public:
 /**
 Writes a log message with the given category and log level.
 \ingroup Logging
-	*/
+*/
 ASL_API void log(const String& cat, Log::Level level, const String& message);
 
 /**
