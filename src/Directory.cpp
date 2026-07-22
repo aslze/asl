@@ -285,6 +285,7 @@ struct WaitData
 	ByteArray       buffer;
 	Set<File>       items;
 	Queue<DirEvent> events;
+	bool            polling;
 };
 
 String Directory::special(Place p)
@@ -372,6 +373,7 @@ DirEvent Directory::wait()
 		_waitdata->hdir = CreateFileW(_path, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_DELETE | FILE_SHARE_WRITE, NULL,
 		                              OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 		_waitdata->buffer.resize(1000);
+		_waitdata->polling = false;
 	}
 
 	if (!_waitdata->events.empty())
@@ -466,6 +468,7 @@ struct WaitData
 	ByteArray       buffer;
 	Set<File>       items;
 	Queue<DirEvent> events;
+	bool            polling;
 };
 
 inline double ft2t(const time_t& ft)
@@ -713,21 +716,50 @@ DirEvent Directory::wait()
 #ifdef ASL_HAVE_INOTIFY
 	if (!File(_path).isDirectory())
 		return DirEvent();
-	if (_path.startsWith("/proc") || _path.startsWith("/sys") || _path.startsWith("/mnt"))
-		return waitPoll();
 
 	if (!_waitdata)
 	{
 		_waitdata = new WaitData;
-		int bufsiz = 4 * (sizeof(inotify_event) + PATH_MAX + 1);
-		_waitdata->buffer.resize(bufsiz);
+		_waitdata->polling = false;
+		String path = _path + "/";
+		if (path.startsWith("/proc/") || path.startsWith("/sys/") || path.startsWith("/mnt/"))
+		{
+			_waitdata->polling = true;
+		}
+		else
+		{
+			Array<String> mounts = TextFile("/proc/mounts").lines();
+			if (!mounts.empty())
+			{
+				foreach (String& line, mounts)
+				{
+					Array<String> parts = line.split();
+					if (parts.length() >= 3 && parts[2] == "9p" && path.startsWith(parts[1] + '/'))
+					{
+						_waitdata->polling = true;
+						break;
+					}
+				}
+			}
+		}
+
+		if (_waitdata->polling)
+			_waitdata->items = files();
+	}
+
+	if (_waitdata->polling)
+		return waitPoll();
+
+	if (!_waitdata->events.empty())
+		return _waitdata->events.get();
+
+	if (_waitdata->buffer.empty())
+	{
+		_waitdata->buffer.resize(4 * (sizeof(inotify_event) + PATH_MAX + 1));
 		_waitdata->inotfd = inotify_init();
 		_waitdata->watch_desc = inotify_add_watch(_waitdata->inotfd, *_path, /*IN_MODIFY |*/ IN_CREATE | IN_DELETE | IN_MOVE);
 	}
 	
-	if (!_waitdata->events.empty())
-		return _waitdata->events.get();
-
 	inotify_event* event = (inotify_event*)_waitdata->buffer.data();
 	unsigned       lastmask = 0;
 	while (1)
@@ -808,6 +840,9 @@ DirEvent Directory::waitPoll()
 
 		_waitdata->items = items;
 
+		if (!_waitdata->events.empty())
+			break;
+
 		sleep(0.2);
 	}
 
@@ -821,7 +856,7 @@ int Directory::numEvents() const
 
 Directory::~Directory()
 {
-	if (_waitdata)
+	if (_waitdata && !_waitdata->polling)
 	{
 #ifdef _WIN32
 		CloseHandle(_waitdata->hdir);

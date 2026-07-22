@@ -15,7 +15,7 @@ using namespace asl;
 ASL_TEST(Process)
 {
 	{
-		Process proc = Process::execute(Process::myPath(), "-subproc", 1);
+		Process proc = Process::execute(Process::myPath(), array<String>("-subproc", "1"));
 		ASL_ASSERT(proc.exitStatus() == 3);
 		//printf("<%s>\n", *proc.output());
 		ASL_ASSERT(proc.output().trimmed() == "subprocess -subproc,1");
@@ -23,7 +23,7 @@ ASL_TEST(Process)
 	{
 		Array<String> lines;
 		Process proc;
-		proc.run(Process::myPath(), array<String>("-subproc", 5, "a \"b\\"));
+		proc.run(Process::myPath(), array<String>("-subproc", "5", "a \"b\\"));
 		while (1)
 		{
 			String line = proc.readOutputLine();
