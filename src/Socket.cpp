@@ -703,6 +703,11 @@ Socket_* LocalSocket_::accept()
 
 // MulticastSocket
 
+#ifndef IPV6_ADD_MEMBERSHIP
+#define IPV6_ADD_MEMBERSHIP  IPV6_JOIN_GROUP
+#define IPV6_DROP_MEMBERSHIP IPV6_LEAVE_GROUP
+#endif
+
 bool MulticastSocket_::join(const InetAddress& a, int interfac)
 {
 	init(a.type() != _family);
