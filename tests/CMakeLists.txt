@@ -45,6 +45,9 @@ set(TESTS
 
 if(ASL_TEST_NET)
 	list(APPEND TESTS HTTP)
+	if(ASL_TLS)
+		list(APPEND TESTS HTTPS)
+	endif()
 endif()
 
 foreach(T ${TESTS})
