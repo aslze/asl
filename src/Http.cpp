@@ -14,6 +14,8 @@
 #pragma warning(disable : 26451 26812)
 #endif
 
+// _status: bit 1 -> error, needs to close connection
+
 namespace asl {
 
 String Url::decode(const String& q0)
@@ -34,7 +36,7 @@ String Url::decode(const String& q0)
 			i += 2;
 		}
 		else
-		q << c;
+			q << c;
 	}
 #ifdef ASL_ANSI
 	return utf8ToLocal(q);
@@ -168,6 +170,7 @@ HttpMessage::HttpMessage() : _proto("HTTP/1.1"), _socket(NULL), _fileBody(false)
 {
 	_sink = new HttpSinkArray(_body);
 	_headersSent = false;
+	_maxSize = 100000000;
 	_status = new HttpStatus;
 	memset(&*_status, 0, sizeof(*_status));
 }
@@ -201,7 +204,7 @@ void HttpMessage::put(const File& body)
 	_fileBody = true;
 }
 
-String capitalized(const String& name) 
+String capitalized(const String& name)
 {
 	String cname = name;
 	char*  pname = cname.data();
@@ -261,7 +264,16 @@ void HttpMessage::readHeaders()
 
 void HttpMessage::readBody()
 {
-	int size = header("Content-Length");
+	Long clength = header("Content-Length");
+
+	if (clength > 0x7fffffff) // Too big
+	{
+		*_socket << "HTTP/1.1 413 Request Entity Too Large\r\n\r\n";
+		_status->status = 1;
+		return;
+	}
+
+	int size = (int)clength;
 
 	int currentsize = 0;
 
@@ -301,6 +313,11 @@ void HttpMessage::readBody()
 		while (maxToRead > 0) {
 			bytesRead = _socket->read(buffer, min(maxToRead, (int)sizeof(buffer)));
 			if (bytesRead <= 0) {
+				return;
+			}
+			if (_maxSize && currentsize + bytesRead > _maxSize) {
+				*_socket << "HTTP/1.1 413 Request Entity Too Large\r\n\r\n";
+				_status->status = 1;
 				return;
 			}
 			currentsize += bytesRead;
@@ -447,10 +464,17 @@ void HttpRequest::read()
 	
 	if (header("Expect") == "100-continue")
 	{
-		if ((Long)header("Content-Length") < 128000000)
+		if ((Long)header("Content-Length") < _maxSize)
 			*_socket << "HTTP/1.1 100 Continue\r\n\r\n";
 		else
-			*_socket << "HTTP/1.1 417 Too big\r\n\r\n";
+			*_socket << "HTTP/1.1 417 Too Large\r\n\r\n";
+	}
+	
+	if((Long)header("Content-Length") > _maxSize) 
+	{
+		*_socket << "HTTP/1.1 413 Request Entity Too Large\r\n\r\n";
+		_status->status = 1;
+		return;
 	}
 
 	readBody();
@@ -515,6 +539,7 @@ HttpResponse::HttpResponse(const HttpRequest& r)
 	if (r._proto == "HTTP/1.0")
 		_proto = r._proto;
 	_headersSent = false;
+	_maxSize = r._maxSize;
 	setCode(200);
 }
 
@@ -548,7 +573,7 @@ void HttpMessage::useSink(const Shared<HttpSink>& s)
 
 bool HttpMessage::sendHeaders()
 {
-	String s;
+	String s(50 + _headers.length() * 64, 0);
 	s << _command << "\r\n";
 	foreach2(String& name, String& value, _headers)
 	{
@@ -570,21 +595,22 @@ bool HttpMessage::write()
 	if (_fileBody)
 		return putFile(_body);
 	else
-		return write((const char*)_body.data(), _body.length()) > 0;
+		return write(_body.data(), _body.length()) > 0;
 }
 
-int HttpMessage::write(const char* buffer, int n)
+int HttpMessage::write(const void* buffer, int n)
 {
 	if (!_headersSent)
 		if (!sendHeaders())
 			return false;
 	int sent = n == 0 ? 1 : 0;
+	const char* p = (const char*)buffer;
 	while (n > 0)
 	{
 		int m = min(n, SEND_BLOCK_SIZE);
 		if (_chunked)
 			*_socket << String::f("%x\r\n", m);
-		int written = _socket->write(buffer, m);
+		int written = _socket->write(p, m);
 		if (written != m)
 			return sent;
 		_status->sent += written;
@@ -595,7 +621,7 @@ int HttpMessage::write(const char* buffer, int n)
 		if (_chunked)
 			*_socket << "\r\n";
 		n -= m;
-		buffer += m;
+		p += m;
 	}
 	return sent;
 }

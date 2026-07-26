@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_HTTPSERVER
@@ -96,6 +96,11 @@ public:
 	void serveFile(HttpRequest& request, HttpResponse& response);
 
 	/**
+	Sets the maximum body size that can be received in requests
+	*/
+	void setMaxUploadSize(int size) { _maxUploadSize = size; }
+
+	/**
 	Links this socket with the given WebSocket server to process incoming WebSocket connections
 	*/
 	void link(WebSocketServer& wsserver) { _wsserver = &wsserver; }
@@ -107,6 +112,8 @@ protected:
 	String _methods;
 	bool _cors;
 	WebSocketServer* _wsserver;
+	int _maxUploadSize;
+
 private:
 	void serve(Socket client);
 };

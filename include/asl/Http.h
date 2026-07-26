@@ -82,6 +82,7 @@ struct HttpStatus
 	int received;
 	int totalSend;
 	int totalReceive;
+	int status;
 };
 
 struct HttpSink
@@ -184,7 +185,7 @@ public:
 	/**
 	Writes the given buffer to the message body.
 	*/
-	int write(const char* buffer, int n);
+	int write(const void* buffer, int n);
 	/**
 	Sends the content of the given file in the message body
 	*/
@@ -199,6 +200,10 @@ public:
 	void useSink(const Shared<HttpSink>& s);
 
 	void setSockError(const String& s) { _socketError = s; }
+
+	void setMaxSize(int n) { _maxSize = n; }
+
+	int status() const { return _status ? _status->status : 0; }
 
 protected:
 	void readHeaders();
@@ -215,6 +220,7 @@ protected:
 	bool _headersSent;
 	Shared<HttpStatus> _status;
 	String _socketError;
+	int _maxSize;
 };
 
 
@@ -258,11 +264,11 @@ public:
 	{
 		_headers = headers; put(data); init();
 	}
+
 	HttpRequest(Socket& s)
 	{
 		_socket = &s;
 		init();
-		read();
 	}
 
 	void init()
@@ -270,7 +276,9 @@ public:
 		_recursion = 0;
 		_followRedirects = true;
 	}
+	
 	void read();
+	
 	const String& resource() const
 	{
 		return _res;
@@ -287,8 +295,6 @@ public:
 		return _method;
 	}
 
-	HttpMethod methodId() const;
-	
 	void setMethod(const String& m)
 	{
 		_method = m;

@@ -15,6 +15,7 @@ HttpServer::HttpServer(int port):
 	_methods("GET, POST, OPTIONS, PUT, DELETE, PATCH, HEAD")
 {
 	_requestStop = false;
+	_maxUploadSize = 1024 * 1024 * 100;
 	if (port >= 0)
 		bind(port);
 	_wsserver = NULL;
@@ -51,7 +52,10 @@ void HttpServer::serve(Socket client)
 			continue;
 
 		HttpRequest request(client);
-		if (client.error() || !request.method().ok() || !request.path().ok() || !request.protocol().ok())
+		request.setMaxSize(_maxUploadSize);
+		request.read();
+
+		if (client.error() || !request.method().ok() || !request.path().ok() || !request.protocol().ok() || request.status() != 0)
 			break;
 
 		String hconn = request.header("Connection").toLowerCase();
