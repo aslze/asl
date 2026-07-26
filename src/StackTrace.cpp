@@ -9,6 +9,9 @@ asl::String         StackTrace::_message;
 }
 
 #ifdef _WIN32
+
+#ifdef _MSC_VER
+
 #include <dbghelp.h>
 #pragma comment(lib, "dbghelp.lib")
 
@@ -96,6 +99,19 @@ LONG StackTrace::crashHandler(EXCEPTION_POINTERS* ep)
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 }
+
+#else // MinGW: empty implementation for now, as MinGW does not support dbghelp.h properly
+
+namespace asl
+{
+void StackTrace::onCrash(asl::Function<void> f)
+{
+	_onCrash = f;
+	printf("StackTrace::onCrash() is not implemented for MinGW\n");
+}
+}
+
+#endif
 
 #else
 

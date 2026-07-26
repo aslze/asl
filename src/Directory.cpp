@@ -11,6 +11,9 @@
 #include <sys/syslimits.h>
 #endif
 #ifdef _WIN32
+#ifndef _WIN32_IE
+#define _WIN32_IE 0x0600
+#endif
 #include <shlobj.h>
 #else
 #include <sys/types.h>

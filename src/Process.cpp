@@ -111,6 +111,10 @@ void Process::ignoreOutput()
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
+#if !defined _WIN32_WINNT || _WIN32_WINNT < 0x0501
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
+#endif
 #include <psapi.h>
 
 namespace asl {
