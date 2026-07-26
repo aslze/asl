@@ -45,7 +45,7 @@ LONG StackTrace::crashHandler(EXCEPTION_POINTERS* ep)
 	frame.AddrFrame.Mode = AddrModeFlat;
 	frame.AddrStack.Mode = AddrModeFlat;
 
-	_message.resize(64 * 64);
+	_message.resize(3000);
 	_message.clear();
 
 	_message << String::f("Fatal exception: 0x%08X\n", ep->ExceptionRecord->ExceptionCode);
@@ -75,7 +75,7 @@ LONG StackTrace::crashHandler(EXCEPTION_POINTERS* ep)
 
 			if (SymGetLineFromAddr64(process, addr, &lineDisp, &line))
 			{
-				_message << String::f("%s() [%s:%lu]\n", symbol->Name, line.FileName, line.LineNumber);
+				_message << String::f("%s() at %s:%lu\n", symbol->Name, *Path(line.FileName).name(), line.LineNumber);
 			}
 			else
 			{
@@ -161,19 +161,26 @@ void StackTrace::segv_handler(int sig)
 		}
 	}
 #else
-	args << "-e" << Process::myPath() << "-f" << "-p" << "-C";
+	args << "-e" << Process::myPath() << "-f" << "-p" << "-C"; 
 	for (int i = 1; i < n; i++)
 	{
 		args << String::f("%p", frames[i]);
 	}
 
 	Process out = Process::execute("addr2line", args);
-	if (out.exitStatus() == 0 && out.output())
+	if (out.exitStatus() == 0)
 	{
 		_message << out.output();
 	}
+	else if (out.exitStatus() == 1) // try without -p for older versions of addr2line
+	{
+		args.remove(3);
+		Process out = Process::execute("addr2line", args);
+		_message << out.output();
+	}
+
 #endif
-	if (_message.length() < 20)
+	if (_message.length() < 17)
 	{
 		char** syms = backtrace_symbols(frames, n);
 		for (int i = 1; i < n; i++)
