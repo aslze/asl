@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_UTIL_H
@@ -24,10 +24,10 @@ Decodes a base64 encoded string into a byte array; the string can contain whites
 */
 inline ByteArray decodeBase64(const String& s)
 {
-	return decodeBase64((const char*)s, s.length());
+	return decodeBase64(s.data(), s.length());
 }
 
-ASL_API String encodeBase64(const byte* data, int n);
+ASL_API String encodeBase64(const void* data, int n);
 
 /**
 Encodes a byte array as a string using base64 encoding.
@@ -42,14 +42,14 @@ Encodes a string as a string using base64 encoding.
 */
 inline String encodeBase64(const String& s)
 {
-	return encodeBase64((const byte*)&s[0], s.length());
+	return encodeBase64(s.data(), s.length());
 }
 
 
 template<int N>
-String encodeBase64(const Array_<byte,N>& src) { return encodeBase64((const byte*)src, N); }
+String encodeBase64(const Array_<byte,N>& src) { return encodeBase64(src.data(), N); }
 
-ASL_API String encodeHex(const byte* data, int n);
+ASL_API String encodeHex(const void* data, int n);
 
 /**
 Encodes a byte array as a string using hexadecimal
@@ -57,7 +57,7 @@ Encodes a byte array as a string using hexadecimal
 inline String encodeHex(const ByteArray& src) { return encodeHex(src.data(), src.length()); }
 
 template<int N>
-String encodeHex(const Array_<byte, N>& src) { return encodeHex((const byte*)src, N); }
+String encodeHex(const Array_<byte, N>& src) { return encodeHex(src.data(), N); }
 
 /**
 Decodes a hexadecimal encoded string into a byte array

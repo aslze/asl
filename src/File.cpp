@@ -324,7 +324,7 @@ File File::temp(const String& ext)
 #if 0
 	char nam[500];
 	strcpy(nam, P_tmpdir "/XXXXXX");
-	#ifdef __ANDROID_API__
+	#ifdef __ANDROID__
 	int fd = mkstemp(nam);
 	#else
 	strcat(nam, ext);

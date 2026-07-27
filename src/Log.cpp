@@ -70,7 +70,7 @@ int Log::maxLevel()
 
 void Log::storeState()
 {
-#ifndef __ANDROID_API__
+#ifndef __ANDROID__
 	String value;
 	int flags = (_usefile ? 1 : 0) | (_useconsole ? 2 : 0);
 	value << char(_maxLevel + '0') << char(flags + '0') << _logfile;
@@ -80,7 +80,7 @@ void Log::storeState()
 
 void Log::updateState()
 {
-#ifndef __ANDROID_API__
+#ifndef __ANDROID__
 	String s = Process::env("ASL_LOG");
 	if (s.length() > 2)
 	{
@@ -119,7 +119,7 @@ void log(const String& cat, Log::Level level, ASL_PRINTF_W1 const char* fmt, ...
 }
 
 
-#ifndef __ANDROID_API__
+#ifndef __ANDROID__
 
 void Log::log(const String& cat, Log::Level level, const String& message)
 {
@@ -139,7 +139,7 @@ void Log::log(const String& cat, Log::Level level, const String& message)
 
 	Lock lock(*_mutex);
 
-#ifndef __ANDROID_API__
+#ifndef __ANDROID__
 	String logfile = _logfile;
 	if (_usefile && TextFile(logfile).size() > ASL_LOG_MAX_SIZE)
 	{
@@ -177,7 +177,10 @@ void Log::log(const String& cat, Log::Level level, const String& message)
 	if (useconsole && color != Console::COLOR_DEFAULT)
 		console.color(color);
 
-	String line(0, "[%s][%s] %s%s\n", *now.toString(), *catg, slevel, *message);
+	//String line = String::f("[%s][%s] %s%s\n", *now.toString(), *catg, slevel, *message);
+
+	asl::String line(255, 0);
+	line << '[' << *now.toString() << "][" << *catg << "] " << slevel << *message << '\n';
 
 	if (message.endsWith('\n'))
 		line.resize(line.length() - 1);

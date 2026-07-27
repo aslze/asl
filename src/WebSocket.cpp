@@ -12,7 +12,7 @@
 #include <ctype.h>
 
 namespace asl {
-	
+
 #ifdef _MSC_VER
 #pragma warning(disable : 26812)
 #endif
@@ -106,9 +106,9 @@ void WebSocketServer::process(Socket& client, const Dic<String>& headers)
 	String key = headers["Sec-Websocket-Key"];
 
 	SHA1::Hash hash = SHA1::hash(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
-	String digest = encodeBase64(hash, hash.length());
+	String digest = encodeBase64(hash);
 
-	client << String(180, "HTTP/1.1 101 Switching Protocols\r\n"
+	client << String::f("HTTP/1.1 101 Switching Protocols\r\n"
 		"Upgrade: websocket\r\n"
 		"Connection: Upgrade\r\n"
 		"Sec-WebSocket-Accept: %s\r\n", *digest);
@@ -382,7 +382,7 @@ void WebSocket::send(const byte* p, int length, FrameType type)
 			((unsigned*)data.data())[i] ^= mask;
 		}
 	}
-	if (!_closed || _socket.disconnected())
+	if (!_closed && !_socket.disconnected())
 		_socket << *buf << data;
 }
 

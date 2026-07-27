@@ -87,7 +87,7 @@ namespace asl {
 #define ASL_HAVE_INITLIST2
 #endif
 
-#if __has_feature(cxx_range_for) || (defined( _MSC_VER ) && _MSC_VER >= 1700) || (defined(__GNUC__) && defined(ASL_GCC11)  && ASL_C_VER >= 40600)
+#if __has_feature(cxx_range_for) || (defined( _MSC_VER ) && _MSC_VER >= 1700) || (defined(__GNUC__) && defined(ASL_GCC11) && ASL_C_VER >= 40600)
 #define ASL_HAVE_RANGEFOR
 #endif
 

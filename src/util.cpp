@@ -227,8 +227,9 @@ static const byte base64_chars_inv[] = {
 // to build above table:
 // byte base64_chars_inv_(char c) { return max(0, String(base64_chars).indexOf(c); }
 
-String encodeBase64(const byte* data, int n)
+String encodeBase64(const void* vdata, int n)
 {
+	const byte* data = (const byte*)vdata;
 	int len = 4 * ((n + 2) / 3);
 	String output(len, len);
 
@@ -328,8 +329,9 @@ ByteArray decodeBase64(const char* src0, int n)
 
 #endif
 
-String encodeHex(const byte* data, int n)
+String encodeHex(const void* vdata, int n)
 {
+	const byte* data = (const byte*)vdata;
 	String h(2*n, 2*n);
 	for (int i = 0; i < n; i++)
 		snprintf(&h[2*i], 3, "%02x", data[i]);

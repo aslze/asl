@@ -8,9 +8,9 @@ asl::Function<void> StackTrace::_onCrash;
 asl::String         StackTrace::_message;
 }
 
-#ifdef _WIN32
+#if ((defined _WIN32 && defined _MSC_VER) || defined __linux__ || defined __APPLE__) && !defined(__ANDROID__)
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 
 #include <dbghelp.h>
 #pragma comment(lib, "dbghelp.lib")
@@ -27,7 +27,12 @@ void StackTrace::onCrash(asl::Function<void> f)
 LONG StackTrace::crashHandler(EXCEPTION_POINTERS* ep)
 {
 	HANDLE process = GetCurrentProcess();
-	SymInitialize(process, NULL, TRUE);
+	HANDLE thread = GetCurrentThread();
+	if (!SymInitialize(process, NULL, TRUE))
+	{
+		_message = String::f("Fatal exception: 0x%08X\n", ep->ExceptionRecord->ExceptionCode);
+		return EXCEPTION_EXECUTE_HANDLER;
+	}
 
 	CONTEXT* ctx = ep->ContextRecord;
 
@@ -50,13 +55,11 @@ LONG StackTrace::crashHandler(EXCEPTION_POINTERS* ep)
 
 	_message.resize(3000);
 	_message.clear();
-
 	_message << String::f("Fatal exception: 0x%08X\n", ep->ExceptionRecord->ExceptionCode);
 
-	for (int i = 0; i < 100; ++i)
+	for (int i = 0; i < 100; i++)
 	{
-		if (!StackWalk64(machine, process, GetCurrentThread(), &frame, ctx, NULL, SymFunctionTableAccess64,
-		                 SymGetModuleBase64, NULL))
+		if (!StackWalk64(machine, process, thread, &frame, ctx, NULL, SymFunctionTableAccess64, SymGetModuleBase64, NULL))
 			break;
 
 		DWORD64 addr = frame.AddrPC.Offset;
@@ -82,7 +85,7 @@ LONG StackTrace::crashHandler(EXCEPTION_POINTERS* ep)
 			}
 			else
 			{
-				_message << String::f("%s() + 0x%llx [0x%llx]\n", symbol->Name, (ULong)displacement, (ULong)addr);
+				_message << String::f("%s()\n", symbol->Name);
 			}
 		}
 		else
@@ -99,19 +102,6 @@ LONG StackTrace::crashHandler(EXCEPTION_POINTERS* ep)
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 }
-
-#else // MinGW: empty implementation for now, as MinGW does not support dbghelp.h properly
-
-namespace asl
-{
-void StackTrace::onCrash(asl::Function<void> f)
-{
-	_onCrash = f;
-	printf("StackTrace::onCrash() is not implemented for MinGW\n");
-}
-}
-
-#endif
 
 #else
 
@@ -213,4 +203,17 @@ void StackTrace::segv_handler(int sig)
 	_exit(128 + sig);
 }
 }
+#endif
+
+#else // Unsupported OS/compiler
+
+namespace asl
+{
+void StackTrace::onCrash(asl::Function<void> f)
+{
+	_onCrash = f;
+	printf("StackTrace::onCrash() is not supported for this OS/compiler\n");
+}
+}
+
 #endif

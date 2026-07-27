@@ -672,6 +672,19 @@ String Directory::special(Place p)
 	if (p == HOME)
 		return home;
 
+#ifdef __ANDROID__
+	String base = "/storage/emulated/0";
+	switch (p)
+	{
+	case DOCUMENTS:
+		return base + "/Documents";
+	case DOWNLOAD:
+		return base + "/Download";
+	default:
+		return String();
+	}
+#endif
+
 	String xdg = home + "/.config/user-dirs.dirs";
 	Dic<String> dirs;
 	if (File(xdg).isFile())
