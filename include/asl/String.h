@@ -421,6 +421,9 @@ public:
 	for functions requiring C-style strings)
 	*/
 	const char* operator*() const {return str();}
+
+	const char* c_str() const { return str(); }
+
 	int toInt() const {return atoi(str());}
 	double toDouble() const { return atof(str()); }
 	float toFloat() const {return (float)atof(str());}

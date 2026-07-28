@@ -295,6 +295,8 @@ String Directory::special(Place p)
 {
 	switch (p)
 	{
+	case EXE:
+		return Process::myDir();
 	case TEMP:
 	case MYTEMP:
 	{
@@ -316,6 +318,24 @@ String Directory::special(Place p)
 			return path;
 		else
 			return special(HOME) + "/Documents";
+		break;
+	}
+	case IMAGES:
+	{
+		wchar_t path[MAX_PATH];
+		if (SHGetSpecialFolderPathW(NULL, path, CSIDL_MYPICTURES, FALSE) && path[0] != 0)
+			return path;
+		else
+			return special(HOME) + "/Pictures";
+		break;
+	}
+	case VIDEOS:
+	{
+		wchar_t path[MAX_PATH];
+		if (SHGetSpecialFolderPathW(NULL, path, CSIDL_MYVIDEO, FALSE) && path[0] != 0)
+			return path;
+		else
+			return special(HOME) + "/Videos";
 		break;
 	}
 	case DOWNLOAD:
@@ -668,6 +688,10 @@ String Directory::special(Place p)
 			tmp = "/tmp";
 		return tmp;
 	}
+	else if (p == EXE)
+	{
+		return Process::myPath();
+	}
 	String home = Process::env("HOME");
 	if (p == HOME)
 		return home;
@@ -678,6 +702,10 @@ String Directory::special(Place p)
 	{
 	case DOCUMENTS:
 		return base + "/Documents";
+	case IMAGES:
+		return base + "/Pictures";
+	case VIDEOS:
+		return base + "/Movies";
 	case DOWNLOAD:
 		return base + "/Download";
 	default:
@@ -707,12 +735,20 @@ String Directory::special(Place p)
 		return dirs["XDG_DESKTOP_DIR"] | (home + "/Desktop");
 	case DOCUMENTS:
 		return dirs["XDG_DOCUMENTS_DIR"] | (home + "/Documents");
+	case IMAGES:
+		return dirs["XDG_PICTURES_DIR"] | (home + "/Pictures");
+	case VIDEOS:
+		return dirs["XDG_VIDEOS_DIR"] | (home + "/Videos");
 	case DOWNLOAD:
 		return dirs["XDG_DOWNLOAD_DIR"] | (home + "/Downloads");
 	case APPS:
 		return dirs["XDG_APPLICATIONS_DIR"] | (home + "/Applications");
 	case APPDATA:
+#ifdef __APPLE__
+		return home + "/Library/Application Support";
+#else
 		return home + "/.local/share";
+#endif
 		break;
 	case APPCONFIG:
 		return home + "/.config";
