@@ -387,22 +387,6 @@ ASL_SMART_CLASS(PacketSocket, Socket)
 		_type = PACKET;
 		_blocking = false;
 	}
-	String readLine()
-	{
-		char buf[4000];
-		if (waitInput())
-		{
-			int n = read(buf, sizeof(buf));
-			if (n < 0)
-				n = 0;
-			const char* nl = (const char*)memchr(buf, '\n', n);
-			if (nl)
-				n = (int)(nl - buf);
-
-			return String(buf, n);
-		}
-		return String();
-	}
 	void sendTo(const InetAddress& addr, const void* data, int n);
 	int readFrom(InetAddress& addr, void* data, int n);
 };
@@ -434,8 +418,6 @@ class ASL_API PacketSocket : public Socket
 public:
 	ASL_SMART_DEF(PacketSocket, Socket);
 	ASL_EXPLICIT PacketSocket(int fd) : ASL_SMART_INIT(fd) {}
-
-	ASL_DEPRECATED(String readLine(), "") { return _()->readLine(); }
 
 	/**
 	Sends `n` bytes from `data` as a packet to the address `addr`.
@@ -584,17 +566,6 @@ public:
 	Sets the multicast socket's TTL value (default 1)
 	*/
 	bool setTTL(int n) { return _()->setTTL(n); }
-
-	/** Starts a multicast session for group address `a`. Packets sent will be received by
-	all sockets that join the group.
-	\deprecated Use .connect() or .sendTo()
-	*/
-	ASL_DEPRECATED(void multicast(const InetAddress& a, int ttl = 1), "Use .connect() or .sendTo()")
-	{
-		connect(a);
-		setLoop(true);
-		setTTL(ttl);
-	}
 
 	bool setOptions(bool loop, int ttl)
 	{

@@ -60,7 +60,7 @@ class ASL_API Log : public Singleton<Log>
 	String _logfile;
 	int _maxLevel;
 	Mutex* _mutex;
-	Long   _maxSize;
+	int _maxSize;
 	void storeState();
 	void updateState();
 	Log(const Log& l) : _mutex(0)

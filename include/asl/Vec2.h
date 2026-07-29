@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2025 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_VECTOR2_H
@@ -57,8 +57,6 @@ class Vec2_
 	T angle()     const {return (T) atan2(y, x);}
 	/** Returns the angle between this vector and `b` */
 	T angle(const Vec2_& b) const { return acos(clamp(((*this) * b) / ((*this).length() * b.length()), T(-1), T(1))); }
-	/** Returns the length of this vector */
-	ASL_DEPRECATED(T operator!() const, "Use length() instead") {return sqrt(x*x+y*y);}
 	/** Returns the length of this vector */
 	T length()    const {return sqrt(x*x+y*y);}
 	/** Returns the length of this vector squared */

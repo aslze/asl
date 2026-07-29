@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2025 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_VECTOR3_H
@@ -72,8 +72,6 @@ class Vec3_
 	T length() const {return sqrt(x*x+y*y+z*z);}
 	/** Returns the length of the vector squared */
 	T length2() const {return x*x+y*y+z*z;}
-	/** Returns the length of the vector */
-	ASL_DEPRECATED(T operator!() const, "Use length() instead") { return length(); }
 	/** Returns the length of this vector */
 	T norm() const { return length(); }
 	T normSq() const { return length2(); }
@@ -122,19 +120,6 @@ class Vec3_
 	void operator%=(const Vec3_& b) { x *= b.x; y *= b.y; z *= b.z; }
 	/** Returns this vector negated */
 	Vec3_ operator-() const {return Vec3_(-x,-y,-z);}
-
-	/** Returns true if this vector is almost null (norm1 less than given threshold)
-	 * \deprecated Use other methods
-	 */
-	ASL_DEPRECATED(bool isNull(T tol = T(0.000001)) const, "Use other methods") { return norm1() < tol; }
-
-	/** Returns true if this vector is nearly parallel to vector `v2` with a given tolerance
-	 * \deprecated Use dot product
-	 */
-	ASL_DEPRECATED(bool isParallelToVector(const Vec3_& v2, T tol = (T)0.000001), "Use dot product")
-	{
-		return fabs( ((*this) * v2)/(length() * v2.length()) ) > (T(1)-tol);
-	}
 
 public:
 	/** The x, y, z components */
