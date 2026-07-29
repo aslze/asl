@@ -14,6 +14,24 @@
 #pragma warning(disable : 26812)
 #endif
 
+inline int valueToCode(int v)
+{
+	if (v < 0)
+		return 0;
+	if (v > 9)
+		return v + 6;
+	return v;
+}
+
+inline int codeToValue(int c)
+{
+	if (c < 0)
+		return 0;
+	if (c > 9)
+		return c - 6;
+	return c;
+}
+
 namespace asl {
 
 Log::Log()
@@ -22,6 +40,7 @@ Log::Log()
 	_useconsole = true;
 	_usefile = true;
 	_maxLevel = 2;
+	_maxSize = 1;
 	_mutex = new Mutex;
 }
 
@@ -68,11 +87,17 @@ int Log::maxLevel()
 	return Log::instance()->_maxLevel;
 }
 
+void Log::setMaxSize(int sizeCode)
+{
+	Log::instance()->_maxSize = sizeCode & 0x07;
+	Log::instance()->storeState();
+}
+
 void Log::storeState()
 {
 #ifndef __ANDROID__
 	String value;
-	int flags = (_usefile ? 1 : 0) | (_useconsole ? 2 : 0);
+	int flags = valueToCode((_usefile ? 1 : 0) | (_useconsole ? 2 : 0) | ((_maxSize & 0x07) << 2));
 	value << char(_maxLevel + '0') << char(flags + '0') << _logfile;
 	Process::setEnv("ASL_LOG", value);
 #endif
@@ -85,7 +110,8 @@ void Log::updateState()
 	if (s.length() > 2)
 	{
 		_maxLevel = s[0] - '0';
-		int flags = s[1] - '0';
+		int flags = codeToValue(s[1] - '0');
+		_maxSize = (flags >> 2) & 0x07;
 		_usefile = (flags & 1) != 0;
 		_useconsole = (flags & 2) != 0;
 		_logfile = &s[2];
@@ -141,7 +167,7 @@ void Log::log(const String& cat, Log::Level level, const String& message)
 
 #ifndef __ANDROID__
 	String logfile = _logfile;
-	if (_usefile && TextFile(logfile).size() > ASL_LOG_MAX_SIZE)
+	if (_usefile && TextFile(logfile).size() > ((1ll << _maxSize) * 1000000))
 	{
 		Path   path = logfile;
 		String oldfile = path.noExt() + "-1." + path.extension();
@@ -190,7 +216,6 @@ void Log::log(const String& cat, Log::Level level, const String& message)
 
 	if (useconsole)
 	{
-		printf("%s", *line);
 		if (color != Console::COLOR_DEFAULT)
 			console.color();
 	}

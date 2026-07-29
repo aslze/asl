@@ -60,10 +60,23 @@ class ASL_API Log : public Singleton<Log>
 	String _logfile;
 	int _maxLevel;
 	Mutex* _mutex;
+	Long   _maxSize;
 	void storeState();
 	void updateState();
-	Log(const Log&) : _mutex(0) { _maxLevel = 0; _useconsole = _usefile = false; }
-	void operator=(const Log&) { _mutex = 0; _maxLevel = 0; _useconsole = _usefile = false;}
+	Log(const Log& l) : _mutex(0)
+	{
+		_maxLevel = l._maxLevel;
+		_useconsole = _usefile = false;
+		_maxSize = l._maxSize;
+	}
+	void operator=(const Log& l)
+	{
+		_mutex = 0;
+		_maxLevel = l._maxLevel;
+		_useconsole = _usefile = false;
+		_maxSize = l._maxSize;
+	}
+
 public:
 	Log();
 	~Log();
@@ -102,6 +115,10 @@ public:
 	Gets the current maximum log level
 	*/
 	static int maxLevel();
+	/**
+	Sets the maximum size of the log file as an exponent: 0 -> 1MB, 1 -> 2MB, 2 -> 4MB, up to 7.
+	*/
+	static void setMaxSize(int sizeCode);
 
 	void log(const String& cat, Log::Level level, const String& message);
 };
