@@ -5,12 +5,65 @@
 
 namespace asl {
 
+#ifdef _WIN32
+const String& ProcEnv::operator[](const String& key) const
+{
+	const String* pkey = _case.find(key.toUpperCase());
+	return pkey? _env[*pkey] : _env[key];
+}
+
+void ProcEnv::set(const String& key, const String& value)
+{
+	_env.reserve(100);
+	String ukey = key.toUpperCase();
+	String* pkey = _case.find(ukey);
+	if (pkey)
+		_env[*pkey] = value;
+	else
+	{
+		_case[ukey] = key;
+		_env[key] = value;
+	}
+}
+
+void ProcEnv::remove(const String& key)
+{
+	String  ukey = key.toUpperCase();
+	String* pkey = _case.find(ukey);
+	if (pkey)
+	{
+		_env.remove(*pkey);
+		_case.remove(ukey);
+	}
+	else
+		_env.remove(key);
+}
+#else
+const String& ProcEnv::operator[](const String& key) const
+{
+	return _env[key];
+}
+
+void ProcEnv::set(const String& key, const String& value)
+{
+	_env.reserve(100);
+	_env[key] = value;
+}
+
+void ProcEnv::remove(const String& key)
+{
+	_env.remove(key);
+}
+#endif
+
+//
+
 String ProcessInfo::name() const
 {
 	return Path(_path).name();
 }
 
-Process Process::execute(const String& command, const Array<String>& args, const Dic<>& env)
+Process Process::execute(const String& command, const Array<String>& args, const ProcEnv& env)
 {
 	Process p;
 	p.run(command, args, env);
@@ -163,9 +216,9 @@ void Process::setEnv(const String& var, const String& value)
 	SetEnvironmentVariableA(var, value);
 }
 
-Dic<> Process::environment()
+ProcEnv Process::environment()
 {
-	Dic<> envvars;
+	ProcEnv envvars;
 	LPTCH  envStrings = GetEnvironmentStringsA();
 	if (envStrings)
 	{
@@ -174,11 +227,16 @@ Dic<> Process::environment()
 			String s = env;
 			int    i = s.indexOf('=');
 			if (i > 0)
-				envvars[s.substr(0, i)] = s.substr(i + 1);
+				envvars.set(s.substr(0, i), s.substr(i + 1));
 		}
 		FreeEnvironmentStringsA(envStrings);
 	}
 	return envvars;
+}
+
+int Process::exec(const String& command, const Array<String>& args, const ProcEnv& env)
+{
+	return 0;
 }
 
 Process::Process()
@@ -254,7 +312,7 @@ void Process::makeDaemon()
 	// does this make sense on Windows?
 }
 
-void Process::run(const String& command, const Array<String>& args, const Dic<>& env)
+void Process::run(const String& command, const Array<String>& args, const ProcEnv& env)
 {
 	if (!_ready)
 		return;
@@ -280,7 +338,7 @@ void Process::run(const String& command, const Array<String>& args, const Dic<>&
 	String theenv;
 	if (env.length() > 0)
 	{
-		theenv = env.join('\0', '=');
+		theenv = env.map().join('\0', '=');
 		theenv << '\0';
 	}
 
@@ -487,16 +545,16 @@ void Process::setEnv(const String& var, const String& value)
 	setenv(var, value, 1);
 }
 
-Dic<> Process::environment()
+ProcEnv Process::environment()
 {
 	char** env = environ;
-	Dic<>        vars;
+	ProcEnv vars;
 	while (*env)
 	{
 		String s = *env;
 		int    i = s.indexOf('=');
 		if (i != -1)
-			vars[s.substring(0, i)] = s.substring(i + 1);
+			vars.set(s.substring(0, i), s.substring(i + 1));
 		env++;
 	}
 	return vars;
@@ -618,7 +676,7 @@ void Process::makeDaemon()
 	}
 }
 
-void Process::run(const String& command, const Array<String>& args, const Dic<>& env)
+void Process::run(const String& command, const Array<String>& args, const ProcEnv& env)
 {
 	if(!_ready)
 		return;
@@ -735,7 +793,7 @@ bool Process::finished()
 	return true;
 }
 
-int Process::exec(const String& command, const Array<String>& args, const Dic<>& env)
+int Process::exec(const String& command, const Array<String>& args, const ProcEnv& env)
 {
 	Array<const char*> argv;
 	argv << command;

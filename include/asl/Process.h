@@ -11,6 +11,35 @@ namespace asl {
 
 class ASL_API Process;
 
+
+class ASL_API ProcEnv
+{
+	Dic<> _env;
+	Dic<> _case;
+
+public:
+	const String&     operator[](const String& key) const;
+	void              set(const String& key, const String& value);
+	void              remove(const String& key);
+	int               length() const { return _env.length(); }
+	const Dic<>&      map() const { return _env; }
+	typedef Dic<>::Enumerator Enumerator;
+	Dic<>::Enumerator all() const { return _env.all(); }
+};
+
+#ifdef ASL_HAVE_RANGEFOR
+
+inline Array<Map<>::KeyVal>::Enumerator begin(const ProcEnv& a)
+{
+	return a.map().kv().all();
+}
+
+inline Array<Map<>::KeyVal>::Enumerator end(const ProcEnv& a)
+{
+	return a.map().kv().all();
+}
+#endif
+
 class ASL_API ProcessInfo
 {
 	friend class Process;
@@ -78,7 +107,7 @@ class ASL_API Process
 	String _output, _errors;
 	bool _detached;
 
-	static int exec(const String& command, const Array<String>& args = Array<String>(), const Dic<>& env = Dic<>());
+	static int exec(const String& command, const Array<String>& args = Array<String>(), const ProcEnv& env = ProcEnv());
 
 public:
 	Process();
@@ -154,12 +183,13 @@ public:
 	process.
 	*/
 	static String loadedLibPath(const String& lib);
+
 	static void makeDaemon();
 
 	/**
 	Starts executing a program with optional command line arguments and environment variables.
 	*/
-	void run(const String& command, const Array<String>& args = Array<String>(), const Dic<>& env = Dic<>());
+	void run(const String& command, const Array<String>& args = Array<String>(), const ProcEnv& env = ProcEnv());
 
 	void run(const String& command, const String& arg1)
 	{
@@ -219,13 +249,13 @@ public:
 	/**
 	Returns a dictionary of all environment variables of the current process.
 	*/
-	static Dic<> environment();
+	static ProcEnv environment();
 	/**
 	Executes `command` with optional arguments and environment vars, and returns the process' data (including output (written to *stdout* and *stderr*);
 	Add a '*' at the end of the command name to show the program's window in case of Win32 apps.
 	*/
 	static Process execute(const String& command, const Array<String>& args = Array<String>(),
-	                       const Dic<>& env = Dic<>());
+	                       const ProcEnv& env = ProcEnv());
 
 	static Process execute(const String& command, const String& arg1)
 	{
