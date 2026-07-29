@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <asl/Path.h>
+#include <asl/Directory.h>
 
 namespace asl {
 
@@ -63,10 +64,12 @@ String ProcessInfo::name() const
 	return Path(_path).name();
 }
 
-Process Process::execute(const String& command, const Array<String>& args, const ProcEnv& env)
+Process Process::execute(const String& command, const Array<String>& args, const Directory& dir, const ProcEnv& env)
 {
 	Process p;
-	p.run(command, args, env);
+	p.setSubprocessEnvironment(env);
+	p.setStartDirectory(dir.path());
+	p.run(command, args);
 	if (p._pid < 0)
 		return p;
 	int n, i = 0;
@@ -312,7 +315,7 @@ void Process::makeDaemon()
 	// does this make sense on Windows?
 }
 
-void Process::run(const String& command, const Array<String>& args, const ProcEnv& env)
+void Process::run(const String& command, const Array<String>& args)
 {
 	if (!_ready)
 		return;
@@ -336,9 +339,9 @@ void Process::run(const String& command, const Array<String>& args, const ProcEn
 	String commandline;
 	commandline << '"' << cmd << "\" " << joinCmdArgs(args);
 	String theenv;
-	if (env.length() > 0)
+	if (!_env.empty())
 	{
-		theenv = env.map().join('\0', '=');
+		theenv = _env.map().join('\0', '=');
 		theenv << '\0';
 	}
 
@@ -350,7 +353,7 @@ void Process::run(const String& command, const Array<String>& args, const ProcEn
 		TRUE,                   // handles are inherited
 		CREATE_NEW_CONSOLE,     // creation flags DETACHED_PROCESS
 	    theenv ? LPVOID(*theenv) : LPVOID(NULL), // use parent's environment
-		NULL,
+		_directory? (const wchar_t*)_directory : NULL,
 		&startInfo,
 		&procInfo) != 0;
 
@@ -676,7 +679,7 @@ void Process::makeDaemon()
 	}
 }
 
-void Process::run(const String& command, const Array<String>& args, const ProcEnv& env)
+void Process::run(const String& command, const Array<String>& args)
 {
 	if(!_ready)
 		return;
@@ -703,7 +706,9 @@ void Process::run(const String& command, const Array<String>& args, const ProcEn
 			//::signal (SIGHUP, SIG_IGN);
 			//pid_t sid = setsid();
 		}
-		exec(command, args, env);
+		if (_directory)
+			Directory::change(_directory);
+		exec(command, args, _env);
 		_exit(127);
         break;
 

@@ -6,25 +6,50 @@
 
 #include <asl/String.h>
 #include <asl/Map.h>
+#include <asl/Directory.h>
 
 namespace asl {
 
+#ifdef _WIN32
+static const char pathsSeparator = ';';
+#else
+static const char pathsSeparator = ':';
+#endif
+
 class ASL_API Process;
 
-
+/**
+ * A process environment variables that works in a case-insensitive way on Windows and case-sensitive on other platforms.
+ */
 class ASL_API ProcEnv
 {
 	Dic<> _env;
 	Dic<> _case;
 
 public:
-	const String&     operator[](const String& key) const;
-	void              set(const String& key, const String& value);
-	void              remove(const String& key);
-	int               length() const { return _env.length(); }
-	const Dic<>&      map() const { return _env; }
+	/**
+	 * Returns the value of the environment variable `key`
+	 */
+	const String& operator[](const String& key) const;
+	/**
+	 * Sets the value of the environment variable `key` to `value`
+	 */
+	void set(const String& key, const String& value);
+	/**
+	 * Removes the environment variable `key` from this environment
+	 */
+	void remove(const String& key);
+	/**
+	 * Returns the number of environment variables in this environment
+	 */
+	int length() const { return _env.length(); }
+	/**
+	 * Returns true if this environment has no variables
+	 */
+	bool                      empty() const { return length() == 0; }
+	const Dic<>&              map() const { return _env; }
 	typedef Dic<>::Enumerator Enumerator;
-	Dic<>::Enumerator all() const { return _env.all(); }
+	Enumerator                all() const { return _env.all(); }
 };
 
 #ifdef ASL_HAVE_RANGEFOR
@@ -89,6 +114,9 @@ show their console. Otherwise they run in the background with no window.
 __Warning__: If a process is run with the run() method and we will not read its output, the process can hang if it writes
 a lot to its output stream (because it will fill a buffer that no one will free). To avoid that, call detach() before calling
 run().
+
+You can set the environment variables to be used by the subprocess with setSubprocessEnvironment() before calling run(),
+and set the directory where the process will start with setStartDirectory().
 */
 
 class ASL_API Process
@@ -105,6 +133,8 @@ class ASL_API Process
 	PipeHandle _pipe_out[2], _pipe_in[2], _pipe_err[2];
 	PipeHandle _stdin, _stdout, _stderr;
 	String _output, _errors;
+	String _directory;
+	ProcEnv _env;
 	bool _detached;
 
 	static int exec(const String& command, const Array<String>& args = Array<String>(), const ProcEnv& env = ProcEnv());
@@ -146,6 +176,11 @@ public:
 	void detach() { ignoreOutput(); }
 	
 	void ignoreOutput();
+	
+	/**
+	Sets the starting directory of the new process
+	*/
+	void setStartDirectory(const String& dir) { _directory = dir; }
 
 	/**
 	Returns the number of bytes that can be read from the process' standard output
@@ -189,7 +224,7 @@ public:
 	/**
 	Starts executing a program with optional command line arguments and environment variables.
 	*/
-	void run(const String& command, const Array<String>& args = Array<String>(), const ProcEnv& env = ProcEnv());
+	void run(const String& command, const Array<String>& args = Array<String>());
 
 	void run(const String& command, const String& arg1)
 	{
@@ -238,6 +273,11 @@ public:
 	int exitStatus() { return _exitstat; }
 
 	/**
+	Sets the environment variables to be used by the subprocess when run
+	*/
+	void setSubprocessEnvironment(const ProcEnv& env) { _env = env; }
+
+	/**
 	Gets the value of an environment variable.
 	*/
 	static String env(const String& var);
@@ -251,11 +291,18 @@ public:
 	*/
 	static ProcEnv environment();
 	/**
-	Executes `command` with optional arguments and environment vars, and returns the process' data (including output (written to *stdout* and *stderr*);
+	Executes `command` with optional arguments, environment vars and a start directory, and returns the process'
+	data (including output (written to *stdout* and *stderr*);
 	Add a '*' at the end of the command name to show the program's window in case of Win32 apps.
 	*/
-	static Process execute(const String& command, const Array<String>& args = Array<String>(),
+	static Process execute(const String& command, const Array<String>& args, const Directory& dir,
 	                       const ProcEnv& env = ProcEnv());
+
+	static Process execute(const String& command, const Array<String>& args = Array<String>(),
+	                       const ProcEnv& env = ProcEnv())
+	{
+		return execute(command, args, Directory(), env);
+	}
 
 	static Process execute(const String& command, const String& arg1)
 	{
