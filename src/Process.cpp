@@ -846,6 +846,8 @@ Array<ProcessInfo> Process::list()
 	if (!dir)
 		return a;
 	struct dirent* entry;
+	char buffer[1024];
+	String path;
 	while ((entry = readdir(dir)) != NULL)
 	{
 		if (entry->d_type == DT_DIR)
@@ -854,18 +856,14 @@ Array<ProcessInfo> Process::list()
 			if (pid > 0)
 			{
 				ProcessInfo info(pid);
-				String cmdline;
-				FILE*  cmdfile = fopen(*("/proc/" + String(entry->d_name) + "/cmdline"), "rt");
-				if (cmdfile)
+				path = "/proc/";
+				path << (const char*)entry->d_name << "/exe";
+				int n = readlink(path, buffer, 1023);
+				if (n != -1)
 				{
-					char c = 0;
-					while (fread(&c, 1, 1, cmdfile) == 1 && c != 0)
-						cmdline << c;
-					fclose(cmdfile);
+					info._path = String(buffer, n);
+					a << info;
 				}
-
-				info._path = cmdline;
-				a << info;
 			}
 		}
 	}
