@@ -216,6 +216,7 @@ void Log::log(const String& cat, Log::Level level, const String& message)
 
 	if (useconsole)
 	{
+		printf("%s", *line);
 		if (color != Console::COLOR_DEFAULT)
 			console.color();
 	}
