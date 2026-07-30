@@ -64,11 +64,10 @@ String ProcessInfo::name() const
 	return Path(_path).name();
 }
 
-Process Process::execute(const String& command, const Array<String>& args, const Directory& dir, const ProcEnv& env)
+Process Process::execute(const String& command, const Array<String>& args, const ProcParams& params)
 {
 	Process p;
-	p.setSubprocessEnvironment(env);
-	p.setStartDirectory(dir.path());
+	p.use(params);
 	p.run(command, args);
 	if (p._pid < 0)
 		return p;
@@ -103,7 +102,7 @@ Process::Process(const Process& p) : _output(p._output), _errors(p._errors)
 	_hasExited = p._hasExited;
 	_ok = p._hasExited;
 	_ready = false;
-	_detached = p._detached;
+	_params = p._params;
 #ifdef _WIN32
 	_hProcess = NULL;
 #endif
@@ -154,9 +153,9 @@ int Process::killAll(const String& name)
 	return killed;
 }
 
-void Process::ignoreOutput()
+void Process::detach()
 {
-	_detached = true;
+	_params.detached = true;
 }
 
 }
@@ -252,7 +251,6 @@ Process::Process()
 	_ready = false;
 	_exitstat = 0;
 	_pid = -1;
-	_detached = false;
 	_hasExited = false;
 	_stderr = _stdin = _stdout = 0;
 	_hProcess = NULL;
@@ -326,22 +324,26 @@ void Process::run(const String& command, const Array<String>& args)
 	startInfo.cb = sizeof(startInfo);
 	startInfo.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
 	startInfo.wShowWindow = SW_HIDE;
-	startInfo.hStdInput = !_detached ? _pipe_in[0] : 0;
-	startInfo.hStdOutput = !_detached ? _pipe_out[1] : 0;
-	startInfo.hStdError = !_detached ? _pipe_err[1] : 0;
+	startInfo.hStdInput = !_params.detached ? _pipe_in[0] : 0;
+	startInfo.hStdOutput = !_params.detached ? _pipe_out[1] : 0;
+	startInfo.hStdError = !_params.detached ? _pipe_err[1] : 0;
 
 	String cmd = command;
-	if (command.endsWith('*')) {
-		startInfo.wShowWindow = SW_SHOWNORMAL;
+	if (command.endsWith('*'))
+	{
+		_params.showWindow = true;
 		cmd = cmd.substr(0, cmd.length() - 1);
 	}
+	
+	if (_params.showWindow)
+		startInfo.wShowWindow = SW_SHOWNORMAL;
 	
 	String commandline;
 	commandline << '"' << cmd << "\" " << joinCmdArgs(args);
 	String theenv;
-	if (!_env.empty())
+	if (!_params.env.empty())
 	{
-		theenv = _env.map().join('\0', '=');
+		theenv = _params.env.map().join('\0', '=');
 		theenv << '\0';
 	}
 
@@ -353,7 +355,7 @@ void Process::run(const String& command, const Array<String>& args)
 		TRUE,                   // handles are inherited
 		CREATE_NEW_CONSOLE,     // creation flags DETACHED_PROCESS
 	    theenv ? LPVOID(*theenv) : LPVOID(NULL), // use parent's environment
-		_directory? (const wchar_t*)_directory : NULL,
+	    _params.workingDir ? (const wchar_t*)_params.workingDir : NULL,
 		&startInfo,
 		&procInfo) != 0;
 
@@ -568,7 +570,6 @@ Process::Process()
 	_hasExited = false;
 	_ready = false;
 	_pid = -1;
-	_detached = false;
 	if(pipe(_pipe_in)==-1 || pipe(_pipe_out)==-1 || pipe(_pipe_err)==-1)
 	{
 		return;
@@ -691,7 +692,8 @@ void Process::run(const String& command, const Array<String>& args)
 		break;
 
 	case 0: // child
-		if(!_detached) {
+		if (!_params.detached)
+		{
 			dup2(_pipe_err[1], 2);
 			dup2(_pipe_out[1], 1);
 			dup2(_pipe_in[0], 0);
@@ -699,21 +701,23 @@ void Process::run(const String& command, const Array<String>& args)
 			close(_pipe_out[0]);
 			close(_pipe_err[0]);
 		}
-		else {
+		else
+		{
 			close(1);
 			close(2);
 			close(0);
 			//::signal (SIGHUP, SIG_IGN);
 			//pid_t sid = setsid();
 		}
-		if (_directory)
-			Directory::change(_directory);
-		exec(command, args, _env);
+		if (_params.workingDir)
+			Directory::change(_params.workingDir);
+		exec(command, args, _params.env);
 		_exit(127);
         break;
 
 	default: // parent
-		if(!_detached) {
+		if (!_params.detached)
+		{
 			close(_pipe_in[0]);
 			close(_pipe_out[1]);
 			close(_pipe_err[1]);

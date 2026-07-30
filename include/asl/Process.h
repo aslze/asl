@@ -65,6 +65,15 @@ inline Array<Map<>::KeyVal>::Enumerator end(const ProcEnv& a)
 }
 #endif
 
+/**
+Process information, including its PID and the path of its executable file, returned by Process::list().
+
+```
+auto procs = Process::list();
+for (const auto& info : procs)
+    printf("Process %i: %s\n", info.pid(), *info.name());
+```
+*/
 class ASL_API ProcessInfo
 {
 	friend class Process;
@@ -76,6 +85,24 @@ public:
 	int    pid() const { return _pid; }
 	String name() const;
 	String path() const { return _path; }
+};
+
+/**
+Process start parameters, including environment variables and working directory. The `detached` flag indicates that we are not interested
+in the process output and the process can continue running even if the parent process ends (must be set before run()).
+The `showWindow` flag on Windows indicates that the process should show its window (if it is a GUI application) or
+console (if it is a console application). The `env` field contains the environment variables to be used by the subprocess,
+and the `workingDir` field contains the directory where the process will start.
+*/
+struct ProcParams
+{
+	bool detached;
+	bool showWindow;
+	ProcEnv env;
+	String  workingDir;
+	ProcParams() : detached(false), showWindow(false) {}
+	ProcParams(const ProcEnv& e, const String& wd = String()) : detached(false), showWindow(false), env(e), workingDir(wd) {}
+	ProcParams(const String& wd, const ProcEnv& e = ProcEnv()) : detached(false), showWindow(false), env(e), workingDir(wd) {}
 };
 
 /**
@@ -108,8 +135,8 @@ if( p.success() )
 	text = p.output();
 ~~~
 
-In Windows you can append a '\*' to program names (e.g. "notepad.exe*") to show their window if they are Win32 GUI apps. Or to
-show their console. Otherwise they run in the background with no window.
+In Windows you can append a '\*' to program names (e.g. "notepad.exe*") or set `showWindow` in the process parameters to show their window
+if they are Win32 GUI apps. Or to show their console. Otherwise they run in the background with no window.
 
 __Warning__: If a process is run with the run() method and we will not read its output, the process can hang if it writes
 a lot to its output stream (because it will fill a buffer that no one will free). To avoid that, call detach() before calling
@@ -133,9 +160,7 @@ class ASL_API Process
 	PipeHandle _pipe_out[2], _pipe_in[2], _pipe_err[2];
 	PipeHandle _stdin, _stdout, _stderr;
 	String _output, _errors;
-	String _directory;
-	ProcEnv _env;
-	bool _detached;
+	ProcParams _params;
 
 	static int exec(const String& command, const Array<String>& args = Array<String>(), const ProcEnv& env = ProcEnv());
 
@@ -173,14 +198,14 @@ public:
 	Indicates that we are not interested in the process' output (must be called this before run()), and the
 	subprocess can continue running if the parent process ends.
 	*/
-	void detach() { ignoreOutput(); }
+	void detach();
 	
-	void ignoreOutput();
+	ASL_DEPRECATED(void ignoreOutput(), "Use .detach()") { detach(); }
 	
 	/**
 	Sets the starting directory of the new process
 	*/
-	void setStartDirectory(const String& dir) { _directory = dir; }
+	void setStartDirectory(const String& dir) { _params.workingDir = dir; }
 
 	/**
 	Returns the number of bytes that can be read from the process' standard output
@@ -273,9 +298,14 @@ public:
 	int exitStatus() { return _exitstat; }
 
 	/**
+	Sets the parameters to be used by the subprocess when run. This includes environment variables, working directory, and
+	other options.
+	*/
+	void use(const ProcParams& params) { _params = params; }
+	/**
 	Sets the environment variables to be used by the subprocess when run
 	*/
-	void setSubprocessEnvironment(const ProcEnv& env) { _env = env; }
+	void setSubprocessEnvironment(const ProcEnv& env) { _params.env = env; }
 
 	/**
 	Gets the value of an environment variable.
@@ -293,16 +323,9 @@ public:
 	/**
 	Executes `command` with optional arguments, environment vars and a start directory, and returns the process'
 	data (including output (written to *stdout* and *stderr*);
-	Add a '*' at the end of the command name to show the program's window in case of Win32 apps.
 	*/
-	static Process execute(const String& command, const Array<String>& args, const Directory& dir,
-	                       const ProcEnv& env = ProcEnv());
-
 	static Process execute(const String& command, const Array<String>& args = Array<String>(),
-	                       const ProcEnv& env = ProcEnv())
-	{
-		return execute(command, args, Directory(), env);
-	}
+	                       const ProcParams& env = ProcParams());
 
 	static Process execute(const String& command, const String& arg1)
 	{
