@@ -89,7 +89,7 @@ int Log::maxLevel()
 
 void Log::setMaxSize(int sizeCode)
 {
-	Log::instance()->_maxSize = sizeCode & 0x07;
+	Log::instance()->_maxSize = sizeCode & 0x03;
 	Log::instance()->storeState();
 }
 

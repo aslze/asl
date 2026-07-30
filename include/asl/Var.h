@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2025 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_VAR_H
@@ -216,7 +216,7 @@ class ASL_API Var
 		for (const Obj* p = b.begin(); p != b.end(); p++)
 			_o->set(p->key, p->value);
 	}
-	
+
 	template<class T>
 	Var(const std::initializer_list<T> b)
 	{
@@ -261,9 +261,24 @@ class ASL_API Var
 		}
 	}
 	template<class T>
-	Var(const Array<T>& v);
+	Var(const Array<T>& v)
+	{
+		_type = ARRAY;
+		NEW_ARRAY(_a);
+		_a->resize(v.length());
+		for (int i = 0; i < v.length(); i++)
+			(*_a)[i] = v[i];
+	}
 	template<class T>
-	Var(const VDic<T>& v);
+	Var(const Dic<T>& x)
+	{
+		_type = DIC;
+		NEW_DIC(_o);
+		_o->reserve(x.length());
+		foreach2 (String& k, T & v, x)
+			_o->set(k, v);
+	}
+
 	Var(const Array<Var>& v) {_type=ARRAY; NEW_ARRAYC(_a, v);}
 	Var(const VDic<Var>& v) {_type=DIC; NEW_DICC(_o, v);}
 	Var(double x);
@@ -298,9 +313,31 @@ class ASL_API Var
 	operator ULong() const { return (ULong)Long(*this); }
 	operator String() const;
 	template<class T>
-	operator Array<T>() const;
+	operator Array<T>() const
+	{
+		Array<T> a2;
+		if (_type == ARRAY)
+		{
+			a2.resize(_a->length());
+			for (int i = 0; i < a2.length(); i++)
+				a2[i] = (*_a)[i];
+		}
+		return a2;
+	}
 	template<class T>
-	operator VDic<T>() const;
+	operator VDic<T>() const
+	{
+		VDic<T> a2;
+		if (_type == DIC)
+		{
+			foreach2 (String& k, Var & v, *_o)
+				a2[k] = v;
+		}
+		return a2;
+	}
+
+	template<class T>
+	T to() const { return (T)(*this); }
 
 	/**
 	Returns the internal Dic if this var is an object
@@ -351,9 +388,26 @@ class ASL_API Var
 	void operator=(const char* x);
 	void operator=(const String& x);
 	template<class T>
-	void operator=(const Array<T>& x);
+	void operator=(const Array<T>& x)
+	{
+		free();
+		_type = ARRAY;
+		NEW_ARRAY(_a);
+		_a->resize(x.length());
+		for (int i = 0; i < x.length(); i++)
+			(*_a)[i] = x[i];
+	}
+
 	template<class T>
-	void operator=(const VDic<T>& x);
+	void operator=(const Dic<T>& x)
+	{
+		free();
+		_type = DIC;
+		NEW_DIC(_o);
+		_o->reserve(x.length());
+		foreach2 (String& k, T & v, x)
+			_o->set(k, v);
+	}
 #ifdef ASL_HAVE_INITLIST
 	void operator=(const std::initializer_list<Obj> x) { *this = Var(x); }
 	template<class T>
@@ -662,73 +716,6 @@ class ASL_API Var
 	void free();
 	friend class XdlEncoder;
 };
-
-template<class T>
-Var::Var(const Array<T>& v)
-{
-	_type=ARRAY;
-	NEW_ARRAY(_a);
-	_a->resize(v.length());
-	for(int i=0; i<v.length(); i++)
-		(*_a)[i] = v[i];
-}
-
-template<class T>
-Var::operator Array<T>() const
-{
-	Array<T> a2;
-	if(_type==ARRAY)
-	{
-		a2.resize(_a->length());
-		for(int i=0; i < a2.length(); i++)
-			a2[i]=(*_a)[i];
-	}
-	return a2;
-}
-
-template<class T>
-Var::operator VDic<T>() const
-{
-	VDic<T> a2;
-	if (_type == DIC)
-	{
-		foreach2(String& k, Var& v, *_o)
-			a2[k] = v;
-	}
-	return a2;
-}
-
-template<class T>
-Var::Var(const VDic<T>& x)
-{
-	_type=DIC;
-	NEW_DIC(_o);
-	_o->reserve(x.length());
-	foreach2(String& k, T& v, x)
-		_o->set(k, v);
-}
-
-template<class T>
-void Var::operator=(const Array<T>& x)
-{
-	free();
-	_type=ARRAY;
-	NEW_ARRAY(_a);
-	_a->resize(x.length());
-	for(int i=0; i<x.length(); i++)
-		(*_a)[i] = x[i];
-}
-
-template<class T>
-void Var::operator=(const VDic<T>& x)
-{
-	free();
-	_type=DIC;
-	NEW_DIC(_o);
-	_o->reserve(x.length());
-	foreach2(String& k, T& v, x)
-		_o->set(k, v);
-}
 
 template<class T>
 Array<T>& Array<T>::operator=(const Var& b)

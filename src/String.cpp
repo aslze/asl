@@ -294,6 +294,13 @@ String::String(const wchar_t* s)
 	_len = to8bit(s, p, cap());
 }
 
+String& String::operator+=(const wchar_t* s)
+{
+	resize(_len + 4 * (int)wcslen(s), true, false);
+	_len += to8bit(s, str() + _len, cap() - _len);
+	return *this;
+}
+
 String::String(const Array<wchar_t>& txt)
 {
 	char* p = alloc(4 * txt.length());
@@ -655,18 +662,18 @@ String String::toUpperCase() const
 	{
 		int code = *e;
 		if (code < 1415)
-	{
-		char c1 = toUppercaseU8[code*2];
-		char c2 = toUppercaseU8[code*2 + 1];
+		{
+			char c1 = toUppercaseU8[code*2];
+			char c2 = toUppercaseU8[code*2 + 1];
 			*p++ = c1;
-		if(c2 != 0)
+			if(c2 != 0)
 				*p++ = c2;
 		}
 		else
 		{
 			u[0] = code;
 			p += utf32toUtf8(u, p, 1);
-	}
+		}
 	}
 	*p++ = '\0';
 	s.fix(int(p - s.str() - 1));
@@ -689,11 +696,11 @@ String String::toLowerCase() const
 	{
 		int  code = *e;
 		if (code < 1415)
-	{
-		char c1 = toLowercaseU8[code*2];
-		char c2 = toLowercaseU8[code*2 + 1];
+		{
+			char c1 = toLowercaseU8[code*2];
+			char c2 = toLowercaseU8[code*2 + 1];
 			*p++ = c1;
-		if(c2 != 0)
+			if(c2 != 0)
 				*p++ = c2;
 		}
 		else

@@ -116,7 +116,7 @@ public:
 	*/
 	static int maxLevel();
 	/**
-	Sets the maximum size of the log file as an exponent: 0 -> 1MB, 1 -> 2MB, 2 -> 4MB, up to 7.
+	Sets the maximum size of the log file as an exponent: 0 -> 1MB, 1 -> 2MB, 2 -> 4MB, 3 -> 8MB.
 	*/
 	static void setMaxSize(int sizeCode);
 

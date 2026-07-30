@@ -187,7 +187,7 @@ Array<File> Directory::items(const String& which, Directory::ItemType t)
 		if (t == DIRE && (!strcmpX(data.cFileName, STR_PREFIX(".")) || !strcmpX(data.cFileName, STR_PREFIX(".."))))
 			continue;
 		name = basedir;
-		name += String(data.cFileName);
+		name += data.cFileName;
 		_files << File(name, infoFor(data));
 	} while (FindNextFile(hdir, &data));
 	FindClose(hdir);

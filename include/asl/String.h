@@ -297,11 +297,7 @@ public:
 	/*
 	*/
 	int cap() const { return (_size == 0) ? ASL_STR_SPACE : _size; }
-	/*
-	Constructs a string by formatting values using `printf`-style specification `fmt`.
-	The first argument can give an initial buffer size, but will be automatically calculated if it is 0. In
-	any case, the function will automatically allocate _space as needed.
-	*/
+
 	ASL_EXPLICIT String(int n, ASL_PRINTF_W1 const char* fmt, ...) ASL_PRINTF_W2(3);
 	/**
 	Constructs a string from a 64bit long integer number
@@ -446,6 +442,9 @@ public:
 	Resizes this string to a length of `n`, keeping or not its original contents
 	*/
 	String& resize(int n, bool keep=true, bool newlen=true);
+
+	void reserve(int n) { resize(n, true, false); }
+
 	/**
 	Restores the internal state of a String that has been modified externally and changed its length
 	*/
@@ -479,6 +478,7 @@ public:
 	String& operator+=(const String& b) { append(b.str(), b._len);  return *this; }
 	String& operator+=(const char* b) { append(b, (int)strlen(b)); return *this; }
 	String& operator+=(char b) { int n=_len+1; if(n>=_size) resize(n); char*s = str(); s[n-1] = b; s[n] = '\0'; _len=n; return *this; }
+	String& operator+=(const wchar_t* b);
 
 	template<class T>
 	String& operator<<(const T& x) {*this += String(x); return *this;}
