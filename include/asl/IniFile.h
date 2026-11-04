@@ -107,7 +107,7 @@ public:
 	Writes the file with its modifications; this is done automatically on destruction, just call this if you need
 	the file written before the object is detroyed
 	*/
-	void write(const String& fname="");
+	bool write(const String& fname="");
 
 	/**
 	Returns true if the file contains a key named `name`. If the name is like

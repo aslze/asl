@@ -25,6 +25,7 @@ template<class T>
 class Vec4_
 {
  public:
+	typedef T value_type;
 	Vec4_() {}
 	Vec4_(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
 	Vec4_(const Vec3_<T>& v, T w) : x(v.x), y(v.y), z(v.z), w(w) {}

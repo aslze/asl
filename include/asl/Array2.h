@@ -35,7 +35,7 @@ protected:
 	Array<T> _a;
 	int _rows, _cols;
 public:
-
+	typedef T value_type;
 	/**
 	Creates an empty array
 	*/

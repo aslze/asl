@@ -75,6 +75,7 @@ String all = numbers.join(", "); // -> "4, 3, -2"
 template <class T>
 class Array
 {
+	typedef T value_type;
 protected:
 	T* _a;
 	struct Data{int n, s; AtomicCount rc; int pad;}; // n=num. elems, s=allocated size

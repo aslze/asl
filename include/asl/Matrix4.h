@@ -31,6 +31,8 @@ class Matrix4_
 	T a[4][4]; // row-major
 
 public:
+	typedef T value_type;
+
 	bool isRowMajor() const { return true; }
 	/**
 	Returns the nubmer of rows of this matrix (4)

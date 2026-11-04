@@ -128,6 +128,8 @@ protected:
 	};
 
 public:
+	typedef T value_type;
+	typedef K key_type;
 	Array<KeyValN*> a;
 	int& _n() { return *(int*)&a[0]; }
 	int _n() const { return *(const int*)&a[0]; }

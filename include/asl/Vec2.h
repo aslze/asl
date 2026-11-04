@@ -30,6 +30,7 @@ template<class T>
 class Vec2_
 {
  public:
+	typedef T value_type;
 	Vec2_() {}
 	/** Constructs a vector with the given (x, y) coordinates */
 	Vec2_(T x, T y): x(x), y(y) {}

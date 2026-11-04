@@ -131,7 +131,7 @@ bool IniFile::has(const String& name) const
 	}
 }
 
-void IniFile::write(const String& fname)
+bool IniFile::write(const String& fname)
 {
 	Dic<Section> newsecs = _sections.clone();
 	foreach(Section & s, newsecs)
@@ -242,15 +242,17 @@ void IniFile::write(const String& fname)
 	{
 		TextFile file ((fname.ok())? fname: _filename, File::WRITE);
 		if(!file)
-			return;
+			return false;
 		foreach(String& line, _lines)
 		{
 			file << line << '\n';
 		}
-		file.close();
+		return !file.error();
 	}
 
 	_lines = oldlines;
+
+	return true;
 }
 
 }

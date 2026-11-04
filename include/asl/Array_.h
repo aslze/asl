@@ -29,6 +29,7 @@ template <class T, int N>
 class Array_
 {
 protected:
+	typedef T value_type;
 	T _a[N];
 	operator void* () { return NULL; }
 public:

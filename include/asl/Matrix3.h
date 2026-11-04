@@ -23,6 +23,8 @@ template<class T>
 class Matrix3_
 {
 public:
+	typedef T value_type;
+
 	bool isRowMajor() const { return true; }
 	/**
 	Returns the nubmer of rows of this matrix (3)

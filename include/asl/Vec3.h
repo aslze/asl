@@ -34,6 +34,7 @@ template<class T>
 class Vec3_
 {
  public:
+	typedef T value_type;
 	Vec3_() {}
 	Vec3_(T x, T y, T z) : x(x), y(y), z(z) {}
 	Vec3_(const Vec2_<T>& v, T z) : x(v.x), y(v.y), z(z) {}

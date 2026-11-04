@@ -80,6 +80,8 @@ template <class K=String, class T=String>
 class Map
 {
 public:
+	typedef T value_type;
+	typedef K key_type;
 	struct KeyVal
 	{
 		K key;

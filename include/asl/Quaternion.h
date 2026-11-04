@@ -17,6 +17,7 @@ template<class T>
 class Quaternion_
 {
 public:
+	typedef T value_type;
 	T w, x, y, z;
 public:
 	Quaternion_() : w(1), x(0), y(0), z(0) {}

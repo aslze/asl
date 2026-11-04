@@ -17,6 +17,8 @@ class Pose_
 	Vec3_<T> p;
 	Quaternion_<T> q;
 public:
+	typedef T value_type;
+
 	Pose_() {}
 	/**
 	Constructs a pose given an affine transformation matrix (it should be orthonormal)

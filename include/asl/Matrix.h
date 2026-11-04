@@ -39,6 +39,8 @@ template <class T>
 class Matrix_ : public Array2<T>
 {
 public:
+	typedef T value_type;
+
 	Matrix_() {}
 
 	/**
