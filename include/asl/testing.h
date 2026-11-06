@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_TESTING_H
@@ -30,7 +30,7 @@ Runs all tests and returns true if all succeded; prints results to console or ap
 bool runAllTests();
 extern asl::String testResult;
 struct TestInfo { const char* name; void (*func)(); };
-extern TestInfo tests[255];
+extern TestInfo tests[500];
 extern int numTests;
 extern bool testFailed;
 extern int failedTests;
@@ -48,7 +48,7 @@ Add support for testing in this executable (use only once in the sources for one
 #define ASL_TEST_ENABLE() \
 namespace asl { \
 asl::String testResult; \
-TestInfo tests[255]; \
+TestInfo tests[500]; \
 int numTests = 0; \
 int failedTests = 0;\
 bool testFailed = false;\
@@ -61,37 +61,82 @@ int addTest(const char* name, void (*func)()) \
 bool runTest(const char* name)\
 {\
 	testFailed = false;\
+	const char* suite = "Tests"; \
 	for (int i = 0; i<numTests; i++)\
 	{\
 		if (strcmp(tests[i].name, name) == 0)\
 		{\
+			printf("[ RUN      ] %s.%s\n", suite, name); \
+			double t1 = asl::now(); \
 			tests[i].func();\
+			double t2 = asl::now(); \
 			if(testFailed) failedTests++;\
+			printf("%s %s.%s (%.0f ms)\n", !testFailed ? "[       OK ]" : "[  FAILED  ]", suite, name, \
+				       1000 * (t2 - t1)); \
 			return !testFailed;\
 		}\
 	}\
-	return false;\
+	return false; \
 }\
-bool runAllTests()\
+bool runAllTests() \
 {\
 	for (int i = 0; i<asl::numTests; i++) { \
-		const char* name = asl::tests[i].name;\
+		const char* name = asl::tests[i].name; \
+		double t1 = asl::now(); \
 		bool result = asl::runTest(name); \
-		printf("Test %s:\n----------------> %s\n\n", name, result? "OK" : "FAILED"); \
+		double t2 = asl::now(); \
 		ASL_PRINT_TEST_RESULT(name, result); \
 	}\
-	return asl::failedTests == 0;\
+	return asl::failedTests == 0; \
 }\
 }
 
+#define ASL_TEST_PROLOG
+
 #define ASL_TEST_MAIN() \
-int main() \
+int main(int argc, char** argv) \
 { \
-	bool ok = asl::runAllTests(); \
-	printf("\n%s: %i tests failed of %i\n", ok ? "OK" : "Error", asl::failedTests, asl::numTests); \
-	return asl::failedTests; \
+	ASL_TEST_PROLOG \
+	for (int i = 1; i < argc; i++) \
+	{ \
+		if (!strcmp(argv[i], "--gtest_list_tests")) \
+		{ \
+			printf("Tests.\n"); \
+			for (int i = 0; i < asl::numTests; i++) \
+				printf("  %s\n", asl::tests[i].name); \
+			return 0; \
+		} \
+	} \
+	asl::Array<asl::String> tests; \
+	if (argc == 2 && !(strlen(argv[1]) > 1 && argv[1][0] == '-' && argv[1][1] == '-')) \
+		tests << argv[1]; \
+	else if (argc > 1 && strlen(argv[1]) > 0 && argv[1][0] == '-' && argv[1][1] != '-') \
+		return EXIT_FAILURE; \
+	for (int i = 1; i < argc; i++) \
+	{ \
+		asl::String a = argv[i]; \
+		if (a.startsWith("--gtest_filter=")) \
+		{ \
+			tests = a.split('=')[1].split(':'); \
+			foreach (asl::String& n, tests) \
+				if (n.contains('.')) \
+					n = n.split('.')[1]; \
+			break; \
+		} \
+	} \
+	foreach (asl::String& name, tests) \
+	{ \
+		if (!asl::runTest(*name)) \
+		{ \
+			printf("Unknown test\n"); \
+		} \
+	} \
+	if (tests.empty()) \
+		asl::runAllTests(); \
+	return (asl::failedTests > 0) ? EXIT_FAILURE : EXIT_SUCCESS; \
 }
 
+#ifndef __ANDROID__
 /** 
 Add support for testing in this executable and create a function `main()` that runs all tests.
 @hideinitializer
@@ -99,6 +144,10 @@ Add support for testing in this executable and create a function `main()` that r
 #define ASL_TEST_ENABLE_MAIN() \
 ASL_TEST_ENABLE() \
 ASL_TEST_MAIN()
+
+#else
+#define ASL_TEST_ENABLE_MAIN() ASL_TEST_ENABLE()
+#endif
 
 /** 
 Create a test named Name.
@@ -111,14 +160,14 @@ void asl_test_##Name()
 
 
 template<class T>
-double distance(const T& a, const T& b)
+double tdistance(const T& a, const T& b)
 {
 	return fabs(a - b);
 }
 
 #ifdef ASL_VECTOR3_H
 template<class T>
-double distance(const Vec3_<T>& a, const Vec3_<T>& b)
+double tdistance(const Vec3_<T>& a, const Vec3_<T>& b)
 {
 	return (a - b).length();
 }
@@ -132,7 +181,7 @@ inline String asString(const Vec3_<T>& x)
 
 #ifdef ASL_VECTOR2_H
 template<class T>
-double distance(const Vec2_<T>& a, const Vec2_<T>& b)
+double tdistance(const Vec2_<T>& a, const Vec2_<T>& b)
 {
 	return (a - b).length();
 }
@@ -146,7 +195,7 @@ inline String asString(const Vec2_<T>& x)
 
 #ifdef ASL_MATRIX4_H
 template<class T>
-double distance(const Matrix4_<T>& a, const Matrix4_<T>& b)
+double tdistance(const Matrix4_<T>& a, const Matrix4_<T>& b)
 {
 	Vec3_<T> vx(1,0,0), vy(0,1,0), vz(0,0,1);
 	return Vec3_<T>((a*vx - b*vx).length(), (a*vy - b*vy).length(), (a*vz - b*vz).length()).length();
@@ -155,7 +204,7 @@ double distance(const Matrix4_<T>& a, const Matrix4_<T>& b)
 
 #ifdef ASL_QUATERNION_H
 template<class T>
-double distance(const Quaternion_<T>& a, const Quaternion_<T>& b)
+double tdistance(const Quaternion_<T>& a, const Quaternion_<T>& b)
 {
 	return min((-a + b).length(), (a + b).length());
 }
@@ -194,13 +243,13 @@ ASL_EXPECT(sqrt(x), >=, 0);
 
 #define ASL_CHECK(x, op, y) ASL_EXPECT(x, op, y)
 
-#define ASL_APPROX(x, y, d) ASL_EXPECT(asl::distance((x), (y)), <, (d))
+#define ASL_APPROX(x, y, d) ASL_EXPECT(asl::tdistance((x), (y)), <, (d))
 
 /** 
-Check that `x` and `y` are approximately equal (within distance `d`).
+Check that `x` and `y` are approximately equal (within tdistance `d`).
 @hideinitializer
 */
-#define ASL_EXPECT_NEAR(x, y, d) ASL_EXPECT(asl::distance((x), (y)), <, (d))
+#define ASL_EXPECT_NEAR(x, y, d) ASL_EXPECT(asl::tdistance((x), (y)), <, (d))
 
 /**@}*/
 }

@@ -8,10 +8,21 @@
 #include <asl/File.h>
 #include <asl/TextFile.h>
 #include <asl/util.h>
-#include <stdio.h>
+#include <asl/Log.h>
 #include <asl/testing.h>
+#include <stdio.h>
 
-ASL_TEST_ENABLE()
+#undef ASL_TEST_PROLOG
+#define ASL_TEST_PROLOG \
+	if (argc > 1 && !strcmp(argv[1], "-subproc"))                    \
+	{                                                                \
+		printf("subprocess ");                                       \
+		for (int i = 1; i < argc; i++)                               \
+			printf("%s%c", argv[i], (i < argc - 1) ? ',' : '\n');    \
+		return argc;                                                 \
+	}
+
+ASL_TEST_ENABLE_MAIN()
 
 #ifdef __CODEGEARC__
 #define U8(x) u8##x
@@ -40,7 +51,7 @@ ASL_TEST(File)
 
 	bfile.open(File::READ);
 	bfile.setEndian(ENDIAN_NATIVE);
-	int n;
+	int   n;
 	float x;
 	bfile >> n >> x;
 	ASL_ASSERT(n == -3 && x == 3.5f);
@@ -50,10 +61,10 @@ ASL_TEST(File)
 	ASL_ASSERT(b[0] == 0x10 && b[1] == 0x20 && b[2] == 0x30 && b[3] == 0x40);
 	bfile.setEndian(ENDIAN_BIG);
 	ASL_ASSERT(bfile.read<unsigned>() == 0x10203040);
-	
+
 	TextFile tfile("lines.txt", File::WRITE);
-	String line1 = "123";
-	String line2 = String::repeat('x', 4000);
+	String   line1 = "123";
+	String   line2 = String::repeat('x', 4000);
 	tfile << line1 << '\n';
 	tfile << line2 << '\n';
 	tfile.close();
@@ -82,7 +93,7 @@ ASL_TEST(IniFile)
 	}
 	{
 		IniFile file("config.ini");
-		//ASL_ASSERT(file.sections()["sec1"].length() == 2);
+		// ASL_ASSERT(file.sections()["sec1"].length() == 2);
 		ASL_ASSERT(file["global"] == "global value");
 		ASL_ASSERT(file["sec1/field1"] == "value1");
 		ASL_ASSERT(file["sec1/field2"] == "value2");
@@ -102,20 +113,20 @@ ASL_TEST(IniFile)
 ASL_TEST(TabularDataFile)
 {
 	int N = 10;
-	
+
 	{
 		TabularDataFile file("data.csv");
 		file.flushEvery(1);
 
 		file.columns("i,x,y,sign:neg|pos,name");
 
-		if(!file.ok())
+		if (!file.ok())
 		{
 			printf("Can't write file\n");
 			ASL_ASSERT(0);
 		}
 
-		for(int i=0; i<N; i++)
+		for (int i = 0; i < N; i++)
 		{
 			file << i << 0.5 << -3.0 * i << "neg" << "is, \"quoted\"";
 		}
@@ -127,31 +138,32 @@ ASL_TEST(TabularDataFile)
 		file.columns("i,x,y,sign:neg|pos");
 		file.flushEvery(100);
 
-		if(!file.ok())
+		if (!file.ok())
 		{
 			printf("Can't write file\n");
 			ASL_ASSERT(0);
 		}
 
-		for(int i=0; i<N; i++)
+		for (int i = 0; i < N; i++)
 		{
-			file << i << 0.5 << -3.0*i << "neg";
+			file << i << 0.5 << -3.0 * i << "neg";
 		}
 	}
 
 	{
 		TabularDataFile file("data.csv");
-		int k = 0;
-		while(file.nextRow())
+		int             k = 0;
+		while (file.nextRow())
 		{
-			ASL_ASSERT(file[0].is(Var::NUMBER) && file[1].is(Var::NUMBER) && file[2].is(Var::NUMBER) && file[3].is(Var::STRING));
-			int i = file[0];
+			ASL_ASSERT(file[0].is(Var::NUMBER) && file[1].is(Var::NUMBER) && file[2].is(Var::NUMBER) &&
+			           file[3].is(Var::STRING));
+			int    i = file[0];
 			double x = file[1];
 			double y = file[2];
 			String s = file[3];
 			ASL_ASSERT(i == k++);
 			ASL_EXPECT_NEAR(x, 0.5, 1e-9);
-			ASL_ASSERT(y == -3.0*i);
+			ASL_ASSERT(y == -3.0 * i);
 			ASL_ASSERT(s == "neg");
 			ASL_ASSERT(file[0] == file["i"] && file[1] == file["x"] && file[2] == file["y"] && file[3] == file["sign"]);
 			ASL_ASSERT(file["name"] == "is, \"quoted\"");
@@ -163,44 +175,44 @@ ASL_TEST(CmdArgs)
 {
 #if defined _WIN32 || defined __linux__ || defined __APPLE__
 	CmdArgs defaultArgs;
-	ASL_ASSERT(defaultArgs.all().length() == 1 || defaultArgs[0] == "CmdArgs");
+	ASL_ASSERT(defaultArgs.all().length() == 1 || defaultArgs[0] == "CmdArgs" || defaultArgs.all()[1].startsWith("--g"));
 #endif
 
 	Array<const char*> argv;
-	argv << "convert" << "-format" << "jpeg" << "-fast" << "-q" << "85" <<
-		"-k" << "k1" << "-k" << "k2" << "-gray" << "on" << "-rgb" << "no" << "-progressive!" << "-scale" << "-1.0" << "image1.png" << "image2.bmp";
+	argv << "convert" << "-format" << "jpeg" << "-fast" << "-q" << "85" << "-k" << "k1" << "-k" << "k2" << "-gray" << "on"
+	     << "-rgb" << "no" << "-progressive!" << "-scale" << "-1.0" << "image1.png" << "image2.bmp";
 
 	CmdArgs args(argv.length(), (char**)argv.data());
 
-	ASL_ASSERT( args.has("format") );
-	ASL_ASSERT( !args["size"] );
-	ASL_ASSERT( !args.has("size") );
-	ASL_ASSERT( args["format"] == "jpeg" );
-	ASL_ASSERT( args.has("fast") );
-	ASL_ASSERT( (int)args("q", 99) == 85 );
-	ASL_ASSERT( (int)args("Q", 99) == 99 );
-	ASL_ASSERT( args["k"] == "k2" );
-	ASL_ASSERT( args("k").length() == 2 );
-	ASL_ASSERT( args("k")[0] == "k1" );
-	ASL_ASSERT( args.is("gray") );
-	ASL_ASSERT( !args.is("rgb") );
-	ASL_ASSERT( !args.is("progrssive") );
-	ASL_ASSERT( args.is("progressive"));
-	ASL_ASSERT( args.all().length() == 19 );
-	ASL_ASSERT( args.length() == 2 );
-	ASL_ASSERT( args[0] == "image1.png" );
-	ASL_ASSERT( args[1] == "image2.bmp" );
-	ASL_ASSERT( ((double)args["scale"] - -1.0) < 1e-10);
-	ASL_ASSERT( args.untested().length() == 0);
+	ASL_ASSERT(args.has("format"));
+	ASL_ASSERT(!args["size"]);
+	ASL_ASSERT(!args.has("size"));
+	ASL_ASSERT(args["format"] == "jpeg");
+	ASL_ASSERT(args.has("fast"));
+	ASL_ASSERT((int)args("q", 99) == 85);
+	ASL_ASSERT((int)args("Q", 99) == 99);
+	ASL_ASSERT(args["k"] == "k2");
+	ASL_ASSERT(args("k").length() == 2);
+	ASL_ASSERT(args("k")[0] == "k1");
+	ASL_ASSERT(args.is("gray"));
+	ASL_ASSERT(!args.is("rgb"));
+	ASL_ASSERT(!args.is("progrssive"));
+	ASL_ASSERT(args.is("progressive"));
+	ASL_ASSERT(args.all().length() == 19);
+	ASL_ASSERT(args.length() == 2);
+	ASL_ASSERT(args[0] == "image1.png");
+	ASL_ASSERT(args[1] == "image2.bmp");
+	ASL_ASSERT(((double)args["scale"] - -1.0) < 1e-10);
+	ASL_ASSERT(args.untested().length() == 0);
 
-	const char* argv2[] = {"convert" , "-format" , "jpeg" , "-q" , "85", "-fast", "image1.bmp"};
+	const char* argv2[] = { "convert", "-format", "jpeg", "-q", "85", "-fast", "image1.bmp" };
 
 	CmdArgs args2(7, (char**)argv2, "format:,q:,fast");
 
-	ASL_ASSERT( args2.is("fast") );
-	ASL_ASSERT( args2["format"] == "jpeg" );
-	ASL_ASSERT( args2[0] == "image1.bmp" );
-	ASL_ASSERT( args2.length() == 1 );
+	ASL_ASSERT(args2.is("fast"));
+	ASL_ASSERT(args2["format"] == "jpeg");
+	ASL_ASSERT(args2[0] == "image1.bmp");
+	ASL_ASSERT(args2.length() == 1);
 }
 
 #endif
@@ -209,6 +221,25 @@ String join(const Array<String>& a)
 {
 	return a.join("-");
 }
+
+struct Obj
+{
+	static int n;
+	int        x;
+	Obj(int k = 0)
+	{
+		n++;
+		x = k;
+	}
+	Obj(const Obj& o)
+	{
+		n++;
+		x = o.x;
+	}
+	~Obj() { n--; }
+};
+
+int Obj::n = 0;
 
 ASL_TEST(Array)
 {
@@ -219,7 +250,7 @@ ASL_TEST(Array)
 
 	ASL_ASSERT(a.length() == 4);
 	ASL_ASSERT(a[0] == 3 && a[1] == -5 && a[2] == 10 && a[3] == 0);
-	ASL_ASSERT(a == array(3, -5, 10, 0) );
+	ASL_ASSERT(a == array(3, -5, 10, 0));
 
 	ASL_ASSERT(a.last() == 0);
 
@@ -243,7 +274,7 @@ ASL_TEST(Array)
 	Array<String> names;
 	names << "Homer" << "Simpson";
 
-	ASL_ASSERT( names.join(",") == "Homer,Simpson" );
+	ASL_ASSERT(names.join(",") == "Homer,Simpson");
 
 #ifdef ASL_HAVE_LAMBDA
 	names.sortBy([](const String& s) { return s.substring(1); }); // sort by the strings skipping first char
@@ -266,9 +297,9 @@ ASL_TEST(Array)
 #endif
 
 	Array<int> b = array(5, 3, -1, 2, 10, 7);
-	int s = 0;
+	int        s = 0;
 
-	foreach(int x, b)
+	foreach (int x, b)
 	{
 		if (x < 0)
 			continue;
@@ -278,7 +309,7 @@ ASL_TEST(Array)
 	}
 	ASL_ASSERT(s == 10);
 	s = 0;
-	foreach2(int i, int x, b)
+	foreach2 (int i, int x, b)
 	{
 		if (i < 2)
 			continue;
@@ -297,9 +328,9 @@ ASL_TEST(Array)
 	ASL_ASSERT(s == 26);
 #endif
 
-	for (int i = 1, n = 1; i < 10; i++, n*=4)
+	for (int i = 1, n = 1; i < 10; i++, n *= 4)
 	{
-		int s = 0;
+		int        s = 0;
 		Array<int> a;
 		for (int j = 0; j < n; j++)
 		{
@@ -313,20 +344,33 @@ ASL_TEST(Array)
 			s += j;
 		}
 		Array<int> b = a.clone();
-		int s2 = 0;
+		int        s2 = 0;
 		foreach (int x, b)
 			s2 += x;
 
 		ASL_EXPECT(s2, ==, s);
 	}
-}
 
+	int an = 0;
+	{
+		Array<Obj> ao;
+		ao << Obj(1) << Obj(2);
+		Array<Obj> ao2(ao);
+		an += ao2[0].x;
+		Array<Obj> ao3;
+		ao3 = ao;
+		ao2 = ao3;
+		ao3 = ao.clone();
+		an += ao3[0].x;
+	}
+	ASL_EXPECT(Obj::n, ==, 0);
+}
 
 ASL_TEST(String)
 {
 	String xxx = String::repeat('x', 1000);
 	ASL_ASSERT(xxx.length() == 1000);
-	for(int i=0; i<1000; i++)
+	for (int i = 0; i < 1000; i++)
 		ASL_ASSERT(xxx[i] == 'x');
 	String f1(15, "%s", *xxx);
 
@@ -341,7 +385,7 @@ ASL_TEST(String)
 	String a = "a";
 	String b = 123;
 	String c = 'c';
-	ASL_ASSERT(a+b+c == "a123c");
+	ASL_ASSERT(a + b + c == "a123c");
 	ASL_ASSERT("a" + b + 'c' == "a123c");
 
 	Long l = String("1234567890123456").toLong();
@@ -350,14 +394,14 @@ ASL_TEST(String)
 	String n = -65536;
 
 	ASL_ASSERT(n == "-65536");
-	
+
 	String d = "My taylor is rich";
 	ASL_ASSERT(d.startsWith("My"));
 	ASL_ASSERT(d.endsWith("rich"));
 	ASL_ASSERT(!d.endsWith("poor"));
 	ASL_ASSERT(d.contains("taylor"));
 	ASL_ASSERT(!d.contains("doctor"));
-	
+
 	ASL_ASSERT(d.substring(3) == "taylor is rich");
 	ASL_ASSERT(d.substring(3, 6) == "tay");
 	ASL_ASSERT(d.substr(-3) == "ich");
@@ -428,8 +472,8 @@ ASL_TEST(String)
 	ASL_ASSERT(!empty.ok());
 	ASL_ASSERT(String("c").ok());
 	String full = "abc";
-	int valid1 = empty.ok()? 1 : 0;
-	int valid2 = full.ok()? 1 : 0;
+	int    valid1 = empty.ok() ? 1 : 0;
+	int    valid2 = full.ok() ? 1 : 0;
 	ASL_ASSERT(valid1 == 0 && valid2 == 1);
 
 	// bool conversion means not empty (might change in the future)
@@ -453,16 +497,16 @@ ASL_TEST(String)
 	x1 = "-32";
 	x2 = "1.5";
 	ASL_ASSERT(x1.to<int>() == -32);
-	ASL_APPROX(x2.to<float>(), 1.5f, 1e-7f);
+	ASL_EXPECT_NEAR(x2.to<float>(), 1.5f, 1e-7f);
 }
 
 ASL_TEST(JSON)
 {
 	String a = "A/*...*/{x=3.5, //...\ny=\"s\", z=[Y, N]}";
-	Var b = Xdl::decode(a);
+	Var    b = Xdl::decode(a);
 	ASL_ASSERT(b.is("A"));
 	ASL_ASSERT(b["x"].is(Var::NUMBER) && fabs((double)b["x"] - 3.5) < .0000001);
-	ASL_ASSERT(b["y"]=="s");
+	ASL_ASSERT(b["y"] == "s");
 	ASL_ASSERT(b["z"].is(Var::ARRAY));
 	ASL_ASSERT(b["z"].length() == 2);
 	ASL_ASSERT(b["z"][0] == true);
@@ -470,7 +514,7 @@ ASL_TEST(JSON)
 	String c = Xdl::encode(b);
 	ASL_ASSERT(c == "A{x=3.5,y=\"s\",z=[Y,N]}");
 	String d = "A/*...*/{x=3.5, //...\ny=\"s\", z=[Y, N)}";
-	Var e = Xdl::decode(d);
+	Var    e = Xdl::decode(d);
 	ASL_ASSERT(!e.ok());
 	ASL_ASSERT(!Json::decode("\"\n\"").ok());
 	Var f = Json::decode("{\"x\":null,\"y\":3}");
@@ -482,24 +526,24 @@ ASL_TEST(JSON)
 
 	ASL_ASSERT(Xdl::encode("a\nb") == "\"a\\nb\"");
 
-	ASL_ASSERT(Json::encode( (Var(), 1, Var::NUL, false) ) == "[1,null,false]");
+	ASL_ASSERT(Json::encode((Var(), 1, Var::NUL, false)) == "[1,null,false]");
 
 	ASL_ASSERT(Xdl::decode("1.25e08").ok());
 	ASL_ASSERT(Xdl::decode("1.25e+08").ok());
-	ASL_ASSERT(fabs( (double)Xdl::decode("1.25e8") - 1.25e8) < 1e-6);
-	ASL_ASSERT(fabs( (double)Xdl::decode("1.25e+8") - 1.25e8) < 1e-6);
+	ASL_ASSERT(fabs((double)Xdl::decode("1.25e8") - 1.25e8) < 1e-6);
+	ASL_ASSERT(fabs((double)Xdl::decode("1.25e+8") - 1.25e8) < 1e-6);
 
 	ASL_ASSERT(Json::encode(nan()) == "null");
 
-	Var v = Var()("x", 1)("y", true)("z", 1.5)("s", "X")("a", array<Var>(1, -5));
+	Var    v = Var()("x", 1)("y", true)("z", 1.5)("s", "X")("a", array<Var>(1, -5));
 	String xdl1 = Xdl::encode(v, Json::COMPACT);
 	String xdl2 = Xdl::encode(v, Json::PRETTY);
 	String json1 = Json::encode(v, Json::COMPACT);
 	String json2 = Json::encode(v, Json::PRETTY);
-	ASL_CHECK(Xdl::decode(xdl1), == , v);
-	ASL_CHECK(Xdl::decode(xdl2), == , v);
-	ASL_CHECK(Json::decode(json1), == , v);
-	ASL_CHECK(Json::decode(json2), == , v);
+	ASL_CHECK(Xdl::decode(xdl1), ==, v);
+	ASL_CHECK(Xdl::decode(xdl2), ==, v);
+	ASL_CHECK(Json::decode(json1), ==, v);
+	ASL_CHECK(Json::decode(json2), ==, v);
 
 #ifndef ASL_ANSI
 	ASL_ASSERT(Json::decode(U8("\"😀\"")) == U8("😀"));
@@ -528,10 +572,10 @@ ASL_TEST(JSON)
 ASL_TEST(Var)
 {
 	Var b = Var("x", 3);
-	ASL_ASSERT(b.type() == Var::OBJ && b.length()==1 && b["x"]==3);
+	ASL_ASSERT(b.type() == Var::OBJ && b.length() == 1 && b["x"] == 3);
 
 	Var c = array<Var>("x", 3, true, 0);
-	ASL_ASSERT(c.type() == Var::ARRAY && c.length()==4 && c[0]=="x" && c[1]==3 && c[2]==true);
+	ASL_ASSERT(c.type() == Var::ARRAY && c.length() == 4 && c[0] == "x" && c[1] == 3 && c[2] == true);
 	ASL_ASSERT(c.contains("x"));
 	ASL_ASSERT(c.contains(3));
 	ASL_ASSERT(c.contains(true));
@@ -539,9 +583,9 @@ ASL_TEST(Var)
 
 	Var a = Var("x", 3)("y", 2);
 	ASL_ASSERT(a.type() == Var::OBJ);
-	ASL_ASSERT(a.length()==2);
-	ASL_ASSERT(a["x"]==3);
-	ASL_ASSERT(a["y"]==2);
+	ASL_ASSERT(a.length() == 2);
+	ASL_ASSERT(a["x"] == 3);
+	ASL_ASSERT(a["y"] == 2);
 	ASL_ASSERT(a.has("x", Var::NUMBER));
 
 	ASL_ASSERT((a("z") | a["x"]) == 3);
@@ -589,11 +633,11 @@ ASL_TEST(Var)
 	ASL_ASSERT(!f);
 
 	String s3 = "a";
-	Var v2 = s3 + "b";
+	Var    v2 = s3 + "b";
 	s3 = v2;
 	ASL_ASSERT(s3 == "ab");
 
-	ASL_ASSERT( Var(Var::NUL) == Var(Var::NUL) );
+	ASL_ASSERT(Var(Var::NUL) == Var(Var::NUL));
 
 	Var none;
 	ASL_ASSERT(!none);
@@ -605,18 +649,13 @@ ASL_TEST(Var)
 	a2.read("x", x);
 	ASL_ASSERT(x == 3);
 #ifdef ASL_HAVE_INITLIST
-	Var a3 = Var::array({1, "a"});
+	Var a3 = Var::array({ 1, "a" });
 	ASL_ASSERT(a3.is(Var::ARRAY) && a3.length() == 2 && a3[0] == 1 && a3[1] == "a");
 #endif
 
 #ifdef ASL_HAVE_INITLIST2
-	Var v3 = {
-		{ "i", 1 },
-		{ "ai", { 1, 2, 3 } },
-		{ "as", { "a", "b" } },
-		{ "s", "abc" }
-	};
-	ASL_CHECK(v3.toString(), == , "{ai=[1,2,3],as=[a,b],i=1,s=abc}");
+	Var v3 = { { "i", 1 }, { "ai", { 1, 2, 3 } }, { "as", { "a", "b" } }, { "s", "abc" } };
+	ASL_CHECK(v3.toString(), ==, "{ai=[1,2,3],as=[a,b],i=1,s=abc}");
 
 	Var v4a = { "x", "y" };
 	Var v4b = { { "x", String("y") } };
@@ -630,6 +669,8 @@ ASL_TEST(Var)
 
 	v3["ab"] = { true, false, true };
 	ASL_ASSERT(v3["ab"].isArrayOf(3, Var::BOOL));
+
+	// Var v5 = { { "a", Var{ 1, true } }, { "b", Var{ { "x", 1.5 }, { "y", -5 } } } };
 #endif
 
 #ifdef ASL_HAVE_RANGEFOR
@@ -650,7 +691,7 @@ ASL_TEST(Var)
 	for (int i = 6; i < 50; i++)
 	{
 		String s = String::repeat('x', i);
-		Var v = s;
+		Var    v = s;
 		ASL_ASSERT(v == s);
 		Var w = v;
 		ASL_ASSERT(w == v);
@@ -658,7 +699,6 @@ ASL_TEST(Var)
 		ASL_ASSERT(w == v);
 	}
 }
-
 
 ASL_TEST(Base64)
 {
@@ -681,30 +721,60 @@ ASL_TEST(Base64)
 
 #ifndef __ANDROID__
 
-int main(int narg, char* argv[])
+
+
+int mainX(int argc, char** argv)
 {
 	{
-		CmdArgs args(narg, argv);
-		if (args.has("subproc")) {
-			printf("subprocess %s\n", *args.all().slice(1).join(","));
-			return args.all().length();
-		}
-	}
-	
-	if (narg < 2) {
-		bool ok = asl::runAllTests();
-		printf("\n%s: %i tests failed of %i\n", ok ? "OK" : "Error", asl::failedTests, asl::numTests); \
-		return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+		CmdArgs args(argc, argv);
+		Log::useConsole(false);
+		Log::setFile("i:/asl.log");
+		ASL_LOG_I("%s", *args.all().join(" "));
 	}
 
-	if(!asl::runTest(argv[1]))
+	if (argc > 1 && !strcmp(argv[1], "-subproc"))
 	{
-		printf("Unknown test\n");
-		return EXIT_FAILURE;
+		printf("subprocess ");
+		for (int i = 1; i < argc; i++)
+			printf("%s%c", argv[i], (i < argc - 1) ? ',' : '\n');
+		return argc;
 	}
-	if (asl::testFailed)
-		return EXIT_FAILURE;
-	
-	return EXIT_SUCCESS;
+
+	for (int i = 1; i < argc; i++)
+	{
+		if (!strcmp(argv[i], "--gtest_list_tests"))
+		{
+			printf("Tests.\n");
+			for (int i = 0; i < asl::numTests; i++)
+				printf("  %s\n", asl::tests[i].name);
+			return 0;
+		}
+	}
+	Array<String> tests;
+	if (argc == 2 && !(strlen(argv[1]) > 1 && argv[1][0] == '-' && argv[1][1] == '-'))
+		tests << argv[1];
+	for (int i = 1; i < argc; i++)
+	{
+		String a = argv[i];
+		if (a.startsWith("--gtest_filter="))
+		{
+			tests = a.split('=')[1].split(':');
+			foreach (String& n, tests)
+				if (n.contains('.'))
+					n = n.split('.')[1];
+			break;
+		}
+	}
+	foreach (String& name, tests)
+	{
+		ASL_LOG_I("Test %s", *name);
+		if (!asl::runTest(*name))
+		{
+			printf("Unknown test\n");
+		}
+	}
+	if (tests.empty())
+		asl::runAllTests();
+	return (asl::failedTests > 0) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 #endif

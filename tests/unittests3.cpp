@@ -16,7 +16,7 @@ ASL_TEST(Process)
 {
 	{
 		Process proc = Process::execute(Process::myPath(), array<String>("-subproc", "1"));
-		ASL_ASSERT(proc.exitStatus() == 3);
+		ASL_CHECK(proc.exitStatus(), ==, 3);
 		//printf("<%s>\n", *proc.output());
 		ASL_ASSERT(proc.output().trimmed() == "subprocess -subproc,1");
 	}
@@ -24,7 +24,7 @@ ASL_TEST(Process)
 		Array<String> lines;
 		Process proc;
 		proc.run(Process::myPath(), array<String>("-subproc", "5", "a \"b\\"));
-		while (1)
+		for(int i = 0; i < 3; i++)
 		{
 			String line = proc.readOutputLine();
 			if (line == "\n")
