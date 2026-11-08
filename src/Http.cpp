@@ -108,10 +108,16 @@ Url::Url(const String& url)
 
 	int pathstart = url.indexOf('/', hoststart);
 	if (pathstart < 0)
-		pathstart = url.length();
+	{
+		pathstart = url.indexOf('?', hoststart); // TODO support '#' fragment too
+		if (pathstart < 0)
+			pathstart = url.length();
+	}
 	host = url.substring(hoststart, pathstart);
 	path = url.substring(pathstart);
-	if (!path.ok())
+	if (path[0] == '?')
+		path = '/' + path;
+	else if (!path.ok())
 		path = '/';
 	int hostend = pathstart, portstart = 0;
 	if (url[hoststart] == '[') // IPv6
@@ -484,21 +490,25 @@ void HttpRequest::read()
 		File("bb.txt").put(_body);
 	}
 	*/
-	int pathend = _res.length();
-	int h = _res.indexOf('#');
+
+	String res = _res;
+	if (res.startsWith("http://") || res.startsWith("https://")) // absolute URI
+		res = Url(_res).path;
+	int pathend = res.length();
+	int h = res.indexOf('#');
 	if (h > 0)
 	{
 		pathend = h;
-		_fragment = _res.substring(h + 1);
+		_fragment = res.substring(h + 1);
 	}
-	int q = _res.indexOf('?');
+	int q = res.indexOf('?');
 	if (q > 0)
 	{
-		_querystring = _res.substring(q + 1, h > 0 ? h : pathend);
+		_querystring = res.substring(q + 1, h > 0 ? h : pathend);
 		pathend = q;
 	}
 
-	_path = Url::decode(_res.substring(0, pathend));
+	_path = Url::decode(res.substring(0, pathend));
 
 	if(_path.contains(".."))
 		_path = _path.replace("..", "");

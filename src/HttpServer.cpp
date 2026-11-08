@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #include <asl/HttpServer.h>
@@ -80,6 +80,14 @@ void HttpServer::serve(Socket client)
 
 		if (!handleOptions(request, response))
 		{
+			if (request.method() == "CONNECT")
+			{
+				response.setCode(501);
+				response.put("Not implemented");
+				response.write();
+				continue;
+			}
+
 			serve(request, response);
 
 			if (!response.body())
