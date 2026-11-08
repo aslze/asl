@@ -247,6 +247,8 @@ Process::Process()
 	_pipe_err[1] = 0;
 	_pipe_in[0] = 0;
 	_pipe_in[1] = 0;
+	_pipe_out[0] = 0;
+	_pipe_out[1] = 0;
 	_ok = false;
 	_ready = false;
 	_exitstat = 0;
@@ -254,19 +256,6 @@ Process::Process()
 	_hasExited = false;
 	_stderr = _stdin = _stdout = 0;
 	_hProcess = NULL;
-
-	SECURITY_ATTRIBUTES sec;
-	sec.nLength = sizeof(SECURITY_ATTRIBUTES);
-	sec.bInheritHandle = TRUE;
-	sec.lpSecurityDescriptor = NULL;
-
-	if (!CreatePipe(&_pipe_out[0], &_pipe_out[1], &sec, 5000))
-		return;
-	if (!CreatePipe(&_pipe_in[0], &_pipe_in[1], &sec, 5000))
-		return;
-	if (!CreatePipe(&_pipe_err[0], &_pipe_err[1], &sec, 5000))
-		return;
-	_ready = true;
 }
 
 Process::~Process()
@@ -315,8 +304,19 @@ void Process::makeDaemon()
 
 void Process::run(const String& command, const Array<String>& args)
 {
-	if (!_ready)
+	SECURITY_ATTRIBUTES sec;
+	sec.nLength = sizeof(SECURITY_ATTRIBUTES);
+	sec.bInheritHandle = TRUE;
+	sec.lpSecurityDescriptor = NULL;
+	
+	if (!CreatePipe(&_pipe_out[0], &_pipe_out[1], &sec, 5000))
 		return;
+	if (!CreatePipe(&_pipe_in[0], &_pipe_in[1], &sec, 5000))
+		return;
+	if (!CreatePipe(&_pipe_err[0], &_pipe_err[1], &sec, 5000))
+		return;
+
+	_ready = true;
 
 	_hasExited = false;
 	STARTUPINFOW startInfo;
