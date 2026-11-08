@@ -68,6 +68,7 @@ class Vec4_
 	Vec4_ operator-(const Vec4_& b) const {return Vec4_(x-b.x, y-b.y, z-b.z, w-b.w);}
 	/** Returns the *dot product* of this vector and `b` */
 	T operator*(const Vec4_& b) const {return x*b.x+y*b.y+z*b.z+w*b.w;}
+	T dot(const Vec4_& b) const { return x * b.x + y * b.y + z * b.z + w * b.w; }
 	/** Returns this vector multiplied by scalar `r` */
 	Vec4_ operator*(T r) const {return Vec4_(x*r, y*r, z*r, w*r);}
 	/** Returns this vector multiplied by scalar `r` */

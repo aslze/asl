@@ -91,8 +91,10 @@ class Vec3_
 	Vec3_ operator-(const Vec3_& b) const {return Vec3_(x-b.x, y-b.y, z-b.z);}
 	/** Returns the *cross product* of this vector and `b` */
 	Vec3_ operator^(const Vec3_& b) const {return Vec3_(y*b.z-z*b.y,z*b.x-x*b.z,x*b.y-y*b.x);}
+	Vec3_ cross(const Vec3_& b) const { return Vec3_(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x); }
 	/** Returns the *dot product* of this vector and `b` */
 	T operator*(const Vec3_& b) const {return x*b.x+y*b.y+z*b.z;}
+	T dot(const Vec3_& b) const { return x * b.x + y * b.y + z * b.z; }
 	/** Returns this vector multiplied by scalar `r` */
 	Vec3_ operator*(T r) const {return Vec3_(x*r, y*r, z*r);}
 	/** Returns this vector multiplied by scalar `r` */

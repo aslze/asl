@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2024 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_PATH
@@ -47,11 +47,13 @@ public:
 	Tests if this path is equal to the given string (ignoring backslash vs slash).
 	*/
 	bool operator==(const String& s) const { return _path == s.replace('\\', '/'); }
-
 	bool operator==(const char* s) const { return _path == String(s).replace('\\', '/'); }
 
-	bool operator!=(const String& s) const { return !(*this == s); }
+	bool operator==(const Path& p) const { return _path == p._path; }
+	bool operator!=(const Path& p) const { return _path != p._path; }
+	bool operator<(const Path& p) const { return _path < p._path; }
 
+	bool operator!=(const String& s) const { return !(*this == s); }
 	bool operator!=(const char* s) const { return !(*this == s); }
 
 	bool operator!() const { return !_path.ok(); }
@@ -82,6 +84,10 @@ public:
 	*/
 	Path directory() const;
 	/**
+	Returns the directory containing this path (without a trailing '/') (alias)
+	*/
+	Path parent() const { return directory(); }
+	/**
 	Returns this path without its extension
 	*/
 	Path noExt() const;
@@ -89,6 +95,10 @@ public:
 	Returns this path's file name without its extension
 	*/
 	String nameNoExt() const { return noExt().name(); }
+	/**
+	Returns this path's file name without its extension (alias)
+	*/
+	String stem() const { return noExt().name(); }
 	/**
 	Returns the absolute path corresponding to this, possibly relative, path
 	*/

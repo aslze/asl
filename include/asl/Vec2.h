@@ -77,6 +77,7 @@ class Vec2_
 	Vec2_ operator-(const Vec2_& b) const {return Vec2_(x-b.x, y-b.y);}
 	/** Returns the dot product of this vector and `b` */
 	T operator*(const Vec2_& b) const {return x*b.x+y*b.y;}
+	T dot(const Vec2_& b) const { return x * b.x + y * b.y; }
 	/** Returns this vector multiplied by scalar `r` */
 	Vec2_ operator*(T r) const {return Vec2_(x*r, y*r);}
 	/** Returns vector `b` multiplied by scalar `r` */
