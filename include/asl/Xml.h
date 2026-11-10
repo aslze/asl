@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2025 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef ASL_XML_H
@@ -505,21 +505,9 @@ public:
 	Xml& put(const String& value);
 
 	/**
-	Sets the content of this element to the given text value.
-	\deprecated Use put()
-	*/
-	ASL_DEPRECATED(Xml& set(const String& value), "Use put()") { return put(value); }
-
-	/**
 	Sets the content of a named subelement creating it if it does not exist
 	*/
 	Xml& put(const String& name, const String& val);
-
-	/**
-	Sets the content of a named subelement creating it if it does not exist
-	\deprecated Use put(), set() will probably set an attribute in the future
-	*/
-	ASL_DEPRECATED(Xml& set(const String& name, const String& val), "Use put(), set() will probably set an attribute in the future") { return put(name, val); }
 
 	/**
 	Removes all children

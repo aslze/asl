@@ -75,6 +75,7 @@ String all = numbers.join(", "); // -> "4, 3, -2"
 template <class T>
 class Array
 {
+public:
 	typedef T value_type;
 protected:
 	T* _a;
@@ -210,10 +211,6 @@ public:
 	Removes all elements in the array
 	*/
 	void clear() { resize(0); }
-	/* Frees all elements (with delete) and clears the array; elements must be pointers
-	\deprecated Delete items explicitly or use smart pointers
-	*/
-	ASL_DEPRECATED(void destroy(), "") { for(int i=0; i<length(); i++) delete _a[i]; clear(); }
 	/**
 	Returns a pointer to the base of the array
 	\deprecated This conversion will not be implicit! Use .data()
