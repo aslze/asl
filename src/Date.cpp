@@ -286,20 +286,27 @@ void Date::construct(Zone z, int year, int month, int day, int h, int m, int s)
 		_t = nan();
 		return;
 	}
-	bool   leap = (daysInYear(year) == 366);
-	double yearday = floor(timeFromYearAsDays(year));
-	double monthday = month_days[leap][month];
-
-	_t = (yearday + monthday + day - 1) * 86400.0;
-	_t += h * 3600 + m * 60 + s; // + ms * 0.001
-	if (z != UTC)
+	if (z == LOCAL)
 	{
-		double t = _t;
-		for (int i = 0; i < 2; i++)
-		{
-			double dt3 = localOffset();
-			_t = t - dt3;
-		}
+		struct tm local = {};
+		local.tm_year = year - 1900;
+		local.tm_mon = month - 1;
+		local.tm_mday = day;
+		local.tm_hour = h;
+		local.tm_min = m;
+		local.tm_sec = s;
+		local.tm_isdst = -1; // Ask the runtime to determine DST.
+
+		time_t result = mktime(&local);
+		_t = (double)result;
+	}
+	else
+	{
+		bool   leap = (daysInYear(year) == 366);
+		double yearday = floor(timeFromYearAsDays(year));
+		double monthday = month_days[leap][month];
+		_t = (yearday + monthday + day - 1) * 86400.0;
+		_t += h * 3600 + m * 60 + s; // + ms * 0.001
 	}
 }
 
@@ -352,6 +359,8 @@ String Date::toString(Date::Format fmt, bool utc) const
 {
 	if (_t != _t)
 		return "?";
+	if (fmt == HTTP) // this format is always GMT/UTC
+		utc = true;
 	DateData d = calc(_t + (utc ? 0 : localOffset()));
 	d.month = clamp(d.month, 1, 12);
 	String   s;
@@ -385,6 +394,21 @@ String Date::toString(Date::Format fmt, bool utc) const
 	return s;
 }
 
+inline bool localTime(time_t t, struct tm& out)
+{
+#ifdef _MSC_VER
+	return ::localtime_s(&out, &t) == 0;
+#elif !defined _WIN32
+	return ::localtime_r(&t, &out) != NULL;
+#else // MinGW?
+	struct tm* ti = ::localtime(&t);
+	if (!ti)
+		return false;
+	out = *ti;
+	return true;
+#endif
+}
+
 double Date::localOffset() const
 {
 	double t = _t;
@@ -393,23 +417,15 @@ double Date::localOffset() const
 		const double y = 86400 * daysInYearAve;
 		t = t - floor(t / y - 2) * y;
 	}
-	time_t     tm = (time_t)t;
-	struct tm* tmL = localtime(&tm);
-	if (!tmL)
-		return 0;
-	int        hL = tmL->tm_hour;
-	int        dL = tmL->tm_yday;
-	int        yL = tmL->tm_year;
-	struct tm* tmU = gmtime(&tm);
-	int        hU = tmU->tm_hour;
-	int        dU = tmU->tm_yday;
-	int        yU = tmU->tm_year;
-	int        o = hL - hU;
-	if ((yL > yU && dL < dU) || (yL == yU && dL > dU))
-		o += 24;
-	else if ((yL < yU && dL > dU) || (yL == yU && dL < dU))
-		o -= 24;
-	return o * 3600;
+	time_t ti = (time_t)floor(t);
+
+	struct tm local;
+	if (!localTime(ti, local))
+		return nan();
+
+	Date wallAsUTC(UTC, local.tm_year + 1900, local.tm_mon + 1, local.tm_mday, local.tm_hour, local.tm_min, local.tm_sec);
+
+	return wallAsUTC.time() - double(t);
 }
 
 #ifdef _WIN32
