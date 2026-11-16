@@ -130,7 +130,7 @@ ASL_SMART_CLASS(Socket, SmartObject)
 	void setEndian(Endian e) { _endian = e; }
 	virtual bool disconnected()
 	{
-		return _handle < 0 || _error != 0 || (waitInput(0) && available() <= 0);
+		return _error != 0 || (waitInput(0) && available() <= 0);
 	}
 
 	virtual bool bind(const String& ip, int port);
@@ -198,7 +198,7 @@ public:
 	bool disconnected() { return _()->disconnected(); }
 
 	/**
-	Checks if the connection is open.
+	Checks if the connection is still open (valid only after a correct connect).
 	*/
 	bool connected() { return !disconnected(); }
 

@@ -1,4 +1,4 @@
-// Copyright(c) 1999-2022 aslze
+// Copyright(c) 1999-2026 aslze
 // Licensed under the MIT License (http://opensource.org/licenses/MIT)
 
 #if !defined(ASL_TLSSOCKET_H) && defined(ASL_TLS)
@@ -33,6 +33,10 @@ ASL_SMART_CLASS(TlsSocket, Socket)
 	String errorMsg() const;
 	bool useCert(const String& cert);
 	bool useKey(const String& key);
+private:
+	void reset();
+	void initTls();
+	void cleanup();
 };
 
 /**
@@ -56,6 +60,11 @@ public:
 	bool useKey(const String& key)
 	{
 		return _()->useKey(key);
+	}
+
+	bool useCert(const String& cert, const String& key)
+	{
+		return useCert(cert) && useKey(key);
 	}
 };
 

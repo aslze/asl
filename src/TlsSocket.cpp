@@ -121,23 +121,23 @@ enum SocketError
 };
 
 static const char* messages[] = { "OK",
-	"SOCKET_BAD_INIT",
-	"SOCKET_BAD_DNS",
-	"SOCKET_BAD_CONNECT",
-	"SOCKET_BAD_LINE",
-	"SOCKET_BAD_RECV",
-	"SOCKET_BAD_DATA",
-	"SOCKET_BAD_WAIT",
-	"SOCKET_BAD_BIND",
-	"",
-	"",
-	"",
-	"SOCKET_BAD_CONFIG",
-	"SOCKET_BAD_CERT",
-	"SOCKET_BAD_SESSION",
-	"SOCKET_BAD_ACCEPT",
-	"SOCKET_BAD_HELLO",
-	"SOCKET_BAD_HANDSHAKE",
+	                              "SOCKET_BAD_INIT",
+	                              "SOCKET_BAD_DNS",
+	                              "SOCKET_BAD_CONNECT",
+	                              "SOCKET_BAD_LINE",
+	                              "SOCKET_BAD_RECV",
+	                              "SOCKET_BAD_DATA",
+	                              "SOCKET_BAD_WAIT",
+	                              "SOCKET_BAD_BIND",
+	                              "",
+	                              "",
+	                              "",
+	                              "SOCKET_BAD_CONFIG",
+	                              "SOCKET_BAD_CERT",
+	                              "SOCKET_BAD_SESSION",
+	                              "SOCKET_BAD_ACCEPT",
+	                              "SOCKET_BAD_HELLO",
+	                              "SOCKET_BAD_HANDSHAKE",
 	                              "SOCKET_BAD_TLS" };
 
 #ifdef TLS_DEBUG
@@ -156,13 +156,14 @@ static void verbose_print(...) {}
 
 struct TlsCore
 {
-	mbedtls_net_context net;
-	mbedtls_ssl_context ssl;
-	mbedtls_ssl_config  conf;
-	mbedtls_x509_crt    cacert;
-	mbedtls_x509_crt    srvcert;
-	mbedtls_pk_context  pkey;
-	bool                bound;
+	mbedtls_net_context      net;
+	mbedtls_ssl_context      ssl;
+	mbedtls_ssl_config       conf;
+	mbedtls_x509_crt         cacert;
+	mbedtls_x509_crt         cert;
+	mbedtls_pk_context       pkey;
+	bool                     bound;
+	bool                     hascert;
 #if MBEDTLS_VERSION_MAJOR < 4
 	mbedtls_entropy_context  entropy;
 	mbedtls_ctr_drbg_context ctr_drbg;
@@ -170,17 +171,31 @@ struct TlsCore
 };
 
 mbedtls_ssl_config config;
-bool inited = false;
+bool               inited = false;
 
 TlsSocket_::TlsSocket_()
 {
+	initTls();
+}
+
+void TlsSocket_::initTls()
+{
+	_handle = -1;
+	_family = InetAddress::IPv4;
+	_hostname = String();
+	_type = TCP;
+	_blocking = true;
+	_endian = ENDIAN_NATIVE;
 	_error = 0;
 	_core = new TlsCore;
 	_core->bound = false;
+	_core->hascert = false;
 	mbedtls_net_init(&_core->net);
 	mbedtls_ssl_init(&_core->ssl);
 	mbedtls_ssl_config_init(&_core->conf);
 	mbedtls_x509_crt_init(&_core->cacert);
+	mbedtls_pk_init(&_core->pkey);
+	mbedtls_x509_crt_init(&_core->cert);
 #if MBEDTLS_VERSION_MAJOR < 4
 	mbedtls_ctr_drbg_init(&_core->ctr_drbg);
 	mbedtls_entropy_init(&_core->entropy);
@@ -195,8 +210,6 @@ TlsSocket_::TlsSocket_()
 	}
 #endif
 	mbedtls_ssl_set_bio(&_core->ssl, &_core->net, mbedtls_net_send, mbedtls_net_recv, NULL);
-	mbedtls_pk_init(&_core->pkey);
-	mbedtls_x509_crt_init(&_core->srvcert);
 	mbedtls_ssl_conf_read_timeout(&_core->conf, 0);
 
 #if MBEDTLS_VERSION_MAJOR < 4
@@ -214,17 +227,26 @@ TlsSocket_::TlsSocket_()
 
 	/*if ((ret = mbedtls_x509_crt_parse(&_core->cacert, (const byte*)mbedtls_test_cas_pem, mbedtls_test_cas_pem_len)) < 0)
 	{
-		_error = true;
-		return;
+	    _error = true;
+	    return;
 	}
-	
+
 	mbedtls_ssl_conf_ca_chain(&_core->conf, &_core->cacert, NULL);
 	*/
-	_type = TCP;
-	_blocking = true;
 }
 
 TlsSocket_::~TlsSocket_()
+{
+	cleanup();
+}
+
+void TlsSocket_::reset()
+{
+	cleanup();
+	initTls();
+}
+
+void TlsSocket_::cleanup()
 {
 	TlsSocket_::close();
 	mbedtls_net_free(&_core->net);
@@ -235,12 +257,12 @@ TlsSocket_::~TlsSocket_()
 	mbedtls_ctr_drbg_free(&_core->ctr_drbg);
 	mbedtls_entropy_free(&_core->entropy);
 #endif
-	if (_core->bound)
 	{
 		mbedtls_pk_free(&_core->pkey);
-		mbedtls_x509_crt_free(&_core->srvcert);
+		mbedtls_x509_crt_free(&_core->cert);
 	}
 	delete _core;
+	_core = NULL;
 }
 
 void TlsSocket_::close()
@@ -262,16 +284,16 @@ bool TlsSocket_::bind(const String& ip, int port)
 		_error = SOCKET_BAD_BIND;
 		return false;
 	}
-	mbedtls_x509_crt_init(&_core->srvcert);
-	mbedtls_pk_init(&_core->pkey);
+	//mbedtls_x509_crt_init(&_core->cert);
+	//mbedtls_pk_init(&_core->pkey);
 	_core->bound = true;
 
 	useCert(asl_test_srv_crt_rsa);
 	useKey(asl_test_srv_key_rsa);
 
 	InetAddress here(ip, port);
-	String host = here.host();
-	int ret = mbedtls_net_bind(&_core->net, host, String(port), MBEDTLS_NET_PROTO_TCP);
+	String      host = here.host();
+	int         ret = mbedtls_net_bind(&_core->net, host, String(port), MBEDTLS_NET_PROTO_TCP);
 	if (ret != 0)
 	{
 		verbose_print("TlsSocket: bind failed 0x%x\n", -ret);
@@ -286,7 +308,7 @@ bool TlsSocket_::bind(const String& ip, int port)
 		return false;
 	}
 
-	if ((ret = mbedtls_ssl_conf_own_cert(&_core->conf, &_core->srvcert, &_core->pkey)) != 0)
+	if ((ret = mbedtls_ssl_conf_own_cert(&_core->conf, &_core->cert, &_core->pkey)) != 0)
 	{
 		verbose_print("TlsSocket: setting certificate failed 0x%x\n", ret);
 		_error = SOCKET_BAD_CERT;
@@ -306,13 +328,14 @@ void TlsSocket_::listen(int) {}
 
 Socket_* TlsSocket_::accept()
 {
-	int ret;
+	int         ret;
 	TlsSocket_* cli = new TlsSocket_();
+	cli->_handle = 0;
 
 	mbedtls_net_free(&cli->_core->net);
 	ret = mbedtls_ssl_config_defaults(&cli->_core->conf, MBEDTLS_SSL_IS_SERVER, MBEDTLS_SSL_TRANSPORT_STREAM,
 	                                  MBEDTLS_SSL_PRESET_DEFAULT);
-	if ((ret = mbedtls_ssl_conf_own_cert(&cli->_core->conf, &_core->srvcert, &_core->pkey)) != 0)
+	if ((ret = mbedtls_ssl_conf_own_cert(&cli->_core->conf, &_core->cert, &_core->pkey)) != 0)
 	{
 		verbose_print("TlsSocket: setting certificate failed -0x%x\n", ret);
 		_error = SOCKET_BAD_CERT;
@@ -321,7 +344,7 @@ Socket_* TlsSocket_::accept()
 
 	ret = mbedtls_ssl_setup(&cli->_core->ssl, &cli->_core->conf);
 
-	char ip[128];
+	char   ip[128];
 	size_t ipsize = 0;
 	ret = mbedtls_net_accept(&_core->net, &cli->_core->net, ip, sizeof(ip), &ipsize);
 	if (ret != 0)
@@ -364,7 +387,7 @@ Socket_* TlsSocket_::accept()
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
 		if (ret == MBEDTLS_ERR_X509_CERT_VERIFY_FAILED)
 		{
-			char vrfy_buf[512];
+			char     vrfy_buf[512];
 			unsigned flags = mbedtls_ssl_get_verify_result(&cli->_core->ssl);
 			mbedtls_x509_crt_verify_info(vrfy_buf, sizeof(vrfy_buf), "", flags);
 			// verbose_print("TlsSocket: auth failed: %s\n", vrfy_buf);
@@ -380,9 +403,9 @@ Socket_* TlsSocket_::accept()
 
 	/*
 	if ((ret = mbedtls_ssl_get_record_expansion(&cli->_core->ssl)) >= 0) // returns 29
-		verbose_print("Record expansion is %d\n", ret);
+	    verbose_print("Record expansion is %d\n", ret);
 	else
-		verbose_print("Record expansion is unknown\n");
+	    verbose_print("Record expansion is unknown\n");
 	*/
 	// verbose_print("TLS accepted connection\n");
 	return cli;
@@ -390,20 +413,32 @@ Socket_* TlsSocket_::accept()
 
 bool TlsSocket_::connect(const InetAddress& addr)
 {
-	int ret = mbedtls_net_connect(&_core->net, addr.host(), String(addr.port()), MBEDTLS_NET_PROTO_TCP);
+	int ret;
+	ret = mbedtls_net_connect(&_core->net, addr.host(), String(addr.port()), MBEDTLS_NET_PROTO_TCP);
 	if (ret)
 	{
-		(*this) = TlsSocket_();
+		reset();
 		_error = SOCKET_BAD_CONNECT;
 		return false;
 	}
 	ret = mbedtls_ssl_config_defaults(&_core->conf, MBEDTLS_SSL_IS_CLIENT, MBEDTLS_SSL_TRANSPORT_STREAM,
 	                                  MBEDTLS_SSL_PRESET_DEFAULT);
 	mbedtls_ssl_conf_authmode(&_core->conf, MBEDTLS_SSL_VERIFY_NONE);
+
+	if (_core->hascert)
+	{
+		if ((ret = mbedtls_ssl_conf_own_cert(&_core->conf, &_core->cert, &_core->pkey)) != 0)
+		{
+			verbose_print("TlsSocket: setting certificate failed 0x%x\n", ret);
+			_error = SOCKET_BAD_CERT;
+			return false;
+		}
+	}
+
 	ret = mbedtls_ssl_setup(&_core->ssl, &_core->conf);
 	if (ret)
 	{
-		(*this) = TlsSocket_();
+		reset();
 		_error = SOCKET_BAD_TLS;
 		return false;
 	}
@@ -413,7 +448,7 @@ bool TlsSocket_::connect(const InetAddress& addr)
 	{
 		if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE && ret != -0x7000)
 		{
-			(*this) = TlsSocket_();
+			reset();
 			_error = SOCKET_BAD_TLS;
 			return false;
 		}
@@ -421,10 +456,10 @@ bool TlsSocket_::connect(const InetAddress& addr)
 	/*unsigned flags;
 	if ((flags = mbedtls_ssl_get_verify_result(&_core->ssl)) != 0)
 	{
-		char vrfy_buf[512];
-		mbedtls_x509_crt_verify_info(vrfy_buf, sizeof(vrfy_buf), "", flags);
-		String verifyInfo = vrfy_buf;
-		// wrong certificate
+	    char vrfy_buf[512];
+	    mbedtls_x509_crt_verify_info(vrfy_buf, sizeof(vrfy_buf), "", flags);
+	    String verifyInfo = vrfy_buf;
+	    // wrong certificate
 	}
 	*/
 	_handle = 0;
@@ -446,33 +481,33 @@ int TlsSocket_::read(void* data, int size)
 {
 	if (_blocking)
 	{
-	int s = size, n;
-	while ((n = mbedtls_ssl_read(&_core->ssl, (unsigned char*)data, size)) < size)
-	{
+		int s = size, n;
+		while ((n = mbedtls_ssl_read(&_core->ssl, (unsigned char*)data, size)) < size)
+		{
 			if (n == MBEDTLS_ERR_SSL_WANT_READ || n == MBEDTLS_ERR_SSL_WANT_WRITE
 #ifdef MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET
-			    || n == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET
+				|| n == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET
 #endif
 			)
-			continue;
+				continue;
 			if (n < 0)
 			{
 				_error = SOCKET_BAD_RECV;
 				break;
 			}
 			else if (n == 0)
-			return s - size;
-		size -= n;
-		data = (char*)data + n;
-	}
-	return s;
+				return s - size;
+			size -= n;
+			data = (char*)data + n;
+		}
+		return s;
 	}
 	else
 	{
 		int n = 1, m = 0;
 		do
 		{
-			n = mbedtls_ssl_read(&_core->ssl, (unsigned char*)data, size); 
+			n = mbedtls_ssl_read(&_core->ssl, (unsigned char*)data, size);
 			if (n > 0)
 				m += n;
 		} while (n > 0 || n == MBEDTLS_ERR_SSL_WANT_READ || n == MBEDTLS_ERR_SSL_WANT_WRITE
@@ -510,7 +545,7 @@ bool TlsSocket_::waitInput(double t)
 	if (available() != 0)
 		return true;
 	// else return false;
-	fd_set rset;
+	fd_set         rset;
 	struct timeval to;
 	to.tv_sec = (int)floor(t);
 	to.tv_usec = (int)((t - floor(t)) * 1e6);
@@ -527,17 +562,18 @@ String TlsSocket_::errorMsg() const
 
 bool TlsSocket_::useCert(const String& cert)
 {
-	mbedtls_x509_crt_free(&_core->srvcert);
-	mbedtls_x509_crt_init(&_core->srvcert);
-	int ret = mbedtls_x509_crt_parse(&_core->srvcert, (byte*)*cert, cert.length() + 1);
+	mbedtls_x509_crt_free(&_core->cert);
+	mbedtls_x509_crt_init(&_core->cert);
+	int ret = mbedtls_x509_crt_parse(&_core->cert, (byte*)*cert, cert.length() + 1);
 	if (ret < 0)
 	{
 		verbose_print("TlsSocket: cert parse error 0x%x\n", -ret);
 		_error = SOCKET_BAD_CERT;
 		return false;
 	}
+	_core->hascert = true;
 	// char buf[500];
-	// mbedtls_x509_crt_info(buf, 500, "Tls: ", &_core->srvcert);
+	// mbedtls_x509_crt_info(buf, 500, "Tls: ", &_core->cert);
 	// printf("%s\n", buf);
 	return true;
 }
@@ -558,7 +594,7 @@ bool TlsSocket_::useKey(const String& key)
 		_error = SOCKET_BAD_CERT;
 		return false;
 	}
-	ret = mbedtls_ssl_conf_own_cert(&_core->conf, &_core->srvcert, &_core->pkey);
+	ret = mbedtls_ssl_conf_own_cert(&_core->conf, &_core->cert, &_core->pkey);
 	if (ret)
 	{
 		verbose_print("TlsSocket: setting certificate failed 0x%x\n", -ret);

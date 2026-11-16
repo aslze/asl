@@ -365,6 +365,11 @@ HttpResponse Http::request(HttpRequest& request)
 #ifdef ASL_TLS
 		socket = TlsSocket();
 		if (!hasPort) url.port = 443;
+		if (request.hasHeader("?cert"))
+		{
+			socket.as<TlsSocket>().useCert(request.header("?cert"));
+			socket.as<TlsSocket>().useKey(request.header("?key"));
+		}
 #else
 		response.setSockError("SOCKET_NO_TLS_AVAILABLE");
 		return response;
@@ -449,6 +454,14 @@ HttpResponse Http::request(HttpRequest& request)
 	return response;
 }
 
+bool HttpRequest::useCert(const String& cert, const String& key)
+{
+	if (cert)
+		_headers["?cert"] = cert;
+	if (key)
+		_headers["?key"] = key;
+	return true;
+}
 
 void HttpRequest::read()
 {
@@ -587,7 +600,8 @@ bool HttpMessage::sendHeaders()
 	s << _command << "\r\n";
 	foreach2(String& name, String& value, _headers)
 	{
-		s << name << ": " << value << "\r\n";
+		if (name[0] !='?')
+			s << name << ": " << value << "\r\n";
 	}
 	s << "\r\n";
 	int sent = _socket->write(*s, s.length());
