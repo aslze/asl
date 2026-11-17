@@ -43,19 +43,19 @@ public:
 ASL_TEST(HTTP)
 {
 	AslServer server;
-	server.bind("127.0.0.1", 9001);
+	server.bind("127.0.0.1", 9901);
 	server.start(true);
 
 	sleep(0.2);
-	HttpResponse res = Http::get("http://127.0.0.1:9001/?name=World");
+	HttpResponse res = Http::get("http://127.0.0.1:9901/?name=World");
 	ASL_CHECK(res.code(), ==, 200);
 	ASL_CHECK(res.text(), ==, "Hello World from AslServer!");
 
-	res = Http::post("http://127.0.0.1:9001/post", "some-data");
+	res = Http::post("http://127.0.0.1:9901/post", "some-data");
 	ASL_ASSERT(res.ok());
 	ASL_CHECK(res.text(), ==, "Received: some-data");
 
-	res = Http::get("http://127.0.0.1:9001/what");
+	res = Http::get("http://127.0.0.1:9901/what");
 	ASL_CHECK(res.code(), ==, 404);
 
 	server.stop();
