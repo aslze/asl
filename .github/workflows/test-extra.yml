@@ -37,7 +37,7 @@ jobs:
         fi
         mkdir build
         cd build
-        cmake -DASL_TESTS=ON -DASL_BUILD_SHARED=OFF -DASL_TEST_NET=ON -DASL_FETCH=ON "${ARGS[@]}" ..
+        cmake -DCMAKE_BUILD_TYPE=Debug -DASL_TESTS=ON -DASL_BUILD_SHARED=OFF -DASL_TEST_NET=ON -DASL_FETCH=ON "${ARGS[@]}" ..
     - name: make
       run: |
         cd build
