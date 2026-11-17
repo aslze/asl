@@ -1,6 +1,7 @@
 #include <asl/StackTrace.h>
 #include <asl/Process.h>
 #include <asl/Path.h>
+#include <stdlib.h>
 
 namespace asl
 {
@@ -8,7 +9,8 @@ asl::Function<void> StackTrace::_onCrash;
 asl::String         StackTrace::_message;
 }
 
-#if ((defined _WIN32 && defined _MSC_VER) || defined __linux__ || defined __APPLE__) && !defined(__ANDROID__)
+#if (defined(_WIN32) && defined(_MSC_VER)) || defined(__APPLE__) ||                                                      \
+    (defined(__linux__) && defined(__GLIBC__) && !defined(__ANDROID__))
 
 #ifdef _WIN32
 
