@@ -9,11 +9,16 @@
 #include <asl/TextFile.h>
 #include <asl/util.h>
 #include <asl/Log.h>
+#include <asl/StackTrace.h>
 #include <asl/testing.h>
 #include <stdio.h>
 
 #undef ASL_TEST_PROLOG
 #define ASL_TEST_PROLOG \
+	asl::StackTrace::onCrash([]() {                                  \
+		printf("%s\n", *asl::StackTrace::message());                 \
+		exit(1);                                                     \
+	});                                                              \
 	if (argc > 1 && !strcmp(argv[1], "-subproc"))                    \
 	{                                                                \
 		printf("subprocess ");                                       \

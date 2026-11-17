@@ -12,6 +12,10 @@ on:
         type: string
         required: false
         default: "3.6.4"
+      debug:
+        description: "Debug build"
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -29,15 +33,19 @@ jobs:
       env:
         USE_TLS: ${{ inputs.use_tls }}
         MBEDTLS_VER: ${{ inputs.mbedtls_version }}
+        BUILD_DEBUG: ${{ inputs.debug }}
       run: |
         ARGS=()
         if [[ "$USE_TLS" == "true" ]]; then
           ARGS+=(-DASL_TLS=ON)
           ARGS+=(-DASL_MBEDTLS_VER=$MBEDTLS_VER)
         fi
+        if [[ "$BUILD_DEBUG" == "true" ]]; then
+          ARGS+=(-DCMAKE_BUILD_TYPE=Debug)
+        fi
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Debug -DASL_TESTS=ON -DASL_BUILD_SHARED=OFF -DASL_TEST_NET=ON -DASL_FETCH=ON "${ARGS[@]}" ..
+        cmake -DASL_TESTS=ON -DASL_BUILD_SHARED=OFF -DASL_TEST_NET=ON -DASL_FETCH=ON "${ARGS[@]}" ..
     - name: make
       run: |
         cd build
