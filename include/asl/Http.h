@@ -271,6 +271,9 @@ public:
 		init();
 	}
 
+	/**
+	Sets a client TLS certificate and key to send to the server for authorization
+	*/
 	bool useCert(const String& cert, const String& key);
 
 	void init()
@@ -488,7 +491,7 @@ Authorization request header):
 ~~~
 String content = "My New File!\n";
 
-auto res = Http::post("https://content.dropboxapi.com/1/files_put/auto/myfile.txt", content, Dic<>("Authorization", "Bearer ..."));
+auto res = Http::post("https://content.dropboxapi.com/1/files_put/auto/myfile.txt", content, Dic<>{{"Authorization", "Bearer ..."}});
 ~~~
 
 In methods like `post()`, `put()` , `patch()`, that expect a body to be sent, this **body** can be:
@@ -521,6 +524,16 @@ Using **IPv6** addresses is supported with square brackets in the host part `[ip
 ~~~
 auto res = Http::get("http://[::1]:80/path");
 ~~~
+
+In HTTPS, a request can include a client TLS certificate and private key for authorization. This is included as pseudo-headers
+"?cert" and "?key":
+
+~~~
+String cert = TextFile("mycert.crt").text();
+String key = TextFile("mycert.key").text();
+auto res = Http::get("https://server/api/myitems", {{"?cert", cert}, {"?key", key}});
+~~~
+
 \ingroup HTTP
 */
 

@@ -55,13 +55,16 @@ public:
 		return _()->useCert(cert);
 	}
 	/**
-	Sets the private key to use by this socket
+	Sets the key to use by this socket's certificate (needs call to useCert)
 	*/
 	bool useKey(const String& key)
 	{
 		return _()->useKey(key);
 	}
 
+	/**
+	Sets the certificate and key to use by this socket (the cert will be sent to the server on connect)
+	*/
 	bool useCert(const String& cert, const String& key)
 	{
 		return useCert(cert) && useKey(key);

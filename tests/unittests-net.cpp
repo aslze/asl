@@ -58,5 +58,5 @@ ASL_TEST(HTTP)
 	res = Http::get("http://127.0.0.1:9901/what");
 	ASL_CHECK(res.code(), ==, 404);
 
-	server.stop();
+	server.stop(true);
 }

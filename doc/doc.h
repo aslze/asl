@@ -32,7 +32,7 @@ __Utilities__:
 - Base64, hex encoding/decoding
 - Binary buffer endian-aware reading/writing
 - %Random number generator
-- Simple testing functionality
+- Basic unit testing functionality
 - Linear and non-linear systems solving (with the Matrix class)
 
 __Basic data types__:
@@ -74,7 +74,7 @@ With CMake 3.14+, instead of using `find_package()`, you can download and build 
 
 ~~~
 include(FetchContent)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.12.0.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.12.1.zip)
 FetchContent_MakeAvailable(asl)
 ~~~
 
@@ -113,8 +113,8 @@ If you don't want the ASL_FETCH functionality, with CMake 3.14+ a project can bu
 ```cmake
 set(ASL_TLS ON)
 set(ENABLE_PROGRAMS OFF CACHE BOOL "") # skip mbedtls samples
-FetchContent_Declare(mtls URL https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.4/mbedtls-3.6.4.tar.bz2)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.12.0.zip)
+FetchContent_Declare(mtls URL https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.8/mbedtls-3.6.8.tar.bz2)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.12.1.zip)
 FetchContent_MakeAvailable(mtls asl)
 ```
 
@@ -126,7 +126,7 @@ Which is equivalent to:
 set(ASL_TLS ON)
 set(ASL_FETCH ON)
 include(FetchContent)
-FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.12.0.zip)
+FetchContent_Declare(asl URL https://github.com/aslze/asl/archive/1.12.1.zip)
 FetchContent_MakeAvailable(asl)
 ```
 */

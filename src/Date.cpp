@@ -374,10 +374,10 @@ String Date::toString(Date::Format fmt, bool utc) const
 		              int(1000 * fract(_t) + 0.5) % 1000);
 		break;
 	case SHORT:
-		s = String(15, "%04i%02i%02iT%02i%02i%02i", d.year, d.month, d.day, d.hours, d.minutes, d.seconds);
+		s = String::f("%04i%02i%02iT%02i%02i%02i", d.year, d.month, d.day, d.hours, d.minutes, d.seconds);
 		break;
 	case DATE_ONLY:
-		s = String(12, "%04i-%02i-%02i", d.year, d.month, d.day);
+		s = String::f("%04i-%02i-%02i", d.year, d.month, d.day);
 		break;
 	case HTTP:
 	{
