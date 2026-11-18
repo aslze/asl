@@ -340,10 +340,29 @@ String Directory::special(Place p)
 	}
 	case DOWNLOAD:
 	{
-		// wchar_t path[MAX_PATH];
-		// if (SHGetSpecialFolderPathW(NULL, path, CSIDL_DOWNLOADS, FALSE))
-		//	return path;
-		return special(HOME) + "/Downloads"; // TODO use newer API
+		typedef HRESULT(WINAPI * GetKnownFolderPathFn)(const GUID&, DWORD, HANDLE, wchar_t**);
+
+		static const GUID downloadsId = {
+			0x374de290, 0x123f, 0x4565, { 0x91, 0x64, 0x39, 0xc4, 0x92, 0x5e, 0x46, 0x7b }
+		};
+
+		HMODULE              shell = GetModuleHandleW(L"shell32.dll");
+		GetKnownFolderPathFn getPath =
+		    shell ? reinterpret_cast<GetKnownFolderPathFn>(GetProcAddress(shell, "SHGetKnownFolderPath")) : NULL;
+
+		if (getPath)
+		{
+			wchar_t* path = NULL;
+			HRESULT  hr = getPath(downloadsId, 0, NULL, &path);
+			String   result;
+			if (SUCCEEDED(hr) && path)
+				result = path;
+			CoTaskMemFree(path);
+
+			if (result)
+				return result;
+		}
+		return special(HOME) + "/Downloads";
 		break;
 	}
 	case APPS:

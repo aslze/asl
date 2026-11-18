@@ -189,11 +189,23 @@ public:
 	static bool clear(const String& path) { return removeRecursive(path, true); }
 
 	/**
-	 * Type of special directories that can be obtained with `Directory::special()`
+	 * Type of special directories that can be obtained with `Directory::special()`; On Linux this follows the XDG spec.
 	 */
 	enum Place
 	{
-		HOME, APPDATA, APPCONFIG, APPDATA_ALL, APPS, DOCUMENTS, IMAGES, VIDEOS, DOWNLOAD, DESKTOP, TEMP, MYTEMP, EXE
+		HOME,        //!< User profile/home directory
+		APPDATA,     //!< user app data (local app data on Windows, ~/.config/local on Linux)
+		APPCONFIG,   //!< user config directory (roaming app data on Windows, ~/.config on Linux)
+		APPDATA_ALL, //!< app data for all users (typicaly C:/ProgramData on Windows, /var/lib on Linux)
+		APPS,        //!< applications (typically C:/Program Files on Windows)
+		DOCUMENTS,   //!< User documents
+		IMAGES,      //!< User images/pictures
+		VIDEOS,      //!< User videos
+		DOWNLOAD,    //!< User downloaded files
+		DESKTOP,     //!< Desktop folder
+		TEMP,        //!< User (on Windows) or global temporary data
+		MYTEMP,      //!< User temporary data
+		EXE          //!< location of current executable
 	};
 
 	/**
