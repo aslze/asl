@@ -625,7 +625,8 @@ reader >> x >> y;                                  // read 2 int32 variables fro
 \defgroup Testing Testing
 
 Tiny testing functionality. The `ASL_TEST_ENABLE_MAIN()` macro adds testing functionality and creates a main function
-that runs all defined tests. Use the `ASL_TEST_ENABLE()` macro if you will provide your own main function.
+that runs all defined tests. Use the `ASL_TEST_ENABLE()` macro if you will provide your own main function. Use one of these
+macros but **only** in one source file (.cpp) if your tests project has several.
 
 ~~~
 #include <asl/testing.h>
@@ -645,6 +646,10 @@ ASL_TEST(Volume)
     ASL_EXPECT_NEAR(sphere.volume(), 4.1888, 1e-3);
 }
 ~~~
+
+Tests should appear in Visual Studio's **Test Explorer**. But for them to be detected you have to set in configuration for Google Test Adapter
+*Regex for test discovery* with something identifying your testing executables (probably just "test" if your projects have names like
+"myunittests.exe").
 */
 
 /**
