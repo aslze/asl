@@ -238,5 +238,7 @@ public:
 	static Space freeSpace(const String& dir);
 };
 
+inline String pathOf(Directory::Place place) { return Directory::special(place); }
+
 }
 #endif

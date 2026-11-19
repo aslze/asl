@@ -41,7 +41,7 @@ class Vec3_
 	template<class T2>
 	Vec3_(const Vec3_<T2>& v) : x(v.x), y(v.y), z(v.z) {}
 	
-	Vec3_(const T* v) : x(v[0]), y(v[1]), z(v[2]) {}
+	ASL_EXPLICIT Vec3_(const T* v) : x(v[0]), y(v[1]), z(v[2]) {}
 	static Vec3_ zeros() { return Vec3_(0, 0, 0); }
 	
 	T*       data() { return &x; }

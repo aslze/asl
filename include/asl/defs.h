@@ -153,9 +153,7 @@ namespace asl {
 */
 
 /**
-An unsigned byte. This is also included in the global scope (`using asl::byte;`) for compatibility with old code, unless `ASL_NO_GLOBAL_BYTE` is defined.
-\ingroup Global
-\deprecated This type will not be added to the global scope anymore; code should use `asl::byte`
+An unsigned byte.
 */
 typedef unsigned char byte;
 

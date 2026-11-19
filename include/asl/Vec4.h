@@ -29,7 +29,7 @@ class Vec4_
 	Vec4_() {}
 	Vec4_(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
 	Vec4_(const Vec3_<T>& v, T w) : x(v.x), y(v.y), z(v.z), w(w) {}
-	Vec4_(const T* v) : x(v[0]), y(v[1]), z(v[2]), w(v[3]) {}
+	ASL_EXPLICIT Vec4_(const T* v) : x(v[0]), y(v[1]), z(v[2]), w(v[3]) {}
 	static Vec4_ zeros() { return Vec4_(0, 0, 0, 0); }
 	template<class T2>
 	Vec4_<T2> with() const
@@ -56,7 +56,6 @@ class Vec4_
 	/** Returns the length of the vector squared */
 	T length2() const {return x*x+y*y+z*z+w*w;}
 	/** Returns the length of the vector \deprecated */
-	ASL_DEPRECATED(T operator!() const, "Use length() instead") { return length(); }
 	T norm() const { return length(); }
 	T normSq() const { return length2(); }
 	/** Returns this vector with absolute coordinates */

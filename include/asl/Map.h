@@ -403,26 +403,6 @@ public:
 	}
 };
 
-
-
-/**
-Parses a string and creates a `Dic` using `sep1` as pair separator, and `sep2` as key/value separator.
-It is the opposite of `join()`.
-\deprecated Use String::split(s1, s2)
-*/
-inline Dic<String> split(const String& s, const String& sep1, const String& sep2)
-{
-	Dic<String> dic;
-	Array<String> pairs = s.split(sep1);
-	for(int i=0; i<pairs.length(); i++)
-	{
-		int j = pairs[i].indexOf(sep2);
-		if(j>0)
-			dic[pairs[i].substring(0, j)] = pairs[i].substring(j+sep2.length());
-	}
-	return dic;
-}
-
 #ifdef ASL_HAVE_RANGEFOR
 
 template<class K, class T>

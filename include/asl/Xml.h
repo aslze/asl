@@ -628,15 +628,6 @@ public:
 	static bool write(const Xml& e, const String& file);
 
 	/**
-	Writes an XML document to a file
-	\deprecated Use Xml::write(xml, file)
-	*/
-	static ASL_DEPRECATED(bool write(const String& file, const Xml& e), "Use Xml::write(xml, file)")
-	{
-		return write(e, file);
-	}
-
-	/**
 	Parses the given string as XML and returns the equivalent DOM tree.
 	*/
 	static Xml decode(const String& xml);
