@@ -9,6 +9,8 @@
 #include <stdio.h>
 #ifdef __APPLE__
 #include <sys/syslimits.h>
+#include <limits.h>
+#include <sysdir.h>
 #endif
 #ifdef _WIN32
 #ifndef _WIN32_IE
@@ -698,6 +700,22 @@ Directory::Space Directory::freeSpace(const String& dir)
 	return space;
 }
 
+#ifdef __APPLE__
+static String specialDirectory(sysdir_search_path_directory_t directory)
+{
+	char path[PATH_MAX];
+	sysdir_search_path_enumeration_state state = sysdir_start_search_path_enumeration(directory, SYSDIR_DOMAIN_MASK_USER);
+	if (!sysdir_get_next_search_path_enumeration(state, path))
+		return String();
+
+	// User-domain paths contain "~"; expand it ourselves.
+	if (path[0] == '~' && (path[1] == '/' || path[1] == '\0'))
+		return Directory::special(Directory::HOME) + (path + 1);
+
+	return String(path);
+}
+#endif
+
 String Directory::special(Place p)
 {
 	if (p == TEMP)
@@ -732,6 +750,24 @@ String Directory::special(Place p)
 	}
 #endif
 
+#ifdef __APPLE__
+	switch (p)
+	{
+	case DESKTOP:
+		return specialDirectory(SYSDIR_DIRECTORY_DESKTOP);
+	case DOCUMENTS:
+		return specialDirectory(SYSDIR_DIRECTORY_DOCUMENT);
+	case IMAGES:
+		return specialDirectory(SYSDIR_DIRECTORY_PICTURES);
+	case VIDEOS:
+		return specialDirectory(SYSDIR_DIRECTORY_MOVIES);
+	case DOWNLOAD:
+		return specialDirectory(SYSDIR_DIRECTORY_DOWNLOADS);
+	case APPDATA:
+		return home + "/Library/Application Support";
+	}
+#endif
+
 	String xdg = home + "/.config/user-dirs.dirs";
 	Dic<String> dirs;
 	if (File(xdg).isFile())
@@ -763,19 +799,13 @@ String Directory::special(Place p)
 	case APPS:
 		return dirs["XDG_APPLICATIONS_DIR"] | (home + "/Applications");
 	case APPDATA:
-#ifdef __APPLE__
-		return home + "/Library/Application Support";
-#else
 		return home + "/.local/share";
-#endif
-		break;
 	case APPCONFIG:
 		return home + "/.config";
 	case APPDATA_ALL:
 		return "/var/lib";
 	case MYTEMP:
 		return dirs["XDG_RUNTIME_DIR"] | ("/tmp");
-		break;
 	default:
 		break;
 	}
