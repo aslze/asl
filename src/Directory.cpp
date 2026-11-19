@@ -710,9 +710,9 @@ static String specialDirectory(sysdir_search_path_directory_t directory)
 
 	// User-domain paths contain "~"; expand it ourselves.
 	if (path[0] == '~' && (path[1] == '/' || path[1] == '\0'))
-		return Directory::special(Directory::HOME) + (path + 1);
+		return Directory::special(Directory::HOME) + (const char*)(path + 1);
 
-	return String(path);
+	return String((const char*)path);
 }
 #endif
 
@@ -754,17 +754,19 @@ String Directory::special(Place p)
 	switch (p)
 	{
 	case DESKTOP:
-		return specialDirectory(SYSDIR_DIRECTORY_DESKTOP);
+		return specialDirectory(SYSDIR_DIRECTORY_DESKTOP) | (home + "/Desktop");
 	case DOCUMENTS:
-		return specialDirectory(SYSDIR_DIRECTORY_DOCUMENT);
+		return specialDirectory(SYSDIR_DIRECTORY_DOCUMENT) | (home + "/Documents");
 	case IMAGES:
-		return specialDirectory(SYSDIR_DIRECTORY_PICTURES);
+		return specialDirectory(SYSDIR_DIRECTORY_PICTURES) | (home + "/Pictures");
 	case VIDEOS:
-		return specialDirectory(SYSDIR_DIRECTORY_MOVIES);
+		return specialDirectory(SYSDIR_DIRECTORY_MOVIES) | (home + "/Movies");
 	case DOWNLOAD:
-		return specialDirectory(SYSDIR_DIRECTORY_DOWNLOADS);
+		return specialDirectory(SYSDIR_DIRECTORY_DOWNLOADS) | (home + "/Downloads");
 	case APPDATA:
 		return home + "/Library/Application Support";
+	default:
+		break;
 	}
 #endif
 
