@@ -24,6 +24,7 @@ set(TESTS
 	HashMap
 	Map
 	File
+	Directory
 	StaticSpace
 	Path
 	Base64

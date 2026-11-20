@@ -55,7 +55,7 @@ class Vec4_
 	T length() const {return sqrt(x*x+y*y+z*z+w*w);}
 	/** Returns the length of the vector squared */
 	T length2() const {return x*x+y*y+z*z+w*w;}
-	/** Returns the length of the vector \deprecated */
+	/** Returns the length of the vector */
 	T norm() const { return length(); }
 	T normSq() const { return length2(); }
 	/** Returns this vector with absolute coordinates */
