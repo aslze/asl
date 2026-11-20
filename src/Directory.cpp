@@ -764,6 +764,7 @@ String Directory::special(Place p)
 	case DOWNLOAD:
 		return specialDirectory(SYSDIR_DIRECTORY_DOWNLOADS) | (home + "/Downloads");
 	case APPDATA:
+	case APPCONFIG:
 		return home + "/Library/Application Support";
 	default:
 		break;

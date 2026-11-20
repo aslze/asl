@@ -238,6 +238,9 @@ public:
 	static Space freeSpace(const String& dir);
 };
 
+/**
+ * Returns the path of the given special/standard directory such as user's Documents, Desktop, profile, configuration data, etc.
+ */
 inline String pathOf(Directory::Place place) { return Directory::special(place); }
 
 }

@@ -6,6 +6,7 @@
 #include <asl/TabularDataFile.h>
 #include <asl/IniFile.h>
 #include <asl/File.h>
+#include <asl/Directory.h>
 #include <asl/TextFile.h>
 #include <asl/util.h>
 #include <asl/Log.h>
@@ -79,6 +80,21 @@ ASL_TEST(File)
 	tfile.remove();
 	ASL_ASSERT(fileExc.open("lines.txt", File::WRITE | File::CREATE));
 #endif
+}
+
+ASL_TEST(Directory)
+{
+	Directory::create("dir1");
+	ASL_ASSERT(Directory("dir1").exists());
+	TextFile("dir1/file1.txt").write("Hello");
+
+	Directory::copy("dir1/file1.txt", "dir1/file2.txt");
+	Array<File> files = Directory("dir1").files();
+	ASL_EXPECT(files.length(), ==, 2);
+	ASL_ASSERT(files[0].name() == "file1.txt" || files[0].name() == "file2.txt"); // is order guaranteed?
+
+	Directory::removeRecursive("dir1");
+	ASL_ASSERT(!Directory("dir1").exists());
 }
 
 ASL_TEST(IniFile)
